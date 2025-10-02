@@ -2,7 +2,7 @@
  * @Author: 星必尘Sguan
  * @Date: 2025-10-02 14:40:13
  * @LastEditors: 星必尘Sguan|3464647102@qq.com
- * @LastEditTime: 2025-10-02 16:54:18
+ * @LastEditTime: 2025-10-02 17:15:55
  * @FilePath: \SguanFOC库\SguanFOC.c
  * @Description: SguanFOC库v1.0版本
  * 
@@ -420,8 +420,8 @@ static void FOC_EncoderAlignment(void) {
 static float FOC_Calculate_Iq(void) {
     // 1. 采样三相电流
     int32_t Iu_Raw,Iv_Raw;
-    Iu_Raw = Sguan_CurAcquisition(0) - Intermediate_Raw;  // U相电流（电压值）
-    Iv_Raw = Sguan_CurAcquisition(1) - Intermediate_Raw;  // V相电流（电压值）
+    Iu_Raw = Sguan_CurAcquisition(1) - Intermediate_Raw;  // U相电流（电压值）
+    Iv_Raw = Sguan_CurAcquisition(0) - Intermediate_Raw;  // V相电流（电压值）
     // 将原始ADC值转换为实际电流值（单位：A）
     // 计算公式：电流(A) = (ADC原始值 * 3.3V / 4096) / (增益 * 采样电阻)
     // 简化后：电流(A) = ADC原始值 * (3.3 / (4096 * 50 * 0.02))
