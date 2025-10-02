@@ -62,4 +62,4 @@ A comprehensive Field-Oriented Control (FOC) library designed for sensored perma
 
 This library forms a solid foundation for sensored FOC applications and will be extended with sensorless FOC capabilities in future releases.
 
-该库为带传感器的FOC（场向控制）应用提供了坚实的基础，并将在未来版本中扩展支持无传感器FOC功能。
+该库函数为带传感器的FOC（场向控制）应用提供了坚实的基础，并将在未来版本中扩展支持无传感器FOC功能。
