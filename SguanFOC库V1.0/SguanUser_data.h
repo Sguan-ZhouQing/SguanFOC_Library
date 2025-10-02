@@ -1,6 +1,7 @@
 #ifndef __SGUANUSER_DATA_H
 #define __SGUANUSER_DATA_H
 
+
 // 【1】电机参数设定（宏定义）
 #define SguanFOC_ARR 2000               // 磁定向控制之中PWM份额值
 #define Pole_Pairs 7                    // 电机的极对极数（通常为7）
@@ -18,6 +19,7 @@ float current_Iq = 0.0f;                // Iq电流滤波后的数据
 // 【4】卡尔曼滤波宏定义(Iq电流滤波)
 #define M_NOISE     10.0f               // R值,传感器噪声大则设大
 #define P_NOISE     0.01f               // Q值,系统变化快则设大
+
 
 // 【5】用户接口函数书写（必写项）
 void Sguan_TimerDriverInit(void){
@@ -71,10 +73,17 @@ void Sguan_FilteredAngularVelocity(float *Speed){
     /* Your code here */
 }
 
+
 /* 【6】函数使用调用
 extern void FOC_Init(void);
 extern void FOC_LoopHandler(void);
 extern void FOC_SetPIDParams(const char *loop, float kp, float ki, float kd, float limit);
+extern FOC_Mode_t FOC_Mode;
+extern float FOC_Target_Position; // rad
+extern float FOC_Target_Speed;    // rad/s
+extern float FOC_Target_Current;  // A
+extern float FOC_Target_Voltage;  // 0~1 (开环时使用)
 */
+
 
 #endif // SGUANUSER_DATA_H
