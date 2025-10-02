@@ -10,6 +10,7 @@ https://zread.ai/Sguan-ZhouQing/SguanFOC_Library
 SguanFOC 库是一个专为有感永磁同步电机（PMSM）设计的综合磁场定向控制（FOC）实现。该库为初级开发人员提供了高级电机控制应用的坚实基础，结合了数学精度与实用性。
 该库采用模块化架构，将控制算法、硬件抽象和用户配置分离。其核心是，FOC 系统将三相电机控制转换为可管理的 d-q 坐标系操作，实现精确的转矩和位置控制。
 该库围绕两个主要数据结构构建，管理所有 FOC 操作：
+
 • SVPWM_HandleTypeDef：管理电压变换和 PWM 生成 SguanFOC.h#L11-L33
 
 • FOC_HandleTypeDef：包含不同控制策略的所有 PID 控制器配置 SguanFOC.h#L35-L113
