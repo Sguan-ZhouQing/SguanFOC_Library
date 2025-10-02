@@ -2,15 +2,14 @@
  * @Author: 星必尘Sguan
  * @Date: 2025-10-02 14:40:13
  * @LastEditors: 星必尘Sguan|3464647102@qq.com
- * @LastEditTime: 2025-10-02 16:19:41
+ * @LastEditTime: 2025-10-02 16:54:18
  * @FilePath: \SguanFOC库\SguanFOC.c
- * @Description: 
+ * @Description: SguanFOC库v1.0版本
  * 
  * Copyright (c) 2025 by $JUST, All Rights Reserved. 
  */
 #include "SguanUser_data.h"
 #include "SguanFOC.h"
-
 
 #define PI 3.14159265358979323846f
 // 磁定向控制的结构体变量
@@ -30,7 +29,6 @@ static uint32_t last_time = 0;          // 上次更新时间
 static float current_Iq = 0.0f;         // Iq电流滤波后的数据
 // 初始"电角度"和"机械角度"对齐变量
 static float alignment_angle_offset = 0.0f;
-
 
 
 /**
@@ -111,8 +109,6 @@ static void fast_sin_cos(float x, float *sin_x, float *cos_x) {
 }
 
 
-
-
 /**
  * @description: 低通滤波
  * @param {float} input
@@ -160,8 +156,6 @@ static float kalman_filter_dir(float input, float r, float q)
     pp = (1 - g) * pp;
     return z_dir;
 }
-
-
 
 
 /**
@@ -327,12 +321,6 @@ static void svpwm(SVPWM_HandleTypeDef* foc) {
     }
     // 至此，t_a, t_b, t_c 就是三相PWM的占空比，可以直接写入定时器寄存器
 }
-
-
-
-
-
-
 
 
 // 初始化FOC控制器的底层硬件
