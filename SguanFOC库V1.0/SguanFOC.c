@@ -2,9 +2,9 @@
  * @Author: 星必尘Sguan
  * @Date: 2025-10-02 14:40:13
  * @LastEditors: 星必尘Sguan|3464647102@qq.com
- * @LastEditTime: 2025-10-02 17:15:55
+ * @LastEditTime: 2025-10-03 20:09:28
  * @FilePath: \SguanFOC库\SguanFOC.c
- * @Description: SguanFOC库v1.0版本
+ * @Description: SguanFOC库v1.0(C语言版本)
  * 
  * Copyright (c) 2025 by $JUST, All Rights Reserved. 
  */
