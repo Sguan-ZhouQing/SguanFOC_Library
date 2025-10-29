@@ -61,13 +61,6 @@ SguanFOC 库是一个专为有/无感永磁同步电机（PMSM）设计的综合
 4. Set control mode and targets
 5. Call `FOC_LoopHandler()` in your main control loop
 
-## Perfect For
-- Robotic joint control
-- CNC machines
-- Precision motion systems
-- DIY motor control projects
-- Educational FOC implementations
-
 This library forms a solid foundation for sensored FOC applications and will be extended with sensorless FOC capabilities in future releases.
 
 该库函数为带传感器的FOC（场向控制）应用提供了坚实的基础，并将在未来版本中扩展支持无传感器FOC功能。
