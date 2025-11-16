@@ -2,7 +2,7 @@
  * @Author: 星必尘Sguan
  * @Date: 2025-11-14 09:31:21
  * @LastEditors: 星必尘Sguan|3464647102@qq.com
- * @LastEditTime: 2025-11-16 14:56:24
+ * @LastEditTime: 2025-11-16 15:04:41
  * @FilePath: \SguanFOC\SguanFOC.c
  * @Description: SguanFOC的“电机运算”库
  * 
@@ -280,7 +280,7 @@ static void Sguan_Current_Calculate(Motor_System_STRUCT *sguan,uint8_t Motor_CH)
     else {
         sguan->Current.Real_Iv = (SguanUser_ReadADC_Raw(Motor_CH,1) - sguan->Current.Offset_b)*sguan->Current.Final_Gain; 
     }
-    if (sguan->Current.Dir_b) {
+    if (sguan->Current.Dir_c) {
         sguan->Current.Real_Iw = -(SguanUser_ReadADC_Raw(Motor_CH,2) - sguan->Current.Offset_c)*sguan->Current.Final_Gain;
     }
     else {
