@@ -2,8 +2,8 @@
  * @Author: 星必尘Sguan
  * @Date: 2025-11-14 09:30:51
  * @LastEditors: 星必尘Sguan|3464647102@qq.com
- * @LastEditTime: 2025-11-15 23:44:50
- * @FilePath: \demo_SguanFOCv2.0\SguanFOC\Sguan_math.c
+ * @LastEditTime: 2025-11-16 18:19:21
+ * @FilePath: \SguanFOC\Sguan_math.c
  * @Description: SguanFOC的“数据处理”库
  * 
  * Copyright (c) 2025 by $JUST, All Rights Reserved. 

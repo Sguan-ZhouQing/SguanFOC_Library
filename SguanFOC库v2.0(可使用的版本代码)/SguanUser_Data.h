@@ -2,8 +2,8 @@
  * @Author: 星必尘Sguan
  * @Date: 2025-11-14 09:31:21
  * @LastEditors: 星必尘Sguan|3464647102@qq.com
- * @LastEditTime: 2025-11-15 23:48:42
- * @FilePath: \demo_SguanFOCv2.0\SguanFOC\SguanUser_Data.h
+ * @LastEditTime: 2025-11-16 15:00:48
+ * @FilePath: \SguanFOC\SguanUser_Data.h
  * @Description: SguanFOC的“用户接口”库
  * 
  * Copyright (c) 2025 by $JUST, All Rights Reserved. 

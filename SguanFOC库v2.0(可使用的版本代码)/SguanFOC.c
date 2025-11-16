@@ -2,7 +2,7 @@
  * @Author: 星必尘Sguan
  * @Date: 2025-11-14 09:31:21
  * @LastEditors: 星必尘Sguan|3464647102@qq.com
- * @LastEditTime: 2025-11-16 15:04:41
+ * @LastEditTime: 2025-11-16 18:19:11
  * @FilePath: \SguanFOC\SguanFOC.c
  * @Description: SguanFOC的“电机运算”库
  * 
@@ -25,6 +25,7 @@ Motor_System_STRUCT Sguan2;
 Motor_System_STRUCT Sguan3;
 #endif // SguanMotor3
 
+static void PID_Control(PID_STRUCT *p);
 static void Sguan_ReadADC_Offset_Init(void);
 static void Sguan_ReadADC_Offset(Motor_System_STRUCT *sguan, uint32_t Motor_CH);
 static void SguanUser_ReadRad_Offset_Init(void);
