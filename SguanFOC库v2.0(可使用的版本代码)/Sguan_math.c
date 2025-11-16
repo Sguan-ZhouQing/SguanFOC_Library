@@ -38,12 +38,6 @@ float normalize_angle(float angle) {
   return normalized;
 }
 
-// 参数转电角度
-float electrical_angle(float mechanical_angle, float pole_pairs) {
-  float elec_angle = mechanical_angle * pole_pairs;
-  return normalize_angle(elec_angle);
-}
-
 // 快速sine和cosine求解的局部函数
 static float f1(float x) {
   float u = 1.3528548e-10f;

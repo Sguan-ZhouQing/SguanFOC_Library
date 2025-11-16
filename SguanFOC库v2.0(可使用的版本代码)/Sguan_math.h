@@ -17,7 +17,6 @@ float Sguan_fabsf(float x);
 // 参数限制函数
 #define Value_Limit(val, max, min) (((val) > (max)) ? (max) : (((val) < (min)) ? (min) : (val)))
 float normalize_angle(float angle);
-float electrical_angle(float mechanical_angle, float pole_pairs);
 
 // 快速正余弦求解
 float fast_sin(float x);
