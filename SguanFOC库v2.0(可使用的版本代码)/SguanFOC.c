@@ -2,8 +2,8 @@
  * @Author: 星必尘Sguan
  * @Date: 2025-11-14 09:31:21
  * @LastEditors: 星必尘Sguan|3464647102@qq.com
- * @LastEditTime: 2025-11-16 13:32:55
- * @FilePath: \demo_SguanFOCv2.0\SguanFOC\SguanFOC.c
+ * @LastEditTime: 2025-11-16 14:56:24
+ * @FilePath: \SguanFOC\SguanFOC.c
  * @Description: SguanFOC的“电机运算”库
  * 
  * Copyright (c) 2025 by $JUST, All Rights Reserved. 
@@ -270,12 +270,20 @@ static void Sguan_Encoder_Tick(void) {
 static void Sguan_Current_Calculate(Motor_System_STRUCT *sguan,uint8_t Motor_CH) {
     if (sguan->Current.Dir_a) {
         sguan->Current.Real_Iu = -(SguanUser_ReadADC_Raw(Motor_CH,0) - sguan->Current.Offset_a)*sguan->Current.Final_Gain;
-        sguan->Current.Real_Iv = -(SguanUser_ReadADC_Raw(Motor_CH,1) - sguan->Current.Offset_b)*sguan->Current.Final_Gain;
-        sguan->Current.Real_Iw = -(SguanUser_ReadADC_Raw(Motor_CH,2) - sguan->Current.Offset_c)*sguan->Current.Final_Gain;
     }
     else {
         sguan->Current.Real_Iu = (SguanUser_ReadADC_Raw(Motor_CH,0) - sguan->Current.Offset_a)*sguan->Current.Final_Gain;
-        sguan->Current.Real_Iv = (SguanUser_ReadADC_Raw(Motor_CH,1) - sguan->Current.Offset_b)*sguan->Current.Final_Gain;
+    }
+    if (sguan->Current.Dir_b) {
+        sguan->Current.Real_Iv = -(SguanUser_ReadADC_Raw(Motor_CH,1) - sguan->Current.Offset_b)*sguan->Current.Final_Gain;
+    }
+    else {
+        sguan->Current.Real_Iv = (SguanUser_ReadADC_Raw(Motor_CH,1) - sguan->Current.Offset_b)*sguan->Current.Final_Gain; 
+    }
+    if (sguan->Current.Dir_b) {
+        sguan->Current.Real_Iw = -(SguanUser_ReadADC_Raw(Motor_CH,2) - sguan->Current.Offset_c)*sguan->Current.Final_Gain;
+    }
+    else {
         sguan->Current.Real_Iw = (SguanUser_ReadADC_Raw(Motor_CH,2) - sguan->Current.Offset_c)*sguan->Current.Final_Gain;
     }
     sguan->Encoder.Real_El_Rad = Sguan_Encoder_GetElRad(sguan,Motor_CH);
