@@ -2,7 +2,7 @@
  * @Author: 星必尘Sguan
  * @Date: 2025-11-14 09:31:21
  * @LastEditors: 星必尘Sguan|3464647102@qq.com
- * @LastEditTime: 2025-11-15 23:44:19
+ * @LastEditTime: 2025-11-16 13:32:55
  * @FilePath: \demo_SguanFOCv2.0\SguanFOC\SguanFOC.c
  * @Description: SguanFOC的“电机运算”库
  * 
@@ -472,5 +472,5 @@ void SguanFOC_GeneratePWM_Loop(void) {
         &Sguan3.Foc.Input_dv,       // d_v: V相占空比输出
         &Sguan3.Foc.Input_dw);      // d_w: W相占空比输出
     Sguan_SetDuty(3,Sguan3.Foc.Input_du,Sguan3.Foc.Input_dv,Sguan3.Foc.Input_dw);
-    #endif // SguanMotor0
+    #endif // SguanMotor3
 }
