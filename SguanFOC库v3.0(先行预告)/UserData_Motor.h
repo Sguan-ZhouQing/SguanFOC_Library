@@ -1,0 +1,41 @@
+#ifndef __USERDATA_MOTOR_H
+#define __USERDATA_MOTOR_H
+#include "SguanFOC.h"
+/* 电机控制User用户设置·电机参数 */
+
+static inline void User_MotorSet(void){
+    // 1.control电机有/无感FOC
+    Sguan.control = SensorFOC_Control;
+    // 2.mode选择电机的运行模式
+    Sguan.mode = Velocity_OPEN_MODE;
+    // 3.motor电机参数辨识
+    Sguan.motor.Vbus = 12.0f;           // (float)母线电压
+    Sguan.motor.Ld = 0.0008f;           // (float)D轴电感
+    Sguan.motor.Lq = 0.0008f;           // (float)Q轴电感
+    Sguan.motor.In = 0.0008f;           // (float)相线电感
+    Sguan.motor.Rs = 0.17f;             // (float)相线电阻
+    Sguan.motor.Flux = 0.0026f;         // (float)磁链
+    Sguan.motor.Poles = 7;              // (uint8_t)极对极数
+
+    Sguan.motor.Limit = 0.2f;           // (float)预处理电压占比
+
+    Sguan.motor.Motor_Dir = 1;          // (int8_t)电机方向1->正向，负1->负向
+    Sguan.motor.PWM_Dir = -1;           // (int8_t)PWM占空比高低对应1->正向，负1->负向
+    Sguan.motor.Duty = 12.0f;           // (uint16_t)PWM满占空比数值
+
+    Sguan.motor.Encoder_Dir = -1;       // (int8_t)编码器方向1->正向，负1->负向
+
+    Sguan.motor.Current_Dir0 = 1;       // (int8_t)相线电流方向1->正向，负1->负向
+    Sguan.motor.Current_Dir1 = 1;       // (int8_t)相线电流方向1->正向，负1->负向
+    Sguan.motor.Current_Num = 1;        // (uint8_t)电流通道0->AB相，1->AC相，2->BC相
+    Sguan.motor.ADC_Precision = 4096;   // (uint32_t)ADC采样精度
+    Sguan.motor.Amplifier = 10.0f;      // (float)运算放大器增益
+    Sguan.motor.MCU_Voltage = 3.3f;     // (float)DSP/单片机的ADC电压基准
+    Sguan.motor.Sampling_Rs = 0.005f;   // (float)采样电阻大小
+    // 4.系统定时中断周期设计
+    Sguan.System_T = 0.0005f;           // (float)系统电机运行时间周期
+    Sguan.TIM_ms_T = 0.001f;            // (float)系统ms级中断时间
+}
+
+
+#endif // USERDATA_MOTOR_H
