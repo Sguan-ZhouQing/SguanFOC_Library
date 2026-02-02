@@ -3,7 +3,7 @@
  * @GitHub: https://github.com/Sguan-ZhouQing
  * @Date: 2026-01-26 22:43:48
  * @LastEditors: 星必尘Sguan|3464647102@qq.com
- * @LastEditTime: 2026-01-30 14:59:42
+ * @LastEditTime: 2026-01-31 14:37:52
  * @FilePath: \demo_SguanFOCCode\SguanFOC库\Sguan_MotorStatus.h
  * @Description: 
  * 
@@ -24,6 +24,7 @@ typedef enum{
     MOTOR_STATUS_OVERVOLTAGE,         // 过压保护
     MOTOR_STATUS_UNDERVOLTAGE,        // 欠压保护
     MOTOR_STATUS_OVERTEMPERATURE,     // 过温保护
+    MOTOR_STATUS_UNDERTEMPERATURE,    // 低温保护
     MOTOR_STATUS_ENCODER_ERROR,       // 编码器故障
     MOTOR_STATUS_SENSOR_ERROR,        // 传感器故障（电流、温度等）
     MOTOR_STATUS_COMMUTATION_ERROR,   // 换相错误

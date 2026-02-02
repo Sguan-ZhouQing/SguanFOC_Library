@@ -3,7 +3,7 @@
  * @GitHub: https://github.com/Sguan-ZhouQing
  * @Date: 2026-01-26 22:38:34
  * @LastEditors: 星必尘Sguan|3464647102@qq.com
- * @LastEditTime: 2026-01-30 14:50:06
+ * @LastEditTime: 2026-02-01 13:47:11
  * @FilePath: \demo_SguanFOCCode\SguanFOC库\SguanFOC.c
  * @Description: SguanFOC库的“核心代码”实现
  * 
@@ -74,7 +74,13 @@ static void (*const PID_Tick[])(SguanFOC_System_STRUCT*)={
  */
 static void Data_Protection_Loop(SguanFOC_System_STRUCT *sguan);
 /**
- * @description: 6.SVPWM电机驱动的马鞍波生成
+ * @description: 6.Status判断并切换状态机
+ * @param {SguanFOC_System_STRUCT} *sguan
+ * @return {*}
+ */
+static void Status_Switch_Loop(SguanFOC_System_STRUCT *sguan);
+/**
+ * @description: 7.SVPWM电机驱动的马鞍波生成
  * @param {SguanFOC_System_STRUCT} *sguan
  * @param {float} d
  * @param {float} q
@@ -82,14 +88,14 @@ static void Data_Protection_Loop(SguanFOC_System_STRUCT *sguan);
  */
 static void SVPWM_Tick(SguanFOC_System_STRUCT *sguan,float Erad,float d_set,float q_set);
 /**
- * @description: 7.Sguan...Loop定时计算并执行
+ * @description: 8.Sguan...Loop定时计算并执行
  * @param {SguanFOC_System_STRUCT} *sguan
  * @return {*}
  */
 static void Sguan_Calculate_Loop(SguanFOC_System_STRUCT *sguan);
 static void Sguan_GeneratePWM_Loop(SguanFOC_System_STRUCT *sguan);
 /**
- * @description: 8.Sguan...Init各种控制系统的初始化
+ * @description: 9.Sguan...Init各种控制系统的初始化
  * @param {SguanFOC_System_STRUCT} *sguan
  * @return {*}
  */
@@ -99,11 +105,13 @@ static void Sguan_PID_Init(SguanFOC_System_STRUCT *sguan);
 static void Sguan_PLL_Init(SguanFOC_System_STRUCT *sguan);
 static void Sguan_Sensorless_Init(SguanFOC_System_STRUCT *sguan);
 /**
- * @description: 9.Pre_Pos电机零点对齐
+ * @description: 10.Pre电机预处理
  * @param {SguanFOC_System_STRUCT} *sguan
  * @return {*}
  */
 static void Sguan_Pre_Positioning(SguanFOC_System_STRUCT *sguan,float d_set);
+static void Sguan_SystemT_Set(SguanFOC_System_STRUCT *sguan);
+static void Sguan_ReStart_Loop(void);
 
 
 // Offset读取编码器偏置
@@ -310,6 +318,36 @@ static void Data_Protection_Loop(SguanFOC_System_STRUCT *sguan){
     sguan->bpf.Thermistor.filter.Input = User_Temperature_DataGet();
     BPF_Loop(&sguan->bpf.VBUS);
     BPF_Loop(&sguan->bpf.Thermistor);
+    sguan->foc.Real_VBUS = sguan->bpf.VBUS.filter.Output;
+    sguan->foc.Real_Temp = sguan->bpf.Thermistor.filter.Output;
+}
+
+// Status判断并切换状态机
+static void Status_Switch_Loop(SguanFOC_System_STRUCT *sguan){
+    // 1.电机母线电压VBUS状态机
+    if (sguan->foc.Real_VBUS > sguan->motor.VBUS_MAX){
+        sguan->status = MOTOR_STATUS_OVERVOLTAGE;
+    }
+    else if (sguan->foc.Real_VBUS < sguan->motor.VBUS_MIM){
+        sguan->status = MOTOR_STATUS_UNDERVOLTAGE;
+    }
+    // 2.驱动器物理温度Temp状态机
+    if (sguan->foc.Real_Temp > sguan->motor.Temp_MAX){
+        sguan->status = MOTOR_STATUS_OVERTEMPERATURE;
+    }
+    else if (sguan->foc.Real_Temp < sguan->motor.Temp_MIN){
+        sguan->status = MOTOR_STATUS_UNDERTEMPERATURE;
+    }
+    // 3.过流保护
+    if (sguan->current.Real_Iq > sguan->motor.Qcur_MAX){
+        sguan->status = MOTOR_STATUS_OVERCURRENT;
+    }
+    // 4.急停保护
+    if (User_StatusSTOP_Signal()){
+        sguan->status = MOTOR_STATUS_EMERGENCY_STOP;
+    }
+    // 5.关机失能
+    
 }
 
 // SVPWM电机驱动的马鞍波生成
@@ -413,12 +451,12 @@ static void Sguan_Sensorless_Init(SguanFOC_System_STRUCT *sguan){
     }
 }
 
-// Pre_Pos电机零点对齐
+// Pre电机零点对齐(机械角度对齐)
 static void Sguan_Pre_Positioning(SguanFOC_System_STRUCT *sguan,float d_set){
     SVPWM_Tick(sguan,0.0f,d_set,0.0f);
 }
 
-// 系统时钟设置(定时器中断周期)
+// Pre系统时钟设置(定时器中断周期)
 static void Sguan_SystemT_Set(SguanFOC_System_STRUCT *sguan){
     sguan->pid.Compare = sguan->pid.Response*sguan->pid.Response;
     // 0.电机编码器参数
@@ -451,6 +489,11 @@ static void Sguan_SystemT_Set(SguanFOC_System_STRUCT *sguan){
     sguan->pll.SMO.T = sguan->System_T;
 }
 
+// Pre系统开始的核心文件,重新开始初始化
+static void Sguan_ReStart_Loop(void){
+
+}
+
 /**
  * @description: SguanFOC核心文件，主任务初始化函数
  * @reminder: 主循环之前，任务优先级“高”
@@ -472,6 +515,7 @@ void SguanFOC_Init(void){
     Sguan_PID_Init(&Sguan);
     Sguan_PLL_Init(&Sguan);
     Sguan_Sensorless_Init(&Sguan);
+    Printf_Init(&Sguan);
     // 读取电流偏置
     Sguan.status = MOTOR_STATUS_CALIBRATING;
     Offset_CurrentRead(&Sguan);
@@ -493,7 +537,9 @@ void SguanFOC_Init(void){
  * @return {*}
  */
 void SguanFOC_Loop(void){
+    // 计算编码器和电流
     Sguan_Calculate_Loop(&Sguan);
+    // 运算PID的执行SVPWM
     Sguan_GeneratePWM_Loop(&Sguan);
 }
 
@@ -503,16 +549,22 @@ void SguanFOC_Loop(void){
  * @return {*}
  */
 void SguanFOC_msTick(void){
+    // 读取母线电压VBUS和温度数据Temp
     Data_Protection_Loop(&Sguan);
+    // 作用->根据环境切换电机状态机
+    Status_Switch_Loop(&Sguan);
+    // 作用->根据电机状态机,运行不同任务
     MotorStatus_Loop(&Sguan.status);
 }
 
 /**
  * @description: SguanFOC核心文件，主循环服务函数(主循环TXdata数据更新)
- * @reminder: 1Khz或者更低定时中断中调用，任务优先级“最低”
+ * @reminder: 主循环函数调用，任务优先级“最低”
  * @return {*}
  */
 void SguanFOC_mainTick(void){
+    // 用户数据填写(串口或者CAN通信)
     User_UserTX();
+    // 发送数据to上位机
     Printf_Loop(&Sguan.TXdata);
 }

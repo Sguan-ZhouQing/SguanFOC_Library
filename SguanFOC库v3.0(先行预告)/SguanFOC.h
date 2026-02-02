@@ -77,10 +77,12 @@ typedef struct{
     uint8_t Poles;              // (电机实体参数)电机极对极数
 
     float Limit;                // (参数设计)预处理|电机定位占空比
+
     float VBUS_MAX;             // (参数设计)母线电压值波动MAX阈值
     float VBUS_MIM;             // (参数设计)母线电压值波动MIN阈值
     float Temp_MAX;             // (参数设计)驱动器允许最大温度
     float Temp_MIN;             // (参数设计)驱动器允许最小温度
+    float Qcur_MAX;          // (参数设计)电机最大电流Q轴限制
 
     int8_t Motor_Dir;           // (参数设计)电机的运行方向设计
     int8_t PWM_Dir;             // (参数设计)PWM占空比高低对应

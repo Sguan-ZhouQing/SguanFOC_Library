@@ -3,7 +3,7 @@
  * @GitHub: https://github.com/Sguan-ZhouQing
  * @Date: 2026-01-27 00:07:53
  * @LastEditors: 星必尘Sguan|3464647102@qq.com
- * @LastEditTime: 2026-01-30 14:49:11
+ * @LastEditTime: 2026-01-30 15:13:12
  * @FilePath: \demo_SguanFOCCode\SguanFOC库\Sguan_printf.c
  * @Description: SguanFOC库的“JustFloat通讯协议”实现
  * 
@@ -38,7 +38,7 @@ int fputc(int ch,FILE *f){
 }
 
 // 初始化JustFloat数据帧尾
-static void Printf_Init(PRINTF_STRUCT *str){
+void Printf_Init(PRINTF_STRUCT *str){
     str->tail[0] = 0x00;
     str->tail[1] = 0x00;
     str->tail[2] = 0x80;
@@ -48,8 +48,6 @@ static void Printf_Init(PRINTF_STRUCT *str){
 
 // 发送数据Tick函数，发送周期可自定
 void Printf_Loop(PRINTF_STRUCT *str){
-    // 数据帧尾定义
-    Printf_Init(str);
     // 发送JustFloat数据
     User_PrintfSet((uint8_t *)str);
 }

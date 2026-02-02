@@ -2,7 +2,7 @@
 #define __USERDATA_USERCONTROL_H
 #include "SguanFOC.h"
 /* 电机控制User用户设置·实时参数控制页面 */
-/* 用户自己的CODE END Includes */
+/* 用户自己的CODE BEGIN Includes */
 
 /* 用户自己的CODE END Includes */
 

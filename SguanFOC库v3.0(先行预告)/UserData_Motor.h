@@ -19,6 +19,12 @@ static inline void User_MotorSet(void){
 
     Sguan.motor.Limit = 0.2f;           // (float)预处理电压占比
 
+    Sguan.motor.VBUS_MAX = 14.0f;       // (float)母线电压值波动MAX阈值
+    Sguan.motor.VBUS_MIM = 10.0f;       // (float)母线电压值波动MIN阈值
+    Sguan.motor.Temp_MAX = 60.0f;       // (float)驱动器允许最大温度
+    Sguan.motor.Temp_MIN = -20.0f;      // (float)驱动器允许最小温度
+    Sguan.motor.Qcur_MAX = 17.6f;       // (float)电机最大电流Q轴限制
+
     Sguan.motor.Motor_Dir = 1;          // (int8_t)电机方向1->正向，负1->负向
     Sguan.motor.PWM_Dir = -1;           // (int8_t)PWM占空比高低对应1->正向，负1->负向
     Sguan.motor.Duty = 12.0f;           // (uint16_t)PWM满占空比数值

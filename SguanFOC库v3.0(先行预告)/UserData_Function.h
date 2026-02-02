@@ -1,6 +1,6 @@
 #ifndef __USERDATA_FUNCTION_H
 #define __USERDATA_FUNCTION_H
-#include "SguanFOC.h"
+#include <stdint.h>
 /* 电机控制User用户设置·功能接口 */
 
 static inline void User_InitialInit(void){
