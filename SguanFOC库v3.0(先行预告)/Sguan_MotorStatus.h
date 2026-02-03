@@ -20,11 +20,11 @@ typedef enum{
     MOTOR_STATUS_ERROR,               // 错误状态（通用错误）
     
     // ====== 硬件相关错误 ======
-    MOTOR_STATUS_OVERCURRENT,         // 过流保护
     MOTOR_STATUS_OVERVOLTAGE,         // 过压保护
     MOTOR_STATUS_UNDERVOLTAGE,        // 欠压保护
     MOTOR_STATUS_OVERTEMPERATURE,     // 过温保护
     MOTOR_STATUS_UNDERTEMPERATURE,    // 低温保护
+    MOTOR_STATUS_OVERCURRENT,         // 过流保护
     MOTOR_STATUS_ENCODER_ERROR,       // 编码器故障
     MOTOR_STATUS_SENSOR_ERROR,        // 传感器故障（电流、温度等）
     MOTOR_STATUS_COMMUTATION_ERROR,   // 换相错误

@@ -3,7 +3,7 @@
  * @GitHub: https://github.com/Sguan-ZhouQing
  * @Date: 2026-01-26 22:38:34
  * @LastEditors: 星必尘Sguan|3464647102@qq.com
- * @LastEditTime: 2026-02-01 13:47:11
+ * @LastEditTime: 2026-02-03 23:09:54
  * @FilePath: \demo_SguanFOCCode\SguanFOC库\SguanFOC.c
  * @Description: SguanFOC库的“核心代码”实现
  * 
@@ -39,14 +39,21 @@ static float Encoder_ReadPos(SguanFOC_System_STRUCT *sguan);
 static float Encoder_ReadSpeed(SguanFOC_System_STRUCT *sguan);
 static void Encoder_Tick(SguanFOC_System_STRUCT *sguan);
 /**
- * @description: 3.Current内部静态函数声明
+ * @description: 3.Sensorless无感控制读取转子位置
+ * @param {SguanFOC_System_STRUCT} *sguan
+ * @return {*}
+ */
+static float HFI_Encoder_ReadRad(SguanFOC_System_STRUCT *sguan);
+static float SMO_Encoder_ReadRad(SguanFOC_System_STRUCT *sguan);
+/**
+ * @description: 4.Current内部静态函数声明
  * @param {SguanFOC_System_STRUCT} *sguan
  * @return {*}
  */
 static void Current_ReadIabc(SguanFOC_System_STRUCT *sguan);
 static void Current_Tick(SguanFOC_System_STRUCT *sguan);
 /**
- * @description: 4.PID运算及其模式切换
+ * @description: 5.PID运算及其模式切换
  * @param {SguanFOC_System_STRUCT} *sguan
  * @return {*}
  */
@@ -68,19 +75,19 @@ static void (*const PID_Tick[])(SguanFOC_System_STRUCT*)={
     PID_PosVelCur_THREE     // PosVelCur_THREE_MODE = 6
 };
 /**
- * @description: 5.Data母线电压和驱动器物理温度数据更新和滤波
+ * @description: 6.Data母线电压和驱动器物理温度数据更新和滤波
  * @param {SguanFOC_System_STRUCT} *sguan
  * @return {*}
  */
 static void Data_Protection_Loop(SguanFOC_System_STRUCT *sguan);
 /**
- * @description: 6.Status判断并切换状态机
+ * @description: 7.Status判断并切换状态机
  * @param {SguanFOC_System_STRUCT} *sguan
  * @return {*}
  */
 static void Status_Switch_Loop(SguanFOC_System_STRUCT *sguan);
 /**
- * @description: 7.SVPWM电机驱动的马鞍波生成
+ * @description: 8.SVPWM电机驱动的马鞍波生成
  * @param {SguanFOC_System_STRUCT} *sguan
  * @param {float} d
  * @param {float} q
@@ -88,14 +95,14 @@ static void Status_Switch_Loop(SguanFOC_System_STRUCT *sguan);
  */
 static void SVPWM_Tick(SguanFOC_System_STRUCT *sguan,float Erad,float d_set,float q_set);
 /**
- * @description: 8.Sguan...Loop定时计算并执行
+ * @description: 9.Sguan...Loop定时计算并执行
  * @param {SguanFOC_System_STRUCT} *sguan
  * @return {*}
  */
 static void Sguan_Calculate_Loop(SguanFOC_System_STRUCT *sguan);
 static void Sguan_GeneratePWM_Loop(SguanFOC_System_STRUCT *sguan);
 /**
- * @description: 9.Sguan...Init各种控制系统的初始化
+ * @description: 10.Sguan...Init各种控制系统的初始化
  * @param {SguanFOC_System_STRUCT} *sguan
  * @return {*}
  */
@@ -105,7 +112,7 @@ static void Sguan_PID_Init(SguanFOC_System_STRUCT *sguan);
 static void Sguan_PLL_Init(SguanFOC_System_STRUCT *sguan);
 static void Sguan_Sensorless_Init(SguanFOC_System_STRUCT *sguan);
 /**
- * @description: 10.Pre电机预处理
+ * @description: 11.Pre电机预处理
  * @param {SguanFOC_System_STRUCT} *sguan
  * @return {*}
  */
@@ -168,12 +175,42 @@ static float Encoder_ReadSpeed(SguanFOC_System_STRUCT *sguan){
 
 // Encoder实时更新角速度和角度信息(已滤波)
 static void Encoder_Tick(SguanFOC_System_STRUCT *sguan){
-    sguan->encoder.Real_Rad = User_Encoder_ReadRad();
+    // 1.有感FOC控制
+    if (sguan->control == SensorFOC_Control){
+        sguan->encoder.Real_Rad = User_Encoder_ReadRad();
+    }
+    // 2.无感控制HFI
+    else if (sguan->control == Sensorless_HFI_Control){
+        sguan->encoder.Real_Rad = HFI_Encoder_ReadRad(sguan);
+    }
+    // 3.无感控制SMO
+    else if (sguan->control == Sensorless_SMO_Control){
+        sguan->encoder.Real_Rad = SMO_Encoder_ReadRad(sguan);
+    }
+    // 4.无感全速域HFI-SMO
+    else if (sguan->control == SensorlessFOC_Control){
+        if (1){
+            sguan->encoder.Real_Rad = HFI_Encoder_ReadRad(sguan);
+        }
+        else{
+            sguan->encoder.Real_Rad = SMO_Encoder_ReadRad(sguan);
+        }
+    }
     sguan->bpf.Encoder.filter.Input = Encoder_ReadSpeed(sguan)*sguan->motor.Motor_Dir;
     BPF_Loop(&sguan->bpf.Encoder);
     sguan->encoder.Real_Speed = sguan->bpf.Encoder.filter.Output;
     sguan->encoder.Real_Pos = Encoder_ReadPos(sguan)*sguan->motor.Motor_Dir;
     sguan->encoder.Real_Erad = Encoder_ReadErad(sguan);
+}
+
+// Sensorless高频注入无感控制
+static float HFI_Encoder_ReadRad(SguanFOC_System_STRUCT *sguan){
+
+}
+
+// Sensorless滑膜观测器无感控制
+static float SMO_Encoder_ReadRad(SguanFOC_System_STRUCT *sguan){
+
 }
 
 // Current读取当前的电流值并更新3相电流(已滤波)

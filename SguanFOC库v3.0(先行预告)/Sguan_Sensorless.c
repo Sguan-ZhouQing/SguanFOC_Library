@@ -20,3 +20,14 @@ void HFI_Init(HFI_STRUCT *hfi){
 void SMO_Init(SMO_STRUCT *smo){
     
 }
+
+
+
+void HFI_Loop(HFI_STRUCT *hfi){
+
+}
+
+
+void NSD_Loop(void){
+    
+}

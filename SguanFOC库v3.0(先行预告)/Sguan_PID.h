@@ -35,6 +35,7 @@ typedef struct{
 
 void PID_Init(PID_STRUCT *pid);
 void PID_Loop(PID_STRUCT *pid);
+void PID_Tick(PID_STRUCT *pid);
 
 
 #endif // SGUAN_PID_H
