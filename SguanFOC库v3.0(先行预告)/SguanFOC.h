@@ -133,6 +133,8 @@ typedef struct{
     int32_t Pos_Flag;           // (Encoder标志位)多圈角度值记录
     float Last_Rad;             // (Encoder数据)上一时刻机械角度数据
     float Pos_offset;           // (Encoder角度偏置)offset偏置位
+    
+    PLL_STRUCT pll;
 }MOTOR_ENCODER_STRUCT;
 
 typedef struct{
@@ -172,7 +174,6 @@ typedef struct{
 // 电机控制核心结构体声明
 extern SguanFOC_System_STRUCT Sguan;
 
-void SguanFOC_Init(void);
 void SguanFOC_Loop(void);
 void SguanFOC_msTick(void);
 void SguanFOC_mainTick(void);

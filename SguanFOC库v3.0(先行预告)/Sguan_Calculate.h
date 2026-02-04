@@ -15,7 +15,7 @@ typedef int32_t q31_t;
 q31_t q31_mul(q31_t a, q31_t b);
 q31_t q31_add(q31_t a, q31_t b);
 q31_t q31_sub(q31_t a, q31_t b);
-q31_t q31_div(q31_t a, q31_t b);  // 备用除法函数
+q31_t q31_div(q31_t a, q31_t b);
 q31_t q31_from_float(float f, float base_value);
 float q31_to_float(q31_t q, float base_value);
 

@@ -3,7 +3,7 @@
  * @GitHub: https://github.com/Sguan-ZhouQing
  * @Date: 2026-01-26 22:28:00
  * @LastEditors: 星必尘Sguan|3464647102@qq.com
- * @LastEditTime: 2026-01-29 23:54:41
+ * @LastEditTime: 2026-02-05 01:09:15
  * @FilePath: \demo_SguanFOCCode\SguanFOC库\Sguan_math.c
  * @Description: SguanFOC库的“数据处理库”实现
  * 1.快速正余弦  2.电机基本变换及SVPWM生成  3.参数限幅设置

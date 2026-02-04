@@ -39,7 +39,7 @@ static inline void User_MotorSet(void){
     Sguan.motor.MCU_Voltage = 3.3f;     // (float)DSP/单片机的ADC电压基准
     Sguan.motor.Sampling_Rs = 0.005f;   // (float)采样电阻大小
     // 4.系统定时中断周期设计
-    Sguan.System_T = 0.0005f;           // (float)系统电机运行时间周期
+    Sguan.System_T = 0.0001f;           // (float)系统电机运行时间周期
     Sguan.TIM_ms_T = 0.001f;            // (float)系统ms级中断时间
 }
 

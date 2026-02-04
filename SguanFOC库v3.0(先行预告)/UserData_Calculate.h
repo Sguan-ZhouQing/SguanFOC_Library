@@ -7,7 +7,7 @@
  * @reminder: 0->关闭PID参数自适应 | 1->开启PID参数自适应
  * @return {*}
  */
-#define PID_Calculate 1
+#define PID_Calculate 0
 
 /**
  * @description: 宏定义0或者1决定“电机实体参数”的测量方式(默认关闭)
@@ -36,6 +36,15 @@
 #define Qmax_Speed 256              // 速度大小(单位为rad/s弧度每秒)
 #define Qmax_Rad 128                // 角度大小(单位为rad弧度)
 #define Qmax_Time 0.00006103515625f // 常量标幺化(无数学单位)
+
+/**
+ * @description: 宏定义决定UART或者CAN发送数据的模式
+ * @reminder: (Printf_Send)0->发送正常数据
+ * @reminder: 1->仅发送Debug数据，不发送正常数据
+ * @return {*}
+ */
+#define Printf_Debug 1
+
 
 // 放置自己的通信驱动代码,用于信息发送
 static inline void User_PrintfSet(uint8_t *ch){

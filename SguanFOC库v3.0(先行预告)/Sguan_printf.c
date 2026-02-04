@@ -3,7 +3,7 @@
  * @GitHub: https://github.com/Sguan-ZhouQing
  * @Date: 2026-01-27 00:07:53
  * @LastEditors: 星必尘Sguan|3464647102@qq.com
- * @LastEditTime: 2026-01-30 15:13:12
+ * @LastEditTime: 2026-02-04 23:30:14
  * @FilePath: \demo_SguanFOCCode\SguanFOC库\Sguan_printf.c
  * @Description: SguanFOC库的“JustFloat通讯协议”实现
  * 
@@ -12,10 +12,12 @@
 #include "Sguan_printf.h"
 /* 外部函数文件声明 */
 #include "UserData_Calculate.h"
-#include "SguanFOC.h"
 /* 内部函数文件声明 */
-static void Printf_Init(PRINTF_STRUCT *str);
+static float Get_Data(void);
+uint8_t Printf_Buff[200];
 
+
+/* ================= 重定向设计 BEGIN ================= */
 // 支持printf函数，而无需选择MicroLIB
 #if 1
 #pragma import(__use_no_semihosting)
@@ -36,8 +38,62 @@ int fputc(int ch,FILE *f){
 	User_PrintfSet((uint8_t *)&ch);
 	return ch;
 }
+/* ================= 重定向设计 END ================= */
 
-// 初始化JustFloat数据帧尾
+
+// [接收]数据解析函数(格式：VE=13.14?)
+static float Get_Data(void){
+    uint8_t data_Start_Num = 0;
+    uint8_t data_End_Num = 0;
+    uint8_t minus_Flag = 0;
+    float data_return = 0;
+    // 查找等号和问号的位置
+    for(uint8_t i = 0; i < 200; i++){
+        if(Printf_Buff[i] == '=') data_Start_Num = i + 1;
+        if(Printf_Buff[i] == '?'){
+            data_End_Num = i - 1;
+            break;
+        }
+    }
+    if(Printf_Buff[data_Start_Num] == '-'){
+        data_Start_Num += 1;
+        minus_Flag = 1;
+    }
+    
+    data_return = 0;
+    uint8_t decimal_point = 0;
+    uint8_t decimal_digits = 0;  // 记录小数位数
+    // 先找到小数点的位置
+    for(uint8_t i = data_Start_Num; i <= data_End_Num; i++){
+        if(Printf_Buff[i] == '.'){
+            decimal_point = i;
+            break;
+        }
+    }
+    
+    // 处理整数部分和小数部分
+    for(uint8_t i = data_Start_Num; i <= data_End_Num; i++){
+        if(Printf_Buff[i] == '.'){
+            continue;  // 跳过小数点
+        }
+        if(i < decimal_point || decimal_point == 0){
+            // 整数部分
+            data_return = data_return * 10 + (Printf_Buff[i] - '0');
+        } else{
+            // 小数部分：根据小数位的位置计算权重
+            decimal_digits++;
+            float decimal_weight = 1.0f;
+            for(uint8_t j = 0; j < decimal_digits; j++){
+                decimal_weight *= 0.1f;
+            }
+            data_return += (Printf_Buff[i] - '0') * decimal_weight;
+        }
+    }
+    if(minus_Flag == 1) data_return = -data_return;
+    return data_return;
+}
+
+// [初始化]初始化JustFloat数据帧尾
 void Printf_Init(PRINTF_STRUCT *str){
     str->tail[0] = 0x00;
     str->tail[1] = 0x00;
@@ -46,9 +102,27 @@ void Printf_Init(PRINTF_STRUCT *str){
     /* JustFloa数据帧尾格式 */
 }
 
-// 发送数据Tick函数，发送周期可自定
+// [发送]发送数据Tick函数，发送周期可自定
 void Printf_Loop(PRINTF_STRUCT *str){
     // 发送JustFloat数据
     User_PrintfSet((uint8_t *)str);
+}
+
+// [接收]实时参数调整函数（需要根据你的实际结构体定义进行调整）
+void Printf_Adjust(void){
+    float data_Get = Get_Data();
+    if(Printf_Buff[0]=='A' && Printf_Buff[1]=='1'){
+
+    }
+    if(Printf_Buff[0]=='P' && Printf_Buff[1]=='2'){
+
+    }
+    if(Printf_Buff[0]=='I' && Printf_Buff[1]=='2'){
+
+    }
+    if(Printf_Buff[0]=='D' && Printf_Buff[1]=='2'){
+
+    }
+    memset(Printf_Buff, 0, sizeof(Printf_Buff));
 }
 

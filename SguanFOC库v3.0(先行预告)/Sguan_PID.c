@@ -3,7 +3,7 @@
  * @GitHub: https://github.com/Sguan-ZhouQing
  * @Date: 2026-01-26 22:38:09
  * @LastEditors: 星必尘Sguan|3464647102@qq.com
- * @LastEditTime: 2026-02-02 20:14:56
+ * @LastEditTime: 2026-02-04 23:43:21
  * @FilePath: \demo_SguanFOCCode\SguanFOC库\Sguan_PID.c
  * @Description: SguanFOC库的“闭环PID算法”实现
  * 
@@ -52,21 +52,3 @@ void PID_Loop(PID_STRUCT *pid){
     pid->run.Output = Value_Limit(pid->run.Output,pid->OutMax,pid->OutMin);
 }
 
-void PID_Tick(PID_STRUCT *pid){
-    // 更新历史输入和输出数值
-    pid->run.i[1] = pid->run.i[0];
-    pid->run.Io[1] = pid->run.Io[0];
-    pid->run.Do[1] = pid->run.Do[0];
-    // 更新当前输入
-    pid->run.i[0] = pid->run.Ref - pid->run.Fbk;
-    if (pid->Ki){
-        pid->run.Io[0] = (pid->run.I_num[0]*pid->run.i[0] + pid->run.I_num[1]*pid->run.i[1] 
-                    - pid->run.I_den[1]*pid->run.Io[1]) / pid->run.I_den[0];
-    }
-    if (pid->Kd){
-        pid->run.Do[0] = (pid->run.D_num[0]*pid->run.i[0] + pid->run.D_num[1]*pid->run.i[1] 
-                    - pid->run.D_den[1]*pid->run.Do[1]) / pid->run.D_den[0];
-    }
-    pid->run.Output = pid->run.i[0]*pid->Kp + pid->run.Io[0] + pid->run.Do[0];
-    pid->run.Output = Value_Limit(pid->run.Output,pid->OutMax,pid->OutMin);
-}

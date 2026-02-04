@@ -106,11 +106,7 @@ static inline void User_ParameterSet(void){
 
     Sguan.pid.Response = 10;                // (uint8_t)响应带宽倍数
     // 3.pll锁相环跟踪系统
-    Sguan.pll.HFI.Kp = 1.2f;                // (float)HFI锁相环->Kp
-    Sguan.pll.HFI.Ki = 0.8f;                // (float)HFI锁相环->Ki
 
-    Sguan.pll.SMO.Kp = 1.2f;                // (float)SMO锁相环->Kp
-    Sguan.pll.SMO.Ki = 0.8f;                // (float)SMO锁相环->Ki
 }
 
 

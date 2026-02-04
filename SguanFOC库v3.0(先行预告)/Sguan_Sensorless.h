@@ -2,7 +2,7 @@
 #define __SGUAN_SENSORLESS_H
 
 typedef struct{
-    float temp;
+    float z[3];
 }HFI_STRUCT;
 
 typedef struct{

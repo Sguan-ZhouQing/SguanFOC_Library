@@ -3,7 +3,7 @@
  * @GitHub: https://github.com/Sguan-ZhouQing
  * @Date: 2026-01-26 22:38:34
  * @LastEditors: 星必尘Sguan|3464647102@qq.com
- * @LastEditTime: 2026-02-03 23:09:54
+ * @LastEditTime: 2026-02-04 23:34:02
  * @FilePath: \demo_SguanFOCCode\SguanFOC库\SguanFOC.c
  * @Description: SguanFOC库的“核心代码”实现
  * 
@@ -87,7 +87,14 @@ static void Data_Protection_Loop(SguanFOC_System_STRUCT *sguan);
  */
 static void Status_Switch_Loop(SguanFOC_System_STRUCT *sguan);
 /**
- * @description: 8.SVPWM电机驱动的马鞍波生成
+ * @description: 8.Printf数据发送Debug和正常模式
+ * @param {SguanFOC_System_STRUCT} *sguan
+ * @return {*}
+ */
+static void Printf_Debug_Loop(SguanFOC_System_STRUCT *sguan);
+static void Printf_Normal_Loop(SguanFOC_System_STRUCT *sguan);
+/**
+ * @description: 9.SVPWM电机驱动的马鞍波生成
  * @param {SguanFOC_System_STRUCT} *sguan
  * @param {float} d
  * @param {float} q
@@ -95,30 +102,36 @@ static void Status_Switch_Loop(SguanFOC_System_STRUCT *sguan);
  */
 static void SVPWM_Tick(SguanFOC_System_STRUCT *sguan,float Erad,float d_set,float q_set);
 /**
- * @description: 9.Sguan...Loop定时计算并执行
+ * @description: 10.Sguan...Loop定时计算并执行
  * @param {SguanFOC_System_STRUCT} *sguan
  * @return {*}
  */
 static void Sguan_Calculate_Loop(SguanFOC_System_STRUCT *sguan);
 static void Sguan_GeneratePWM_Loop(SguanFOC_System_STRUCT *sguan);
 /**
- * @description: 10.Sguan...Init各种控制系统的初始化
+ * @description: 11.Sguan...Init各种控制系统的初始化
  * @param {SguanFOC_System_STRUCT} *sguan
  * @return {*}
  */
 static void Sguan_Quantize_Init(void);
+static void Sguan_PIDset_Init(void);
 static void Sguan_BPF_Init(SguanFOC_System_STRUCT *sguan);
 static void Sguan_PID_Init(SguanFOC_System_STRUCT *sguan);
 static void Sguan_PLL_Init(SguanFOC_System_STRUCT *sguan);
 static void Sguan_Sensorless_Init(SguanFOC_System_STRUCT *sguan);
 /**
- * @description: 11.Pre电机预处理
+ * @description: 12.Pre电机预处理
  * @param {SguanFOC_System_STRUCT} *sguan
  * @return {*}
  */
 static void Sguan_Pre_Positioning(SguanFOC_System_STRUCT *sguan,float d_set);
 static void Sguan_SystemT_Set(SguanFOC_System_STRUCT *sguan);
 static void Sguan_ReStart_Loop(void);
+/**
+ * @description: 13.SguanFOC核心文件，主任务初始化函数
+ * @return {*}
+ */
+static void SguanFOC_Init(void);
 
 
 // Offset读取编码器偏置
@@ -387,6 +400,60 @@ static void Status_Switch_Loop(SguanFOC_System_STRUCT *sguan){
     
 }
 
+// Printf电机调试信息发送
+static void Printf_Debug_Loop(SguanFOC_System_STRUCT *sguan){
+    static uint8_t status = 0xFF;
+    static uint32_t count = 0;
+    if (sguan->status != status){
+        static const char* status_names[] = {
+            // ====== 初始化与运行状态(状态) ======
+            "待机（未初始化，准备中）",
+            "未初始化",
+            "初始化中（参数加载、外设初始化）",
+            "校准中（电阻、电感、编码器零位）",
+            // ====== 运行状态(当前反馈) ======
+            "空闲（已初始化，使能但零指令）",
+            "力矩增大中~电流模式(下时刻->力矩保持)",
+            "力矩减小中~电流模式(下时刻->力矩保持)",
+            "力矩保持~电流模式(稳态)",
+            "加速中~速度模式(下时刻->恒速保持)",
+            "减速中~速度模式(下时刻->恒速保持)",
+            "恒速保持~速度模式(稳态)",
+            "位置增加中~位置模式(下时刻->位置保持)",
+            "位置减少中~位置模式(下时刻->位置保持)",
+            "位置保持~位置模式(稳态)",
+            // ====== 硬件相关错误(状态) ======
+            "过压保护(锁定->手动解除进待机)",
+            "欠压保护(锁定->手动解除进待机)",
+            "过温保护(锁定->手动解除进待机)",
+            "低温保护(锁定->手动解除进待机)",
+            "过流保护(稳态->电机电流限幅)",
+            "编码器故障(锁定->手动解除进待机)",
+            "传感器故障(锁定->手动解除进待机)",
+            "缺相错误(锁定->手动解除进待机)",
+            "相线短路错误(锁定->手动解除进待机)",
+            // ====== 安全状态(状态) ======
+            "急停（立即关闭PWM,会立即锁定->手动解除进待机）",
+            "已失能（软关闭,会缓慢进入待机->自动进待机）"
+        };
+        
+        printf("[状态机更新%lu]：%s...状态机编号%d\n", 
+                   count, 
+                   status_names[sguan->status], 
+                   sguan->status);
+        count += 1;
+        status = sguan->status;
+    }
+}
+
+// Printf电机数据正常发送
+static void Printf_Normal_Loop(SguanFOC_System_STRUCT *sguan){
+    // 用户数据填写(串口或者CAN通信)
+    User_UserTX();
+    // 发送数据to上位机
+    Printf_Loop(&Sguan.TXdata);
+}
+
 // SVPWM电机驱动的马鞍波生成
 static void SVPWM_Tick(SguanFOC_System_STRUCT *sguan,float Erad,float d_set,float q_set){
     SVPWM(Erad,d_set,q_set,
@@ -419,22 +486,35 @@ static void Sguan_Calculate_Loop(SguanFOC_System_STRUCT *sguan){
 
 // Sguan...Loop计算PID并执行电机控制
 static void Sguan_GeneratePWM_Loop(SguanFOC_System_STRUCT *sguan){
-    if (sguan->status == MOTOR_STATUS_ENABLED){
+    if (sguan->status == MOTOR_STATUS_IDLE){
         // 用户实时控制的参数传入
         User_UserControl();
         // PID运算PWM大小并执行
-        PID_Tick[sguan->mode](sguan);
+        if (sguan->mode >= 0 && sguan->mode < 7){
+            PID_Tick[sguan->mode](sguan);
+        } else{
+            // 错误处理：自动跳转到默认速度单闭环模式
+            sguan->mode = Velocity_SINGLE_MODE;
+            PID_Tick[Velocity_SINGLE_MODE](sguan);
+        }
         SVPWM_Tick(sguan,sguan->encoder.Real_Erad,
             sguan->foc.Ud_in/sguan->motor.Vbus,
             sguan->foc.Uq_in/sguan->motor.Vbus);
     }
 }
 
-// Sguan...Init电机参数辨识和PI参数自适应初始化
+// Sguan...Init电机参数辨识和自适应初始化
 static void Sguan_Quantize_Init(void){
-    #if Quantize_Method 1
+    #if Quantize_Method
     uint8_t count = 0;
-    #endif
+    #endif // Quantize_Method
+}
+
+// Sguan...Init闭环控制系统的参数自适应
+static void Sguan_PIDset_Init(void){
+    #if PID_Calculate
+    uint8_t temp = 0;
+    #endif // PID_Calculate
 }
 
 // Sguan...Init巴特沃斯低通滤波器的初始化
@@ -531,46 +611,49 @@ static void Sguan_ReStart_Loop(void){
 
 }
 
-/**
- * @description: SguanFOC核心文件，主任务初始化函数
- * @reminder: 主循环之前，任务优先级“高”
- * @return {*}
- */
-void SguanFOC_Init(void){
-    Sguan.status = MOTOR_STATUS_INITIALIZING;
-    // 用户自定义的电机参数和控制系统参数
-    User_MotorSet();
-    User_ParameterSet();
-    // 系统时间设定
-    Sguan_SystemT_Set(&Sguan);
-    // 用户自定义的Init(主要用于物理驱动器)
-    User_InitialInit();
-    // 控制系统量化和电机参数辨识(离线测量)
-    Sguan_Quantize_Init();
-    // 各种控制系统的初始化
-    Sguan_BPF_Init(&Sguan);
-    Sguan_PID_Init(&Sguan);
-    Sguan_PLL_Init(&Sguan);
-    Sguan_Sensorless_Init(&Sguan);
-    Printf_Init(&Sguan);
-    // 读取电流偏置
-    Sguan.status = MOTOR_STATUS_CALIBRATING;
-    Offset_CurrentRead(&Sguan);
-    // 电机回零操作
-    Sguan_Pre_Positioning(&Sguan,Sguan.motor.Limit);
-    User_Delay(800);
-    // 读取角度偏置
-    Offset_EncoderRead(&Sguan);
-    // 电机失能并进入正常工作状态
-    Sguan_Pre_Positioning(&Sguan,0.0f);
-    User_Delay(600);
-    // 正常工作中(状态机运行)
-    Sguan.status = MOTOR_STATUS_ENABLED;
+// SguanFOC核心文件，主任务初始化函数
+static void SguanFOC_Init(void){
+    if (Sguan.status == MOTOR_STATUS_UNINITIALIZED){
+        static uint8_t Flag = 0;
+        if (!Flag){
+            Sguan.status = MOTOR_STATUS_INITIALIZING;
+            // 用户自定义的电机参数和控制系统参数
+            User_MotorSet();
+            User_ParameterSet();
+            // 系统时间设定
+            Sguan_SystemT_Set(&Sguan);
+            // 用户自定义的Init(主要用于物理驱动器)
+            User_InitialInit();
+            // 控制系统量化和电机参数辨识(离线测量)
+            Sguan_Quantize_Init();
+            Sguan_PIDset_Init();
+            // 各种控制系统的初始化
+            Sguan_BPF_Init(&Sguan);
+            Sguan_PID_Init(&Sguan);
+            Sguan_PLL_Init(&Sguan);
+            Sguan_Sensorless_Init(&Sguan);
+            Printf_Init(&Sguan);
+            Flag = 1;
+        }
+        // 读取电流偏置
+        Sguan.status = MOTOR_STATUS_CALIBRATING;
+        Offset_CurrentRead(&Sguan);
+        // 电机回零操作
+        Sguan_Pre_Positioning(&Sguan,Sguan.motor.Limit);
+        User_Delay(800);
+        // 读取角度偏置
+        Offset_EncoderRead(&Sguan);
+        // 电机失能并进入正常工作状态
+        Sguan_Pre_Positioning(&Sguan,0.0f);
+        User_Delay(600);
+        // 正常工作中(状态机运行)
+        Sguan.status = MOTOR_STATUS_IDLE;
+    }
 }
 
 /**
  * @description: SguanFOC核心文件，定时中断服务函数(高频率电机载波)
- * @reminder: 20Khz或者更高定时中断中调用，任务优先级“最高”
+ * @reminder: 10Khz或者更高定时中断中调用，任务优先级“最高”
  * @return {*}
  */
 void SguanFOC_Loop(void){
@@ -600,8 +683,10 @@ void SguanFOC_msTick(void){
  * @return {*}
  */
 void SguanFOC_mainTick(void){
-    // 用户数据填写(串口或者CAN通信)
-    User_UserTX();
-    // 发送数据to上位机
-    Printf_Loop(&Sguan.TXdata);
+    SguanFOC_Init();
+    #if Printf_Debug
+    Printf_Debug_Loop(&Sguan);
+    #else // Printf_Debug
+    Printf_Normal_Loop(&Sguan);
+    #endif // Printf_Debug
 }

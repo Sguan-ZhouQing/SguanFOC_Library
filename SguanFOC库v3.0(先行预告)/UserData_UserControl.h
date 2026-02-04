@@ -12,8 +12,9 @@ static inline void User_UserControl(void){
 }
 
 static inline void User_UserTX(void){
-    /* 仅传入主循环printf发送的数据，如TXdata.fdata[0] */
-    Sguan.TXdata.fdata[0] = Sguan.encoder.Real_Speed;
+    /* 仅传入主循环printf发送的数据，如TXdata.fdata[0],默认最多8个 */
+    Sguan.TXdata.fdata[0] = Sguan.status;
+    Sguan.TXdata.fdata[1] = Sguan.encoder.Real_Speed;
 }
 
 

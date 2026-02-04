@@ -15,8 +15,11 @@ typedef struct{
     uint8_t tail[4];
 }PRINTF_STRUCT;
 
+extern uint8_t Printf_Buff[200];
+
 void Printf_Init(PRINTF_STRUCT *str);
 void Printf_Loop(PRINTF_STRUCT *str);
+void Printf_Adjust(void);
 
 
 #endif // SGUAN_PRINTF_H
