@@ -3,7 +3,7 @@
  * @GitHub: https://github.com/Sguan-ZhouQing
  * @Date: 2026-02-06 03:54:11
  * @LastEditors: 星必尘Sguan|3464647102@qq.com
- * @LastEditTime: 2026-02-06 14:35:38
+ * @LastEditTime: 2026-02-08 03:35:17
  * @FilePath: \stm_SguanFOCtest\SguanFOC\Sguan_math.c
  * @Description: SguanFOC库的“数学运算函数”实现
  * 
@@ -13,6 +13,7 @@
 
 /* 外部C标准库文件声明 */
 #include <stdbool.h>
+#include <math.h>
 
 // 内部宏定义声明
 #define Value_rad60 1.047197551196598f
@@ -102,6 +103,9 @@ void fast_sin_cos(float x, float *sin_x, float *cos_x) {
 void SVPWM(float phi, float d, float q, float *d_u, float *d_v, float *d_w) {
   d = Value_Limit(d,1,-1);   // 限幅函数
   q = Value_Limit(q,1,-1);
+
+  Overmodulation(&d, &q);    // 过调制处理
+
   const int v[6][3] = {{1, 0, 0}, {1, 1, 0}, {0, 1, 0}, {0, 1, 1}, {0, 0, 1}, {1, 0, 1}};
   const int K_to_sector[] = {4, 6, 5, 5, 3, 1, 2, 2};
   float sin_phi,cos_phi;
@@ -129,6 +133,19 @@ void SVPWM(float phi, float d, float q, float *d_u, float *d_v, float *d_w) {
   *d_w = t_m * v[sector - 1][2] + t_n * v[sector % 6][2] + t_0 / 2;
 }
 
+// 对DQ轴电压进行幅值限制，防止过调制
+void Overmodulation(float *d, float *q){
+    // 计算合成“矢量幅值的平方”
+    float Vref = (*d)*(*d) + (*q)*(*q);
+    
+    if (Vref > 1.0f) {
+      float scale = 1.0f / sqrtf(Vref);
+      *d *= scale;
+      *q *= scale;
+      // 幅值限制处理,如果“幅值平方”超过 1,进行等比例缩放
+    }
+}
+
 // 克拉克变换
 void clarke(float *i_alpha,float *i_beta,float i_a,float i_b) {
   *i_alpha = i_a;
@@ -146,4 +163,5 @@ void ipark(float *u_alpha,float *u_beta,float u_d,float u_q,float sine,float cos
   *u_alpha = u_d * cosine - u_q * sine;
   *u_beta = u_q * cosine + u_d * sine;
 }
+
 
