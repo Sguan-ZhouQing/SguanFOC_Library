@@ -1,13 +1,22 @@
 #ifndef __USERDATA_MOTOR_H
 #define __USERDATA_MOTOR_H
 #include "SguanFOC.h"
-/* 电机控制User用户设置·电机参数 */
+/* 电机控制User用户设置·电机参数(SguanFOC用户核心代码) */
 
+/**
+ * @description: 宏定义0~3决定“电机有/无感运行模式”的开启与否(默认有感FOC控制)
+ * @reminder: 0->有传感器FOC控制(全速域) | 1->无感HFI高频注入控制(低速域)
+ * @reminder: 2->无感SMO滑膜观测器控制(高速域) | 3->无感HFI-SMO控制(全速域)
+ * @return {*}
+ */
+#define MOTOR_CONTROL 0
+
+// 电机实体参数设置(根据实际需要填写)
 static inline void User_MotorSet(void){
-    // 1.control电机有/无感FOC
-    Sguan.control = SensorFOC_Control;
-    // 2.mode选择电机的运行模式
+    // 1.mode选择电机的运行模式
     Sguan.mode = Velocity_OPEN_MODE;
+    // 2.flag电机标志位
+    Sguan.flag.PWM_watchdog_limit = 10; // (uint8_t)PWM错误限幅
     // 3.motor电机参数辨识
     Sguan.motor.Vbus = 12.0f;           // (float)母线电压
     Sguan.motor.Ld = 0.0008f;           // (float)D轴电感
@@ -18,12 +27,18 @@ static inline void User_MotorSet(void){
     Sguan.motor.Poles = 7;              // (uint8_t)极对极数
 
     Sguan.motor.Limit = 0.2f;           // (float)预处理电压占比
+    Sguan.motor.Dcur_MAX = 17.6f;       // (float)电机最大电流D轴限制
+    Sguan.motor.Qcur_MAX = 17.6f;       // (float)电机最大电流Q轴限制
 
+    #if Open_VBUS_Calculate
     Sguan.motor.VBUS_MAX = 14.0f;       // (float)母线电压值波动MAX阈值
     Sguan.motor.VBUS_MIM = 10.0f;       // (float)母线电压值波动MIN阈值
+    #endif // Open_VBUS_Calculate
+
+    #if Open_Temp_Calculate
     Sguan.motor.Temp_MAX = 60.0f;       // (float)驱动器允许最大温度
     Sguan.motor.Temp_MIN = -20.0f;      // (float)驱动器允许最小温度
-    Sguan.motor.Qcur_MAX = 17.6f;       // (float)电机最大电流Q轴限制
+    #endif // Open_Temp_Calculate
 
     Sguan.motor.Motor_Dir = 1;          // (int8_t)电机方向1->正向，负1->负向
     Sguan.motor.PWM_Dir = -1;           // (int8_t)PWM占空比高低对应1->正向，负1->负向

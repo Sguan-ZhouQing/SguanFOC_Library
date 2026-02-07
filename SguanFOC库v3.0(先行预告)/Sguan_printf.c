@@ -3,8 +3,8 @@
  * @GitHub: https://github.com/Sguan-ZhouQing
  * @Date: 2026-01-27 00:07:53
  * @LastEditors: 星必尘Sguan|3464647102@qq.com
- * @LastEditTime: 2026-02-04 23:30:14
- * @FilePath: \demo_SguanFOCCode\SguanFOC库\Sguan_printf.c
+ * @LastEditTime: 2026-02-06 14:37:49
+ * @FilePath: \stm_SguanFOCtest\SguanFOC\Sguan_printf.c
  * @Description: SguanFOC库的“JustFloat通讯协议”实现
  * 
  * Copyright (c) 2026 by $星必尘Sguan, All Rights Reserved. 
@@ -12,6 +12,7 @@
 #include "Sguan_printf.h"
 /* 外部函数文件声明 */
 #include "UserData_Calculate.h"
+#include <string.h>
 /* 内部函数文件声明 */
 static float Get_Data(void);
 uint8_t Printf_Buff[200];
@@ -41,7 +42,7 @@ int fputc(int ch,FILE *f){
 /* ================= 重定向设计 END ================= */
 
 
-// [接收]数据解析函数(格式：VE=13.14?)
+// [接收]数据解析函数(格式：AO=13.14?)
 static float Get_Data(void){
     uint8_t data_Start_Num = 0;
     uint8_t data_End_Num = 0;
@@ -111,17 +112,14 @@ void Printf_Loop(PRINTF_STRUCT *str){
 // [接收]实时参数调整函数（需要根据你的实际结构体定义进行调整）
 void Printf_Adjust(void){
     float data_Get = Get_Data();
-    if(Printf_Buff[0]=='A' && Printf_Buff[1]=='1'){
-
+    if(Printf_Buff[0]=='A' && Printf_Buff[1]=='O'){
+        User_AO_Adjust(data_Get);
     }
-    if(Printf_Buff[0]=='P' && Printf_Buff[1]=='2'){
-
+    if(Printf_Buff[0]=='B' && Printf_Buff[1]=='O'){
+        User_BO_Adjust(data_Get);
     }
-    if(Printf_Buff[0]=='I' && Printf_Buff[1]=='2'){
-
-    }
-    if(Printf_Buff[0]=='D' && Printf_Buff[1]=='2'){
-
+    if(Printf_Buff[0]=='C' && Printf_Buff[1]=='O'){
+        User_CO_Adjust(data_Get);
     }
     memset(Printf_Buff, 0, sizeof(Printf_Buff));
 }

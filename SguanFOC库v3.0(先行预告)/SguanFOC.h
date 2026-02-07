@@ -13,13 +13,6 @@
 /* USER CODE END Includes */
 
 typedef enum{
-    SensorFOC_Control = 0,      // 有传感器FOC控制(全速域)
-    Sensorless_HFI_Control,     // 无感HFI高频注入控制(低速域)
-    Sensorless_SMO_Control,     // 无感SMO滑膜观测器控制(高速域)
-    SensorlessFOC_Control       // 无感HFI-SMO控制(全速域)
-}MOTOR_CONTROL_ENUM;
-
-typedef enum{
     Velocity_OPEN_MODE = 0,     // 速度开环(直接控制Sguan.foc.Uq_in用于电机方向测试)
     Current_SINGLE_MODE,        // 电流单闭环(力矩控制)
     Velocity_SINGLE_MODE,       // 速度单闭环(速度控制)
@@ -30,13 +23,27 @@ typedef enum{
 }MOTOR_MODE_ENUM;
 
 typedef struct{
+    uint8_t Initialize;         // 初始化标志位
+
+    uint8_t PWM_Calc;           // PWM计算标志位
+    uint8_t PWM_watchdog_counter;//PWM看门狗计数
+    uint8_t PWM_watchdog_limit; // PWM错误限幅
+
+    uint8_t in_PWM_Calc_ISR;    // (互斥锁)标记是否在PWM计算中断中
+}MOTOR_FLAG_STRUCT;
+
+typedef struct{
+    #if Open_VBUS_Calculate
     BPF_STRUCT VBUS;            // (电压数据)母线电压滤波
+    #endif // Open_VBUS_Calculate
+
+    #if Open_Temp_Calculate
+    BPF_STRUCT Thermistor;      // (温度数据)热敏电阻滤波
+    #endif // Open_Temp_Calculate
+
     BPF_STRUCT Current0;        // (电流数据)电机电流滤波
     BPF_STRUCT Current1;        // (电流数据)电机电流滤波
     BPF_STRUCT Encoder;         // (速度数据)速度信号滤波
-    BPF_STRUCT Thermistor;      // (温度数据)热敏电阻滤波
-    BPF_STRUCT HFI;             // (无感观测器)HFI滤波
-    BPF_STRUCT SMO;             // (无感观测器)SMO滤波
 }MOTOR_BPF_STRUCT;
 
 typedef struct{
@@ -63,11 +70,6 @@ typedef struct{
 }MOTOR_PID_STRUCT;
 
 typedef struct{
-    PLL_STRUCT HFI;             // (无感观测器)HFI锁相环
-    PLL_STRUCT SMO;             // (无感观测器)SMO锁相环
-}MOTOR_PLL_STRUCT;
-
-typedef struct{
     float Vbus;                 // (电机实体参数)母线电压
     float Ld;                   // (电机实体参数)D轴电感
     float Lq;                   // (电机实体参数)Q轴电感
@@ -77,12 +79,18 @@ typedef struct{
     uint8_t Poles;              // (电机实体参数)电机极对极数
 
     float Limit;                // (参数设计)预处理|电机定位占空比
+    float Dcur_MAX;             // (参数设计)电机最大电流D轴限制
+    float Qcur_MAX;             // (参数设计)电机最大电流Q轴限制
 
+    #if Open_VBUS_Calculate
     float VBUS_MAX;             // (参数设计)母线电压值波动MAX阈值
     float VBUS_MIM;             // (参数设计)母线电压值波动MIN阈值
+    #endif // Open_VBUS_Calculate
+
+    #if Open_Temp_Calculate
     float Temp_MAX;             // (参数设计)驱动器允许最大温度
     float Temp_MIN;             // (参数设计)驱动器允许最小温度
-    float Qcur_MAX;          // (参数设计)电机最大电流Q轴限制
+    #endif // Open_Temp_Calculate
 
     int8_t Motor_Dir;           // (参数设计)电机的运行方向设计
     int8_t PWM_Dir;             // (参数设计)PWM占空比高低对应
@@ -122,6 +130,8 @@ typedef struct{
 
     float Real_VBUS;            // (数据)Real实际的电机母线电压
     float Real_Temp;            // (数据)Temp实际的驱动器物理温度
+
+    PLL_STRUCT pll;             // (PLL锁相环)电机角度锁相环
 }MOTOR_FOC_STRUCT;
 
 typedef struct{
@@ -131,10 +141,7 @@ typedef struct{
     float Real_Erad;            // (Encoder电角度)Real实际电子角度
 
     int32_t Pos_Flag;           // (Encoder标志位)多圈角度值记录
-    float Last_Rad;             // (Encoder数据)上一时刻机械角度数据
     float Pos_offset;           // (Encoder角度偏置)offset偏置位
-    
-    PLL_STRUCT pll;
 }MOTOR_ENCODER_STRUCT;
 
 typedef struct{
@@ -154,14 +161,13 @@ typedef struct{
 }MOTOR_CURRENT_STRUCT;
 
 typedef struct{
-    MOTOR_CONTROL_ENUM control; // 【有参数设计】control电机有/无感FOC
     MOTOR_MODE_ENUM mode;       // 【有参数设计】mode选择电机的运行模式
     MOTOR_STATUS_ENUM status;   // 【数据】status存储电机运行状态
+    MOTOR_FLAG_STRUCT flag;     // 【有参数设计】flag电机运行标志位
     MOTOR_BPF_STRUCT bpf;       // 【有参数设计】bpf低通滤波器设计
     MOTOR_PID_STRUCT pid;       // 【有参数设计】pid闭环控制系统设计
-    MOTOR_PLL_STRUCT pll;       // 【有参数设计】pll锁相环跟踪系统
     MOTOR_QUANTIZE_STRUCT motor;// 【有参数设计】motor电机参数辨识
-    MOTOR_FOC_STRUCT foc;       // 【数据】foc控制的参数输入“缓存”
+    MOTOR_FOC_STRUCT foc;       // 【有参数设计】foc控制的参数输入“缓存”
     MOTOR_ENCODER_STRUCT encoder;//【数据】电机角速度和角度信息“缓存”
     MOTOR_CURRENT_STRUCT current;//【数据】电机电流采样信息“缓存”
     PRINTF_STRUCT TXdata;       // 【数据】data串口或CAN发送的信息
@@ -176,6 +182,7 @@ extern SguanFOC_System_STRUCT Sguan;
 
 void SguanFOC_Loop(void);
 void SguanFOC_msTick(void);
+void SguanFOC_PrintfTick(void);
 void SguanFOC_mainTick(void);
 
 

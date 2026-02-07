@@ -1,5 +1,6 @@
 #ifndef __USERDATA_CALCULATE_H
 #define __USERDATA_CALCULATE_H
+#include <stdint.h>
 /* 电机控制User用户设置·数据计算及printf重定向 */
 
 /**
@@ -7,7 +8,20 @@
  * @reminder: 0->关闭PID参数自适应 | 1->开启PID参数自适应
  * @return {*}
  */
-#define PID_Calculate 0
+#define Open_PID_Calculate 0
+
+/**
+ * @description: 宏定义0或1决定“PID运算参数”自适应与否(默认开启)
+ * @reminder: 0->关闭PID参数自适应 | 1->开启PID参数自适应
+ * @return {*}
+ */
+#define Open_Velocity_OPEN      1
+#define Open_Current_SINGLE     1
+#define Open_Velocity_SINGLE    1
+#define Open_Position_SINGLE    1
+#define Open_VelCur_DOUBLE      1
+#define Open_PosVel_DOUBLE      1
+#define Open_PosVelCur_THREE    1
 
 /**
  * @description: 宏定义0或者1决定“电机实体参数”的测量方式(默认关闭)
@@ -15,14 +29,14 @@
  * @reminder: 1->(主动离线测量)之后一直使用这个值
  * @return {*}
  */
-#define Quantize_Method 0
+#define Open_Quantize_Method 0
 
 /**
  * @description: 宏定义0或1决定“Q31定点化运算”的开启与否(默认关闭)
  * @reminder: 0->浮点运算 | 1->定点运算
  * @return {*}
  */
-#define Q31_Calculate 0
+#define Open_Q31_Calculate 0
 
 /**
  * @description: 定点化运算的数据标幺(基值设计)
@@ -38,6 +52,20 @@
 #define Qmax_Time 0.00006103515625f // 常量标幺化(无数学单位)
 
 /**
+ * @description: 宏定义0或1决定“VBUS母线电压测量”的开启与否(默认关闭)
+ * @reminder: 0->关闭测量 | 1->开启测量
+ * @return {*}
+ */
+#define Open_VBUS_Calculate 0
+
+/**
+ * @description: 宏定义0或1决定“Temp驱动器物理温度测量”的开启与否(默认关闭)
+ * @reminder: 0->关闭测量 | 1->开启测量
+ * @return {*}
+ */
+#define Open_Temp_Calculate 0
+
+/**
  * @description: 宏定义决定UART或者CAN发送数据的模式
  * @reminder: (Printf_Send)0->发送正常数据
  * @reminder: 1->仅发送Debug数据，不发送正常数据
@@ -46,9 +74,22 @@
 #define Printf_Debug 1
 
 
-// 放置自己的通信驱动代码,用于信息发送
+/* ================= 驱动代码(驱动层) ================= */
 static inline void User_PrintfSet(uint8_t *ch){
     /* Your code for UART or CAN Signal Transmit Driver */
+}
+
+/* ================= 参数调整代码(调试层) ================= */
+static inline void User_AO_Adjust(float AO){
+    /* Your code for Parameter set */
+}
+
+static inline void User_BO_Adjust(float BO){
+    /* Your code for Parameter set */
+}
+
+static inline void User_CO_Adjust(float CO){
+    /* Your code for Parameter set */
 }
 
 

@@ -1,6 +1,9 @@
 #ifndef __SGUAN_MOTORSTATUS_H
 #define __SGUAN_MOTORSTATUS_H
 
+/* 外部用户设置函数声明 */
+#include "UserData_Status.h"
+
 typedef enum{
     // ====== 初始化与运行状态(状态) ======
     MOTOR_STATUS_STANDBY = 0,           // 待机（未初始化，准备中）
@@ -33,14 +36,14 @@ typedef enum{
     MOTOR_STATUS_ENCODER_ERROR,         // 编码器故障(锁定->手动解除进待机)
     MOTOR_STATUS_SENSOR_ERROR,          // 传感器故障(锁定->手动解除进待机)
     
-    MOTOR_STATUS_PHASE_LOSS,            // 缺相错误(锁定->手动解除进待机)
-    MOTOR_STATUS_PHASE_SHORT,           // 相线短路错误(锁定->手动解除进待机)
+    MOTOR_STATUS_PWM_CALC_FAULT,        // PWM计算错误(锁定->手动解除进待机)
     
     // ====== 安全状态(状态) ======
     MOTOR_STATUS_EMERGENCY_STOP,        // 急停（立即关闭PWM,会立即锁定->手动解除进待机）
     MOTOR_STATUS_DISABLED,              // 已失能（软关闭,会缓慢进入待机->自动进待机）
 }MOTOR_STATUS_ENUM;
 
+// 函数定义声明
 void MotorStatus_Loop(MOTOR_STATUS_ENUM *status);
 
 

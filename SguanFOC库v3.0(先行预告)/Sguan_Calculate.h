@@ -11,6 +11,9 @@
 // Q31运算函数声明
 typedef int32_t q31_t;
 
+// 参数限制函数
+float Value_Limit(float val, float max, float min);
+
 // Q31基本运算
 q31_t q31_mul(q31_t a, q31_t b);
 q31_t q31_add(q31_t a, q31_t b);

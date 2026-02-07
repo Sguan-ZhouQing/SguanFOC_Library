@@ -1,12 +1,11 @@
 /*
  * @Author: 星必尘Sguan
  * @GitHub: https://github.com/Sguan-ZhouQing
- * @Date: 2026-01-26 22:28:00
+ * @Date: 2026-02-06 03:54:11
  * @LastEditors: 星必尘Sguan|3464647102@qq.com
- * @LastEditTime: 2026-02-05 01:09:15
- * @FilePath: \demo_SguanFOCCode\SguanFOC库\Sguan_math.c
- * @Description: SguanFOC库的“数据处理库”实现
- * 1.快速正余弦  2.电机基本变换及SVPWM生成  3.参数限幅设置
+ * @LastEditTime: 2026-02-06 14:35:38
+ * @FilePath: \stm_SguanFOCtest\SguanFOC\Sguan_math.c
+ * @Description: SguanFOC库的“数学运算函数”实现
  * 
  * Copyright (c) 2026 by $星必尘Sguan, All Rights Reserved. 
  */
@@ -36,13 +35,6 @@ float Sguan_fabsf(float x) {
   u.f = x;
   u.i &= 0x7FFFFFFF; // 1次位与操作
   return u.f;
-}
-
-// 数值限幅
-float Value_Limit(float val, float max, float min) {
-    if (val > max) return max;
-    if (val < min) return min;
-    return val;
 }
 
 // 参数限定

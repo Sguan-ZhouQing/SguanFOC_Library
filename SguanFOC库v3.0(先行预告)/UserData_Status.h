@@ -7,6 +7,13 @@
 /* 用户自己的CODE END Includes */
 
 /* ================= 状态机任务信号(输入) ================= */
+static inline uint8_t MOTOR_STATUS_STANDBY_Signal(void){
+    uint8_t STANDBY_num = 0;
+    /* 解除锁定信号(Emergency stop signal) */
+    /* 输出0->不执行 输出1->解除锁定(进入待机状态) */
+    return STANDBY_num;
+}
+
 static inline uint8_t MOTOR_STATUS_UNINITIALIZED_Signal(void){
     uint8_t UNINITIALIZED_num = 0;
     /* 准备开始初始化信号(Emergency stop signal) */
@@ -26,13 +33,6 @@ static inline uint8_t MOTOR_STATUS_SENSOR_ERROR_Signal(void){
     /* 传感器错误信号(Emergency stop signal) */
     /* 输出0->正常运行 输出1->传感器错误(锁定) */
     return SENSOR_num;
-}
-
-static inline uint8_t MOTOR_STATUS_STANDBY_Signal(void){
-    uint8_t STANDBY_num = 0;
-    /* 解除锁定信号(Emergency stop signal) */
-    /* 输出0->不执行 输出1->解除锁定(进入待机状态) */
-    return STANDBY_num;
 }
 
 static inline uint8_t MOTOR_STATUS_EMERGENCY_STOP_Signal(void){
@@ -135,12 +135,8 @@ static inline void MOTOR_STATUS_SENSOR_ERROR_Loop(void){
     /* Your code for 传感器故障(锁定->手动解除进待机) here */
 }
 
-static inline void MOTOR_STATUS_PHASE_LOSS_Loop(void){
-    /* Your code for 缺相错误(锁定->手动解除进待机) here */
-}
-
-static inline void MOTOR_STATUS_PHASE_SHORT_Loop(void){
-    /* Your code for 相线短路错误(锁定->手动解除进待机) here */
+static inline void MOTOR_STATUS_PWM_CALC_FAULT_Loop(void){
+    /* Your code for PWM计算错误(锁定->手动解除进待机) here */
 }
 
 static inline void MOTOR_STATUS_EMERGENCY_STOP_Loop(void){

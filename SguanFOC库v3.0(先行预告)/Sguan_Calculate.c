@@ -3,8 +3,8 @@
  * @GitHub: https://github.com/Sguan-ZhouQing
  * @Date: 2026-01-29 15:32:59
  * @LastEditors: 星必尘Sguan|3464647102@qq.com
- * @LastEditTime: 2026-02-04 01:12:11
- * @FilePath: \demo_SguanFOCCode\SguanFOC库\Sguan_Calculate.c
+ * @LastEditTime: 2026-02-06 14:26:45
+ * @FilePath: \stm_SguanFOCtest\SguanFOC\Sguan_Calculate.c
  * @Description: SguanFOC库的"浮点转Q31定点运算"实现 - 修复版
  * 
  * Copyright (c) 2026 by $星必尘Sguan, All Rights Reserved. 
@@ -24,6 +24,13 @@
 // 预计算64位常量（使用正确的类型）
 static const int64_t Q31_MAX_64 = 2147483647LL;
 static const int64_t Q31_MIN_64 = -2147483648LL;
+
+// 数值限幅
+float Value_Limit(float val, float max, float min) {
+    if (val > max) return max;
+    if (val < min) return min;
+    return val;
+}
 
 // Q31乘法（带舍入）
 q31_t q31_mul(q31_t a, q31_t b){

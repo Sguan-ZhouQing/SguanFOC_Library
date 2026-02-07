@@ -17,6 +17,7 @@ typedef struct{
 
 extern uint8_t Printf_Buff[200];
 
+// 函数定义声明
 void Printf_Init(PRINTF_STRUCT *str);
 void Printf_Loop(PRINTF_STRUCT *str);
 void Printf_Adjust(void);

@@ -3,8 +3,8 @@
  * @GitHub: https://github.com/Sguan-ZhouQing
  * @Date: 2026-01-26 22:38:09
  * @LastEditors: 星必尘Sguan|3464647102@qq.com
- * @LastEditTime: 2026-02-04 23:43:21
- * @FilePath: \demo_SguanFOCCode\SguanFOC库\Sguan_PID.c
+ * @LastEditTime: 2026-02-06 05:29:40
+ * @FilePath: \stm_SguanFOCtest\SguanFOC\Sguan_PID.c
  * @Description: SguanFOC库的“闭环PID算法”实现
  * 
  * Copyright (c) 2026 by $星必尘Sguan, All Rights Reserved. 

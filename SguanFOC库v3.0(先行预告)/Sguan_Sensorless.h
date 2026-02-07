@@ -3,6 +3,7 @@
 
 typedef struct{
     float z[3];
+    
 }HFI_STRUCT;
 
 typedef struct{

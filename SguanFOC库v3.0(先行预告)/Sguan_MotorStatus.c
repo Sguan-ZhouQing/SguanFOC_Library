@@ -3,16 +3,13 @@
  * @GitHub: https://github.com/Sguan-ZhouQing
  * @Date: 2026-01-26 22:43:42
  * @LastEditors: 星必尘Sguan|3464647102@qq.com
- * @LastEditTime: 2026-02-04 23:03:00
- * @FilePath: \demo_SguanFOCCode\SguanFOC库\Sguan_MotorStatus.c
+ * @LastEditTime: 2026-02-06 04:36:43
+ * @FilePath: \stm_SguanFOCtest\SguanFOC\Sguan_MotorStatus.c
  * @Description: SguanFOC库的“电机状态机”实现
  * 
  * Copyright (c) 2026 by $星必尘Sguan, All Rights Reserved. 
  */
 #include "Sguan_MotorStatus.h"
-
-/* 外部用户设置函数声明 */
-#include "UserData_Status.h"
 
 // 函数指针数组（按枚举顺序排列）
 static void (*const status_handlers[])(void) = {
@@ -42,8 +39,7 @@ static void (*const status_handlers[])(void) = {
     MOTOR_STATUS_OVERCURRENT_Loop,
     MOTOR_STATUS_ENCODER_ERROR_Loop,
     MOTOR_STATUS_SENSOR_ERROR_Loop,
-    MOTOR_STATUS_PHASE_LOSS_Loop,
-    MOTOR_STATUS_PHASE_SHORT_Loop,
+    MOTOR_STATUS_PWM_CALC_FAULT_Loop,
     
     // 安全状态
     MOTOR_STATUS_EMERGENCY_STOP_Loop,
@@ -52,7 +48,7 @@ static void (*const status_handlers[])(void) = {
 
 // 核心函数MotorStatus_Loop函数
 void MotorStatus_Loop(MOTOR_STATUS_ENUM *status){
-    if (*status >= 0 && *status < 25){
+    if (*status < 24){
         status_handlers[*status]();
     } else{
         // 错误处理：记录日志并跳转到安全状态
