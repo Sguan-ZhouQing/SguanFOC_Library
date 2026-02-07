@@ -4,6 +4,14 @@
 /* 电机控制User用户设置·数据计算及printf重定向 */
 
 /**
+ * @description: 宏定义0~3决定“电机有/无感运行模式”的开启与否(默认有感FOC控制)
+ * @reminder: 0->有传感器FOC控制(全速域) | 1->无感HFI高频注入控制(低速域)
+ * @reminder: 2->无感SMO滑膜观测器控制(高速域) | 3->无感HFI-SMO控制(全速域)
+ * @return {*}
+ */
+#define MOTOR_CONTROL 0
+
+/**
  * @description: 宏定义0或1决定“PID运算参数”自适应与否(默认开启)
  * @reminder: 0->关闭PID参数自适应 | 1->开启PID参数自适应
  * @return {*}

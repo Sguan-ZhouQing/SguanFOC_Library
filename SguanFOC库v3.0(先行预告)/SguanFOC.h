@@ -47,22 +47,36 @@ typedef struct{
 }MOTOR_BPF_STRUCT;
 
 typedef struct{
+    #if Open_Current_SINGLE
     PID_STRUCT Current_D;       // (电流单环)PID电流环D轴参数
     PID_STRUCT Current_Q;       // (电流单环)PID电流环Q轴参数
-    PID_STRUCT Velocity;        // (速度单环)PID速度环参数
-    PID_STRUCT Position;        // (位置单环)PID位置环参数
+    #endif // Open_Current_SINGLE
 
+    #if Open_Velocity_SINGLE
+    PID_STRUCT Velocity;        // (速度单环)PID速度环参数
+    #endif // Open_Velocity_SINGLE
+
+    #if Open_Position_SINGLE
+    PID_STRUCT Position;        // (位置单环)PID位置环参数
+    #endif // Open_Position_SINGLE
+
+    #if Open_VelCur_DOUBLE
     PID_STRUCT VelCur_v;        // (速度-电流双环)双PID速度外环参数
     PID_STRUCT VelCur_D;        // (速度-电流双环)双PID电流内环D轴参数
     PID_STRUCT VelCur_Q;        // (速度-电流双环)双PID电流内环Q轴参数
+    #endif // Open_VelCur_DOUBLE
 
+    #if Open_PosVel_DOUBLE
     PID_STRUCT PosVel_p;        // (位置-速度双环)双PID位置外环参数
     PID_STRUCT PosVel_v;        // (位置-速度双环)双PID速度内环参数
+    #endif // Open_PosVel_DOUBLE
 
+    #if Open_PosVelCur_THREE
     PID_STRUCT PosVelCur_p;     // (高性能伺服三环)pos
     PID_STRUCT PosVelCur_v;     // (高性能伺服三环)vel
     PID_STRUCT PosVelCur_D;     // (高性能伺服三环)D轴
     PID_STRUCT PosVelCur_Q;     // (高性能伺服三环)Q轴
+    #endif // Open_PosVelCur_THREE
 
     uint8_t Response;           // (参数设计)响应带宽倍数
     uint16_t Count;             // (数据)响应带宽记录
@@ -171,8 +185,15 @@ typedef struct{
     MOTOR_ENCODER_STRUCT encoder;//【数据】电机角速度和角度信息“缓存”
     MOTOR_CURRENT_STRUCT current;//【数据】电机电流采样信息“缓存”
     PRINTF_STRUCT TXdata;       // 【数据】data串口或CAN发送的信息
+
+    #if MOTOR_CONTROL == 1 || MOTOR_CONTROL == 3
     HFI_STRUCT hfi;             // 【数据】HFI高频注入算法
+    #endif // MOTOR_CONTROL
+
+    #if MOTOR_CONTROL == 2 || MOTOR_CONTROL == 3
     SMO_STRUCT smo;             // 【数据】SMO滑膜观测器算法
+    #endif // MOTOR_CONTROL
+
     float System_T;             // 【有参数设计】系统电机运行时间周期
     float TIM_ms_T;             // 【有参数设计】系统ms级中断时间
 }SguanFOC_System_STRUCT;

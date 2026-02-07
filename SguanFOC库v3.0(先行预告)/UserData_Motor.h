@@ -3,14 +3,6 @@
 #include "SguanFOC.h"
 /* 电机控制User用户设置·电机参数(SguanFOC用户核心代码) */
 
-/**
- * @description: 宏定义0~3决定“电机有/无感运行模式”的开启与否(默认有感FOC控制)
- * @reminder: 0->有传感器FOC控制(全速域) | 1->无感HFI高频注入控制(低速域)
- * @reminder: 2->无感SMO滑膜观测器控制(高速域) | 3->无感HFI-SMO控制(全速域)
- * @return {*}
- */
-#define MOTOR_CONTROL 0
-
 // 电机实体参数设置(根据实际需要填写)
 static inline void User_MotorSet(void){
     // 1.mode选择电机的运行模式
