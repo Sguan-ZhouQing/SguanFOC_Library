@@ -3,8 +3,8 @@
  * @GitHub: https://github.com/Sguan-ZhouQing
  * @Date: 2026-01-26 22:50:37
  * @LastEditors: 星必尘Sguan|3464647102@qq.com
- * @LastEditTime: 2026-02-04 01:26:02
- * @FilePath: \demo_SguanFOCCode\SguanFOC库\Sguan_PLL.c
+ * @LastEditTime: 2026-02-14 00:40:33
+ * @FilePath: \stm_SguanFOCtest\SguanFOC\Sguan_PLL.c
  * @Description: SguanFOC库的“开环PLL锁相环”实现
  * 
  * Copyright (c) 2026 by $星必尘Sguan, All Rights Reserved. 
@@ -28,6 +28,10 @@ void PLL_Init(PLL_STRUCT *pll){
         pll->go.Xo[n] = 0;
         pll->go.Yo[n] = 0;
     }
+    pll->is_position_mode = 0; // 默认非位置环模式
+    pll->go.OutWe = 0;
+    pll->go.OutRe = 0;
+    pll->go.Error = 0;
 }
 
 // 闭环控制运算的定时器中断服务函数
@@ -45,7 +49,13 @@ void PLL_Loop(PLL_STRUCT *pll){
     // 计算积分器(并输出Re)
     pll->go.Yo[0] = (pll->go.Y_num[0]*pll->go.Xo[0] + pll->go.Y_num[1]*pll->go.Xo[1] 
                 - pll->go.Y_den[1]*pll->go.Yo[1]) / pll->go.Y_den[0];
-    pll->go.OutRe = pll->go.Yo[0];
+    if (pll->is_position_mode) {
+        // 位置环模式：连续积分，不进行归一化
+        pll->go.OutRe = pll->go.Yo[0];
+    } else {
+        // 非位置环模式：使用normalize_angle函数归一化到[0, 2π)
+        pll->go.OutRe = normalize_angle(pll->go.Yo[0]);
+    }
 }
 
 

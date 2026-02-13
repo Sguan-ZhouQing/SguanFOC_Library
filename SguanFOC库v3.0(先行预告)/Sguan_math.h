@@ -3,11 +3,6 @@
 
 /* 外部函数声明 */
 #include "Sguan_Calculate.h"
-// 重写C标准库
-float Sguan_fabsf(float x);
-
-// 参数限制函数
-float normalize_angle(float angle);
 
 // 快速正余弦求解
 float fast_sin(float x);
@@ -15,7 +10,7 @@ float fast_cos(float x);
 void fast_sin_cos(float x, float *sin_x, float *cos_x);
 
 // 电机相关
-void SVPWM(float phi, float d, float q, float *d_u, float *d_v, float *d_w);
+void SVPWM(float d, float q, float sin_phi, float cos_phi, float *d_u, float *d_v, float *d_w);
 void Overmodulation(float *d, float *q);
 void clarke(float *i_alpha,float *i_beta,float i_a,float i_b);
 void park(float *i_d,float *i_q,float i_alpha,float i_beta,float sine,float cosine);

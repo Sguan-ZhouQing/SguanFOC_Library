@@ -3,7 +3,7 @@
  * @GitHub: https://github.com/Sguan-ZhouQing
  * @Date: 2026-02-06 03:54:11
  * @LastEditors: 星必尘Sguan|3464647102@qq.com
- * @LastEditTime: 2026-02-08 03:35:17
+ * @LastEditTime: 2026-02-14 02:55:39
  * @FilePath: \stm_SguanFOCtest\SguanFOC\Sguan_math.c
  * @Description: SguanFOC库的“数学运算函数”实现
  * 
@@ -20,13 +20,6 @@
 #define Value_INV_SQRT3 0.5773502691896257f
 #define Value_SQRT3 1.73205080756887729353f
 
-// 重写fmodf函数
-static float Sguan_fmodf(float x, float y) {
-  if (y == 0.0f) return 0.0f;
-  int quotient = (int)(x / y); // 1次除法运算
-  return x - quotient * y;     // 1次乘1次减
-}
-
 // 重写fabsf函数
 float Sguan_fabsf(float x) {
   union {
@@ -36,16 +29,6 @@ float Sguan_fabsf(float x) {
   u.f = x;
   u.i &= 0x7FFFFFFF; // 1次位与操作
   return u.f;
-}
-
-// 参数限定
-float normalize_angle(float angle) {
-  float normalized = Sguan_fmodf(angle, Value_PI*2);
-  // 如果结果为负，加上2π使其在[0, 2π)范围内
-  if (normalized < 0) {
-      normalized += Value_PI*2;
-  }
-  return normalized;
 }
 
 // 快速sine和cosine求解的局部函数
@@ -100,7 +83,7 @@ void fast_sin_cos(float x, float *sin_x, float *cos_x) {
 }
 
 // 电机SVPWM空间矢量调制函数
-void SVPWM(float phi, float d, float q, float *d_u, float *d_v, float *d_w) {
+void SVPWM(float d, float q, float sin_phi, float cos_phi, float *d_u, float *d_v, float *d_w){
   d = Value_Limit(d,1,-1);   // 限幅函数
   q = Value_Limit(q,1,-1);
 
@@ -108,8 +91,6 @@ void SVPWM(float phi, float d, float q, float *d_u, float *d_v, float *d_w) {
 
   const int v[6][3] = {{1, 0, 0}, {1, 1, 0}, {0, 1, 0}, {0, 1, 1}, {0, 0, 1}, {1, 0, 1}};
   const int K_to_sector[] = {4, 6, 5, 5, 3, 1, 2, 2};
-  float sin_phi,cos_phi;
-  fast_sin_cos(phi,&sin_phi,&cos_phi);
   float alpha,beta;
   ipark(&alpha, &beta, d, q, sin_phi, cos_phi);
 

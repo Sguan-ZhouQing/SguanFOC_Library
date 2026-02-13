@@ -3,7 +3,7 @@
  * @GitHub: https://github.com/Sguan-ZhouQing
  * @Date: 2026-01-29 15:32:59
  * @LastEditors: 星必尘Sguan|3464647102@qq.com
- * @LastEditTime: 2026-02-06 14:26:45
+ * @LastEditTime: 2026-02-13 21:25:25
  * @FilePath: \stm_SguanFOCtest\SguanFOC\Sguan_Calculate.c
  * @Description: SguanFOC库的"浮点转Q31定点运算"实现 - 修复版
  * 
@@ -25,11 +25,28 @@
 static const int64_t Q31_MAX_64 = 2147483647LL;
 static const int64_t Q31_MIN_64 = -2147483648LL;
 
+// 重写fmodf函数
+static float Sguan_fmodf(float x, float y) {
+  if (y == 0.0f) return 0.0f;
+  int quotient = (int)(x / y); // 1次除法运算
+  return x - quotient * y;     // 1次乘1次减
+}
+
 // 数值限幅
 float Value_Limit(float val, float max, float min) {
     if (val > max) return max;
     if (val < min) return min;
     return val;
+}
+
+// 参数取模
+float normalize_angle(float angle) {
+  float normalized = Sguan_fmodf(angle, Value_PI*2);
+  // 如果结果为负，加上2π使其在[0, 2π)范围内
+  if (normalized < 0) {
+      normalized += Value_PI*2;
+  }
+  return normalized;
 }
 
 // Q31乘法（带舍入）

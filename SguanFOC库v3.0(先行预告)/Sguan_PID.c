@@ -3,13 +3,15 @@
  * @GitHub: https://github.com/Sguan-ZhouQing
  * @Date: 2026-01-26 22:38:09
  * @LastEditors: 星必尘Sguan|3464647102@qq.com
- * @LastEditTime: 2026-02-06 05:29:40
+ * @LastEditTime: 2026-02-14 00:59:01
  * @FilePath: \stm_SguanFOCtest\SguanFOC\Sguan_PID.c
  * @Description: SguanFOC库的“闭环PID算法”实现
  * 
  * Copyright (c) 2026 by $星必尘Sguan, All Rights Reserved. 
  */
 #include "Sguan_PID.h"
+
+#include <math.h>
 
 // 闭环系统PID核心参数初始化，主函数调用
 void PID_Init(PID_STRUCT *pid){
@@ -30,6 +32,9 @@ void PID_Init(PID_STRUCT *pid){
         pid->run.Io[n] = 0;
         pid->run.Do[n] = 0;
     }
+    pid->run.Ref = 0;
+    pid->run.Fbk = 0;
+    pid->run.Output = 0;
 }
 
 // 闭环控制运算的定时器中断服务函数

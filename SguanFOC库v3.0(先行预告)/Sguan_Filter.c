@@ -3,13 +3,15 @@
  * @GitHub: https://github.com/Sguan-ZhouQing
  * @Date: 2026-01-26 22:37:25
  * @LastEditors: 星必尘Sguan|3464647102@qq.com
- * @LastEditTime: 2026-02-06 05:28:15
+ * @LastEditTime: 2026-02-13 23:07:08
  * @FilePath: \stm_SguanFOCtest\SguanFOC\Sguan_Filter.c
  * @Description: SguanFOC库的“二阶巴特沃斯滤低通滤波器”实现
  * 
  * Copyright (c) 2026 by $星必尘Sguan, All Rights Reserved. 
  */
 #include "Sguan_Filter.h"
+
+#include <math.h>
 
 /* 二阶典型环节参数初始化，主函数调用 */
 void BPF_Init(BPF_STRUCT *bpf){
@@ -27,6 +29,8 @@ void BPF_Init(BPF_STRUCT *bpf){
         bpf->filter.i[n] = 0;
         bpf->filter.o[n] = 0;
     }
+    bpf->filter.Input = 0;
+    bpf->filter.Output = 0;
 }
 
 /* 定时器1ms中断服务函数 */
@@ -36,11 +40,56 @@ void BPF_Loop(BPF_STRUCT *bpf){
         bpf->filter.i[n] = bpf->filter.i[n-1];
         bpf->filter.o[n] = bpf->filter.o[n-1];
     }
-    // 更新当前输入
+
+    // 更新当前输入,计算输出
     bpf->filter.i[0] = bpf->filter.Input;
-    float num = bpf->filter.num[0]*bpf->filter.i[0]+bpf->filter.num[1]*bpf->filter.i[1]+bpf->filter.num[2]*bpf->filter.i[2];
-    float den = bpf->filter.den[1]*bpf->filter.o[1]+bpf->filter.den[2]*bpf->filter.o[2];
-    bpf->filter.o[0] = (num - den)/bpf->filter.den[0];
+    float num = bpf->filter.num[0] * bpf->filter.i[0] + 
+                bpf->filter.num[1] * bpf->filter.i[1] + 
+                bpf->filter.num[2] * bpf->filter.i[2];
+    float den = bpf->filter.den[1] * bpf->filter.o[1] + 
+                bpf->filter.den[2] * bpf->filter.o[2];
+
+    // 安全检查并输出结果，避免除以零或产生NaN/Inf
+    if (bpf->filter.den[0] != 0.0f && !isnan(den) && !isinf(den)) {
+        bpf->filter.o[0] = (num - den) / bpf->filter.den[0];
+    }
+    if (isnan(bpf->filter.o[0]) || isinf(bpf->filter.o[0])) {
+        bpf->filter.o[0] = 0.0f;
+    }
     bpf->filter.Output = bpf->filter.o[0];
 }
 
+// void BPF_Loop(BPF_STRUCT *bpf){
+//     // 保存当前输入
+//     float input = bpf->filter.Input;
+    
+//     // 计算输出（使用历史值）
+//     float num = bpf->filter.num[0] * input + 
+//                 bpf->filter.num[1] * bpf->filter.i[0] + 
+//                 bpf->filter.num[2] * bpf->filter.i[1];
+    
+//     float den = bpf->filter.den[1] * bpf->filter.o[0] + 
+//                 bpf->filter.den[2] * bpf->filter.o[1];
+    
+//     // 计算输出，如果分母为0就设为0
+//     float output = 0.0f;
+//     if (bpf->filter.den[0] != 0.0f && !isnan(den) && !isinf(den)) {
+//         output = (num - den) / bpf->filter.den[0];
+//     }
+    
+//     // 检查输出是否有效
+//     if (isnan(output) || isinf(output)) {
+//         output = 0.0f;
+//     }
+    
+//     // 更新历史值
+//     bpf->filter.i[2] = bpf->filter.i[1];
+//     bpf->filter.i[1] = bpf->filter.i[0];
+//     bpf->filter.i[0] = input;
+    
+//     bpf->filter.o[2] = bpf->filter.o[1];
+//     bpf->filter.o[1] = bpf->filter.o[0];
+//     bpf->filter.o[0] = output;
+    
+//     bpf->filter.Output = output;
+// }
