@@ -204,7 +204,7 @@ extern SguanFOC_System_STRUCT Sguan;
 
 void SguanFOC_Loop(void);
 void SguanFOC_msTick(void);
-void SguanFOC_PrintfTick(void);
+void SguanFOC_PrintfTick(uint8_t *data, uint16_t length);
 void SguanFOC_mainTick(void);
 
 

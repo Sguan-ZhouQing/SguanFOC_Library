@@ -11,19 +11,33 @@ static inline void User_UserControl(void){
     // Sguan.foc.Target_Speed = 0.0f;
 }
 
+static inline void User_AO_Adjust(float AO){
+    /* Your code for Parameter set */
+    Sguan.foc.Target_Pos = AO;
+}
+
+static inline void User_BO_Adjust(float BO){
+    /* Your code for Parameter set */
+}
+
+static inline void User_CO_Adjust(float CO){
+    /* Your code for Parameter set */
+}
+
 static inline void User_UserTX(void){
-    /* 仅传入主循环printf发送的数据，如TXdata.fdata[0],默认最多11个 */
+    /* 仅传入主循环printf发送的数据，如TXdata.fdata[0],默认最多12个 */
     Sguan.TXdata.fdata[0] = Sguan.status;
     Sguan.TXdata.fdata[1] = Sguan.encoder.Real_Speed;
     Sguan.TXdata.fdata[2] = Sguan.foc.Target_Speed;
     Sguan.TXdata.fdata[3] = Sguan.current.Real_Id;
     Sguan.TXdata.fdata[4] = Sguan.current.Real_Iq;
-    Sguan.TXdata.fdata[5] = Sguan.foc.Uq_in;
-    Sguan.TXdata.fdata[6] = Sguan.current.Real_Ia;
-    Sguan.TXdata.fdata[7] = Sguan.current.Real_Ib;
-    Sguan.TXdata.fdata[8] = Sguan.current.Real_Ic;
-    Sguan.TXdata.fdata[9] = Sguan.current.Real_Ialpha;
-    Sguan.TXdata.fdata[10] = Sguan.current.Real_Ibeta;
+    Sguan.TXdata.fdata[5] = Sguan.foc.Target_Iq;
+    Sguan.TXdata.fdata[6] = Sguan.foc.Uq_in;
+    Sguan.TXdata.fdata[7] = Sguan.current.Real_Ia;
+    Sguan.TXdata.fdata[8] = Sguan.encoder.Real_Pos;
+    Sguan.TXdata.fdata[9] = Sguan.foc.Target_Pos;
+    Sguan.TXdata.fdata[10] = Sguan.pid.PosVelCur_p.run.Output;
+    Sguan.TXdata.fdata[11] = Sguan.pid.PosVelCur_v.run.Output;
 }
 
 

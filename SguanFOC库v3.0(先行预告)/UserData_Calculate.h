@@ -90,18 +90,5 @@ static inline void User_PrintfSet(uint8_t *ch, uint16_t size){
     HAL_UART_Transmit(&huart1, ch, size, 0xFFFF);
 }
 
-/* ================= 参数调整代码(调试层) ================= */
-static inline void User_AO_Adjust(float AO){
-    /* Your code for Parameter set */
-}
-
-static inline void User_BO_Adjust(float BO){
-    /* Your code for Parameter set */
-}
-
-static inline void User_CO_Adjust(float CO){
-    /* Your code for Parameter set */
-}
-
 
 #endif // USERDATA_CALCULATE_H

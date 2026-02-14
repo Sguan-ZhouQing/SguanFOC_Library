@@ -3,7 +3,7 @@
  * @GitHub: https://github.com/Sguan-ZhouQing
  * @Date: 2026-01-26 22:38:34
  * @LastEditors: 星必尘Sguan|3464647102@qq.com
- * @LastEditTime: 2026-02-14 02:58:52
+ * @LastEditTime: 2026-02-15 04:37:08
  * @FilePath: \stm_SguanFOCtest\SguanFOC\SguanFOC.c
  * @Description: SguanFOC库的“核心代码”实现
  * 
@@ -12,6 +12,8 @@
 #include "SguanFOC.h"
 
 /* USER CODE BEGIN Includes */
+#include <string.h>
+#include <math.h> 
 // 电机控制User用户设置声明
 #include "UserData_Function.h"
 #include "UserData_Motor.h"
@@ -256,10 +258,12 @@ static void Current_ReadIabc(SguanFOC_System_STRUCT *sguan){
                             sguan->current.Final_Gain*sguan->motor.Current_Dir0;
     sguan->bpf.Current1.filter.Input = (User_ReadADC_Raw(1) - sguan->current.Pos_offset1)*
                             sguan->current.Final_Gain*sguan->motor.Current_Dir1;
-    BPF_Loop(&sguan->bpf.Current0);
-    BPF_Loop(&sguan->bpf.Current1);
-    float I0 = sguan->bpf.Current0.filter.Output;
-    float I1 = sguan->bpf.Current1.filter.Output;
+    // BPF_Loop(&sguan->bpf.Current0);
+    // BPF_Loop(&sguan->bpf.Current1);
+    float I0 = sguan->bpf.Current0.filter.Input;
+    float I1 = sguan->bpf.Current1.filter.Input;
+    // float I0 = sguan->bpf.Current0.filter.Output;
+    // float I1 = sguan->bpf.Current1.filter.Output;
     float I2 = -(I0 + I1);
     if (sguan->motor.Current_Num == 0){  // AB采样(判断电流相序和电机方向)
         sguan->current.Real_Ia = sguan->motor.Motor_Dir == 1 ? I0 : I1;
@@ -395,7 +399,7 @@ static void PID_PosVelCur_THREE(SguanFOC_System_STRUCT *sguan){
     }
     sguan->pid.PosVelCur_D.run.Ref = sguan->foc.Target_Id; // 默认D轴励磁为0
     sguan->pid.PosVelCur_D.run.Fbk = sguan->current.Real_Id;
-    sguan->pid.PosVelCur_Q.run.Ref = sguan->foc.Target_Iq;
+    sguan->pid.PosVelCur_Q.run.Ref = sguan->pid.PosVelCur_v.run.Output;
     sguan->pid.PosVelCur_Q.run.Fbk = sguan->current.Real_Iq;
     PID_Loop(&sguan->pid.PosVelCur_D);
     PID_Loop(&sguan->pid.PosVelCur_Q);
@@ -675,8 +679,8 @@ static void Sguan_GeneratePWM_Loop(SguanFOC_System_STRUCT *sguan){
         if (sguan->mode < 7){
             PID_Tick[sguan->mode](sguan);
             if (sguan->status == 18){ // 触发过流保护(MOTOR_STATUS_OVERCURRENT)
-                sguan->foc.Ud_in = Value_Limit(sguan->foc.Ud_in,sguan->motor.Vbus/2,-sguan->motor.Vbus/2);
-                sguan->foc.Uq_in = Value_Limit(sguan->foc.Uq_in,sguan->motor.Vbus/2,-sguan->motor.Vbus/2);
+                sguan->foc.Ud_in = Value_Limit(sguan->foc.Ud_in,sguan->motor.Vbus*0.9f,-sguan->motor.Vbus*0.9f);
+                sguan->foc.Uq_in = Value_Limit(sguan->foc.Uq_in,sguan->motor.Vbus*0.9f,-sguan->motor.Vbus*0.9f);
             }
         } else{
             // 错误处理：自动跳转到默认速度单闭环模式
@@ -870,7 +874,7 @@ static void Sguan_Start_Loop(void){
         Offset_EncoderRead(&Sguan);
         // 电机失能并进入正常工作状态
         Sguan_Pre_Positioning(&Sguan,0.0f);
-        User_Delay(600);
+        User_Delay(800);
         //正常工作中(状态机运行)
         Sguan.status = MOTOR_STATUS_IDLE;
     }
@@ -927,11 +931,23 @@ void SguanFOC_msTick(void){
 /**
  * @description: SguanFOC核心文件，UART或者CAN接收完成中断服务函数
  * @reminder: 主循环函数调用，任务优先级“低”
+ * @param {uint8_t} *data 接收到的数据
+ * @param {uint16_t} length 数据长度
  * @return {*}
  */
-void SguanFOC_PrintfTick(void){
-    // 接收数据并更新调试信息
-    Printf_Adjust();
+void SguanFOC_PrintfTick(uint8_t *data, uint16_t length){
+    if(length > sizeof(Sguan_PrintfBuff)){
+        length = sizeof(Sguan_PrintfBuff);  // 截断到缓冲区大小
+    }
+
+    for(uint16_t i = 0; i < length; i++){
+        if(data[i] == '?'){
+            Printf_Adjust();  // 调用解析函数
+            // 清空缓冲区
+            memset(Sguan_PrintfBuff, 0, sizeof(Sguan_PrintfBuff));
+            break;
+        }
+    }
 }
 
 /**

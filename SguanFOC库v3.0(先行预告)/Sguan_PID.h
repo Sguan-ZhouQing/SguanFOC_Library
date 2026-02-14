@@ -31,6 +31,9 @@ typedef struct{
 
     float OutMax;   // (参数设计)输出上限限幅
     float OutMin;   // (参数设计)输出下限限幅
+
+    float IntMax;   // (参数设计)积分项上限
+    float IntMin;   // (参数设计)积分项下限
 }PID_STRUCT;
 
 void PID_Init(PID_STRUCT *pid);

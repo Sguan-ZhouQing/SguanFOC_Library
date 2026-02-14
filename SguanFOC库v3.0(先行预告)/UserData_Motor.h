@@ -6,7 +6,7 @@
 // 电机实体参数设置(根据实际需要填写)
 static inline void User_MotorSet(void){
     // 1.mode选择电机的运行模式
-    Sguan.mode = Current_SINGLE_MODE;
+    Sguan.mode = PosVelCur_THREE_MODE;
     // 2.flag电机标志位
     Sguan.flag.PWM_watchdog_limit = 10; // (uint8_t)PWM错误限幅
     // 3.motor电机参数辨识
@@ -19,8 +19,8 @@ static inline void User_MotorSet(void){
     Sguan.motor.Poles = 7;              // (uint8_t)极对极数
 
     Sguan.motor.Limit = 0.2f;           // (float)预处理电压占比
-    Sguan.motor.Dcur_MAX = 6.0f;       // (float)电机最大电流D轴限制
-    Sguan.motor.Qcur_MAX = 6.0f;       // (float)电机最大电流Q轴限制
+    Sguan.motor.Dcur_MAX = 10.0f;       // (float)电机最大电流D轴限制
+    Sguan.motor.Qcur_MAX = 10.0f;       // (float)电机最大电流Q轴限制
 
     #if Open_VBUS_Calculate
     Sguan.motor.VBUS_MAX = 14.0f;       // (float)母线电压值波动MAX阈值

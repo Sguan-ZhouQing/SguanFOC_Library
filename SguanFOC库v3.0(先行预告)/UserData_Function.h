@@ -40,11 +40,11 @@ static inline int32_t User_ReadADC_Raw(uint8_t Current_CH){
     switch (Current_CH){
     case 0:
         /* Your code for Motor CH0 raw */
-        ADC_num = ADC_InjectedValues[1];
+        ADC_num = (int32_t)ADC_InjectedValues[1];
         break;
     case 1:
         /* Your code for Motor CH1 raw */
-        ADC_num = ADC_InjectedValues[2];
+        ADC_num = (int32_t)ADC_InjectedValues[2];
         break;
     default:
         break;

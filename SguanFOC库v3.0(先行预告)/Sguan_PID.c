@@ -3,7 +3,7 @@
  * @GitHub: https://github.com/Sguan-ZhouQing
  * @Date: 2026-01-26 22:38:09
  * @LastEditors: 星必尘Sguan|3464647102@qq.com
- * @LastEditTime: 2026-02-14 00:59:01
+ * @LastEditTime: 2026-02-14 05:29:55
  * @FilePath: \stm_SguanFOCtest\SguanFOC\Sguan_PID.c
  * @Description: SguanFOC库的“闭环PID算法”实现
  * 
@@ -48,6 +48,9 @@ void PID_Loop(PID_STRUCT *pid){
     if (pid->Ki){
         pid->run.Io[0] = (pid->run.I_num[0]*pid->run.i[0] + pid->run.I_num[1]*pid->run.i[1] 
                     - pid->run.I_den[1]*pid->run.Io[1]) / pid->run.I_den[0];
+
+        if(pid->run.Io[0] > pid->IntMax) pid->run.Io[0] = pid->IntMax;
+        if(pid->run.Io[0] < pid->IntMin) pid->run.Io[0] = pid->IntMin;
     }
     if (pid->Kd){
         pid->run.Do[0] = (pid->run.D_num[0]*pid->run.i[0] + pid->run.D_num[1]*pid->run.i[1] 
