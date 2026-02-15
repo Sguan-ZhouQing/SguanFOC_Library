@@ -49,10 +49,10 @@ void PLL_Loop(PLL_STRUCT *pll){
     // 计算积分器(并输出Re)
     pll->go.Yo[0] = (pll->go.Y_num[0]*pll->go.Xo[0] + pll->go.Y_num[1]*pll->go.Xo[1] 
                 - pll->go.Y_den[1]*pll->go.Yo[1]) / pll->go.Y_den[0];
-    if (pll->is_position_mode) {
+    if (pll->is_position_mode){
         // 位置环模式：连续积分，不进行归一化
         pll->go.OutRe = pll->go.Yo[0];
-    } else {
+    } else{
         // 非位置环模式：使用normalize_angle函数归一化到[0, 2π)
         pll->go.OutRe = normalize_angle(pll->go.Yo[0]);
     }
