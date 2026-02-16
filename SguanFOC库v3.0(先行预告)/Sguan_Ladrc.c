@@ -3,7 +3,7 @@
  * @GitHub: https://github.com/Sguan-ZhouQing
  * @Date: 2026-02-16  00:27:53
  * @LastEditors: 星必尘Sguan|3464647102@qq.com
- * @LastEditTime: 2026-02-16 02:41:52
+ * @LastEditTime: 2026-02-16 16:56:26
  * @FilePath: \stm_SguanFOCtest\SguanFOC\Sguan_Ladrc.c
  * @Description: SguanFOC库的“线性自抗扰控制(LADRC)算法”实现
  * 
@@ -11,6 +11,11 @@
  */
 
 #include "Sguan_Ladrc.h"
+
+// 静态函数声明 - LADRC核心算法的三个步骤
+static void Ladrc_LTD(LADRC_STRUCT *ladrc);
+static void Ladrc_LESO(LADRC_STRUCT *ladrc);
+static void Ladrc_LinearControlRate(LADRC_STRUCT *ladrc);
 
 // 线性跟踪微分器(LTD) - 安排过渡过程
 static void Ladrc_LTD(LADRC_STRUCT *ladrc){
@@ -23,8 +28,8 @@ static void Ladrc_LTD(LADRC_STRUCT *ladrc){
     ladrc->linear.v2 += ladrc->linear.fh * ladrc->T;
 }
 
-// 扩张状态观测器(ESO) - 估计系统状态和总扰动
-static void Ladrc_ESO(LADRC_STRUCT *ladrc){
+// 线性扩张状态观测器(ESO) - 估计系统状态和总扰动
+static void Ladrc_LESO(LADRC_STRUCT *ladrc){
     /* 观测器误差 e = z1 - Fbk */
     ladrc->linear.e = ladrc->linear.z1 - ladrc->linear.Fbk;
     
@@ -49,7 +54,7 @@ static void Ladrc_LinearControlRate(LADRC_STRUCT *ladrc){
     ladrc->linear.u0 = ladrc->Kp * ladrc->linear.e1 + ladrc->Kd * ladrc->linear.e2;
     
     /* 扰动补偿 u = (u0 - z3) / b0 */
-    ladrc->linear.u = (ladrc->linear.u0 - ladrc->linear.z3) / ladrc->b0;
+    ladrc->linear.u_sat = (ladrc->linear.u0 - ladrc->linear.z3) / ladrc->b0;
     
     /* 输出限幅 */
     ladrc->linear.u_sat = Value_Limit(ladrc->linear.u_sat, ladrc->OutMax, ladrc->OutMin);
@@ -86,7 +91,6 @@ void Ladrc_Init(LADRC_STRUCT *ladrc){
     ladrc->linear.z3 = 0.0f;
     ladrc->linear.Ref = 0.0f;
     ladrc->linear.Fbk = 0.0f;
-    ladrc->linear.u = 0.0f;
     ladrc->linear.u_sat = 0.0f;
     ladrc->linear.e = 0.0f;
     ladrc->linear.e1 = 0.0f;
@@ -105,7 +109,7 @@ void Ladrc_Loop(LADRC_STRUCT *ladrc){
     Ladrc_LTD(ladrc);
     
     /* 扩张状态观测器 - 估计状态和扰动 */
-    Ladrc_ESO(ladrc);
+    Ladrc_LESO(ladrc);
     
     /* 线性控制率 - 计算控制量 */
     Ladrc_LinearControlRate(ladrc);
