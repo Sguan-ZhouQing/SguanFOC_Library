@@ -1,9 +1,6 @@
 #ifndef __USERDATA_CALCULATE_H
 #define __USERDATA_CALCULATE_H
-#include <stdint.h>
-/* 电机控制User用户设置·数据计算及printf重定向 */
-#include "main.h"
-extern UART_HandleTypeDef huart1;
+/* 电机控制User用户设置·数据计算 */
 
 /**
  * @description: 宏定义0~3决定“电机有/无感运行模式”的开启与否(默认有感FOC控制)
@@ -82,13 +79,6 @@ extern UART_HandleTypeDef huart1;
  * @return {*}
  */
 #define Printf_Debug 0
-
-
-/* ================= 驱动代码(驱动层) ================= */
-static inline void User_PrintfSet(uint8_t *ch, uint16_t size){
-    /* Your code for UART or CAN Signal Transmit Driver */
-    HAL_UART_Transmit(&huart1, ch, size, 0xFFFF);
-}
 
 
 #endif // USERDATA_CALCULATE_H

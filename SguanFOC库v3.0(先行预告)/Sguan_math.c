@@ -3,7 +3,7 @@
  * @GitHub: https://github.com/Sguan-ZhouQing
  * @Date: 2026-02-06 03:54:11
  * @LastEditors: 星必尘Sguan|3464647102@qq.com
- * @LastEditTime: 2026-02-14 02:55:39
+ * @LastEditTime: 2026-02-19 23:53:07
  * @FilePath: \stm_SguanFOCtest\SguanFOC\Sguan_math.c
  * @Description: SguanFOC库的“数学运算函数”实现
  * 

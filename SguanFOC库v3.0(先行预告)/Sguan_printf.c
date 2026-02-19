@@ -3,7 +3,7 @@
  * @GitHub: https://github.com/Sguan-ZhouQing
  * @Date: 2026-01-27 00:07:53
  * @LastEditors: 星必尘Sguan|3464647102@qq.com
- * @LastEditTime: 2026-02-14 03:54:13
+ * @LastEditTime: 2026-02-19 22:52:41
  * @FilePath: \stm_SguanFOCtest\SguanFOC\Sguan_printf.c
  * @Description: SguanFOC库的“JustFloat通讯协议”实现
  * 
@@ -11,7 +11,7 @@
  */
 #include "Sguan_printf.h"
 /* 外部函数文件声明 */
-#include "UserData_Calculate.h"
+#include "UserData_Correspond.h"
 #include "UserData_UserControl.h"
 #include <string.h>
 /* 内部函数文件声明 */
@@ -36,7 +36,7 @@ void _sys_exit(int x){
 
 //串口重定向函数printf，不使用到MicroLIB
 int fputc(int ch,FILE *f){
-	User_PrintfSet((uint8_t *)&ch,1);
+	User_CorrespondSet((uint8_t *)&ch,1);
 	return ch;
 }
 /* ================= 重定向设计 END ================= */
@@ -106,7 +106,7 @@ void Printf_Init(PRINTF_STRUCT *str){
 // [发送]发送数据Tick函数，发送周期可自定
 void Printf_Loop(PRINTF_STRUCT *str){
     // 发送JustFloat数据
-    User_PrintfSet((uint8_t *)str,sizeof(PRINTF_STRUCT));
+    User_CorrespondSet((uint8_t *)str,sizeof(PRINTF_STRUCT));
 }
 
 // [接收]实时参数调整函数（需要根据你的实际结构体定义进行调整）
