@@ -3,13 +3,12 @@
  * @GitHub: https://github.com/Sguan-ZhouQing
  * @Date: 2026-02-16  00:27:53
  * @LastEditors: 星必尘Sguan|3464647102@qq.com
- * @LastEditTime: 2026-02-16 16:56:26
+ * @LastEditTime: 2026-02-20 23:18:28
  * @FilePath: \stm_SguanFOCtest\SguanFOC\Sguan_Ladrc.c
- * @Description: SguanFOC库的“线性自抗扰控制(LADRC)算法”实现
+ * @Description: SguanFOC库的“典型二阶线性自抗扰控制(LADRC)算法”实现
  * 
  * Copyright (c) 2026 by 星必尘Sguan, All Rights Reserved. 
  */
-
 #include "Sguan_Ladrc.h"
 
 // 静态函数声明 - LADRC核心算法的三个步骤
@@ -28,7 +27,7 @@ static void Ladrc_LTD(LADRC_STRUCT *ladrc){
     ladrc->linear.v2 += ladrc->linear.fh * ladrc->T;
 }
 
-// 线性扩张状态观测器(ESO) - 估计系统状态和总扰动
+// 线性扩张状态观测器(LESO) - 估计系统状态和总扰动
 static void Ladrc_LESO(LADRC_STRUCT *ladrc){
     /* 观测器误差 e = z1 - Fbk */
     ladrc->linear.e = ladrc->linear.z1 - ladrc->linear.Fbk;
@@ -67,7 +66,6 @@ static void Ladrc_LinearControlRate(LADRC_STRUCT *ladrc){
  */
 void Ladrc_Init(LADRC_STRUCT *ladrc){
     /* 控制器参数设置 */
-    ladrc->wc = 10.0f/ladrc->T;      // 控制器带宽
     ladrc->w0 = 4.0f * ladrc->wc;     // 观测器带宽
     
     /* 计算观测器系数 */

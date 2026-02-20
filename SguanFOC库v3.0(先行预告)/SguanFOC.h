@@ -33,13 +33,13 @@ typedef struct{
 }MOTOR_FLAG_STRUCT;
 
 typedef struct{
-    // #if Open_VBUS_Calculate
-    // BPF_STRUCT VBUS;            // (电压数据)母线电压滤波
-    // #endif // Open_VBUS_Calculate
+    #if Open_VBUS_Calculate
+    BPF_STRUCT VBUS;            // (电压数据)母线电压滤波
+    #endif // Open_VBUS_Calculate
 
-    // #if Open_Temp_Calculate
-    // BPF_STRUCT Thermistor;      // (温度数据)热敏电阻滤波
-    // #endif // Open_Temp_Calculate
+    #if Open_Temp_Calculate
+    BPF_STRUCT Thermistor;      // (温度数据)热敏电阻滤波
+    #endif // Open_Temp_Calculate
 
     BPF_STRUCT Current0;        // (电流数据)电机电流滤波
     BPF_STRUCT Current1;        // (电流数据)电机电流滤波
@@ -86,27 +86,30 @@ typedef struct{
 }MOTOR_PID_STRUCT;
 
 typedef struct{
-    float Vbus;                 // (电机实体参数)母线电压
     float Ld;                   // (电机实体参数)D轴电感
     float Lq;                   // (电机实体参数)Q轴电感
     float Ls;                   // (电机实体参数)相线电感
     float Rs;                   // (电机实体参数)相线电阻
-    float Flux;                 // (电机实体参数)电机磁链
+    float Flux;                 // (电机实体参数)电机磁链    
+}MOTOR_IDENTIFY_STRUCT;
+
+typedef struct{
+    float Vbus;                 // (电机实体参数)母线电压
     uint8_t Poles;              // (电机实体参数)电机极对极数
 
     float Limit;                // (参数设计)预处理|电机定位占空比
     float Dcur_MAX;             // (参数设计)电机最大电流D轴限制
     float Qcur_MAX;             // (参数设计)电机最大电流Q轴限制
 
-    // #if Open_VBUS_Calculate
-    // float VBUS_MAX;             // (参数设计)母线电压值波动MAX阈值
-    // float VBUS_MIM;             // (参数设计)母线电压值波动MIN阈值
-    // #endif // Open_VBUS_Calculate
+    #if Open_VBUS_Calculate
+    float VBUS_MAX;             // (参数设计)母线电压值波动MAX阈值
+    float VBUS_MIM;             // (参数设计)母线电压值波动MIN阈值
+    #endif // Open_VBUS_Calculate
 
-    // #if Open_Temp_Calculate
-    // float Temp_MAX;             // (参数设计)驱动器允许最大温度
-    // float Temp_MIN;             // (参数设计)驱动器允许最小温度
-    // #endif // Open_Temp_Calculate
+    #if Open_Temp_Calculate
+    float Temp_MAX;             // (参数设计)驱动器允许最大温度
+    float Temp_MIN;             // (参数设计)驱动器允许最小温度
+    #endif // Open_Temp_Calculate
 
     int8_t Motor_Dir;           // (参数设计)电机的运行方向设计
     int8_t PWM_Dir;             // (参数设计)PWM占空比高低对应
@@ -152,9 +155,10 @@ typedef struct{
 
 typedef struct{
     float Real_Speed;           // (Encoder速度)Real实际机械角速度
-    double Real_Pos;            // (Encoder角度)Real实际机械角度
-    float Real_Rad;             // (Encoder电角度)Real实际机械角度
+    double Real_Pos;            // (Encoder多圈角度)Real实际机械角度
+    float Real_Rad;             // (Encoder单圈角度)Real实际机械角度
     float Real_Erad;            // (Encoder电角度)Real实际电子角度
+    float Real_Espeed;          // (Encoder电速度)Real实际电子角速度
 
     float Pos_offset;           // (Encoder角度偏置)offset偏置位
 }MOTOR_ENCODER_STRUCT;
@@ -181,19 +185,20 @@ typedef struct{
     MOTOR_FLAG_STRUCT flag;     // 【有参数设计】flag电机运行标志位
     MOTOR_BPF_STRUCT bpf;       // 【有参数设计】bpf低通滤波器设计
     MOTOR_PID_STRUCT pid;       // 【有参数设计】pid闭环控制系统设计
+    MOTOR_IDENTIFY_STRUCT identify;//【数据】电机参数辨识结果
     MOTOR_QUANTIZE_STRUCT motor;// 【有参数设计】motor电机参数辨识
     MOTOR_FOC_STRUCT foc;       // 【有参数设计】foc控制的参数输入“缓存”
     MOTOR_ENCODER_STRUCT encoder;//【数据】电机角速度和角度信息“缓存”
     MOTOR_CURRENT_STRUCT current;//【数据】电机电流采样信息“缓存”
     PRINTF_STRUCT TXdata;       // 【数据】data串口或CAN发送的信息
 
-    // #if MOTOR_CONTROL == 1 || MOTOR_CONTROL == 3
-    // HFI_STRUCT hfi;             // 【数据】HFI高频注入算法
-    // #endif // MOTOR_CONTROL
+    #if MOTOR_CONTROL == 1 || MOTOR_CONTROL == 3
+    HFI_STRUCT hfi;             // 【数据】HFI高频注入算法
+    #endif // MOTOR_CONTROL
 
-    // #if MOTOR_CONTROL == 2 || MOTOR_CONTROL == 3
-    // SMO_STRUCT smo;             // 【数据】SMO滑膜观测器算法
-    // #endif // MOTOR_CONTROL
+    #if MOTOR_CONTROL == 2 || MOTOR_CONTROL == 3
+    SMO_STRUCT smo;             // 【数据】SMO滑膜观测器算法
+    #endif // MOTOR_CONTROL
 
     float System_T;             // 【有参数设计】系统电机运行时间周期
     float TIM_ms_T;             // 【有参数设计】系统ms级中断时间

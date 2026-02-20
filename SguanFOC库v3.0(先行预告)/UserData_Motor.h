@@ -5,17 +5,18 @@
 
 // 电机实体参数设置(根据实际需要填写)
 static inline void User_MotorSet(void){
-    // 1.mode选择电机的运行模式
+    // 0.mode选择电机的运行模式
     Sguan.mode = PosVelCur_THREE_MODE;
-    // 2.flag电机标志位
+    // 1.flag电机标志位
     Sguan.flag.PWM_watchdog_limit = 10; // (uint8_t)PWM错误限幅
+    // 2.identify电机参数辨识结果(根据实际电机参数填写，或者通过辨识算法得到)
+    Sguan.identify.Ld = 0.0000519338f;  // (float)D轴电感
+    Sguan.identify.Lq = 0.0000519338f;  // (float)Q轴电感
+    Sguan.identify.Ls = 0.0000519338f;  // (float)相线电感
+    Sguan.identify.Rs = 0.19067f;       // (float)相线电阻
+    Sguan.identify.Flux = 0.00028043f;  // (float)磁链
     // 3.motor电机参数辨识
     Sguan.motor.Vbus = 12.0f;           // (float)母线电压
-    Sguan.motor.Ld = 0.0000519338f;           // (float)D轴电感
-    Sguan.motor.Lq = 0.0000519338f;           // (float)Q轴电感
-    Sguan.motor.Ls = 0.0000519338f;           // (float)相线电感
-    Sguan.motor.Rs = 0.19067f;             // (float)相线电阻
-    Sguan.motor.Flux = 0.00028043f;         // (float)磁链
     Sguan.motor.Poles = 7;              // (uint8_t)极对极数
 
     Sguan.motor.Limit = 0.2f;           // (float)预处理电压占比

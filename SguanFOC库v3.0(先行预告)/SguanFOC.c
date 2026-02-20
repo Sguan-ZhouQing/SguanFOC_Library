@@ -3,7 +3,7 @@
  * @GitHub: https://github.com/Sguan-ZhouQing
  * @Date: 2026-01-26 22:38:34
  * @LastEditors: 星必尘Sguan|3464647102@qq.com
- * @LastEditTime: 2026-02-20 00:06:33
+ * @LastEditTime: 2026-02-21 01:27:00
  * @FilePath: \stm_SguanFOCtest\SguanFOC\SguanFOC.c
  * @Description: SguanFOC库的“核心代码”实现
  * 
@@ -26,6 +26,7 @@ SguanFOC_System_STRUCT Sguan = {
     .flag = {0},        // 所有flag成员默认为0
     .bpf = {0},         // 所有bpf成员默认为0
     .pid = {0},         // 所有pid成员默认为0
+    .identify = {0},    // 所有identify成员默认为0
     .motor = {0},       // 所有motor成员默认为0
     .foc = {0},         // 所有foc成员默认为0
     .encoder = {0},     // 所有encoder成员默认为0
@@ -46,7 +47,6 @@ SguanFOC_System_STRUCT Sguan = {
     .flag.PWM_watchdog_limit = 10,
     .pid.Response = 5,
     .pid.Compare = 25,
-    .foc.Uq_in = 3.0f,
     .System_T = 0.0001f,
     .TIM_ms_T = 0.001f
 };
@@ -213,6 +213,7 @@ static float Encoder_ReadSpeed(SguanFOC_System_STRUCT *sguan){
     return sguan->foc.pll.go.OutWe;
 }
 
+
 // Encoder实时更新角速度和角度信息(已滤波)
 static void Encoder_Tick(SguanFOC_System_STRUCT *sguan){
     #if !MOTOR_CONTROL
@@ -233,6 +234,7 @@ static void Encoder_Tick(SguanFOC_System_STRUCT *sguan){
     sguan->encoder.Real_Speed = sguan->bpf.Encoder.filter.Output;
     sguan->encoder.Real_Pos = sguan->foc.pll.go.OutRe*sguan->motor.Encoder_Dir;
     sguan->encoder.Real_Erad = normalize_angle(Encoder_ReadErad(sguan)*sguan->motor.Encoder_Dir);
+    sguan->encoder.Real_Espeed = sguan->encoder.Real_Speed*sguan->motor.Poles;
     fast_sin_cos(sguan->encoder.Real_Erad,&sguan->foc.sine,&sguan->foc.cosine);
 }
 
@@ -310,14 +312,22 @@ static void PID_Velocity_OPEN(SguanFOC_System_STRUCT *sguan){
 // PID电流单环(单闭环)
 static void PID_Current_SINGLE(SguanFOC_System_STRUCT *sguan){
     #if Open_Current_SINGLE
+    // 1.前馈计算
+    float Ud_ff = -sguan->encoder.Real_Espeed*sguan->identify.Lq*sguan->current.Real_Iq; 
+    float Uq_ff = sguan->encoder.Real_Espeed*sguan->identify.Ld*sguan->current.Real_Id + 
+                    sguan->encoder.Real_Espeed*sguan->identify.Flux;
+
+    // 2.PID计算
     sguan->pid.Current_D.run.Ref = sguan->foc.Target_Id; // 默认D轴励磁Id为0
     sguan->pid.Current_D.run.Fbk = sguan->current.Real_Id;
     sguan->pid.Current_Q.run.Ref = sguan->foc.Target_Iq;
     sguan->pid.Current_Q.run.Fbk = sguan->current.Real_Iq;
     PID_Loop(&sguan->pid.Current_D);
     PID_Loop(&sguan->pid.Current_Q);
-    sguan->foc.Ud_in = sguan->pid.Current_D.run.Output;
-    sguan->foc.Uq_in = sguan->pid.Current_Q.run.Output;
+
+    // 3.叠加前馈和PID输出
+    sguan->foc.Ud_in = sguan->pid.Current_D.run.Output + Ud_ff;
+    sguan->foc.Uq_in = sguan->pid.Current_Q.run.Output + Uq_ff;
     #endif // Open_Current_SINGLE
 }
 
@@ -353,14 +363,20 @@ static void PID_VelCur_DOUBLE(SguanFOC_System_STRUCT *sguan){
         PID_Loop(&sguan->pid.VelCur_v);
         sguan->pid.Count = 0;
     }
+    // 1.前馈计算
+    float Ud_ff = -sguan->encoder.Real_Espeed*sguan->identify.Lq*sguan->current.Real_Iq; 
+    float Uq_ff = sguan->encoder.Real_Espeed*sguan->identify.Ld*sguan->current.Real_Id + 
+                    sguan->encoder.Real_Espeed*sguan->identify.Flux;
+
+    // 2.PID计算
     sguan->pid.VelCur_D.run.Ref = sguan->foc.Target_Id; // 默认D轴励磁Id为0
     sguan->pid.VelCur_D.run.Fbk = sguan->current.Real_Id;
     sguan->pid.VelCur_Q.run.Ref = sguan->pid.VelCur_v.run.Output;
     sguan->pid.VelCur_Q.run.Fbk = sguan->current.Real_Iq;
     PID_Loop(&sguan->pid.VelCur_D);
     PID_Loop(&sguan->pid.VelCur_Q);
-    sguan->foc.Ud_in = sguan->pid.VelCur_D.run.Output;
-    sguan->foc.Uq_in = sguan->pid.VelCur_Q.run.Output;
+    sguan->foc.Ud_in = sguan->pid.VelCur_D.run.Output + Ud_ff;
+    sguan->foc.Uq_in = sguan->pid.VelCur_Q.run.Output + Uq_ff;
     #endif // Open_VelCur_DOUBLE
 }
 
