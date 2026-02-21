@@ -12,77 +12,41 @@
 #include "Sguan_printf.h"
 /* USER CODE END Includes */
 
-typedef enum{
-    Velocity_OPEN_MODE = 0,     // 速度开环(直接控制Sguan.foc.Uq_in用于电机方向测试)
-    Current_SINGLE_MODE,        // 电流单闭环(力矩控制)
-    Velocity_SINGLE_MODE,       // 速度单闭环(速度控制)
-    Position_SINGLE_MODE,       // 位置单闭环(角度控制)
-    VelCur_DOUBLE_MODE,         // 速度-电流串级PID
-    PosVel_DOUBLE_MODE,         // 位置-速度串级PID
-    PosVelCur_THREE_MODE        // 位置-速度-电流多环PID
-}MOTOR_MODE_ENUM;
+#define Velocity_OPEN_MODE      0x00 // 速度开环(Uq_in电机方向测试和电机参数测算)
+#define Current_SINGLE_MODE     0x01 // 电流单闭环(力矩控制)
+#define VelCur_DOUBLE_MODE      0x02 // 速度-电流串级PID
+#define PosVelCur_THREE_MODE    0x03 // 位置-速度-电流多环PID
+#define Sensorless_HFI_MODE     0x04 // 无感高频方波注入控制(低速域)
+#define Sensorless_SMO_MODE     0x05 // 无感滑膜观测器控制(强拖切高速域)
+#define Sensorless_HS_MODE      0x06 // 无感方波注入切滑膜(全速域)
 
 typedef struct{
-    uint8_t Initialize;         // 初始化标志位
-
     uint8_t PWM_Calc;           // PWM计算标志位
-    uint8_t PWM_watchdog_counter;//PWM看门狗计数
     uint8_t PWM_watchdog_limit; // PWM错误限幅
 
     uint8_t in_PWM_Calc_ISR;    // (互斥锁)标记是否在PWM计算中断中
 }MOTOR_FLAG_STRUCT;
 
 typedef struct{
-    #if Open_VBUS_Calculate
-    BPF_STRUCT VBUS;            // (电压数据)母线电压滤波
-    #endif // Open_VBUS_Calculate
-
-    #if Open_Temp_Calculate
-    BPF_STRUCT Thermistor;      // (温度数据)热敏电阻滤波
-    #endif // Open_Temp_Calculate
-
-    BPF_STRUCT Current0;        // (电流数据)电机电流滤波
-    BPF_STRUCT Current1;        // (电流数据)电机电流滤波
     BPF_STRUCT CurrentD;        // (电流数据)电机D轴滤波
     BPF_STRUCT CurrentQ;        // (电流数据)电机Q轴滤波
     BPF_STRUCT Encoder;         // (速度数据)速度信号滤波
 }MOTOR_BPF_STRUCT;
 
 typedef struct{
-    #if Open_Current_SINGLE
     PID_STRUCT Current_D;       // (电流单环)PID电流环D轴参数
     PID_STRUCT Current_Q;       // (电流单环)PID电流环Q轴参数
-    #endif // Open_Current_SINGLE
 
-    #if Open_Velocity_SINGLE
-    PID_STRUCT Velocity;        // (速度单环)PID速度环参数
-    #endif // Open_Velocity_SINGLE
+    PID_STRUCT VelCur_v;        // (速度-电流双环||无感控制)双PID速度外环参数
+    PID_STRUCT VelCur_D;        // (速度-电流双环||无感控制)双PID电流内环D轴参数
+    PID_STRUCT VelCur_Q;        // (速度-电流双环||无感控制)双PID电流内环Q轴参数
 
-    #if Open_Position_SINGLE
-    PID_STRUCT Position;        // (位置单环)PID位置环参数
-    #endif // Open_Position_SINGLE
-
-    #if Open_VelCur_DOUBLE
-    PID_STRUCT VelCur_v;        // (速度-电流双环)双PID速度外环参数
-    PID_STRUCT VelCur_D;        // (速度-电流双环)双PID电流内环D轴参数
-    PID_STRUCT VelCur_Q;        // (速度-电流双环)双PID电流内环Q轴参数
-    #endif // Open_VelCur_DOUBLE
-
-    #if Open_PosVel_DOUBLE
-    PID_STRUCT PosVel_p;        // (位置-速度双环)双PID位置外环参数
-    PID_STRUCT PosVel_v;        // (位置-速度双环)双PID速度内环参数
-    #endif // Open_PosVel_DOUBLE
-
-    #if Open_PosVelCur_THREE
     PID_STRUCT PosVelCur_p;     // (高性能伺服三环)pos
     PID_STRUCT PosVelCur_v;     // (高性能伺服三环)vel
     PID_STRUCT PosVelCur_D;     // (高性能伺服三环)D轴
     PID_STRUCT PosVelCur_Q;     // (高性能伺服三环)Q轴
-    #endif // Open_PosVelCur_THREE
 
     uint8_t Response;           // (参数设计)响应带宽倍数
-    uint16_t Count;             // (数据)响应带宽记录
-    uint16_t Compare;           // (数据)带宽倍数2的幂
 }MOTOR_PID_STRUCT;
 
 typedef struct{
@@ -94,7 +58,7 @@ typedef struct{
 }MOTOR_IDENTIFY_STRUCT;
 
 typedef struct{
-    float Vbus;                 // (电机实体参数)母线电压
+    float VBUS;                 // (电机实体参数)母线电压
     uint8_t Poles;              // (电机实体参数)电机极对极数
 
     float Limit;                // (参数设计)预处理|电机定位占空比
@@ -180,8 +144,8 @@ typedef struct{
 }MOTOR_CURRENT_STRUCT;
 
 typedef struct{
-    MOTOR_MODE_ENUM mode;       // 【有参数设计】mode选择电机的运行模式
-    MOTOR_STATUS_ENUM status;   // 【数据】status存储电机运行状态
+    uint8_t mode;       // 【有参数设计】mode选择电机的运行模式
+    uint8_t status;   // 【数据】status存储电机运行状态
     MOTOR_FLAG_STRUCT flag;     // 【有参数设计】flag电机运行标志位
     MOTOR_BPF_STRUCT bpf;       // 【有参数设计】bpf低通滤波器设计
     MOTOR_PID_STRUCT pid;       // 【有参数设计】pid闭环控制系统设计

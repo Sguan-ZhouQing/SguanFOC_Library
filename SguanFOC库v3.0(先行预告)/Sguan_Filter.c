@@ -11,9 +11,7 @@
  */
 #include "Sguan_Filter.h"
 
-#include <math.h>
-
-/* 二阶典型环节参数初始化，主函数调用 */
+// 二阶典型环节参数初始化，主函数调用
 void BPF_Init(BPF_STRUCT *bpf){
     double temp0 = bpf->T*bpf->Wc*2.828427124746f;
     double temp1 = bpf->T*bpf->Wc;
@@ -33,7 +31,7 @@ void BPF_Init(BPF_STRUCT *bpf){
     bpf->filter.Output = 0;
 }
 
-/* 定时器1ms中断服务函数 */
+// 定时器1ms中断服务函数
 void BPF_Loop(BPF_STRUCT *bpf){
     // 更新历史输入和输出数值
     for (int n = 2; n > 0; n--){
@@ -50,46 +48,11 @@ void BPF_Loop(BPF_STRUCT *bpf){
                 bpf->filter.den[2] * bpf->filter.o[2];
 
     // 安全检查并输出结果，避免除以零或产生NaN/Inf
-    if (bpf->filter.den[0] != 0.0f && !isnan(den) && !isinf(den)) {
+    if (bpf->filter.den[0] != 0.0f && !Value_isnan(den) && !Value_isinf(den)) {
         bpf->filter.o[0] = (num - den) / bpf->filter.den[0];
     }
-    if (isnan(bpf->filter.o[0]) || isinf(bpf->filter.o[0])) {
+    if (Value_isnan(bpf->filter.o[0]) || Value_isinf(bpf->filter.o[0])) {
         bpf->filter.o[0] = 0.0f;
     }
     bpf->filter.Output = bpf->filter.o[0];
 }
-
-// void BPF_Loop(BPF_STRUCT *bpf){
-//     // 保存当前输入
-//     float input = bpf->filter.Input;
-    
-//     // 计算输出（使用历史值）
-//     float num = bpf->filter.num[0] * input + 
-//                 bpf->filter.num[1] * bpf->filter.i[0] + 
-//                 bpf->filter.num[2] * bpf->filter.i[1];
-    
-//     float den = bpf->filter.den[1] * bpf->filter.o[0] + 
-//                 bpf->filter.den[2] * bpf->filter.o[1];
-    
-//     // 计算输出，如果分母为0就设为0
-//     float output = 0.0f;
-//     if (bpf->filter.den[0] != 0.0f && !isnan(den) && !isinf(den)) {
-//         output = (num - den) / bpf->filter.den[0];
-//     }
-    
-//     // 检查输出是否有效
-//     if (isnan(output) || isinf(output)) {
-//         output = 0.0f;
-//     }
-    
-//     // 更新历史值
-//     bpf->filter.i[2] = bpf->filter.i[1];
-//     bpf->filter.i[1] = bpf->filter.i[0];
-//     bpf->filter.i[0] = input;
-    
-//     bpf->filter.o[2] = bpf->filter.o[1];
-//     bpf->filter.o[1] = bpf->filter.o[0];
-//     bpf->filter.o[0] = output;
-    
-//     bpf->filter.Output = output;
-// }

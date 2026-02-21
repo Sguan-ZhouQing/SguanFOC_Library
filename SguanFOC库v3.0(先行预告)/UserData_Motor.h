@@ -16,7 +16,7 @@ static inline void User_MotorSet(void){
     Sguan.identify.Rs = 0.19067f;       // (float)相线电阻
     Sguan.identify.Flux = 0.00028043f;  // (float)磁链
     // 3.motor电机参数辨识
-    Sguan.motor.Vbus = 12.0f;           // (float)母线电压
+    Sguan.motor.VBUS = 12.0f;           // (float)母线电压
     Sguan.motor.Poles = 7;              // (uint8_t)极对极数
 
     Sguan.motor.Limit = 0.2f;           // (float)预处理电压占比

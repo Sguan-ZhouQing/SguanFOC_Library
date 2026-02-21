@@ -47,7 +47,7 @@ static void (*const status_handlers[])(void) = {
 };
 
 // 核心函数MotorStatus_Loop函数
-void MotorStatus_Loop(MOTOR_STATUS_ENUM *status){
+void MotorStatus_Loop(uint8_t *status){
     if (*status < 24){
         status_handlers[*status]();
     } else{

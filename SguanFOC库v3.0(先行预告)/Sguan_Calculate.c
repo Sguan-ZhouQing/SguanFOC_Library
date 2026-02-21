@@ -26,10 +26,83 @@ static const int64_t Q31_MAX_64 = 2147483647LL;
 static const int64_t Q31_MIN_64 = -2147483648LL;
 
 // 重写fmodf函数
-static float Sguan_fmodf(float x, float y) {
+static float Value_fmodf(float x, float y) {
   if (y == 0.0f) return 0.0f;
   int quotient = (int)(x / y); // 1次除法运算
   return x - quotient * y;     // 1次乘1次减
+}
+
+// 重写fabsf函数
+float Value_fabsf(float x){
+  union {
+      float f;
+      uint32_t i;
+  } u;
+  u.f = x;
+  u.i &= 0x7FFFFFFF; // 1次位与操作
+  return u.f;
+}
+
+// 重写isinf函数
+int Value_isinf(float x){
+    union{
+        float f;
+        uint32_t i;
+    } u = {x};
+    
+    // 单精度浮点数格式：
+    // 符号位(1bit) | 指数位(8bits) | 尾数位(23bits)
+    // 无穷大：指数位全1，尾数位全0
+    // 去除符号位后检查
+    uint32_t exp_mask = 0x7F800000;  // 指数位全1的掩码
+    uint32_t mant_mask = 0x007FFFFF;  // 尾数位掩码
+    
+    // 检查指数位是否全1且尾数位全0
+    if ((u.i & exp_mask) == exp_mask && (u.i & mant_mask) == 0) {
+        return 1;  // 是无穷大
+    }
+    return 0;  // 不是无穷大
+}
+
+// 重写isnan函数
+int Value_isnan(float x){
+    union{
+        float f;
+        uint32_t i;
+    } u = {x};
+    
+    uint32_t exp_mask = 0x7F800000;  // 指数位全1的掩码
+    uint32_t mant_mask = 0x007FFFFF;  // 尾数位掩码
+    if ((u.i & exp_mask) == exp_mask && (u.i & mant_mask) != 0) {
+        return 1;  // 是NaN
+    }
+    return 0;  // 不是NaN
+}
+
+// 重写sqrtf函数
+float Value_sqrtf(float x){
+    if (x < 0){
+        return 0.0f / 0.0f;  // 返回NaN（0/0产生NaN）
+    }
+    if (x == 0 || x == 1){
+        return x;
+    }
+    float guess = x;
+    float epsilon = 0.00001f;  // 精度要求
+    // 牛顿迭代公式：guess = (guess + x/guess) / 2
+    while (1) {
+        float new_guess = (guess + x / guess) * 0.5f;
+        if (new_guess > guess){
+            if (new_guess - guess < epsilon){
+                return new_guess;
+            }
+        } else {
+            if (guess - new_guess < epsilon){
+                return new_guess;
+            }
+        }
+        guess = new_guess;
+    }
 }
 
 // 数值限幅
@@ -41,7 +114,7 @@ float Value_Limit(float val, float max, float min) {
 
 // 参数取模
 float normalize_angle(float angle) {
-  float normalized = Sguan_fmodf(angle, Value_PI*2);
+  float normalized = Value_fmodf(angle, Value_PI*2);
   // 如果结果为负，加上2π使其在[0, 2π)范围内
   if (normalized < 0) {
       normalized += Value_PI*2;

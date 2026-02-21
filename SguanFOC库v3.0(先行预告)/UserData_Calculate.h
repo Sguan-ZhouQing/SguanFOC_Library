@@ -3,42 +3,6 @@
 /* 电机控制User用户设置·数据计算 */
 
 /**
- * @description: 宏定义0~3决定“电机有/无感运行模式”的开启与否(默认有感FOC控制)
- * @reminder: 0->有传感器FOC控制(全速域) | 1->无感HFI高频注入控制(低速域)
- * @reminder: 2->无感SMO滑膜观测器控制(高速域) | 3->无感HFI-SMO控制(全速域)
- * @return {*}
- */
-#define MOTOR_CONTROL 0
-
-/**
- * @description: 宏定义0或1决定“PID运算参数”自适应与否(默认开启)
- * @reminder: 0->关闭PID参数自适应 | 1->开启PID参数自适应
- * @return {*}
- */
-#define Open_PID_Calculate 0
-
-/**
- * @description: 宏定义0或1决定“PID运算参数”自适应与否(默认开启)
- * @reminder: 0->关闭PID参数自适应 | 1->开启PID参数自适应
- * @return {*}
- */
-#define Open_Velocity_OPEN      1
-#define Open_Current_SINGLE     1
-#define Open_Velocity_SINGLE    1
-#define Open_Position_SINGLE    1
-#define Open_VelCur_DOUBLE      1
-#define Open_PosVel_DOUBLE      1
-#define Open_PosVelCur_THREE    1
-
-/**
- * @description: 宏定义0或者1决定“电机实体参数”的测量方式(默认关闭)
- * @reminder: 0->不主动进行测量，使用UserData_Motor.h中的离线值
- * @reminder: 1->(主动离线测量)之后一直使用这个值
- * @return {*}
- */
-#define Open_Quantize_Method 0
-
-/**
  * @description: 宏定义0或1决定“Q31定点化运算”的开启与否(默认关闭)
  * @reminder: 0->浮点运算 | 1->定点运算
  * @return {*}

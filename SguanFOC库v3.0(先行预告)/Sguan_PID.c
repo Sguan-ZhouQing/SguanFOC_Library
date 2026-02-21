@@ -10,8 +10,6 @@
  * Copyright (c) 2026 by $星必尘Sguan, All Rights Reserved. 
  */
 #include "Sguan_PID.h"
-// 外部函数文件声明
-#include <math.h>
 
 // 闭环系统PID核心参数初始化，主函数调用
 void PID_Init(PID_STRUCT *pid){

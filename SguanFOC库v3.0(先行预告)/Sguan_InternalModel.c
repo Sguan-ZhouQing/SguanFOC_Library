@@ -12,4 +12,10 @@
 #include "Sguan_InternalModel.h"
 
 
+void InternalModel_Init(INTERNALMODEL_STRUCT *im){
 
+}
+
+void InternalModel_Loop(INTERNALMODEL_STRUCT *im){
+
+}

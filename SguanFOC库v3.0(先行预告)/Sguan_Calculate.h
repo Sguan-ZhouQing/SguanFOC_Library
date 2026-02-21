@@ -12,7 +12,10 @@
 typedef int32_t q31_t;
 
 // 重写C标准库
-float Sguan_fabsf(float x);
+float Value_fabsf(float x);
+int Value_isinf(float x);
+int Value_isnan(float x);
+float Value_sqrtf(float x);
 
 // 参数限制函数
 float Value_Limit(float val, float max, float min);

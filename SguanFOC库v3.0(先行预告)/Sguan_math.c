@@ -11,25 +11,10 @@
  */
 #include "Sguan_math.h"
 
-/* 外部C标准库文件声明 */
-#include <stdbool.h>
-#include <math.h>
-
 // 内部宏定义声明
 #define Value_rad60 1.047197551196598f
 #define Value_INV_SQRT3 0.5773502691896257f
 #define Value_SQRT3 1.73205080756887729353f
-
-// 重写fabsf函数
-float Sguan_fabsf(float x) {
-  union {
-      float f;
-      uint32_t i;
-  } u;
-  u.f = x;
-  u.i &= 0x7FFFFFFF; // 1次位与操作
-  return u.f;
-}
 
 // 快速sine和cosine求解的局部函数
 static float f1(float x) {
@@ -94,9 +79,9 @@ void SVPWM(float d, float q, float sin_phi, float cos_phi, float *d_u, float *d_
   float alpha,beta;
   ipark(&alpha, &beta, d, q, sin_phi, cos_phi);
 
-  bool A = beta > 0;
-  bool B = Sguan_fabsf(beta) > Value_SQRT3 * Sguan_fabsf(alpha);
-  bool C = alpha > 0;
+  int8_t A = beta > 0;
+  int8_t B = Value_fabsf(beta) > Value_SQRT3 * Value_fabsf(alpha);
+  int8_t C = alpha > 0;
   int K = 4 * A + 2 * B + C;
   int sector = K_to_sector[K];
 
@@ -120,7 +105,7 @@ void Overmodulation(float *d, float *q){
     float Vref = (*d)*(*d) + (*q)*(*q);
     
     if (Vref > 1.0f) {
-      float scale = 1.0f / sqrtf(Vref);
+      float scale = 1.0f / Value_sqrtf(Vref);
       *d *= scale;
       *q *= scale;
       // 幅值限制处理,如果“幅值平方”超过 1,进行等比例缩放
