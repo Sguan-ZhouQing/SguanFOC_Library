@@ -13,5 +13,4 @@ static inline void User_CorrespondSet(uint8_t *ch, uint16_t size){
 }
 
 
-
 #endif // CORRESPOND_H

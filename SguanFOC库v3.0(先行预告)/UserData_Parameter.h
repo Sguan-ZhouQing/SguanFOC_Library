@@ -17,14 +17,12 @@ static inline void User_ParameterSet(void){
     Sguan.bpf.Current1.Wc = 800.0f;          // 电机电流滤波->截止频率(默认参数)
     Sguan.bpf.CurrentD.Wc = 31415.96f;          // 电机D轴电流滤波->截止频率(默认参数)
     Sguan.bpf.CurrentQ.Wc = 31415.96f;          // 电机Q轴电流滤波->截止频率(默认参数)
-    Sguan.bpf.Encoder.Wc = 78.539;           // 速度信号滤波->截止频率(默认参数)
+    Sguan.bpf.Encoder.Wc = 314.1596f;           // 速度信号滤波->截止频率(默认参数)
     // 2.pid闭环控制系统设计
     #if Open_Current_SINGLE
     Sguan.pid.Current_D.Wc = 100.0f;        // PID电流环D轴参数->截止频率(默认参数)
     Sguan.pid.Current_D.Kp = 0.261f;          // PID电流环D轴参数->Kp【PID参数自适应】
     Sguan.pid.Current_D.Ki = 958.4111f;         // PID电流环D轴参数->Ki【PID参数自适应】
-    // Sguan.pid.Current_D.Kp = 2.3f;          // PID电流环D轴参数->Kp【PID参数自适应】
-    // Sguan.pid.Current_D.Ki = 30.8f;         // PID电流环D轴参数->Ki【PID参数自适应】
     Sguan.pid.Current_D.Kd = 0.0f;          // PID电流环D轴参数->Kd【PID参数自适应】
     Sguan.pid.Current_D.OutMax = 12.0f;     // PID电流环D轴参数->最大限幅(默认参数)
     Sguan.pid.Current_D.OutMin = -12.0f;    // PID电流环D轴参数->最小限幅(默认参数)
@@ -34,8 +32,6 @@ static inline void User_ParameterSet(void){
     Sguan.pid.Current_Q.Wc = 100.0f;        // PID电流环Q轴参数->截止频率(默认参数)
     Sguan.pid.Current_Q.Kp = 0.261f;          // PID电流环Q轴参数->Kp【PID参数自适应】
     Sguan.pid.Current_Q.Ki = 958.4111f;         // PID电流环Q轴参数->Ki【PID参数自适应】
-    // Sguan.pid.Current_Q.Kp = 2.3f;          // PID电流环Q轴参数->Kp【PID参数自适应】
-    // Sguan.pid.Current_Q.Ki = 30.8f;         // PID电流环Q轴参数->Ki【PID参数自适应】
     Sguan.pid.Current_Q.Kd = 0.0f;          // PID电流环Q轴参数->Kd【PID参数自适应】
     Sguan.pid.Current_Q.OutMax = 12.0f;     // PID电流环Q轴参数->最大限幅(默认参数)
     Sguan.pid.Current_Q.OutMin = -12.0f;    // PID电流环Q轴参数->最小限幅(默认参数)
@@ -67,8 +63,8 @@ static inline void User_ParameterSet(void){
 
     #if Open_VelCur_DOUBLE
     Sguan.pid.VelCur_v.Wc = 100.0f;         // 双PID速度外环参数(默认参数)
-    Sguan.pid.VelCur_v.Kp = 0.06206f;           // 双PID速度外环参数【PID参数自适应】
-    Sguan.pid.VelCur_v.Ki = 0.6542f;          // 双PID速度外环参数【PID参数自适应】
+    Sguan.pid.VelCur_v.Kp = 0.06f;           // 双PID速度外环参数【PID参数自适应】
+    Sguan.pid.VelCur_v.Ki = 0.4f;          // 双PID速度外环参数【PID参数自适应】
     Sguan.pid.VelCur_v.Kd = 0.0f;           // 双PID速度外环参数【PID参数自适应】
     Sguan.pid.VelCur_v.OutMax = 10.5f;      // 双PID速度外环参数(默认参数)
     Sguan.pid.VelCur_v.OutMin = -10.5f;     // 双PID速度外环参数(默认参数)
@@ -116,17 +112,17 @@ static inline void User_ParameterSet(void){
 
     #if Open_PosVelCur_THREE
     Sguan.pid.PosVelCur_p.Wc = 18.0f;      // 高性能伺服三环pos(默认参数)
-    Sguan.pid.PosVelCur_p.Kp = 6.0f;        // 高性能伺服三环pos【PID参数自适应】
+    Sguan.pid.PosVelCur_p.Kp = 12.0f;        // 高性能伺服三环pos【PID参数自适应】
     Sguan.pid.PosVelCur_p.Ki = 0.0f;       // 高性能伺服三环pos【PID参数自适应】
     Sguan.pid.PosVelCur_p.Kd = 0.0f;        // 高性能伺服三环pos【PID参数自适应】
-    Sguan.pid.PosVelCur_p.OutMax = 120.0f;   // 高性能伺服三环pos(默认参数)
-    Sguan.pid.PosVelCur_p.OutMin = -120.0f;  // 高性能伺服三环pos(默认参数)
+    Sguan.pid.PosVelCur_p.OutMax = 150.0f;   // 高性能伺服三环pos(默认参数)
+    Sguan.pid.PosVelCur_p.OutMin = -150.0f;  // 高性能伺服三环pos(默认参数)
     Sguan.pid.PosVelCur_p.IntMax = 150.0f;   // 高性能伺服三环pos->积分项上限(默认参数)
     Sguan.pid.PosVelCur_p.IntMin = -150.0f;  // 高性能伺服三环pos->积分项下限(默认参数)
     /* =========================== 分割线 ========================== */
     Sguan.pid.PosVelCur_v.Wc = 100.0f;      // 高性能伺服三环vel(默认参数)
-    Sguan.pid.PosVelCur_v.Kp = 0.06206f;        // 高性能伺服三环vel【PID参数自适应】
-    Sguan.pid.PosVelCur_v.Ki = 0.6542f;       // 高性能伺服三环vel【PID参数自适应】
+    Sguan.pid.PosVelCur_v.Kp = 0.06f;        // 高性能伺服三环vel【PID参数自适应】
+    Sguan.pid.PosVelCur_v.Ki = 0.4f;       // 高性能伺服三环vel【PID参数自适应】
     Sguan.pid.PosVelCur_v.Kd = 0.0f;        // 高性能伺服三环vel【PID参数自适应】
     Sguan.pid.PosVelCur_v.OutMax = 10.0f;   // 高性能伺服三环vel(默认参数)
     Sguan.pid.PosVelCur_v.OutMin = -10.0f;  // 高性能伺服三环vel(默认参数)

@@ -14,6 +14,8 @@ static inline void User_UserControl(void){
 
 static inline void User_AO_Adjust(float AO){
     /* Your code for Parameter set */
+    // Sguan.foc.Target_Iq = AO;
+    // Sguan.foc.Target_Speed = AO;
     Sguan.foc.Target_Pos = AO;
 }
 
@@ -38,7 +40,7 @@ static inline void User_UserTX(void){
     Sguan.TXdata.fdata[8] = Sguan.encoder.Real_Pos;
     Sguan.TXdata.fdata[9] = Sguan.foc.Target_Pos;
     Sguan.TXdata.fdata[10] = Sguan.pid.PosVelCur_p.run.Output;
-    Sguan.TXdata.fdata[11] = Sguan.pid.PosVelCur_v.run.Output;
+    Sguan.TXdata.fdata[11] = Sguan.encoder.Pos_offset;
 }
 
 

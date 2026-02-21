@@ -413,14 +413,20 @@ static void PID_PosVelCur_THREE(SguanFOC_System_STRUCT *sguan){
         sguan->pid.PosVelCur_v.run.Fbk = sguan->encoder.Real_Speed;
         PID_Loop(&sguan->pid.PosVelCur_v);
     }
+    // 1.前馈计算
+    float Ud_ff = -sguan->encoder.Real_Espeed*sguan->identify.Lq*sguan->current.Real_Iq; 
+    float Uq_ff = sguan->encoder.Real_Espeed*sguan->identify.Ld*sguan->current.Real_Id + 
+                    sguan->encoder.Real_Espeed*sguan->identify.Flux;
+
+    // 2.PID计算
     sguan->pid.PosVelCur_D.run.Ref = sguan->foc.Target_Id; // 默认D轴励磁为0
     sguan->pid.PosVelCur_D.run.Fbk = sguan->current.Real_Id;
     sguan->pid.PosVelCur_Q.run.Ref = sguan->pid.PosVelCur_v.run.Output;
     sguan->pid.PosVelCur_Q.run.Fbk = sguan->current.Real_Iq;
     PID_Loop(&sguan->pid.PosVelCur_D);
     PID_Loop(&sguan->pid.PosVelCur_Q);
-    sguan->foc.Ud_in = sguan->pid.PosVelCur_D.run.Output;
-    sguan->foc.Uq_in = sguan->pid.PosVelCur_Q.run.Output;
+    sguan->foc.Ud_in = sguan->pid.PosVelCur_D.run.Output + Ud_ff;
+    sguan->foc.Uq_in = sguan->pid.PosVelCur_Q.run.Output + Uq_ff;
     #endif // Open_PosVelCur_THREE
 }
 
