@@ -12,8 +12,6 @@
 #include "SguanFOC.h"
 
 /* USER CODE BEGIN Includes */
-#include "Sguan_Current.h"
-#include "Sguan_Encoder.h"
 // 电机控制User用户设置声明
 #include "UserData_Function.h"
 #include "UserData_Motor.h"
@@ -137,7 +135,13 @@ static void Offset_EncoderRead(SguanFOC_System_STRUCT *sguan){
 
 // Offset读取电流偏置
 static void Offset_CurrentRead(SguanFOC_System_STRUCT *sguan){
-   Current_OffsetRead(&sguan->current.Pos_offset0,&sguan->current.Pos_offset1);
+    for (uint8_t i = 0; i < 24; i++){
+        sguan->current.Pos_offset0 += User_ReadADC_Raw(0);
+        sguan->current.Pos_offset1 += User_ReadADC_Raw(1);
+        User_Delay(2);
+    }
+    sguan->current.Pos_offset0 = sguan->current.Pos_offset0/24;
+    sguan->current.Pos_offset1 = sguan->current.Pos_offset1/24;
     sguan->current.Final_Gain = sguan->motor.MCU_Voltage/
         (sguan->motor.ADC_Precision*sguan->motor.Amplifier*sguan->motor.Sampling_Rs);
 }
@@ -171,22 +175,10 @@ static float Encoder_ReadSpeed(SguanFOC_System_STRUCT *sguan){
     return sguan->encoder.pll.go.OutWe;
 }
 
-
 // Encoder实时更新角速度和角度信息(已滤波)
 static void Encoder_Tick(SguanFOC_System_STRUCT *sguan){
-    #if !MOTOR_CONTROL
     // 0.有传感器FOC控制(全速域)
     sguan->encoder.Real_Rad = User_Encoder_ReadRad();
-    #elif MOTOR_CONTROL == 1
-    // 1.无感HFI高频注入控制(低速域)
-    sguan->encoder.Real_Rad = HFI_Encoder_ReadRad(sguan);
-    #elif MOTOR_CONTROL == 2
-    // 2.无感SMO滑膜观测器控制(高速域)
-    sguan->encoder.Real_Rad = SMO_Encoder_ReadRad(sguan);
-    #elif MOTOR_CONTROL == 3
-    // 3.无感HFI-SMO控制(全速域)
-    sguan->encoder.Real_Rad = User_Encoder_ReadRad();
-    #endif // MOTOR_CONTROL
     sguan->bpf.Encoder.filter.Input = Encoder_ReadSpeed(sguan)*sguan->motor.Encoder_Dir;
     BPF_Loop(&sguan->bpf.Encoder);
     sguan->encoder.Real_Speed = sguan->bpf.Encoder.filter.Output;
