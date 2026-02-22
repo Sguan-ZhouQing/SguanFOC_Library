@@ -12,7 +12,10 @@ typedef struct{
 
 typedef struct{
     IMC_STRUCT imc;         // (结构体)内模控制器结构体
-    double T;               // (参数设计)T周期
+    
+    float T;               // (参数设计)T周期
+    double Rs;              // (参数设计)Rs相电阻
+    double Ls;              // (参数设计)Ls相电感
 }INTERNALMODEL_STRUCT;
 
 void InternalModel_Init(INTERNALMODEL_STRUCT *im);

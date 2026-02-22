@@ -16,19 +16,11 @@ void PLL_Init(PLL_STRUCT *pll){
     double temp0 = pll->T*pll->Ki;
     pll->go.X_num[0] = (float)(2*pll->Kp+temp0);
     pll->go.X_num[1] = (float)(-2*pll->Kp+temp0);
-    pll->go.X_den[0] = (float)2;
-    pll->go.X_den[1] = (float)(-2);
-    pll->go.Y_num[0] = (float)pll->T;
-    pll->go.Y_num[1] = (float)pll->T;
-    pll->go.Y_den[0] = (float)2;
-    pll->go.Y_den[1] = (float)(-2);
     // 初始化为零
-    for (int n = 0; n < 2; n++){
-        pll->go.i[n] = 0;
-        pll->go.Xo[n] = 0;
-        pll->go.Yo[n] = 0;
-    }
-    pll->is_position_mode = 0; // 默认非位置环模式
+    pll->is_position_mode = 0; // 默认非位置环mode
+    pll->go.i = 0;
+    pll->go.Xo = 0;
+    pll->go.Yo = 0;
     pll->go.OutWe = 0;
     pll->go.OutRe = 0;
     pll->go.Error = 0;
@@ -36,26 +28,20 @@ void PLL_Init(PLL_STRUCT *pll){
 
 // 闭环控制运算的定时器中断服务函数
 void PLL_Loop(PLL_STRUCT *pll){
-    // 更新历史输入和输出数值
-    pll->go.i[1] = pll->go.i[0];
-    pll->go.Xo[1] = pll->go.Xo[0];
-    pll->go.Yo[1] = pll->go.Yo[0];
-    // 更新当前输入
-    pll->go.i[0] = pll->go.Error;
     // 计算PI控制器(并输出We)
-    pll->go.Xo[0] = (pll->go.X_num[0]*pll->go.i[0] + pll->go.X_num[1]*pll->go.i[1] 
-                - pll->go.X_den[1]*pll->go.Xo[1]) / pll->go.X_den[0];
-    pll->go.OutWe = pll->go.Xo[0];
+    pll->go.OutWe = (pll->go.X_num[0]*pll->go.Error + pll->go.X_num[1]*pll->go.i 
+                + 2.0f*pll->go.Xo) / 2.0f;
     // 计算积分器(并输出Re)
-    pll->go.Yo[0] = (pll->go.Y_num[0]*pll->go.Xo[0] + pll->go.Y_num[1]*pll->go.Xo[1] 
-                - pll->go.Y_den[1]*pll->go.Yo[1]) / pll->go.Y_den[0];
-    if (pll->is_position_mode){
-        // 位置环模式：连续积分，不进行归一化
-        pll->go.OutRe = pll->go.Yo[0];
-    } else{
+    pll->go.OutRe = (pll->T*pll->go.OutWe + pll->T*pll->go.Xo 
+                + 2.0f*pll->go.Yo) / 2.0f;
+    if (!pll->is_position_mode){
         // 非位置环模式：使用normalize_angle函数归一化到[0, 2π)
-        pll->go.OutRe = normalize_angle(pll->go.Yo[0]);
+        pll->go.OutRe = normalize_angle(pll->go.OutRe);
     }
+    // 更新历史输入和输出数值
+    pll->go.i = pll->go.Error;
+    pll->go.Xo = pll->go.OutWe;
+    pll->go.Yo = pll->go.OutRe;
 }
 
 

@@ -12,5 +12,7 @@
 #include "Sguan_Identify.h"
 
 
-
+void Identify_Loop(void){
+    
+}
 

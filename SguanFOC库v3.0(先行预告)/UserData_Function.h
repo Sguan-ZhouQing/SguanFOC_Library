@@ -68,15 +68,19 @@ static inline void User_PwmDuty_Set(uint16_t Duty_u,uint16_t Duty_v,uint16_t Dut
 }
 
 static inline float User_VBUS_DataGet(void){
-    float VBUS_num = 0.0f;
+    // float VBUS_num = 0.0f;
     /* Your code for motor VBUS_Voltage Data return if you use it */
-    return VBUS_num;
+    
+    // 如果不使用电压功能，返回-9999.0f（正常电压不会是负数）
+    return -9999.0f;
 }
 
 static inline float User_Temperature_DataGet(void){
-    float Temp_num = 0.0f;
+    // float Temp_num = 0.0f;
     /* Your code for motor Temperature Data return if you use it */
-    return Temp_num;
+    
+    // 如果不使用温度功能，返回-9999.0f（正常温度不会是这么大的负数）
+    return -9999.0f;
 }
 
 

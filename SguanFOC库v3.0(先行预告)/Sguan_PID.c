@@ -5,7 +5,7 @@
  * @LastEditors: 星必尘Sguan|3464647102@qq.com
  * @LastEditTime: 2026-02-16 00:39:48
  * @FilePath: \stm_SguanFOCtest\SguanFOC\Sguan_PID.c
- * @Description: SguanFOC库的“闭环PID算法”实现
+ * @Description: SguanFOC库的“开环PID算法”实现
  * 
  * Copyright (c) 2026 by $星必尘Sguan, All Rights Reserved. 
  */
@@ -18,8 +18,6 @@ void PID_Init(PID_STRUCT *pid){
     double temp2 = pid->Kd*pid->Wc;
     pid->run.I_num[0] = (float)temp0;
     pid->run.I_num[1] = (float)temp0;
-    pid->run.I_den[0] = (float)2;
-    pid->run.I_den[1] = (float)(-2);
     pid->run.D_num[0] = (float)(2*temp2);
     pid->run.D_num[1] = (float)(-2*temp2);
     pid->run.D_den[0] = (float)(2+temp1);
@@ -45,7 +43,7 @@ void PID_Loop(PID_STRUCT *pid){
     pid->run.i[0] = pid->run.Ref - pid->run.Fbk;
     if (pid->Ki){
         pid->run.Io[0] = (pid->run.I_num[0]*pid->run.i[0] + pid->run.I_num[1]*pid->run.i[1] 
-                    - pid->run.I_den[1]*pid->run.Io[1]) / pid->run.I_den[0];
+                    + 2.0f*pid->run.Io[1]) / 2.0f;
 
         if(pid->run.Io[0] > pid->IntMax) pid->run.Io[0] = pid->IntMax;
         if(pid->run.Io[0] < pid->IntMin) pid->run.Io[0] = pid->IntMin;

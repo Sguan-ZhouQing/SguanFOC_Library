@@ -12,6 +12,8 @@
 #include "SguanFOC.h"
 
 /* USER CODE BEGIN Includes */
+#include "Sguan_Current.h"
+#include "Sguan_Encoder.h"
 // 电机控制User用户设置声明
 #include "UserData_Function.h"
 #include "UserData_Motor.h"
@@ -62,20 +64,14 @@ static void Current_Tick(SguanFOC_System_STRUCT *sguan);
  */
 static void PID_Velocity_OPEN(SguanFOC_System_STRUCT *sguan);
 static void PID_Current_SINGLE(SguanFOC_System_STRUCT *sguan);
-static void PID_Velocity_SINGLE(SguanFOC_System_STRUCT *sguan);
-static void PID_Position_SINGLE(SguanFOC_System_STRUCT *sguan);
 static void PID_VelCur_DOUBLE(SguanFOC_System_STRUCT *sguan);
-static void PID_PosVel_DOUBLE(SguanFOC_System_STRUCT *sguan);
 static void PID_PosVelCur_THREE(SguanFOC_System_STRUCT *sguan);
 static void (*const PID_Tick[])(SguanFOC_System_STRUCT*)={
     /*这里注意“枚举变量”的边界, PID_Tick[sguan->mode](sguan)使用*/
     PID_Velocity_OPEN,      // Velocity_OPEN_MODE = 0
     PID_Current_SINGLE,     // Current_SINGLE_MODE = 1
-    PID_Velocity_SINGLE,    // Velocity_SINGLE_MODE = 2
-    PID_Position_SINGLE,    // Position_SINGLE_MODE = 3
-    PID_VelCur_DOUBLE,      // VelCur_DOUBLE_MODE = 4
-    PID_PosVel_DOUBLE,      // PosVel_DOUBLE_MODE = 5
-    PID_PosVelCur_THREE     // PosVelCur_THREE_MODE = 6
+    PID_VelCur_DOUBLE,      // VelCur_DOUBLE_MODE = 2
+    PID_PosVelCur_THREE     // PosVelCur_THREE_MODE = 3
 };
 /**
  * @description: 6.Data母线电压和驱动器物理温度数据更新和滤波
@@ -120,7 +116,6 @@ static void Sguan_GeneratePWM_Loop(SguanFOC_System_STRUCT *sguan);
  * @return {*}
  */
 static void Sguan_Quantize_Init(void);
-static void Sguan_PIDset_Init(void);
 static void Sguan_BPF_Init(SguanFOC_System_STRUCT *sguan);
 static void Sguan_PID_Init(SguanFOC_System_STRUCT *sguan);
 static void Sguan_PLL_Init(SguanFOC_System_STRUCT *sguan);
@@ -142,13 +137,7 @@ static void Offset_EncoderRead(SguanFOC_System_STRUCT *sguan){
 
 // Offset读取电流偏置
 static void Offset_CurrentRead(SguanFOC_System_STRUCT *sguan){
-   for (uint8_t i = 0; i < 24; i++){
-       sguan->current.Pos_offset0 += User_ReadADC_Raw(0);
-       sguan->current.Pos_offset1 += User_ReadADC_Raw(1);
-       User_Delay(2);
-   }
-    sguan->current.Pos_offset0 = sguan->current.Pos_offset0/24;
-    sguan->current.Pos_offset1 = sguan->current.Pos_offset1/24;
+   Current_OffsetRead(&sguan->current.Pos_offset0,&sguan->current.Pos_offset1);
     sguan->current.Final_Gain = sguan->motor.MCU_Voltage/
         (sguan->motor.ADC_Precision*sguan->motor.Amplifier*sguan->motor.Sampling_Rs);
 }
@@ -160,7 +149,7 @@ static float Encoder_ReadErad(SguanFOC_System_STRUCT *sguan){
 
 // Encoder获取实际电机速度(未滤波)
 static float Encoder_ReadSpeed(SguanFOC_System_STRUCT *sguan){
-    float Encoder_num = sguan->encoder.Real_Rad - normalize_angle(sguan->foc.pll.go.OutRe);
+    float Encoder_num = sguan->encoder.Real_Rad - normalize_angle(sguan->encoder.pll.go.OutRe);
     
     // 计算角度误差,始终归一化到[-π, π)范围
     if (Encoder_num >= Value_PI){
@@ -172,14 +161,14 @@ static float Encoder_ReadSpeed(SguanFOC_System_STRUCT *sguan){
     
     if (sguan->mode == PosVelCur_THREE_MODE){
         // 位置环模式：PLL连续积分（可以超过2π）
-        sguan->foc.pll.is_position_mode = 1;
+        sguan->encoder.pll.is_position_mode = 1;
     } else{
         // 非位置环模式：PLL输出归一化到[0, 2π)
-        sguan->foc.pll.is_position_mode = 0;
+        sguan->encoder.pll.is_position_mode = 0;
     }
-    sguan->foc.pll.go.Error = Encoder_num;
-    PLL_Loop(&sguan->foc.pll);
-    return sguan->foc.pll.go.OutWe;
+    sguan->encoder.pll.go.Error = Encoder_num;
+    PLL_Loop(&sguan->encoder.pll);
+    return sguan->encoder.pll.go.OutWe;
 }
 
 
@@ -201,7 +190,7 @@ static void Encoder_Tick(SguanFOC_System_STRUCT *sguan){
     sguan->bpf.Encoder.filter.Input = Encoder_ReadSpeed(sguan)*sguan->motor.Encoder_Dir;
     BPF_Loop(&sguan->bpf.Encoder);
     sguan->encoder.Real_Speed = sguan->bpf.Encoder.filter.Output;
-    sguan->encoder.Real_Pos = sguan->foc.pll.go.OutRe*sguan->motor.Encoder_Dir;
+    sguan->encoder.Real_Pos = sguan->encoder.pll.go.OutRe*sguan->motor.Encoder_Dir;
     sguan->encoder.Real_Erad = normalize_angle(Encoder_ReadErad(sguan)*sguan->motor.Encoder_Dir);
     sguan->encoder.Real_Espeed = sguan->encoder.Real_Speed*sguan->motor.Poles;
     fast_sin_cos(sguan->encoder.Real_Erad,&sguan->foc.sine,&sguan->foc.cosine);
@@ -280,26 +269,26 @@ static void PID_Current_SINGLE(SguanFOC_System_STRUCT *sguan){
                     sguan->encoder.Real_Espeed*sguan->identify.Flux;
 
     // 2.PID计算
-    sguan->pid.Current_D.run.Ref = sguan->foc.Target_Id; // 默认D轴励磁Id为0
-    sguan->pid.Current_D.run.Fbk = sguan->current.Real_Id;
-    sguan->pid.Current_Q.run.Ref = sguan->foc.Target_Iq;
-    sguan->pid.Current_Q.run.Fbk = sguan->current.Real_Iq;
-    PID_Loop(&sguan->pid.Current_D);
-    PID_Loop(&sguan->pid.Current_Q);
+    sguan->control.Current_D.run.Ref = sguan->foc.Target_Id; // 默认D轴励磁Id为0
+    sguan->control.Current_D.run.Fbk = sguan->current.Real_Id;
+    sguan->control.Current_Q.run.Ref = sguan->foc.Target_Iq;
+    sguan->control.Current_Q.run.Fbk = sguan->current.Real_Iq;
+    PID_Loop(&sguan->control.Current_D);
+    PID_Loop(&sguan->control.Current_Q);
 
     // 3.叠加前馈和PID输出
-    sguan->foc.Ud_in = sguan->pid.Current_D.run.Output + Ud_ff;
-    sguan->foc.Uq_in = sguan->pid.Current_Q.run.Output + Uq_ff;
+    sguan->foc.Ud_in = sguan->control.Current_D.run.Output + Ud_ff;
+    sguan->foc.Uq_in = sguan->control.Current_Q.run.Output + Uq_ff;
 }
 
 // PID速度-电流双环(双闭环)
 static void PID_VelCur_DOUBLE(SguanFOC_System_STRUCT *sguan){
     static uint8_t PID_Count = 0;
     PID_Count++;
-    if (PID_Count == sguan->pid.Response){
-        sguan->pid.VelCur_v.run.Ref = sguan->foc.Target_Speed;
-        sguan->pid.VelCur_v.run.Fbk = sguan->encoder.Real_Speed;
-        PID_Loop(&sguan->pid.VelCur_v);
+    if (PID_Count == sguan->control.Response){
+        sguan->control.Velocity.run.Ref = sguan->foc.Target_Speed;
+        sguan->control.Velocity.run.Fbk = sguan->encoder.Real_Speed;
+        PID_Loop(&sguan->control.Velocity);
         PID_Count = 0;
     }
     // 1.前馈计算
@@ -308,30 +297,30 @@ static void PID_VelCur_DOUBLE(SguanFOC_System_STRUCT *sguan){
                     sguan->encoder.Real_Espeed*sguan->identify.Flux;
 
     // 2.PID计算
-    sguan->pid.VelCur_D.run.Ref = sguan->foc.Target_Id; // 默认D轴励磁Id为0
-    sguan->pid.VelCur_D.run.Fbk = sguan->current.Real_Id;
-    sguan->pid.VelCur_Q.run.Ref = sguan->pid.VelCur_v.run.Output;
-    sguan->pid.VelCur_Q.run.Fbk = sguan->current.Real_Iq;
-    PID_Loop(&sguan->pid.VelCur_D);
-    PID_Loop(&sguan->pid.VelCur_Q);
-    sguan->foc.Ud_in = sguan->pid.VelCur_D.run.Output + Ud_ff;
-    sguan->foc.Uq_in = sguan->pid.VelCur_Q.run.Output + Uq_ff;
+    sguan->control.Current_D.run.Ref = sguan->foc.Target_Id; // 默认D轴励磁Id为0
+    sguan->control.Current_D.run.Fbk = sguan->current.Real_Id;
+    sguan->control.Current_Q.run.Ref = sguan->control.Velocity.run.Output;
+    sguan->control.Current_Q.run.Fbk = sguan->current.Real_Iq;
+    PID_Loop(&sguan->control.Current_D);
+    PID_Loop(&sguan->control.Current_Q);
+    sguan->foc.Ud_in = sguan->control.Current_D.run.Output + Ud_ff;
+    sguan->foc.Uq_in = sguan->control.Current_Q.run.Output + Uq_ff;
 }
 
 // PID高性能伺服三环(三闭环)
 static void PID_PosVelCur_THREE(SguanFOC_System_STRUCT *sguan){
     static uint8_t PID_Count = 0;
     PID_Count++;
-    if (PID_Count == sguan->pid.Response*sguan->pid.Response){
-        sguan->pid.PosVelCur_p.run.Ref = sguan->foc.Target_Pos;
-        sguan->pid.PosVelCur_p.run.Fbk = sguan->encoder.Real_Pos;
-        PID_Loop(&sguan->pid.PosVelCur_p);
+    if (PID_Count == sguan->control.Response*sguan->control.Response){
+        sguan->control.Position.run.Ref = sguan->foc.Target_Pos;
+        sguan->control.Position.run.Fbk = sguan->encoder.Real_Pos;
+        PID_Loop(&sguan->control.Position);
         PID_Count = 0;
     }
-    if (PID_Count % sguan->pid.Response == 0){
-        sguan->pid.PosVelCur_v.run.Ref = sguan->pid.PosVelCur_p.run.Output;
-        sguan->pid.PosVelCur_v.run.Fbk = sguan->encoder.Real_Speed;
-        PID_Loop(&sguan->pid.PosVelCur_v);
+    if (PID_Count % sguan->control.Response == 0){
+        sguan->control.Velocity.run.Ref = sguan->control.Position.run.Output;
+        sguan->control.Velocity.run.Fbk = sguan->encoder.Real_Speed;
+        PID_Loop(&sguan->control.Velocity);
     }
     // 1.前馈计算
     float Ud_ff = -sguan->encoder.Real_Espeed*sguan->identify.Lq*sguan->current.Real_Iq; 
@@ -339,14 +328,14 @@ static void PID_PosVelCur_THREE(SguanFOC_System_STRUCT *sguan){
                     sguan->encoder.Real_Espeed*sguan->identify.Flux;
 
     // 2.PID计算
-    sguan->pid.PosVelCur_D.run.Ref = sguan->foc.Target_Id; // 默认D轴励磁为0
-    sguan->pid.PosVelCur_D.run.Fbk = sguan->current.Real_Id;
-    sguan->pid.PosVelCur_Q.run.Ref = sguan->pid.PosVelCur_v.run.Output;
-    sguan->pid.PosVelCur_Q.run.Fbk = sguan->current.Real_Iq;
-    PID_Loop(&sguan->pid.PosVelCur_D);
-    PID_Loop(&sguan->pid.PosVelCur_Q);
-    sguan->foc.Ud_in = sguan->pid.PosVelCur_D.run.Output + Ud_ff;
-    sguan->foc.Uq_in = sguan->pid.PosVelCur_Q.run.Output + Uq_ff;
+    sguan->control.Current_D.run.Ref = sguan->foc.Target_Id; // 默认D轴励磁为0
+    sguan->control.Current_D.run.Fbk = sguan->current.Real_Id;
+    sguan->control.Current_Q.run.Ref = sguan->control.Velocity.run.Output;
+    sguan->control.Current_Q.run.Fbk = sguan->current.Real_Iq;
+    PID_Loop(&sguan->control.Current_D);
+    PID_Loop(&sguan->control.Current_Q);
+    sguan->foc.Ud_in = sguan->control.Current_D.run.Output + Ud_ff;
+    sguan->foc.Uq_in = sguan->control.Current_Q.run.Output + Uq_ff;
 }
 
 // Data母线电压和驱动器物理温度数据更新和滤波
@@ -425,8 +414,8 @@ static void Status_Switch_Loop(SguanFOC_System_STRUCT *sguan){
     #endif // Open_Temp_Calculate
     // 3.过流保护
     if ((sguan->status != MOTOR_STATUS_OVERCURRENT) && 
-        (sguan->current.Real_Id > sguan->motor.Dcur_MAX) || 
-        (sguan->current.Real_Iq > sguan->motor.Qcur_MAX)){
+        (sguan->current.Real_Id > sguan->safe.Dcur_MAX) || 
+        (sguan->current.Real_Iq > sguan->safe.Qcur_MAX)){
         sguan->status = MOTOR_STATUS_OVERCURRENT;
     }
     if (sguan->status == MOTOR_STATUS_OVERCURRENT){
@@ -636,22 +625,17 @@ static void Sguan_BPF_Init(SguanFOC_System_STRUCT *sguan){
 // Sguan...Init闭环控制算法PID的初始化
 static void Sguan_PID_Init(SguanFOC_System_STRUCT *sguan){
     // 单闭环初始化(电流单闭环)
-    PID_Init(&sguan->pid.Current_D);
-    PID_Init(&sguan->pid.Current_Q);
+    PID_Init(&sguan->control.Current_D);
+    PID_Init(&sguan->control.Current_Q);
     // 双闭环(速度-电流||无感控制)
-    PID_Init(&sguan->pid.VelCur_v);
-    PID_Init(&sguan->pid.VelCur_D);
-    PID_Init(&sguan->pid.VelCur_Q);
+    PID_Init(&sguan->control.Velocity);
     // 三闭环(位置-速度-电流)
-    PID_Init(&sguan->pid.PosVelCur_p);
-    PID_Init(&sguan->pid.PosVelCur_v);
-    PID_Init(&sguan->pid.PosVelCur_D);
-    PID_Init(&sguan->pid.PosVelCur_Q);
+    PID_Init(&sguan->control.Position);
 }
 
 // Sguan...Init锁相环PLL的初始化
 static void Sguan_PLL_Init(SguanFOC_System_STRUCT *sguan){
-    PLL_Init(&sguan->foc.pll);
+    PLL_Init(&sguan->encoder.pll);
 }
 
 // Sguan...Init无感算法Sensorless的初始化
@@ -668,25 +652,18 @@ static void Sguan_Pre_Positioning(SguanFOC_System_STRUCT *sguan,float d_set){
 // Pre系统时钟设置(定时器中断周期)
 static void Sguan_SystemT_Set(SguanFOC_System_STRUCT *sguan){
     // 0.电机编码器参数
-    sguan->motor.Encoder_T = sguan->System_T;
+    sguan->motor.Encoder_T = sguan->PMSM_RUN_T;
     // 1.bpf低通滤波器
-    sguan->bpf.CurrentD.T = sguan->System_T;
-    sguan->bpf.CurrentQ.T = sguan->System_T;
-    sguan->bpf.Encoder.T = sguan->System_T;
+    sguan->bpf.CurrentD.T = sguan->PMSM_RUN_T;
+    sguan->bpf.CurrentQ.T = sguan->PMSM_RUN_T;
+    sguan->bpf.Encoder.T = sguan->PMSM_RUN_T;
     // 2.pid闭环控制系统
-    sguan->pid.Current_D.T = sguan->System_T;
-    sguan->pid.Current_Q.T = sguan->System_T;
-    /* ====================== 分割线 ===================== */
-    sguan->pid.VelCur_v.T = sguan->System_T*sguan->pid.Response;
-    sguan->pid.VelCur_D.T = sguan->System_T;
-    sguan->pid.VelCur_Q.T = sguan->System_T;
-    /* ====================== 分割线 ===================== */
-    sguan->pid.PosVelCur_p.T = sguan->System_T*sguan->pid.Response*sguan->pid.Response;
-    sguan->pid.PosVelCur_v.T = sguan->System_T*sguan->pid.Response;
-    sguan->pid.PosVelCur_D.T = sguan->System_T;
-    sguan->pid.PosVelCur_Q.T = sguan->System_T;
+    sguan->control.Current_D.T = sguan->PMSM_RUN_T;
+    sguan->control.Current_Q.T = sguan->PMSM_RUN_T;
+    sguan->control.Velocity.T = sguan->PMSM_RUN_T*sguan->control.Response;
+    sguan->control.Position.T = sguan->PMSM_RUN_T*sguan->control.Response*sguan->control.Response;
     // 3.pll锁相环跟踪系统
-    sguan->foc.pll.T = sguan->System_T;
+    sguan->encoder.pll.T = sguan->PMSM_RUN_T;
 }
 
 // Pre系统开始的核心文件，主任务初始化函数
@@ -702,7 +679,6 @@ static void Sguan_Start_Loop(void){
         User_InitialInit();
         // 控制系统量化和电机参数辨识(离线测量)
         Sguan_Quantize_Init();
-        Sguan_PIDset_Init();
         // 各种控制系统的初始化
         Sguan_BPF_Init(&Sguan);
         Sguan_PID_Init(&Sguan);
@@ -714,12 +690,12 @@ static void Sguan_Start_Loop(void){
         Offset_CurrentRead(&Sguan);
         //电机回零操作
         Sguan_Pre_Positioning(&Sguan,Sguan.motor.Limit);
-        User_Delay(800);
+        User_Delay(1200);
         // 读取角度偏置
         Offset_EncoderRead(&Sguan);
         // 电机失能并进入正常工作状态
         Sguan_Pre_Positioning(&Sguan,0.0f);
-        User_Delay(800);
+        User_Delay(1200);
         //正常工作中(状态机运行)
         Sguan.status = MOTOR_STATUS_IDLE;
     }
@@ -783,14 +759,24 @@ void SguanFOC_msTick(void){
  */
 void SguanFOC_PrintfTick(uint8_t *data, uint16_t length){
     if(length > sizeof(Sguan_PrintfBuff)){
-        length = sizeof(Sguan_PrintfBuff);  // 截断到缓冲区大小
+        length = sizeof(Sguan_PrintfBuff);
     }
 
     for(uint16_t i = 0; i < length; i++){
         if(data[i] == '?'){
-            Printf_Adjust();  // 调用解析函数
-            // 清空缓冲区
-            memset(Sguan_PrintfBuff, 0, sizeof(Sguan_PrintfBuff));
+            Printf_Adjust();
+            // 内存对齐的优化清零
+            uint32_t *p32 = (uint32_t*)Sguan_PrintfBuff;
+            uint16_t size = sizeof(Sguan_PrintfBuff);
+            // 按4字节清空
+            for(uint16_t j = 0; j < size / 4; j++){
+                p32[j] = 0;
+            }
+            // 处理剩余字节
+            uint8_t *p8 = (uint8_t*)&p32[size / 4];
+            for(uint16_t j = 0; j < size % 4; j++){
+                p8[j] = 0;
+            }
             break;
         }
     }

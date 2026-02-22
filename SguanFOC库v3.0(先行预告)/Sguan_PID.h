@@ -9,12 +9,11 @@ typedef struct{
     float Io[2];    // (数据)积分历史输出值
     float Do[2];    // (数据)微分历史输出值
 
-    float Ref;      // (数据)Target期望数值
-    float Fbk;      // (数据)Real真实反馈数据
-    float Output;   // (数据)Output输出
+    float Ref;      // (输入数据)Target期望数值
+    float Fbk;      // (输出数据)Real真实反馈数据
+    float Output;   // (输出数据)Output输出
 
     float I_num[2]; // (中间量)积分传递函数分子系数
-    float I_den[2]; // (中间量)积分传递函数分母系数
     float D_num[2]; // (中间量)微分传递函数分子系数
     float D_den[2]; // (中间量)微分传递函数分母系数
 }RUN_STRUCT;
