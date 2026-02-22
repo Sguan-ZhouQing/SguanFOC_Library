@@ -11,8 +11,9 @@
 #include "Sguan_MotorStatus.h"
 #include "Sguan_PID.h"
 #include "Sguan_PLL.h"
-#include "Sguan_Sensorless.h"
 #include "Sguan_printf.h"
+#include "Sguan_SensorlessHFI.h"
+#include "Sguan_SensorlessSMO.h"
 /* USER CODE END Includes */
 
 #define Velocity_OPEN_MODE      0x00 // 速度开环(Uq_in电机方向测试和电机参数测算)

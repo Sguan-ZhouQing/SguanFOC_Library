@@ -13,12 +13,12 @@
 
 /**
  * @description: 电机转子极性辨识NSD函数实现
- * @param {float} input 当前d轴电流高频分量 Id_h
- * @param {float} *Ud   用于输出的d轴电压给定值
+ * @param {float} input 当前d轴电流高频分量Id_h
+ * @param {float} *Ud   用于输出的d轴电压偏置
  * @reminder:0 - 转子在0度电角度处；1 - 转子在180度电角度处
  * @return {*}
  */
-uint8_t NSD_Loop(float input, float *Ud){
+uint8_t NSD_Loop(float input, float Ud_MAX, float *Ud){
     static uint16_t NSD_Count = 0;
     static float sum1 = 0, sum2 = 0;
     static uint8_t init_done = 0;
@@ -42,7 +42,7 @@ uint8_t NSD_Loop(float input, float *Ud){
             break;
         case 1: // 第二阶段：正电压注入 (400-599)
             if(NSD_Count < 600){
-                *Ud = 2.0f;
+                *Ud = Ud_MAX;
             }
             else{
                 state = 2;
@@ -51,7 +51,7 @@ uint8_t NSD_Loop(float input, float *Ud){
             break;
         case 2: // 第三阶段：正电压注入+采样 (600-609)
             if(NSD_Count < 610){
-                *Ud = 2.0f;
+                *Ud = Ud_MAX;
                 sum1 += fabs(input * 4.0f);
             }
             else{
@@ -70,7 +70,7 @@ uint8_t NSD_Loop(float input, float *Ud){
             break;
         case 4: // 第五阶段：负电压注入 (810-1009)
             if(NSD_Count < 1010){
-                *Ud = -2.0f;
+                *Ud = -Ud_MAX;
             }
             else{
                 state = 5;
@@ -79,7 +79,7 @@ uint8_t NSD_Loop(float input, float *Ud){
             break;
         case 5: // 第六阶段：负电压注入+采样 (1010-1019)
             if(NSD_Count < 1020){
-                *Ud = -2.0f;
+                *Ud = -Ud_MAX;
                 sum2 += fabs(input * 4.0f);
             }
             else{
