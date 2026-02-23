@@ -5,7 +5,7 @@
 #include "Sguan_Calculate.h"
 
 typedef struct{
-    float z[3];
+    float Gain;             // (参数设计)滑膜观测器增益
     
     
 }SMO_STRUCT;

@@ -5,9 +5,9 @@
 #include "Sguan_Calculate.h"
 
 typedef struct{
-    float i;     // (数据)数据历史输入值
-    float Xo;    // (数据)PI历史输出值
-    float Yo;    // (数据)积分历史输出值
+    float i;        // (数据)数据历史输入值
+    float Xo;       // (数据)PI历史输出值
+    float Yo;       // (数据)积分历史输出值
     float X_num[2]; // (中间量)PI传递函数分子系数
 
     float Error;    // (输入数据)Error真实反馈数据

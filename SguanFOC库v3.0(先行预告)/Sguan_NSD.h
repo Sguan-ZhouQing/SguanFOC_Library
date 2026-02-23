@@ -4,7 +4,7 @@
 /* 外部函数声明 */
 #include "Sguan_Calculate.h"
 
-uint8_t NSD_Loop(float input, float Ud_MAX, float *Ud);
+uint8_t NSD_Loop(float input, float Ud_Bias, float *Ud);
 
 
 #endif // SGUAN_NSD

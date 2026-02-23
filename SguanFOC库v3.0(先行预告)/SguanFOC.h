@@ -18,8 +18,8 @@
 
 #define Velocity_OPEN_MODE      0x00 // 速度开环(Uq_in电机方向测试和电机参数测算)
 #define Current_SINGLE_MODE     0x01 // 电流单闭环(力矩控制)
-#define VelCur_DOUBLE_MODE      0x02 // 速度-电流串级PID
-#define PosVelCur_THREE_MODE    0x03 // 位置-速度-电流多环PID
+#define VelCur_DOUBLE_MODE      0x02 // 速度-电流串级闭环控制
+#define PosVelCur_THREE_MODE    0x03 // 位置-速度-电流多环
 #define Sensorless_HFI_MODE     0x04 // 无感高频方波注入控制(低速域)
 #define Sensorless_SMO_MODE     0x05 // 无感滑膜观测器控制(强拖切高速域)
 #define Sensorless_HS_MODE      0x06 // 无感方波注入切滑膜(全速域)

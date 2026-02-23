@@ -18,7 +18,7 @@
  * @reminder:0 - 转子在0度电角度处；1 - 转子在180度电角度处
  * @return {*}
  */
-uint8_t NSD_Loop(float input, float Ud_MAX, float *Ud){
+uint8_t NSD_Loop(float input, float Ud_Bias, float *Ud){
     static uint16_t NSD_Count = 0;
     static float sum1 = 0, sum2 = 0;
     static uint8_t init_done = 0;
@@ -42,7 +42,7 @@ uint8_t NSD_Loop(float input, float Ud_MAX, float *Ud){
             break;
         case 1: // 第二阶段：正电压注入 (400-599)
             if(NSD_Count < 600){
-                *Ud = Ud_MAX;
+                *Ud = Ud_Bias;
             }
             else{
                 state = 2;
@@ -51,7 +51,7 @@ uint8_t NSD_Loop(float input, float Ud_MAX, float *Ud){
             break;
         case 2: // 第三阶段：正电压注入+采样 (600-609)
             if(NSD_Count < 610){
-                *Ud = Ud_MAX;
+                *Ud = Ud_Bias;
                 sum1 += fabs(input * 4.0f);
             }
             else{
@@ -70,7 +70,7 @@ uint8_t NSD_Loop(float input, float Ud_MAX, float *Ud){
             break;
         case 4: // 第五阶段：负电压注入 (810-1009)
             if(NSD_Count < 1010){
-                *Ud = -Ud_MAX;
+                *Ud = -Ud_Bias;
             }
             else{
                 state = 5;
@@ -79,7 +79,7 @@ uint8_t NSD_Loop(float input, float Ud_MAX, float *Ud){
             break;
         case 5: // 第六阶段：负电压注入+采样 (1010-1019)
             if(NSD_Count < 1020){
-                *Ud = -Ud_MAX;
+                *Ud = -Ud_Bias;
                 sum2 += fabs(input * 4.0f);
             }
             else{
