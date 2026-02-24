@@ -56,15 +56,29 @@ static float SMO_Encoder_ReadRad(SguanFOC_System_STRUCT *sguan);
 static void Current_ReadIabc(SguanFOC_System_STRUCT *sguan);
 static void Current_Tick(SguanFOC_System_STRUCT *sguan);
 /**
- * @description: 5.PID运算及其模式切换
+ * @description: 5.Transfer传递函数离散化运算
+ * @param {PID_STRUCT} *pid (控制)PID闭环控制系统运算
+ * @param {LADRC_STRUCT} *ladrc (控制)LADRC线自抗扰运算
+ * @param {INTERNALMODEL_STRUCT} *im (控制)IMC内模控制
+ * @param {BPF_STRUCT} *bpf (滤波)BPF二阶巴特沃斯低通滤波
+ * @param {PLL_STRUCT} *pll (估算)PLL速度跟踪锁相环
+ * @return {*}
+ */
+static void Transfer_PID_Loop(PID_STRUCT *pid,float Ref,float Fbk,float *output);
+static void Transfer_Ladrc_Loop(LADRC_STRUCT *ladrc,float Ref,float Fbk,float *output);
+static void Transfer_IM_Loop(INTERNALMODEL_STRUCT *im,PID_STRUCT *pid,float Ref,float Fbk,float *output);
+static void Transfer_BPF_Loop(BPF_STRUCT *bpf,float input,float *output);
+static void Transfer_PLL_Loop(PLL_STRUCT *pll,float input,float *output);
+/**
+ * @description: 6.Control运算及其模式切换
  * @param {SguanFOC_System_STRUCT} *sguan
  * @return {*}
  */
-static void PID_Velocity_OPEN(SguanFOC_System_STRUCT *sguan);
-static void PID_Current_SINGLE(SguanFOC_System_STRUCT *sguan);
-static void PID_VelCur_DOUBLE(SguanFOC_System_STRUCT *sguan);
-static void PID_PosVelCur_THREE(SguanFOC_System_STRUCT *sguan);
-static void (*const PID_Tick[])(SguanFOC_System_STRUCT*)={
+static void Control_Velocity_OPEN(SguanFOC_System_STRUCT *sguan);
+static void Control_Current_SINGLE(SguanFOC_System_STRUCT *sguan);
+static void Control_VelCur_DOUBLE(SguanFOC_System_STRUCT *sguan);
+static void Control_PosVelCur_THREE(SguanFOC_System_STRUCT *sguan);
+static void (*const Control_Tick[])(SguanFOC_System_STRUCT*)={
     /*这里注意“枚举变量”的边界, PID_Tick[sguan->mode](sguan)使用*/
     PID_Velocity_OPEN,      // Velocity_OPEN_MODE = 0
     PID_Current_SINGLE,     // Current_SINGLE_MODE = 1
@@ -72,19 +86,19 @@ static void (*const PID_Tick[])(SguanFOC_System_STRUCT*)={
     PID_PosVelCur_THREE     // PosVelCur_THREE_MODE = 3
 };
 /**
- * @description: 6.Data母线电压和驱动器物理温度数据更新和滤波
+ * @description: 7.Data母线电压和驱动器物理温度数据更新和滤波
  * @param {SguanFOC_System_STRUCT} *sguan
  * @return {*}
  */
 static void Data_Protection_Loop(SguanFOC_System_STRUCT *sguan);
 /**
- * @description: 7.Status判断并切换状态机
+ * @description: 8.Status判断并切换状态机
  * @param {SguanFOC_System_STRUCT} *sguan
  * @return {*}
  */
 static void Status_Switch_Loop(SguanFOC_System_STRUCT *sguan);
 /**
- * @description: 8.Printf数据发送Debug和正常模式
+ * @description: 9.Printf数据发送Debug和正常模式
  * @param {SguanFOC_System_STRUCT} *sguan
  * @return {*}
  */
@@ -94,7 +108,7 @@ static void Printf_Debug_Loop(SguanFOC_System_STRUCT *sguan);
 static void Printf_Normal_Loop(SguanFOC_System_STRUCT *sguan);
 #endif // Printf_Debug
 /**
- * @description: 9.SVPWM电机驱动的马鞍波生成
+ * @description: 10.SVPWM电机驱动的马鞍波生成
  * @param {SguanFOC_System_STRUCT} *sguan
  * @param {float} d
  * @param {float} q
@@ -102,14 +116,14 @@ static void Printf_Normal_Loop(SguanFOC_System_STRUCT *sguan);
  */
 static void SVPWM_Tick(SguanFOC_System_STRUCT *sguan,float Erad,float d_set,float q_set);
 /**
- * @description: 10.Sguan...Loop定时计算并执行
+ * @description: 11.Sguan...Loop定时计算并执行
  * @param {SguanFOC_System_STRUCT} *sguan
  * @return {*}
  */
 static void Sguan_Calculate_Loop(SguanFOC_System_STRUCT *sguan);
 static void Sguan_GeneratePWM_Loop(SguanFOC_System_STRUCT *sguan);
 /**
- * @description: 11.Sguan...Init各种控制系统的初始化
+ * @description: 12.Sguan...Init各种控制系统的初始化
  * @param {SguanFOC_System_STRUCT} *sguan
  * @return {*}
  */
@@ -119,7 +133,7 @@ static void Sguan_PID_Init(SguanFOC_System_STRUCT *sguan);
 static void Sguan_PLL_Init(SguanFOC_System_STRUCT *sguan);
 static void Sguan_Sensorless_Init(SguanFOC_System_STRUCT *sguan);
 /**
- * @description: 12.Pre电机预处理
+ * @description: 13.Pre电机预处理
  * @param {SguanFOC_System_STRUCT} *sguan
  * @return {*}
  */
@@ -244,6 +258,44 @@ static void Current_Tick(SguanFOC_System_STRUCT *sguan){
     sguan->current.Real_Id = sguan->bpf.CurrentD.filter.Output;
     sguan->current.Real_Iq = sguan->bpf.CurrentQ.filter.Output;
 }
+
+// Transfer运算_PID运算
+static void Transfer_PID_Loop(PID_STRUCT *pid,float Ref,float Fbk,float *output){
+    pid->run.Ref = Ref;
+    pid->run.Fbk = Fbk;
+    PID_Loop(pid);
+    *output = pid->run.Output;
+}
+
+// Transfer运算_LADRC运算
+static void Transfer_Ladrc_Loop(LADRC_STRUCT *ladrc,float Ref,float Fbk,float *output){
+    ladrc->linear.Ref = Ref;
+    ladrc->linear.Fbk = Fbk;
+    Ladrc_Loop(ladrc);
+    *output = ladrc->linear.Output;
+}
+
+// Transfer运算_内模控制运算
+static void Transfer_IM_Loop(INTERNALMODEL_STRUCT *im,PID_STRUCT *pid,float Ref,float Fbk,float *output){
+    // 1.设置参考值并计算反馈误差(包含模型补偿)
+    pid->run.Ref = Ref;
+    pid->run.Fbk = Fbk - im->imc.Output;
+    // 2.执行PI运算并输出结果
+    PID_Loop(pid);
+    *output = pid->run.Output;
+    // 3.IMC数据输入，运行内模控制
+    im->imc.Input = pid->run.Output;
+    InternalModel_Loop(im);
+}
+
+// Transfer运算_二阶巴特沃斯低通滤波器
+static void Transfer_BPF_Loop(BPF_STRUCT *bpf,float input,float *output){
+    bpf->filter.Input = input;
+    BPF_Loop(bpf);
+    *output = bpf->filter.Output;
+}
+
+
 
 // PID速度开环(用于直接控制Uq_in,用于电机测试)
 static void PID_Velocity_OPEN(SguanFOC_System_STRUCT *sguan){
