@@ -22,7 +22,7 @@ float HFI_ToggleCurrent(float Ud_Bias, float Ud_Limit){
     }
 }
 
-// 读取高频和基频电流分量
+// 读取高频电流分量
 void HFI_ReadCurrent(HFI_STRUCT *hfi){
     // 1.计算并分离高频，基频分量
     hfi->alpha_h = (hfi->Input_a - hfi->alpha[0] + hfi->alpha[1])/4.0f;

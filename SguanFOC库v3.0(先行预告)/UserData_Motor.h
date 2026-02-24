@@ -18,7 +18,6 @@ static inline void User_MotorSet(void){
     // 4.motor电机参数辨识
     Sguan.motor.Poles = 7;              // (uint8_t)极对极数
     Sguan.motor.VBUS = 12.0f;           // (float)母线电压
-    Sguan.motor.Limit = 0.2f;           // (float)预处理电压占比
 
     Sguan.motor.Motor_Dir = 1;          // (int8_t)电机方向1->正向，负1->负向
     Sguan.motor.PWM_Dir = -1;           // (int8_t)PWM占空比高低对应1->正向，负1->负向

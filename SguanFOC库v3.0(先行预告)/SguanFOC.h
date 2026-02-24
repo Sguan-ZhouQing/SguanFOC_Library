@@ -26,7 +26,7 @@
 
 typedef struct{
     uint8_t PWM_Calc;               // PWM计算标志位
-    uint8_t PWM_watchdog_limit;     // PWM错误限幅
+    uint8_t PWM_watchdog_limit;     // PWM错误限幅(uint8_t够用，PWM计算不能错误太多次)
 
     uint8_t in_PWM_Calc_ISR;        // (互斥锁)标记是否在PWM计算中断中
 }MOTOR_FLAG_STRUCT;
@@ -65,7 +65,6 @@ typedef struct{
 typedef struct{
     uint8_t Poles;                  // (电机实体参数)电机极对极数
     float VBUS;                     // (电机实体参数)母线电压
-    float Limit;                    // (参数设计)预处理|电机定位占空比
 
     int8_t Motor_Dir;               // (参数设计)电机的运行方向设计
     int8_t PWM_Dir;                 // (参数设计)PWM占空比高低对应
@@ -83,14 +82,20 @@ typedef struct{
     float Sampling_Rs;              // (参数设计)采样电阻的阻值大小
 }MOTOR_QUANTIZE_STRUCT;
 
-typedef struct{
-    float Dcur_MAX;                 // (参数设计)电机最大电流D轴限制
-    float Qcur_MAX;                 // (参数设计)电机最大电流Q轴限制
-
+typedef struct{    
     float VBUS_MAX;                 // (参数设计)母线电压值波动MAX阈值
     float VBUS_MIM;                 // (参数设计)母线电压值波动MIN阈值
+    uint32_t VBUS_watchdog_limit;   // (参数设计)电压异常的警告周期
+    
     float Temp_MAX;                 // (参数设计)驱动器允许最大温度
     float Temp_MIN;                 // (参数设计)驱动器允许最小温度
+    uint32_t Temp_watchdog_limit;   // (参数设计)温度异常的警告周期
+
+    float Dcur_MAX;                 // (参数设计)电机最大电流D轴限制
+    float Qcur_MAX;                 // (参数设计)电机最大电流Q轴限制
+    uint32_t DQcur_watchdog_limit;  // (参数设计)过流保护的警告周期
+
+    uint32_t DISABLED_watchdog_limit;//(参数设计)电机DISABLED状态机进待机模式的延时周期
 }MOTOR_SAFE_STRUCT;
 
 typedef struct{
