@@ -11,9 +11,9 @@ typedef struct{
     float Output;               // (输出数据)电流高/基频分量
 }HFI_STRUCT;
 
-float HFI_ToggleCurrent(float Ud_Bias, float Ud_Limit);
-void HFI_ReadCurrent(HFI_STRUCT *hfi);
-
+float HFI_ToggleVBUS(float Ud_Bias, float Ud_Limit);
+void HFI_ReadHighCurrent(HFI_STRUCT *hfi);
+void HFI_ReadFundamentalCurrent(HFI_STRUCT *hfi);
 
 
 #endif // SGUAN_SENSORLESSHFI_H

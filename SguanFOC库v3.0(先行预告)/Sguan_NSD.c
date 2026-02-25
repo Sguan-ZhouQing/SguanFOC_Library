@@ -11,6 +11,41 @@
  */
 #include "Sguan_NSD.h"
 
+uint8_t NSD_SensorLoop(float ENABLE,float angle,float *Ud,float *Uq){
+    if (ENABLE){
+        static uint32_t NSD_Count = 0;
+        static float Offset = 0.0f;
+        static uint8_t init_done = 0;
+        static uint8_t state = 0;
+
+        // 如果已经完成极性辨识，直接返回结果
+        if(init_done == 1){
+            return init_done - 1; // 0或1
+        }
+
+        NSD_Count++;
+        switch (state){
+            case 0:
+                
+                break;
+            case 1:
+                
+                break;
+            case 2:
+                
+                break;
+            
+            default:
+                break;
+        }
+
+        *Ud = 0.2f;
+        *Uq = 0.0f;
+        return 2;
+    }
+}
+
+
 /**
  * @description: 电机转子极性辨识NSD函数实现
  * @param {float} input 当前d轴电流高频分量Id_h
@@ -18,8 +53,8 @@
  * @reminder:0 - 转子在0度电角度处；1 - 转子在180度电角度处
  * @return {*}
  */
-uint8_t NSD_Loop(float input, float Ud_Bias, float *Ud){
-    static uint16_t NSD_Count = 0;
+uint8_t NSD_HFILoop(float input, float Ud_Bias, float *Ud){
+    static uint32_t NSD_Count = 0;
     static float sum1 = 0, sum2 = 0;
     static uint8_t init_done = 0;
     static uint8_t state = 0;

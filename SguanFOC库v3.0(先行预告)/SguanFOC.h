@@ -9,6 +9,7 @@
 #include "Sguan_Ladrc.h"
 #include "Sguan_math.h"
 #include "Sguan_MotorStatus.h"
+#include "Sguan_NSD.h"
 #include "Sguan_PID.h"
 #include "Sguan_PLL.h"
 #include "Sguan_printf.h"
@@ -151,22 +152,37 @@ typedef struct{
 }MOTOR_CURRENT_STRUCT;
 
 typedef struct{
+    HFI_STRUCT alpha_h;             // 转子
+    HFI_STRUCT beta_h;
+
+    HFI_STRUCT D_h;
+
+    HFI_STRUCT D_f;
+    HFI_STRUCT Q_f;
+}MOTOR_HFI_STRUCT;
+
+typedef struct{
+    SMO_STRUCT smo;
+}MOTOR_SMO_STRUCT;
+
+typedef struct{
     float PMSM_RUN_T;               // 【有参数设计】系统电机运行时间周期
     uint8_t mode;                   // 【有参数设计】mode选择电机的运行模式
     uint8_t status;                 // 【数据】status存储电机运行状态
     
     MOTOR_FLAG_STRUCT flag;         // 【有参数设计】flag电机运行标志位
     MOTOR_BPF_STRUCT bpf;           // 【有参数设计】bpf低通滤波器设计
-    MOTOR_CONTROL_STRUCT control;   // 【有参数设计】pid闭环控制系统设计
+    MOTOR_CONTROL_STRUCT control;   // 【有参数设计】闭环控制系统设计
     MOTOR_IDENTIFY_STRUCT identify; // 【数据】identify电机参数辨识结果
     MOTOR_QUANTIZE_STRUCT motor;    // 【有参数设计】motor电机参数量化
     MOTOR_SAFE_STRUCT safe;         // 【有参数设计】safe电机安全设置
     MOTOR_FOC_STRUCT foc;           // 【有参数设计】foc控制的参数输入“缓存”
     MOTOR_ENCODER_STRUCT encoder;   // 【数据】电机角速度和角度信息“缓存”
     MOTOR_CURRENT_STRUCT current;   // 【数据】电机电流采样信息“缓存”
+    MOTOR_HFI_STRUCT hfi;                 // 【数据】HFI高频注入算法
+    MOTOR_SMO_STRUCT smo;                 // 【数据】SMO滑膜观测器算法
+
     PRINTF_STRUCT TXdata;           // 【数据】data串口或CAN发送的信息
-    HFI_STRUCT hfi;                 // 【数据】HFI高频注入算法
-    SMO_STRUCT smo;                 // 【数据】SMO滑膜观测器算法
 }SguanFOC_System_STRUCT;
 
 // 电机控制核心结构体声明

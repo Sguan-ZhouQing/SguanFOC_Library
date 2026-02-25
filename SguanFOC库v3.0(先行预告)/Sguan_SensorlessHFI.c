@@ -12,7 +12,7 @@
 #include "Sguan_SensorlessHFI.h"
 
 // 原理上实现高频方波注入算法
-float HFI_ToggleCurrent(float Ud_Bias, float Ud_Limit){
+float HFI_ToggleVBUS(float Ud_Bias, float Ud_Limit){
     static uint8_t count = 0;
     if (count){
         return Ud_Bias + Ud_Limit;
@@ -23,17 +23,20 @@ float HFI_ToggleCurrent(float Ud_Bias, float Ud_Limit){
 }
 
 // 读取高频电流分量
-void HFI_ReadCurrent(HFI_STRUCT *hfi){
-    // 1.计算并分离高频，基频分量
-    hfi->alpha_h = (hfi->Input_a - hfi->alpha[0] + hfi->alpha[1])/4.0f;
-    hfi->beta_h = (hfi->Input_b - hfi->beta[0] + hfi->beta[1])/4.0f;
-
-    hfi->alpha_f = (hfi->Input_a + hfi->alpha[0] + hfi->alpha[1])/4.0f;
-    hfi->beta_f = (hfi->Input_b + hfi->beta[0] + hfi->beta[1])/4.0f;
-    // 2.更新历史输入值
-    hfi->alpha[1] = hfi->alpha[0];
-    hfi->alpha[0] = hfi->Input_a;
+void HFI_ReadHighCurrent(HFI_STRUCT *hfi){
+    // 计算高频分量
+    hfi->Output = (hfi->Input - 2.0f*hfi->i[0] + hfi->i[1])/4.0f;
+    // 更新历史输入值
+    hfi->i[1] = hfi->i[0];
+    hfi->i[0] = hfi->Input;
 }
 
-
+// 读取基频电流分量
+void HFI_ReadFundamentalCurrent(HFI_STRUCT *hfi){
+    // 计算高频分量
+    hfi->Output = (hfi->Input + 2.0f*hfi->i[0] + hfi->i[1])/4.0f;
+    // 更新历史输入值
+    hfi->i[1] = hfi->i[0];
+    hfi->i[0] = hfi->Input;
+}
 

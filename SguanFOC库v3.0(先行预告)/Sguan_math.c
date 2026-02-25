@@ -79,9 +79,9 @@ void SVPWM(float d, float q, float sin_phi, float cos_phi, float *d_u, float *d_
   float alpha,beta;
   ipark(&alpha, &beta, d, q, sin_phi, cos_phi);
 
-  int8_t A = beta > 0;
-  int8_t B = Value_fabsf(beta) > Value_SQRT3 * Value_fabsf(alpha);
-  int8_t C = alpha > 0;
+  int A = (beta > 0);
+  int B = (Value_fabsf(beta) > Value_SQRT3 * Value_fabsf(alpha));
+  int C = (alpha > 0);
   int K = 4 * A + 2 * B + C;
   int sector = K_to_sector[K];
 
