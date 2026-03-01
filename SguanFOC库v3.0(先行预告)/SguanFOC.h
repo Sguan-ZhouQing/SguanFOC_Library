@@ -42,8 +42,8 @@ typedef struct{
     #if !Open_PI_Control
     INTERNALMODEL_STRUCT Dimc;      // (IMC)电流环调优
     INTERNALMODEL_STRUCT Qimc;      // (IMC)电流环调优
-    PID_STRUCT Internal_D;          // (电流内模控制)PI控制器D轴参数
-    PID_STRUCT Internal_Q;          // (电流内模控制)PI控制器Q轴参数
+    PID_STRUCT PID_D;               // (电流内模控制)PI控制器D轴参数
+    PID_STRUCT PID_Q;               // (电流内模控制)PI控制器Q轴参数
     LADRC_STRUCT Speed;             // (LADRC)线自抗扰控制
     #else // Open_PI_Control
     PID_STRUCT Current_D;           // (电流单环)PID电流环D轴参数
@@ -152,17 +152,17 @@ typedef struct{
 }MOTOR_CURRENT_STRUCT;
 
 typedef struct{
-    HFI_STRUCT alpha_h;             // 转子
-    HFI_STRUCT beta_h;
+    HFI_STRUCT alpha_h;             // (用于电角度解耦)转子alpha轴的高频信号
+    HFI_STRUCT beta_h;              // (由于电角度解耦)转子beta轴的高频信号
 
-    HFI_STRUCT D_h;
+    HFI_STRUCT D_h;                 // (用于HFI转子极性辨识)电机D轴的高频信号
 
-    HFI_STRUCT D_f;
-    HFI_STRUCT Q_f;
+    HFI_STRUCT D_f;                 // (电机正常DQ环)电机的D轴基频信号
+    HFI_STRUCT Q_f;                 // (电机正常DQ环)电机的Q轴基频信号
 }MOTOR_HFI_STRUCT;
 
 typedef struct{
-    SMO_STRUCT smo;
+    SMO_STRUCT smo;                 // 滑膜观测器的结构体
 }MOTOR_SMO_STRUCT;
 
 typedef struct{

@@ -55,8 +55,6 @@ static void Offset_CurrentRead(SguanFOC_System_STRUCT *sguan);
  * @param {SguanFOC_System_STRUCT} *sguan
  * @return {*}
  */
-static float Encoder_ReadErad(SguanFOC_System_STRUCT *sguan);
-static float Encoder_ReadSpeed(SguanFOC_System_STRUCT *sguan);
 static void Encoder_Tick(SguanFOC_System_STRUCT *sguan);
 /**
  * @description: 5.Current内部静态函数声明
@@ -83,9 +81,9 @@ static void (*const Control_Tick[])(SguanFOC_System_STRUCT*)={
     Control_Current_SINGLE,     // Current_SINGLE_MODE = 1
     Control_VelCur_DOUBLE,      // VelCur_DOUBLE_MODE  = 2
     Control_PosVelCur_THREE,    // PosVelCur_THREE_MODE= 3
-    Control_Sensorless_HFI,     // Sensorless_HFI_MODE = 4
-    Control_Sensorless_SMO,     // Sensorless_SMO_MODE = 5
-    Control_Sensorless_HS       // Sensorless_HS_MODE  = 6
+    Control_VelCur_DOUBLE,      // Sensorless_HFI_MODE = 4
+    Control_VelCur_DOUBLE,      // Sensorless_SMO_MODE = 5
+    Control_VelCur_DOUBLE       // Sensorless_HS_MODE  = 6
 };
 /**
  * @description: 7.Data母线电压和驱动器物理温度数据更新
@@ -96,9 +94,17 @@ static void Data_Protection_Loop(SguanFOC_System_STRUCT *sguan);
 /**
  * @description: 8.Status判断并切换状态机
  * @param {SguanFOC_System_STRUCT} *sguan
+ * @param {uint32_t} *count
  * @return {*}
  */
+static void Status_Switch_DISABLED(SguanFOC_System_STRUCT *sguan,uint32_t *count);
+static void Status_VBUS_OVERVOLTAGE(SguanFOC_System_STRUCT *sguan,uint32_t *count);
+static void Status_VBUS_UNDERVOLTAGE(SguanFOC_System_STRUCT *sguan,uint32_t *count);
+static void Status_Temp_OVERTEMPERATURE(SguanFOC_System_STRUCT *sguan,uint32_t *count);
+static void Status_Temp_UNDERTEMPERATURE(SguanFOC_System_STRUCT *sguan,uint32_t *count);
+static void Status_Current_OVERCURRENT(SguanFOC_System_STRUCT *sguan,uint32_t *count);
 static void Status_Switch_Loop(SguanFOC_System_STRUCT *sguan);
+static void Status_RUN_Loop(SguanFOC_System_STRUCT *sguan);
 /**
  * @description: 9.Printf数据发送Debug和正常模式
  * @param {SguanFOC_System_STRUCT} *sguan
@@ -243,45 +249,32 @@ static void Offset_CurrentRead(SguanFOC_System_STRUCT *sguan){
         (sguan->motor.ADC_Precision*sguan->motor.Amplifier*sguan->motor.Sampling_Rs);
 }
 
-// Encoder获取实际单圈电子角度(无需滤波)
-static float Encoder_ReadErad(SguanFOC_System_STRUCT *sguan){
-    return (sguan->encoder.Real_Rad - sguan->encoder.Pos_offset)*sguan->motor.Poles;
-}
-
-// Encoder获取实际电机速度(未滤波)
-static float Encoder_ReadSpeed(SguanFOC_System_STRUCT *sguan){
-    float Encoder_num = sguan->encoder.Real_Rad - normalize_angle(sguan->encoder.pll.go.OutRe);
-    
-    // 计算角度误差,始终归一化到[-π, π)范围
-    if (Encoder_num >= Value_PI){
-        Encoder_num -= Value_PI*2;
-    }
-    if (Encoder_num <= -Value_PI){
-        Encoder_num += Value_PI*2;
-    }
-    
-    if (sguan->mode == PosVelCur_THREE_MODE){
-        // 位置环模式：PLL连续积分（可以超过2π）
-        sguan->encoder.pll.is_position_mode = 1;
-    } else{
-        // 非位置环模式：PLL输出归一化到[0, 2π)
-        sguan->encoder.pll.is_position_mode = 0;
-    }
-    sguan->encoder.pll.go.Error = Encoder_num;
-    PLL_Loop(&sguan->encoder.pll);
-    return sguan->encoder.pll.go.OutWe;
-}
-
 // Encoder实时更新角速度和角度信息(已滤波)
 static void Encoder_Tick(SguanFOC_System_STRUCT *sguan){
-    // 0.有传感器FOC控制(全速域)
-    sguan->encoder.Real_Rad = User_Encoder_ReadRad();
-    sguan->bpf.Encoder.filter.Input = Encoder_ReadSpeed(sguan)*sguan->motor.Encoder_Dir;
-    BPF_Loop(&sguan->bpf.Encoder);
-    sguan->encoder.Real_Speed = sguan->bpf.Encoder.filter.Output;
-    sguan->encoder.Real_Pos = sguan->encoder.pll.go.OutRe*sguan->motor.Encoder_Dir;
-    sguan->encoder.Real_Erad = normalize_angle(Encoder_ReadErad(sguan)*sguan->motor.Encoder_Dir);
-    sguan->encoder.Real_Espeed = sguan->encoder.Real_Speed*sguan->motor.Poles;
+    // 1.有传感器FOC控制(全速域)
+    if (sguan->mode < 4){
+        sguan->encoder.Real_Rad = User_Encoder_ReadRad();
+        Transfer_PLL_Loop(&sguan->encoder.pll,sguan->mode,sguan->encoder.Real_Rad);
+        sguan->bpf.Encoder.filter.Input = sguan->encoder.pll.go.OutWe*sguan->motor.Encoder_Dir;
+        BPF_Loop(&sguan->bpf.Encoder);
+        sguan->encoder.Real_Speed = sguan->bpf.Encoder.filter.Output;
+        sguan->encoder.Real_Pos = sguan->encoder.pll.go.OutRe*sguan->motor.Encoder_Dir;
+        sguan->encoder.Real_Erad = normalize_angle((sguan->encoder.Real_Rad - sguan->encoder.Pos_offset)*
+                                        sguan->motor.Poles*sguan->motor.Encoder_Dir);
+        sguan->encoder.Real_Espeed = sguan->encoder.Real_Speed*sguan->motor.Poles;
+    }
+    // 2.无传感器FOC控制(低速域)
+    else if (sguan->mode == Sensorless_HFI_MODE){
+        
+    }
+    // 3.无传感器FOC控制(高速域)
+    else if (sguan->mode == Sensorless_SMO_MODE){
+        
+    }
+    // 4.无传感器FOC控制(全速域)
+    else{
+
+    }
     fast_sin_cos(sguan->encoder.Real_Erad,&sguan->foc.sine,&sguan->foc.cosine);
 }
 
@@ -314,113 +307,216 @@ static void Current_Tick(SguanFOC_System_STRUCT *sguan){
         &sguan->current.Real_Ibeta,
         sguan->current.Real_Ia,
         sguan->current.Real_Ib);
-    park(&sguan->bpf.CurrentD.filter.Input,
-        &sguan->bpf.CurrentQ.filter.Input,
+    park(&sguan->current.Real_Id,
+        &sguan->current.Real_Iq,
         sguan->current.Real_Ialpha,
         sguan->current.Real_Ibeta,
         sguan->foc.sine,
         sguan->foc.cosine);
-    BPF_Loop(&sguan->bpf.CurrentD);
-    BPF_Loop(&sguan->bpf.CurrentQ);
+    Transfer_BPF_Loop(&sguan->bpf.CurrentD,sguan->current.Real_Id);
+    Transfer_BPF_Loop(&sguan->bpf.CurrentQ,sguan->current.Real_Iq);
     sguan->current.Real_Id = sguan->bpf.CurrentD.filter.Output;
     sguan->current.Real_Iq = sguan->bpf.CurrentQ.filter.Output;
 }
 
 // Control速度开环(用于直接控制Uq_in,用于电机测试)
 static void Control_Velocity_OPEN(SguanFOC_System_STRUCT *sguan){
-    // #if Open_Velocity_OPEN
-    // // sguan->foc.Ud_in = 0.0f;
-    // // sguan->foc.Uq_in = 2.0f;
-    // #endif // Open_Velocity_OPEN
+    // 如果不在正常工作状态，则赋值为零
+    if ((sguan->status < 4) || (sguan->status >= 19)){
+        sguan->foc.Ud_in = 0.0f;
+        sguan->foc.Uq_in = 0.0f;
+    }
 }
 
 // Control电流单环(单闭环)
 static void Control_Current_SINGLE(SguanFOC_System_STRUCT *sguan){
+    // 0.(控制器数据赋值)如果不在工作状态，赋值为零
+    if ((sguan->status >= 4) && (sguan->status < 19)){
+        sguan->foc.Target_Id = 0.0f;
+        sguan->foc.Target_Iq = 0.0f;
+        sguan->current.Real_Id = 0.0f;
+        sguan->current.Real_Iq = 0.0f;
+    }
+
+    #if !Open_PI_Control
     // 1.前馈计算
     float Ud_ff = -sguan->encoder.Real_Espeed*sguan->identify.Lq*sguan->current.Real_Iq; 
     float Uq_ff = sguan->encoder.Real_Espeed*sguan->identify.Ld*sguan->current.Real_Id + 
                     sguan->encoder.Real_Espeed*sguan->identify.Flux;
 
-    // 2.PID计算
-    sguan->control.Current_D.run.Ref = sguan->foc.Target_Id; // 默认D轴励磁Id为0
-    sguan->control.Current_D.run.Fbk = sguan->current.Real_Id;
-    sguan->control.Current_Q.run.Ref = sguan->foc.Target_Iq;
-    sguan->control.Current_Q.run.Fbk = sguan->current.Real_Iq;
-    PID_Loop(&sguan->control.Current_D);
-    PID_Loop(&sguan->control.Current_Q);
+    // 2.电流环IMC内模控制器计算
+    Transfer_IM_Loop(&sguan->control.Dimc,
+        &sguan->control.PID_D,
+        sguan->foc.Target_Id,
+        sguan->current.Real_Id);
+    Transfer_IM_Loop(&sguan->control.Qimc,
+        &sguan->control.PID_Q,
+        sguan->foc.Target_Iq,
+        sguan->current.Real_Iq);
 
-    // 3.叠加前馈和PID输出
+    // 3.结果输出到Ud和Uq给定
+    sguan->foc.Ud_in = sguan->control.PID_D.run.Output + Ud_ff;
+    sguan->foc.Uq_in = sguan->control.PID_Q.run.Output + Uq_ff;
+    #else // Open_PI_Control
+    // 1.前馈计算
+    float Ud_ff = -sguan->encoder.Real_Espeed*sguan->identify.Lq*sguan->current.Real_Iq; 
+    float Uq_ff = sguan->encoder.Real_Espeed*sguan->identify.Ld*sguan->current.Real_Id + 
+                    sguan->encoder.Real_Espeed*sguan->identify.Flux;
+
+    // 2.电流环PI控制器计算
+    Transfer_PID_Loop(&sguan->control.Current_D,
+        sguan->foc.Target_Id,
+        sguan->current.Real_Id);
+    Transfer_PID_Loop(&sguan->control.Current_Q,
+        sguan->foc.Target_Iq,
+        sguan->current.Real_Iq);
+
+    // 3.结果输出到Ud和Uq给定
     sguan->foc.Ud_in = sguan->control.Current_D.run.Output + Ud_ff;
     sguan->foc.Uq_in = sguan->control.Current_Q.run.Output + Uq_ff;
+    #endif // Open_PI_Control
 }
 
 // Control速度-电流双环(双闭环)
 static void Control_VelCur_DOUBLE(SguanFOC_System_STRUCT *sguan){
-    static uint8_t PID_Count = 0;
-    PID_Count++;
-    if (PID_Count == sguan->control.Response){
-        sguan->control.Velocity.run.Ref = sguan->foc.Target_Speed;
-        sguan->control.Velocity.run.Fbk = sguan->encoder.Real_Speed;
-        PID_Loop(&sguan->control.Velocity);
-        PID_Count = 0;
+    static uint8_t Control_Count = 0;
+    Control_Count++;
+    // 0.(控制器数据赋值)如果不在工作状态，赋值为零
+    if ((sguan->status >= 4) && (sguan->status < 19)){
+        sguan->foc.Target_Speed = 0.0f;
+        sguan->encoder.Real_Speed = 0.0f;
     }
-    // 1.前馈计算
+
+    #if !Open_PI_Control
+    // 1.转速环LADRC线自抗扰计算
+    if (Control_Count == sguan->control.Response){
+        Transfer_Ladrc_Loop(&sguan->control.Speed,
+            sguan->foc.Target_Speed,
+            sguan->encoder.Real_Speed);
+        Control_Count = 0;
+    }
+
+    // 2.前馈计算
     float Ud_ff = -sguan->encoder.Real_Espeed*sguan->identify.Lq*sguan->current.Real_Iq; 
     float Uq_ff = sguan->encoder.Real_Espeed*sguan->identify.Ld*sguan->current.Real_Id + 
                     sguan->encoder.Real_Espeed*sguan->identify.Flux;
 
-    // 2.PID计算
-    sguan->control.Current_D.run.Ref = sguan->foc.Target_Id; // 默认D轴励磁Id为0
-    sguan->control.Current_D.run.Fbk = sguan->current.Real_Id;
-    sguan->control.Current_Q.run.Ref = sguan->control.Velocity.run.Output;
-    sguan->control.Current_Q.run.Fbk = sguan->current.Real_Iq;
-    PID_Loop(&sguan->control.Current_D);
-    PID_Loop(&sguan->control.Current_Q);
+    // 3.电流环IM内模控制器计算
+    Transfer_IM_Loop(&sguan->control.Dimc,
+        &sguan->control.PID_D,
+        sguan->foc.Target_Id,       // 默认D轴励磁Id为0
+        sguan->current.Real_Id);
+    Transfer_IM_Loop(&sguan->control.Qimc,
+        &sguan->control.PID_Q,
+        sguan->control.Speed.linear.Output,
+        sguan->current.Real_Iq);
+
+    // 4.结果输出到Ud和Uq给定
+    sguan->foc.Ud_in = sguan->control.PID_D.run.Output + Ud_ff;
+    sguan->foc.Uq_in = sguan->control.PID_Q.run.Output + Uq_ff;
+    #else // Open_PI_Control
+    // 1.转速环PI控制器计算
+    if (Control_Count == sguan->control.Response){
+        Transfer_PID_Loop(&sguan->control.Velocity,
+            sguan->foc.Target_Speed,
+            sguan->encoder.Real_Speed);
+        Control_Count = 0;
+    }
+    // 2.前馈计算
+    float Ud_ff = -sguan->encoder.Real_Espeed*sguan->identify.Lq*sguan->current.Real_Iq; 
+    float Uq_ff = sguan->encoder.Real_Espeed*sguan->identify.Ld*sguan->current.Real_Id + 
+                    sguan->encoder.Real_Espeed*sguan->identify.Flux;
+
+    // 3.电流环PI控制器计算
+    Transfer_PID_Loop(&sguan->control.Current_D,
+        sguan->foc.Target_Id,       // 默认D轴励磁Id为0
+        sguan->current.Real_Id);
+    Transfer_PID_Loop(&sguan->control.Current_Q,
+        sguan->control.Velocity.run.Output,
+        sguan->current.Real_Iq);
+
+    // 4.结果输出到Ud和Uq给定
     sguan->foc.Ud_in = sguan->control.Current_D.run.Output + Ud_ff;
     sguan->foc.Uq_in = sguan->control.Current_Q.run.Output + Uq_ff;
+    #endif // Open_PI_Control
 }
 
 // Control高性能伺服三环(三闭环)
 static void Control_PosVelCur_THREE(SguanFOC_System_STRUCT *sguan){
-    static uint8_t PID_Count = 0;
-    PID_Count++;
-    if (PID_Count == sguan->control.Response*sguan->control.Response){
-        sguan->control.Position.run.Ref = sguan->foc.Target_Pos;
-        sguan->control.Position.run.Fbk = sguan->encoder.Real_Pos;
-        PID_Loop(&sguan->control.Position);
-        PID_Count = 0;
+    static uint8_t Control_Count = 0;
+    Control_Count++;
+    // 0.(控制器数据赋值)如果不在工作状态，赋值为零
+    if ((sguan->status >= 4) && (sguan->status < 19)){
+        sguan->foc.Target_Pos = 0.0f;
+        sguan->encoder.Real_Pos = 0.0f;
     }
-    if (PID_Count % sguan->control.Response == 0){
-        sguan->control.Velocity.run.Ref = sguan->control.Position.run.Output;
-        sguan->control.Velocity.run.Fbk = sguan->encoder.Real_Speed;
-        PID_Loop(&sguan->control.Velocity);
+
+    #if !Open_PI_Control
+    // 1.位置环PD控制器计算
+    if (Control_Count == sguan->control.Response*sguan->control.Response){
+        Transfer_PID_Loop(&sguan->control.Position,
+            sguan->foc.Target_Pos,
+            sguan->encoder.Real_Pos);
+        Control_Count = 0;
     }
-    // 1.前馈计算
+
+    // 2.转速环LADRC线自抗扰计算
+    if (Control_Count % sguan->control.Response == 0){
+        Transfer_Ladrc_Loop(&sguan->control.Speed,
+            sguan->control.Position.run.Output,
+            sguan->encoder.Real_Speed);
+    }
+
+    // 3.前馈计算
     float Ud_ff = -sguan->encoder.Real_Espeed*sguan->identify.Lq*sguan->current.Real_Iq; 
     float Uq_ff = sguan->encoder.Real_Espeed*sguan->identify.Ld*sguan->current.Real_Id + 
                     sguan->encoder.Real_Espeed*sguan->identify.Flux;
 
-    // 2.PID计算
-    sguan->control.Current_D.run.Ref = sguan->foc.Target_Id; // 默认D轴励磁为0
-    sguan->control.Current_D.run.Fbk = sguan->current.Real_Id;
-    sguan->control.Current_Q.run.Ref = sguan->control.Velocity.run.Output;
-    sguan->control.Current_Q.run.Fbk = sguan->current.Real_Iq;
-    PID_Loop(&sguan->control.Current_D);
-    PID_Loop(&sguan->control.Current_Q);
+    // 4.电流环IM内模控制器计算
+    Transfer_IM_Loop(&sguan->control.Dimc,
+        &sguan->control.PID_D,
+        sguan->foc.Target_Id,       // 默认D轴励磁Id为0
+        sguan->current.Real_Id);
+    Transfer_IM_Loop(&sguan->control.Qimc,
+        &sguan->control.PID_Q,
+        sguan->control.Speed.linear.Output,
+        sguan->current.Real_Iq);
+
+    // 5.结果输出到Ud和Uq给定
+    sguan->foc.Ud_in = sguan->control.PID_D.run.Output + Ud_ff;
+    sguan->foc.Uq_in = sguan->control.PID_Q.run.Output + Uq_ff;
+    #else // Open_PI_Control
+    // 1.位置环PD控制器计算
+    if (Control_Count == sguan->control.Response*sguan->control.Response){
+        Transfer_PID_Loop(&sguan->control.Position,
+            sguan->foc.Target_Pos,
+            sguan->encoder.Real_Pos);
+        Control_Count = 0;
+    }
+
+    // 2.转速环PI控制器计算
+    if (Control_Count % sguan->control.Response == 0){
+        Transfer_PID_Loop(&sguan->control.Velocity,
+            sguan->control.Position.run.Output,
+            sguan->encoder.Real_Speed);
+    }
+    // 3.前馈计算
+    float Ud_ff = -sguan->encoder.Real_Espeed*sguan->identify.Lq*sguan->current.Real_Iq; 
+    float Uq_ff = sguan->encoder.Real_Espeed*sguan->identify.Ld*sguan->current.Real_Id + 
+                    sguan->encoder.Real_Espeed*sguan->identify.Flux;
+
+    // 4.电流环PI控制器计算
+    Transfer_PID_Loop(&sguan->control.Current_D,
+        sguan->foc.Target_Id,       // 默认D轴励磁为0
+        sguan->current.Real_Id);
+    Transfer_PID_Loop(&sguan->control.Current_Q,
+        sguan->control.Velocity.run.Output,
+        sguan->current.Real_Iq);
+
+    // 5.结果输出到Ud和Uq给定
     sguan->foc.Ud_in = sguan->control.Current_D.run.Output + Ud_ff;
     sguan->foc.Uq_in = sguan->control.Current_Q.run.Output + Uq_ff;
-}
-
-static void Control_Sensorless_HFI(SguanFOC_System_STRUCT *sguan){
-
-}
-
-static void Control_Sensorless_SMO(SguanFOC_System_STRUCT *sguan){
-
-}
-
-static void Control_Sensorless_HS(SguanFOC_System_STRUCT *sguan){
-    
+    #endif // Open_PI_Control
 }
 
 // Data母线电压和驱动器物理温度数据更新
@@ -430,6 +526,77 @@ static void Data_Protection_Loop(SguanFOC_System_STRUCT *sguan){
     }
     if (User_Temperature_DataGet() != -9999.0f){        
         sguan->foc.Real_Temp = User_Temperature_DataGet();
+    }
+}
+
+// Status判断DISABLED状态机的切换
+static void Status_Switch_DISABLED(SguanFOC_System_STRUCT *sguan,uint32_t *count){
+    if ((count > sguan->safe.DISABLED_watchdog_limit) && 
+        (sguan->status == MOTOR_STATUS_DISABLED)){
+        sguan->status = MOTOR_STATUS_STANDBY;
+        *count = 0;
+        // 已失能状态持续“自定义”次控制周期后，自动切换退出已失能状态
+    }
+}
+
+// Status判断过压保护状态
+static void Status_VBUS_OVERVOLTAGE(SguanFOC_System_STRUCT *sguan,uint32_t *count){
+    if (sguan->foc.Real_VBUS > sguan->safe.VBUS_MAX){
+        sguan->status = MOTOR_STATUS_STANDBY;
+        *count = 0;
+    }
+    else{
+        sguan->status = MOTOR_STATUS_IDLE;
+        *count = 0;           
+    }
+}
+
+// Status判断欠压保护状态
+static void Status_VBUS_UNDERVOLTAGE(SguanFOC_System_STRUCT *sguan,uint32_t *count){
+    if (sguan->foc.Real_VBUS < sguan->safe.VBUS_MIM){
+        sguan->status = MOTOR_STATUS_STANDBY;
+        *count = 0;
+    }
+    else{
+        sguan->status = MOTOR_STATUS_IDLE;
+        *count = 0;           
+    }
+}
+
+// Status判断过温保护状态
+static void Status_Temp_OVERTEMPERATURE(SguanFOC_System_STRUCT *sguan,uint32_t *count){
+    if (sguan->foc.Real_Temp > sguan->safe.Temp_MAX){
+        sguan->status = MOTOR_STATUS_STANDBY;
+        *count = 0;
+    }
+    else{
+        sguan->status = MOTOR_STATUS_IDLE;
+        *count = 0;           
+    }
+}
+
+// Status判断低温保护状态
+static void Status_Temp_UNDERTEMPERATURE(SguanFOC_System_STRUCT *sguan,uint32_t *count){
+    if (sguan->foc.Real_Temp < sguan->safe.Temp_MIN){
+        sguan->status = MOTOR_STATUS_STANDBY;
+        *count = 0;
+    }
+    else{
+        sguan->status = MOTOR_STATUS_IDLE;
+        *count = 0;           
+    }
+}
+
+// Status判断过流保护状态
+static void Status_Current_OVERCURRENT(SguanFOC_System_STRUCT *sguan,uint32_t *count){
+    if ((sguan->current.Real_Id > sguan->safe.Dcur_MAX) || 
+        ((sguan->current.Real_Iq > sguan->safe.Qcur_MAX))){
+        sguan->status = MOTOR_STATUS_STANDBY;
+        *count = 0;
+    }
+    else{
+        sguan->status = MOTOR_STATUS_IDLE;
+        *count = 0;           
     }
 }
 
@@ -446,10 +613,6 @@ static void Status_Switch_Loop(SguanFOC_System_STRUCT *sguan){
     }
 
     // ====== 初始化与运行状态(状态) ======
-    if ((sguan->status != MOTOR_STATUS_UNINITIALIZED) && 
-        MOTOR_STATUS_UNINITIALIZED_Signal()){ // [重要]接收到开始信号后，切换到未初始化状态...准备初始化
-        sguan->status = MOTOR_STATUS_UNINITIALIZED;
-    }
     if ((sguan->status != MOTOR_STATUS_STANDBY) && 
         MOTOR_STATUS_STANDBY_Signal()){ // [重要]接收到待机信号后，解除锁定状态...进入待机状态
         sguan->status = MOTOR_STATUS_STANDBY;
@@ -457,6 +620,10 @@ static void Status_Switch_Loop(SguanFOC_System_STRUCT *sguan){
     if ((sguan->status == MOTOR_STATUS_EMERGENCY_STOP) || 
         (sguan->status == MOTOR_STATUS_DISABLED)){
         return; // 紧急停止和失能状态优先级最高, 直接返回不执行后续状态判断
+    }
+    if ((sguan->status != MOTOR_STATUS_UNINITIALIZED) && 
+        MOTOR_STATUS_UNINITIALIZED_Signal()){ // [重要]接收到开始信号后，切换到未初始化状态...准备初始化
+        sguan->status = MOTOR_STATUS_UNINITIALIZED;
     }
 
     // ====== 硬件相关错误(状态) ======
@@ -567,63 +734,62 @@ static void Status_Switch_Loop(SguanFOC_System_STRUCT *sguan){
     }
 }
 
+// Status定时器中断调用的状态机运行函数
 static void Status_RUN_Loop(SguanFOC_System_STRUCT *sguan){
     // 1.状态机失能DISABLED安全状态处理
     static uint32_t count = 0;
     count++;
     if (sguan->status == MOTOR_STATUS_DISABLED){
-        if ((count > sguan->safe.DISABLED_watchdog_limit) && 
-            (sguan->status == MOTOR_STATUS_DISABLED)){
-            sguan->status = MOTOR_STATUS_STANDBY;
-            count = 0;
-             // 已失能状态持续“自定义”次控制周期后，自动切换退出已失能状态
+        if (count > sguan->safe.DISABLED_watchdog_limit){
+            Status_Switch_DISABLED(sguan,count);
         }
     }
     // 2.电机电压异常_错误处理
     if (sguan->status == MOTOR_STATUS_OVERVOLTAGE){
-        if (count > sguan->safe.VBUS_watchdog_limit/2)
-        {
-            
+        if (count % sguan->safe.VBUS_watchdog_limit == 0){
+            Status_VBUS_OVERVOLTAGE(sguan,count);
         }
-        if ((count > sguan->safe.VBUS_watchdog_limit) && 
-            (sguan->status == MOTOR_STATUS_OVERVOLTAGE)){ 
-            sguan->status = MOTOR_STATUS_STANDBY;
-            count = 0;
+        if (count > sguan->safe.VBUS_watchdog_limit*10){ 
+            Status_VBUS_OVERVOLTAGE(sguan,count);
             // 持续自定义的周期后，自动切换退出过压保护，并进入STANDBY
         }
     }
     if (sguan->status == MOTOR_STATUS_UNDERVOLTAGE){
-        if ((count > sguan->safe.VBUS_watchdog_limit) && 
-            (sguan->status == MOTOR_STATUS_UNDERVOLTAGE)){ 
-            sguan->status = MOTOR_STATUS_STANDBY;
-            count = 0;
-            // 持续自定义的周期后，自动切换退出欠压保护，并进入STANDBY
+        if (count % sguan->safe.VBUS_watchdog_limit == 0){
+            Status_VBUS_UNDERVOLTAGE(sguan,count);
+        }
+        if (count > sguan->safe.VBUS_watchdog_limit*10){ 
+            Status_VBUS_UNDERVOLTAGE(sguan,count);
+            // 持续自定义的周期后，自动切换退出过压保护，并进入STANDBY
         }
     }
     // 3.电机驱动器温度异常_错误处理
     if (sguan->status == MOTOR_STATUS_OVERTEMPERATURE){
-        if ((count > sguan->safe.Temp_watchdog_limit) && 
-            (sguan->status == MOTOR_STATUS_OVERTEMPERATURE)){ 
-            sguan->status = MOTOR_STATUS_STANDBY;
-            count = 0;
-            // 持续自定义的周期后，自动切换退出过温保护，并进入STANDBY
+        if (count % sguan->safe.Temp_watchdog_limit == 0){
+            Status_Temp_OVERTEMPERATURE(sguan,count);
+        }
+        if (count > sguan->safe.Temp_watchdog_limit*10){ 
+            Status_Temp_OVERTEMPERATURE(sguan,count);
+            // 持续自定义的周期后，自动切换退出过压保护，并进入STANDBY
         }
     }
     if (sguan->status == MOTOR_STATUS_UNDERTEMPERATURE){
-        if ((count > sguan->safe.Temp_watchdog_limit) && 
-            (sguan->status == MOTOR_STATUS_UNDERTEMPERATURE)){ 
-            sguan->status = MOTOR_STATUS_STANDBY;
-            count = 0;
-            // 持续自定义的周期后，自动切换退出低温保护，并进入STANDBY
+        if (count % sguan->safe.Temp_watchdog_limit == 0){
+            Status_Temp_UNDERTEMPERATURE(sguan,count);
+        }
+        if (count > sguan->safe.Temp_watchdog_limit*10){ 
+            Status_Temp_UNDERTEMPERATURE(sguan,count);
+            // 持续自定义的周期后，自动切换退出过压保护，并进入STANDBY
         }
     }
     // 4.电机过流保护OVERCURRENT错误处理
     if (sguan->status == MOTOR_STATUS_OVERCURRENT){
-        if ((count > sguan->safe.DQcur_watchdog_limit) && 
-            (sguan->status == MOTOR_STATUS_OVERCURRENT)){ 
-            sguan->status = MOTOR_STATUS_STANDBY;
-            count = 0;
-            // 持续自定义的周期后，自动切换退出过流保护，并进入STANDBY
+        if (count % sguan->safe.DQcur_watchdog_limit == 0){
+            Status_Current_OVERCURRENT(sguan,count);
+        }
+        if (count > sguan->safe.DQcur_watchdog_limit*10){ 
+            Status_Current_OVERCURRENT(sguan,count);
+            // 持续自定义的周期后，自动切换退出过压保护，并进入STANDBY
         }
     }
     MotorStatus_Loop(&Sguan.status);
@@ -751,12 +917,22 @@ static void Sguan_BPF_Init(SguanFOC_System_STRUCT *sguan){
 
 // Sguan...Init闭环控制算法PID的初始化
 static void Sguan_PID_Init(SguanFOC_System_STRUCT *sguan){
-    // 单闭环初始化(电流单闭环)
+    #if !Open_PI_Control
+    // 1.电流环IM内模控制器初始化
+    InternalModel_Init(&sguan->control.Dimc);
+    InternalModel_Init(&sguan->control.Qimc);
+    PID_Init(&sguan->control.PID_D);
+    PID_Init(&sguan->control.PID_Q);
+    // 2.转速环LADRC线自抗扰初始化
+    Ladrc_Init(&sguan->control.Speed);
+    #else // Open_PI_Control
+    // 1.电流环PI控制器初始化
     PID_Init(&sguan->control.Current_D);
     PID_Init(&sguan->control.Current_Q);
-    // 双闭环(速度-电流||无感控制)
+    // 2.转速环PI控制器初始化
     PID_Init(&sguan->control.Velocity);
-    // 三闭环(位置-速度-电流)
+    #endif // Open_PI_Control
+    // 3.位置环PD控制器初始化
     PID_Init(&sguan->control.Position);
 }
 
@@ -784,10 +960,18 @@ static void Sguan_SystemT_Set(SguanFOC_System_STRUCT *sguan){
     sguan->bpf.CurrentD.T = sguan->PMSM_RUN_T;
     sguan->bpf.CurrentQ.T = sguan->PMSM_RUN_T;
     sguan->bpf.Encoder.T = sguan->PMSM_RUN_T;
-    // 2.pid闭环控制系统
+    // 2.control闭环控制系统
+    #if !Open_PI_Control
+    sguan->control.Dimc.T = sguan->PMSM_RUN_T;
+    sguan->control.Qimc.T = sguan->PMSM_RUN_T;
+    sguan->control.PID_D.T = sguan->PMSM_RUN_T;
+    sguan->control.PID_Q.T = sguan->PMSM_RUN_T;
+    sguan->control.Speed.T = sguan->PMSM_RUN_T*sguan->control.Response;
+    #else // Open_PI_Control
     sguan->control.Current_D.T = sguan->PMSM_RUN_T;
     sguan->control.Current_Q.T = sguan->PMSM_RUN_T;
     sguan->control.Velocity.T = sguan->PMSM_RUN_T*sguan->control.Response;
+    #endif // Open_PI_Control
     sguan->control.Position.T = sguan->PMSM_RUN_T*sguan->control.Response*sguan->control.Response;
     // 3.pll锁相环跟踪系统
     sguan->encoder.pll.T = sguan->PMSM_RUN_T;

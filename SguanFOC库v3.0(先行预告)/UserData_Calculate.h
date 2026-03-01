@@ -8,7 +8,7 @@
  * @reminder: 1->电流环“PI控制”，转速环“PI控制”，位置环“PD控制”
  * @return {*}
  */
-#define Open_PI_Control 1
+#define Open_PI_Control 0
 
 /**
  * @description: 宏定义0或1决定“Q31定点化运算”的开启与否(默认关闭)

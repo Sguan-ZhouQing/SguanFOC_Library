@@ -9,6 +9,9 @@ static inline void User_ParameterSet(void){
     Sguan.bpf.CurrentQ.Wc = 31415.96f;          // 电机Q轴电流滤波->截止频率(默认参数)
     Sguan.bpf.Encoder.Wc = 314.1596f;           // 速度信号滤波->截止频率(默认参数)
     // 2.pid闭环控制系统设计
+    #if !Open_PI_Control
+
+    #else // Open_PI_Control
     Sguan.control.Current_D.Wc = 100.0f;            // PID电流环D轴参数->截止频率(默认参数)
     Sguan.control.Current_D.Kp = 0.261f;            // PID电流环D轴参数->Kp【PID参数自适应】
     Sguan.control.Current_D.Ki = 958.4111f;         // PID电流环D轴参数->Ki【PID参数自适应】
@@ -35,7 +38,7 @@ static inline void User_ParameterSet(void){
     Sguan.control.Velocity.OutMin = -10.5f;         // 双PID速度外环参数(默认参数)
     Sguan.control.Velocity.IntMax = 15000.0f;       // 双PID速度外环参数->积分项上限(默认参数)
     Sguan.control.Velocity.IntMin = -15000.0f;      // 双PID速度外环参数->积分项下限(默认参数)
-    /* =========================== 分割线 ========================== */
+    #endif // Open_PI_Control
     Sguan.control.Position.Wc = 18.0f;           // 高性能伺服三环pos(默认参数)
     Sguan.control.Position.Kp = 12.0f;           // 高性能伺服三环pos【PID参数自适应】
     Sguan.control.Position.Ki = 0.0f;            // 高性能伺服三环pos【PID参数自适应】
