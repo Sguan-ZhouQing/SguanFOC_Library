@@ -471,7 +471,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 
 ---
 
-## 📞 联系支持
+## 📞 联系支持及致谢
 
 | 渠道 | 联系方式 |
 |:-----|:---------|
@@ -480,15 +480,8 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 | 🐛 **Issues** | [GitHub Issues](https://github.com/Sguan-ZhouQing/SguanFOC_Library/issues) |
 | 📚 **Wiki** | [项目Wiki](https://github.com/Sguan-ZhouQing/SguanFOC_Library/wiki) |
 
----
-
-## 🌟 致谢
-
 感谢所有为项目做出贡献的开发者们！
-
-<div align="center">
-  <img src="https://img.shields.io/badge/⭐-如果这个项目对你有帮助，请给我们一个Star！-brightgreen">
-</div>
+<img src="https://img.shields.io/badge/⭐-如果这个项目对你有帮助，请给我们一个Star！-brightgreen">
 
 ---
 
