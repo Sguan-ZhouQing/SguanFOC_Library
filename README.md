@@ -1,5 +1,4 @@
-# SguanFOC - 高性能磁场定向控制库
-![电机](https://github.com/user-attachments/assets/180d2939-68cd-442c-ab6e-ac0ab835b193)
+# SguanFOC - 高性能磁场定向控制库 ![电机](https://github.com/user-attachments/assets/180d2939-68cd-442c-ab6e-ac0ab835b193)
 
 ![Version](https://img.shields.io/badge/Version-3.0.0-blue)
 ![License](https://img.shields.io/badge/License-MIT-green)
