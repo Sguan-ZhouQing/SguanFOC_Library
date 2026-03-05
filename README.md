@@ -1,4 +1,4 @@
-# SguanFOC - 高性能磁场定向控制库(FOC控制)
+# SguanFOC - 高性能磁场定向控制库(FOC)
 
 ![Version](https://img.shields.io/badge/Version-3.0.0-blue)
 ![License](https://img.shields.io/badge/License-MIT-green)
