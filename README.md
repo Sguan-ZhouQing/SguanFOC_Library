@@ -503,7 +503,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 
 | 渠道 | 联系方式 |
 |:-----|:---------|
-| 👨‍💻 **作者** | 星必尘Sguan |
+| 👨‍💻 **作者** | 星必尘Sguan                     |
 | 📧 **邮箱** | 3464647102@qq.com |
 | 🐛 **Issues** | [GitHub Issues](https://github.com/Sguan-ZhouQing/SguanFOC_Library/issues) |
 | 📚 **Wiki** | [项目Wiki](https://github.com/Sguan-ZhouQing/SguanFOC_Library/wiki) |
