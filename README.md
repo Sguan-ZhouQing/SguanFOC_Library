@@ -1,4 +1,4 @@
-# SguanFOC - 高性能磁场定向控制库 ![PMSM](https://github.com/user-attachments/assets/1464a572-3d07-4379-b336-ac5b7cc9360b)
+# SguanFOC - 高性能磁场定向控制库 ![电机](https://github.com/user-attachments/assets/35dcf7ac-3f25-4bd2-8ce5-7f233f2bb911)
 
 ![Version](https://img.shields.io/badge/Version-3.0.0-blue)
 ![License](https://img.shields.io/badge/License-MIT-green)
