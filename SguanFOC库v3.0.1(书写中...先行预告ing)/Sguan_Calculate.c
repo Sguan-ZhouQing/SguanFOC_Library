@@ -5,7 +5,7 @@
  * @LastEditors: 星必尘Sguan|3464647102@qq.com
  * @LastEditTime: 2026-02-13 21:25:25
  * @FilePath: \stm_SguanFOCtest\SguanFOC\Sguan_Calculate.c
- * @Description: SguanFOC库的"浮点转Q31定点运算"实现 - 修复版
+ * @Description: SguanFOC库的"浮点转Q31定点运算"实现
  * 
  * Copyright (c) 2026 by $星必尘Sguan, All Rights Reserved. 
  */
@@ -113,7 +113,7 @@ float Value_Limit(float val, float max, float min) {
 }
 
 // 参数取模
-float normalize_angle(float angle) {
+float Value_normalize(float angle) {
   float normalized = Value_fmodf(angle, Value_PI*2);
   // 如果结果为负，加上2π使其在[0, 2π)范围内
   if (normalized < 0) {

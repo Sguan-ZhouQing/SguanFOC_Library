@@ -2,7 +2,7 @@
 #define __SGUAN_PLL_H
 
 /* 外部函数声明 */
-#include "Sguan_math.h"
+#include "Sguan_Calculate.h"
 
 typedef struct{
     float i;        // (数据)数据历史输入值

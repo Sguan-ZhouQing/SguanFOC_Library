@@ -5,19 +5,26 @@
 // 电机控制核心函数文件声明
 #include "Sguan_Filter.h"
 #include "Sguan_FW.h"
+#include "Sguan_Identify.h"
 #include "Sguan_InternalModel.h"
 #include "Sguan_Ladrc.h"
 #include "Sguan_math.h"
 #include "Sguan_MotorStatus.h"
+#include "Sguan_NSD.h"
 #include "Sguan_PID.h"
 #include "Sguan_PLL.h"
 #include "Sguan_printf.h"
+#include "Sguan_SensorlessHFI.h"
+#include "Sguan_SensorlessSMO.h"
 /* USER CODE END Includes */
 
 #define Velocity_OPEN_MODE      0x00 // 速度开环(Uq_in电机方向测试和电机参数测算)
 #define Current_SINGLE_MODE     0x01 // 电流单闭环(力矩控制)
 #define VelCur_DOUBLE_MODE      0x02 // 速度-电流串级闭环控制
 #define PosVelCur_THREE_MODE    0x03 // 位置-速度-电流多环
+#define Sensorless_HFI_MODE     0x04 // 无感高频方波注入控制(低速域)
+#define Sensorless_SMO_MODE     0x05 // 无感滑膜观测器控制(强拖切高速域)
+#define Sensorless_HS_MODE      0x06 // 无感方波注入切滑膜(全速域)
 
 typedef struct{
     uint8_t Angle_Calc;             // 电机读取角度校正和转子极性辨识“标志位”
@@ -83,23 +90,14 @@ typedef struct{
     float VBUS_MAX;                 // (参数设计)母线电压值波动MAX阈值
     float VBUS_MIM;                 // (参数设计)母线电压值波动MIN阈值
     uint32_t VBUS_watchdog_limit;   // (参数设计)电压异常的警告周期
-    // 如果有电机电压预警，电机正常运行...经过Sguan_Low_Loop()的VBUS_watchdog_limit此运行周期
-    // 若2-10次，中间有一次再触发电压警告，电机停转进待机
-    // 若首次后10次，都未再触发，电机以后都正常运行
     
     float Temp_MAX;                 // (参数设计)驱动器允许最大温度
     float Temp_MIN;                 // (参数设计)驱动器允许最小温度
     uint32_t Temp_watchdog_limit;   // (参数设计)温度异常的警告周期
-    // 如果有驱动器温度预警，电机正常运行...经过Sguan_Low_Loop()的Temp_watchdog_limit此运行周期
-    // 若2-10次，中间有一次再触发温度警告，电机停转进待机
-    // 若首次后10次，都未再触发，电机以后都正常运行
- 
+
     float Dcur_MAX;                 // (参数设计)电机最大电流D轴限制
     float Qcur_MAX;                 // (参数设计)电机最大电流Q轴限制
     uint32_t DQcur_watchdog_limit;  // (参数设计)过流保护的警告周期
-    // 如果有电机过流预警，电机正常运行...经过Sguan_Low_Loop()的DQcur_watchdog_limit此运行周期
-    // 若2-10次，中间有一次再触发过流警告，电机停转进待机
-    // 若首次后10次，都未再触发，电机以后都正常运行
 
     uint32_t DISABLED_watchdog_limit;//(参数设计)电机DISABLED状态机进待机模式的延时周期
 }MOTOR_SAFE_STRUCT;
@@ -157,6 +155,20 @@ typedef struct{
 }MOTOR_CURRENT_STRUCT;
 
 typedef struct{
+    HFI_STRUCT alpha_h;             // (用于电角度解耦)转子alpha轴的高频信号
+    HFI_STRUCT beta_h;              // (由于电角度解耦)转子beta轴的高频信号
+
+    HFI_STRUCT D_h;                 // (用于HFI转子极性辨识)电机D轴的高频信号
+
+    HFI_STRUCT D_f;                 // (电机正常DQ环)电机的D轴基频信号
+    HFI_STRUCT Q_f;                 // (电机正常DQ环)电机的Q轴基频信号
+}MOTOR_HFI_STRUCT;
+
+typedef struct{
+    SMO_STRUCT smo;                 // 滑膜观测器的结构体
+}MOTOR_SMO_STRUCT;
+
+typedef struct{
     float PMSM_RUN_T;               // 【有参数设计】系统电机运行时间周期
     uint8_t mode;                   // 【有参数设计】mode选择电机的运行模式
     uint8_t status;                 // 【数据】status存储电机运行状态
@@ -170,6 +182,8 @@ typedef struct{
     MOTOR_FOC_STRUCT foc;           // 【有参数设计】foc控制的参数输入“缓存”
     MOTOR_ENCODER_STRUCT encoder;   // 【数据】电机角速度和角度信息“缓存”
     MOTOR_CURRENT_STRUCT current;   // 【数据】电机电流采样信息“缓存”
+    MOTOR_HFI_STRUCT hfi;                 // 【数据】HFI高频注入算法
+    MOTOR_SMO_STRUCT smo;                 // 【数据】SMO滑膜观测器算法
 
     PRINTF_STRUCT TXdata;           // 【数据】data串口或CAN发送的信息
 }SguanFOC_System_STRUCT;

@@ -1,8 +1,8 @@
 #ifndef __SGUAN_PRINTF_H
 #define __SGUAN_PRINTF_H
 
-/* 外部函数声明 */
-#include "Sguan_math.h"
+#include <stdint.h>
+#include <stdio.h>
 
 /**
  * @description: 自定义数据发送的个数(默认为8)

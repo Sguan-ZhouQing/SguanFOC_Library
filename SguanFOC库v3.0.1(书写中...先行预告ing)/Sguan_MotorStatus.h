@@ -3,7 +3,7 @@
 
 /* 外部用户设置函数声明 */
 #include "UserData_Status.h"
-#include <stdint.h>
+#include "Sguan_Calculate.h"
 
 // ====== 初始化与运行状态(状态) ======
 #define MOTOR_STATUS_STANDBY                0x00    // 待机（未初始化，准备中）

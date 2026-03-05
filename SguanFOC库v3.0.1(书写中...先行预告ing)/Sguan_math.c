@@ -16,103 +16,6 @@
 #define Value_INV_SQRT3 0.5773502691896257f
 #define Value_SQRT3 1.73205080756887729353f
 
-// 重写fmodf函数
-static float Value_fmodf(float x, float y) {
-  if (y == 0.0f) return 0.0f;
-  int quotient = (int)(x / y); // 1次除法运算
-  return x - quotient * y;     // 1次乘1次减
-}
-
-// 重写fabsf函数
-float Value_fabsf(float x){
-  union {
-      float f;
-      uint32_t i;
-  } u;
-  u.f = x;
-  u.i &= 0x7FFFFFFF; // 1次位与操作
-  return u.f;
-}
-
-// 重写isinf函数
-int Value_isinf(float x){
-    union{
-        float f;
-        uint32_t i;
-    } u = {x};
-    
-    // 单精度浮点数格式：
-    // 符号位(1bit) | 指数位(8bits) | 尾数位(23bits)
-    // 无穷大：指数位全1，尾数位全0
-    // 去除符号位后检查
-    uint32_t exp_mask = 0x7F800000;  // 指数位全1的掩码
-    uint32_t mant_mask = 0x007FFFFF;  // 尾数位掩码
-    
-    // 检查指数位是否全1且尾数位全0
-    if ((u.i & exp_mask) == exp_mask && (u.i & mant_mask) == 0) {
-        return 1;  // 是无穷大
-    }
-    return 0;  // 不是无穷大
-}
-
-// 重写isnan函数
-int Value_isnan(float x){
-    union{
-        float f;
-        uint32_t i;
-    } u = {x};
-    
-    uint32_t exp_mask = 0x7F800000;  // 指数位全1的掩码
-    uint32_t mant_mask = 0x007FFFFF;  // 尾数位掩码
-    if ((u.i & exp_mask) == exp_mask && (u.i & mant_mask) != 0) {
-        return 1;  // 是NaN
-    }
-    return 0;  // 不是NaN
-}
-
-// 重写sqrtf函数
-float Value_sqrtf(float x){
-    if (x < 0){
-        return 0.0f;  // 返回NaN（0/0产生NaN）
-    }
-    if (x == 0 || x == 1){
-        return x;
-    }
-    float guess = x;
-    float epsilon = 0.00001f;  // 精度要求
-    // 牛顿迭代公式：guess = (guess + x/guess) / 2
-    while (1) {
-        float new_guess = (guess + x / guess) * 0.5f;
-        if (new_guess > guess){
-            if (new_guess - guess < epsilon){
-                return new_guess;
-            }
-        } else {
-            if (guess - new_guess < epsilon){
-                return new_guess;
-            }
-        }
-        guess = new_guess;
-    }
-}
-
-// 数值限幅
-float Value_Limit(float val, float max, float min) {
-    if (val > max) return max;
-    if (val < min) return min;
-    return val;
-}
-
-// 参数取模
-float Value_normalize(float angle) {
-  float normalized = Value_fmodf(angle, Value_PI*2);
-  // 如果结果为负，加上2π使其在[0, 2π)范围内
-  if (normalized < 0) {
-      normalized += Value_PI*2;
-  }
-  return normalized;
-}
-
 // 快速sine和cosine求解的局部函数
 static float f1(float x) {
   float u = 1.3528548e-10f;
@@ -164,25 +67,12 @@ void fast_sin_cos(float x, float *sin_x, float *cos_x) {
   *cos_x = 1.0f + x * x * f2(x * x);
 }
 
-// 对DQ轴电压进行幅值限制，防止过调制
-static void Overmod(float *d, float *q){
-    // 计算合成“矢量幅值的平方”
-    float Vref = (*d)*(*d) + (*q)*(*q);
-    
-    if (Vref > 1.0f) {
-      float scale = 1.0f / Value_sqrtf(Vref);
-      *d *= scale;
-      *q *= scale;
-      // 幅值限制处理,如果“幅值平方”超过 1,进行等比例缩放
-    }
-}
-
 // 电机SVPWM空间矢量调制函数
 void SVPWM(float d, float q, float sin_phi, float cos_phi, float *d_u, float *d_v, float *d_w){
   d = Value_Limit(d,1,-1);   // 限幅函数
   q = Value_Limit(q,1,-1);
 
-  Overmod(&d, &q);    // 过调制处理
+  Overmodulation(&d, &q);    // 过调制处理
 
   const int v[6][3] = {{1, 0, 0}, {1, 1, 0}, {0, 1, 0}, {0, 1, 1}, {0, 0, 1}, {1, 0, 1}};
   const int K_to_sector[] = {4, 6, 5, 5, 3, 1, 2, 2};
@@ -207,6 +97,19 @@ void SVPWM(float d, float q, float sin_phi, float cos_phi, float *d_u, float *d_
   *d_u = t_m * v[sector - 1][0] + t_n * v[sector % 6][0] + t_0 / 2;
   *d_v = t_m * v[sector - 1][1] + t_n * v[sector % 6][1] + t_0 / 2;
   *d_w = t_m * v[sector - 1][2] + t_n * v[sector % 6][2] + t_0 / 2;
+}
+
+// 对DQ轴电压进行幅值限制，防止过调制
+void Overmodulation(float *d, float *q){
+    // 计算合成“矢量幅值的平方”
+    float Vref = (*d)*(*d) + (*q)*(*q);
+    
+    if (Vref > 1.0f) {
+      float scale = 1.0f / Value_sqrtf(Vref);
+      *d *= scale;
+      *q *= scale;
+      // 幅值限制处理,如果“幅值平方”超过 1,进行等比例缩放
+    }
 }
 
 // 克拉克变换

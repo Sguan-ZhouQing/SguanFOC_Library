@@ -2,7 +2,7 @@
 #define __SGUAN_LADRC_H
 
 /* 外部函数声明 */
-#include "Sguan_math.h"
+#include "Sguan_Calculate.h"
 
 typedef struct{
     // 跟踪微分器(TD)变量

@@ -13,7 +13,6 @@
 /* 外部函数文件声明 */
 #include "UserData_Correspond.h"
 #include "UserData_UserControl.h"
-#include <stdio.h>
 #include <string.h>
 /* 内部函数文件声明 */
 static float Get_Data(void);

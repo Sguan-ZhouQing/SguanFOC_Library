@@ -3,7 +3,15 @@
 
 /* 外部函数声明 */
 #include "UserData_Calculate.h"
-#include <stdint.h>
+
+typedef signed char         int8_t;
+typedef signed short int    int16_t;
+typedef signed int          int32_t;
+typedef signed long long    int64_t;
+typedef unsigned char       uint8_t;
+typedef unsigned short int  uint16_t;
+typedef unsigned int        uint32_t;
+typedef unsigned long long  uint64_t;
 
 // 常量宏定义
 #define Value_PI 3.14159265358979323846f
@@ -19,7 +27,7 @@ float Value_sqrtf(float x);
 
 // 参数限制函数
 float Value_Limit(float val, float max, float min);
-float normalize_angle(float angle);
+float Value_normalize(float angle);
 
 // Q31基本运算
 q31_t q31_mul(q31_t a, q31_t b);
