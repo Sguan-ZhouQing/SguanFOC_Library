@@ -4,7 +4,7 @@
 ![License](https://img.shields.io/badge/License-MIT-green)
 ![Language](https://img.shields.io/badge/Language-C-00599C)
  <img src="https://img.shields.io/badge/🔄_完整FOC-开箱即用-red">
-![Platform](https://img.shields.io/badge/Platform-STM32%20%7C%20ARM%20%7C%20任何C语言MCU-orange)
+![Platform](https://img.shields.io/badge/Platform-ARM%20%7C%20DSP%20%7C%20任何C语言MCU-orange)
 
 ---
 
