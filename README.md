@@ -1,16 +1,10 @@
 # 🧠 SguanFOC - 高性能磁场定向控制库
 
 ![Version](https://img.shields.io/badge/Version-3.0.0-blue)
-![Build](https://img.shields.io/badge/Build-passing-brightgreen)
 ![License](https://img.shields.io/badge/License-MIT-green)
 ![Language](https://img.shields.io/badge/Language-C-00599C)
 ![Platform](https://img.shields.io/badge/Platform-STM32%20%7C%20ARM%20%7C%20任何C语言MCU-orange)
-
 <div align="center">
-  <img src="https://img.shields.io/badge/⚡_有感控制-高性能-blueviolet">
-  <img src="https://img.shields.io/badge/🔮_无感控制-开发中-yellow">
-  <img src="https://img.shields.io/badge/🧮_浮点运算-v3.0.0-success">
-  <img src="https://img.shields.io/badge/🔢_定点运算-v3.0.1-ff69b4">
   <img src="https://img.shields.io/badge/🔄_完整FOC-开箱即用-red">
 </div>
 
