@@ -3,8 +3,8 @@
 ![Version](https://img.shields.io/badge/Version-3.0.0-blue)
 ![License](https://img.shields.io/badge/License-MIT-green)
 ![Language](https://img.shields.io/badge/Language-C-00599C)
-![Platform](https://img.shields.io/badge/Platform-STM32%20%7C%20ARM%20%7C%20任何C语言MCU-orange)
  <img src="https://img.shields.io/badge/🔄_完整FOC-开箱即用-red">
+![Platform](https://img.shields.io/badge/Platform-STM32%20%7C%20ARM%20%7C%20任何C语言MCU-orange)
 
 ---
 
