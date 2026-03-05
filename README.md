@@ -5,10 +5,10 @@
 ![Language](https://img.shields.io/badge/Language-C-00599C)
  <img src="https://img.shields.io/badge/🔄_完整FOC-开箱即用-red">
 ![Platform](https://img.shields.io/badge/Platform-ARM%20%7C%20DSP%20%7C%20任何C语言MCU-orange)
- 
+
 ---
 
-## ![电机](https://github.com/user-attachments/assets/35dcf7ac-3f25-4bd2-8ce5-7f233f2bb911) 项目简介
+## ![无刷电机](https://github.com/user-attachments/assets/bf4b151d-f330-4d1e-a4ff-1aaee886554e) 项目简介
 
 **SguanFOC库** 是一个完全使用**纯C语言**编写的开源磁场定向控制(FOC)库，专为嵌入式微控制器设计。该库提供了完整的FOC算法实现，支持电机快速控制，具有高性能、易移植、可配置性强等特点
 
