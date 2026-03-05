@@ -1,11 +1,12 @@
-# SguanFOC - 高性能磁场定向控制库 ![电机](https://github.com/user-attachments/assets/35dcf7ac-3f25-4bd2-8ce5-7f233f2bb911)
+# SguanFOC - 高性能磁场定向控制库
 
 ![Version](https://img.shields.io/badge/Version-3.0.0-blue)
 ![License](https://img.shields.io/badge/License-MIT-green)
 ![Language](https://img.shields.io/badge/Language-C-00599C)
  <img src="https://img.shields.io/badge/🔄_完整FOC-开箱即用-red">
 ![Platform](https://img.shields.io/badge/Platform-ARM%20%7C%20DSP%20%7C%20任何C语言MCU-orange)
-
+![电机](https://github.com/user-attachments/assets/35dcf7ac-3f25-4bd2-8ce5-7f233f2bb911)
+ 
 ---
 
 ## 🚀 项目简介
