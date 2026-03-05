@@ -1,4 +1,4 @@
-# SguanFOC - 高性能磁场定向控制库(FOC)
+# SguanFOC - 高性能磁场定向控制库
 
 ![Version](https://img.shields.io/badge/Version-3.0.0-blue)
 ![License](https://img.shields.io/badge/License-MIT-green)
@@ -6,6 +6,7 @@
  <img src="https://img.shields.io/badge/🔄_完整FOC-开箱即用-red">
 ![Platform](https://img.shields.io/badge/Platform-ARM%20%7C%20DSP%20%7C%20任何C语言MCU-orange)
 
+<img src="https://raw.githubusercontent.com/Templarian/MaterialDesign/master/svg/motor.svg" alt="Motor" width="20" height="20"/>
 ---
 
 ## 🚀 项目简介
