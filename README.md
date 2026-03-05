@@ -1,4 +1,4 @@
-# SguanFOC - 高性能磁场定向控制库(电机有/无感控制)
+# SguanFOC - 高性能磁场定向控制库(有_无感控制)
 
 ![Version](https://img.shields.io/badge/Version-3.0.0-blue)
 ![License](https://img.shields.io/badge/License-MIT-green)
