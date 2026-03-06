@@ -3,7 +3,7 @@
  * @GitHub: https://github.com/Sguan-ZhouQing
  * @Date: 2026-02-06 03:54:11
  * @LastEditors: 星必尘Sguan|3464647102@qq.com
- * @LastEditTime: 2026-02-19 23:53:07
+ * @LastEditTime: 2026-03-05 23:53:07
  * @FilePath: \stm_SguanFOCtest\SguanFOC\Sguan_math.c
  * @Description: SguanFOC库的“数学运算函数”实现
  * 
@@ -16,8 +16,14 @@
 #define Value_INV_SQRT3 0.5773502691896257f
 #define Value_SQRT3 1.73205080756887729353f
 
+// 内部静态函数声明
+static float Value_fmodf(float x, float y);
+static float f1(float x);
+static float f2(float x);
+static void Overmod(float *d, float *q);
+
 // 重写fmodf函数
-static float Value_fmodf(float x, float y) {
+static float Value_fmodf(float x, float y){
   if (y == 0.0f) return 0.0f;
   int quotient = (int)(x / y); // 1次除法运算
   return x - quotient * y;     // 1次乘1次减
@@ -114,7 +120,7 @@ float Value_normalize(float angle) {
 }
 
 // 快速sine和cosine求解的局部函数
-static float f1(float x) {
+static float f1(float x){
   float u = 1.3528548e-10f;
   u = u * x + -2.4703144e-08f;
   u = u * x + 2.7532926e-06f;
@@ -124,7 +130,7 @@ static float f1(float x) {
 }
 
 // 快速sine和cosine求解的局部函数
-static float f2(float x) {
+static float f2(float x){
   float u = 1.7290616e-09f;
   u = u * x + -2.7093486e-07f;
   u = u * x + 2.4771643e-05f;
