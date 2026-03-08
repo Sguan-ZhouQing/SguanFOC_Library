@@ -42,71 +42,60 @@ float Value_fabsf(float x){
 
 // 重写isinf函数
 int Value_isinf(float x){
-    union{
-        float f;
-        uint32_t i;
-    } u = {x};
-    
-    // 单精度浮点数格式：
-    // 符号位(1bit) | 指数位(8bits) | 尾数位(23bits)
-    // 无穷大：指数位全1，尾数位全0
-    // 去除符号位后检查
-    uint32_t exp_mask = 0x7F800000;  // 指数位全1的掩码
-    uint32_t mant_mask = 0x007FFFFF;  // 尾数位掩码
-    
-    // 检查指数位是否全1且尾数位全0
-    if ((u.i & exp_mask) == exp_mask && (u.i & mant_mask) == 0) {
-        return 1;  // 是无穷大
-    }
-    return 0;  // 不是无穷大
+  union{
+      float f;
+      uint32_t i;
+  } u = {x};
+  
+  // 单精度浮点数格式：
+  // 符号位(1bit) | 指数位(8bits) | 尾数位(23bits)
+  // 无穷大：指数位全1，尾数位全0
+  // 去除符号位后检查
+  uint32_t exp_mask = 0x7F800000;  // 指数位全1的掩码
+  uint32_t mant_mask = 0x007FFFFF;  // 尾数位掩码
+  
+  // 检查指数位是否全1且尾数位全0
+  if ((u.i & exp_mask) == exp_mask && (u.i & mant_mask) == 0) {
+      return 1;  // 是无穷大
+  }
+  return 0;  // 不是无穷大
 }
 
 // 重写isnan函数
 int Value_isnan(float x){
-    union{
-        float f;
-        uint32_t i;
-    } u = {x};
-    
-    uint32_t exp_mask = 0x7F800000;  // 指数位全1的掩码
-    uint32_t mant_mask = 0x007FFFFF;  // 尾数位掩码
-    if ((u.i & exp_mask) == exp_mask && (u.i & mant_mask) != 0) {
-        return 1;  // 是NaN
-    }
-    return 0;  // 不是NaN
+  union{
+      float f;
+      uint32_t i;
+  } u = {x};
+  
+  uint32_t exp_mask = 0x7F800000;  // 指数位全1的掩码
+  uint32_t mant_mask = 0x007FFFFF;  // 尾数位掩码
+  if ((u.i & exp_mask) == exp_mask && (u.i & mant_mask) != 0) {
+      return 1;  // 是NaN
+  }
+  return 0;  // 不是NaN
 }
 
 // 重写sqrtf函数
-float Value_sqrtf(float x){
-    if (x < 0){
-        return 0.0f;  // 返回NaN（0/0产生NaN）
-    }
-    if (x == 0 || x == 1){
-        return x;
-    }
-    float guess = x;
-    float epsilon = 0.00001f;  // 精度要求
-    // 牛顿迭代公式：guess = (guess + x/guess) / 2
-    while (1) {
-        float new_guess = (guess + x / guess) * 0.5f;
-        if (new_guess > guess){
-            if (new_guess - guess < epsilon){
-                return new_guess;
-            }
-        } else {
-            if (guess - new_guess < epsilon){
-                return new_guess;
-            }
-        }
-        guess = new_guess;
-    }
+float Value_sqrtf(float x) {
+  if (x <= 0.0f) {
+      return 0.0f;
+  }
+  
+  float guess = x;
+  
+  // 固定3次牛顿迭代 - 执行时间完全可预测
+  guess = (guess + x / guess) * 0.5f;  // 第1次迭代
+  guess = (guess + x / guess) * 0.5f;  // 第2次迭代
+  guess = (guess + x / guess) * 0.5f;  // 第3次迭代
+  
+  return guess;
 }
-
 // 数值限幅
 float Value_Limit(float val, float max, float min) {
-    if (val > max) return max;
-    if (val < min) return min;
-    return val;
+  if (val > max) return max;
+  if (val < min) return min;
+  return val;
 }
 
 // 参数取模

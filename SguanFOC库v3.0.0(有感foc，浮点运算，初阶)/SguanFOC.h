@@ -5,7 +5,6 @@
 // 电机控制核心函数文件声明
 #include "Sguan_Filter.h"
 #include "Sguan_FW.h"
-#include "Sguan_InternalModel.h"
 #include "Sguan_Ladrc.h"
 #include "Sguan_math.h"
 #include "Sguan_MotorStatus.h"
@@ -35,17 +34,15 @@ typedef struct{
 }MOTOR_BPF_STRUCT;
 
 typedef struct{
-    #if !Open_PI_Control
-    INTERNALMODEL_STRUCT Dimc;      // (IMC)电流环调优
-    INTERNALMODEL_STRUCT Qimc;      // (IMC)电流环调优
-    PID_STRUCT PID_D;               // (电流内模控制)PI控制器D轴参数
-    PID_STRUCT PID_Q;               // (电流内模控制)PI控制器Q轴参数
-    LADRC_STRUCT Speed;             // (LADRC)线自抗扰控制
-    #else // Open_PI_Control
     PID_STRUCT Current_D;           // (电流单环)PID电流环D轴参数
     PID_STRUCT Current_Q;           // (电流单环)PID电流环Q轴参数
+
+    #if Open_PI_Control
     PID_STRUCT Velocity;            // (速度-电流双环)双PID速度外环参数
-    #endif // Open_PI_Control
+    #else // Open_PI_Control
+    LADRC_STRUCT Speed;             // (LADRC)线自抗扰控制
+    #endif // Open/_PI_Control
+    
     PID_STRUCT Position;            // (高性能伺服三环)Position
 
     uint8_t Response;               // (参数设计)响应带宽倍数

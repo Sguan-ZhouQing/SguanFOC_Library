@@ -8,8 +8,8 @@
 // ====== 初始化与运行状态(状态) ======
 #define MOTOR_STATUS_STANDBY                0x00    // 待机（未初始化，准备中）
 #define MOTOR_STATUS_UNINITIALIZED          0x01    // 未初始化
-#define MOTOR_STATUS_INITIALIZING           0x02    // 初始化中（参数加载、外设初始化）
-#define MOTOR_STATUS_CALIBRATING            0x03    // 校准中（电阻、电感、编码器零位）
+#define MOTOR_STATUS_INITIALIZING           0x02    // 初始化中（参数加载、外设初始化，编码器零位）
+#define MOTOR_STATUS_CALIBRATING            0x03    // 校准（此时SVPWM可用，用于转子校正）
 
 // ====== 运行状态(当前反馈) ======
 #define MOTOR_STATUS_IDLE                   0x04    // 空闲（已初始化，使能但零指令）
