@@ -1,0 +1,5 @@
+#ifndef __SGUAN_IDENTIFY_H
+#define __SGUAN_IDENTIFY_H
+
+
+#endif // SGUAN_IDENTIFY_H
