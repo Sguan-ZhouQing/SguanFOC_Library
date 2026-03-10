@@ -3,7 +3,7 @@
  * @GitHub: https://github.com/Sguan-ZhouQing
  * @Date: 2026-01-26 22:38:34
  * @LastEditors: 星必尘Sguan|3464647102@qq.com
- * @LastEditTime: 2026-02-21 01:27:00
+ * @LastEditTime: 2026-03-11 01:27:00
  * @FilePath: \stm_SguanFOCtest\SguanFOC\SguanFOC.c
  * @Description: SguanFOC库的“核心代码”实现
  * 
@@ -334,7 +334,7 @@ static void Control_VelCur_DOUBLE(SguanFOC_System_STRUCT *sguan){
 
     #if Open_PI_Control
     // 1.转速环PI控制器计算
-    if (Control_Count == sguan->control.Response){
+    if (Control_Count >= sguan->control.Response){
         Transfer_PID_Loop(&sguan->control.Velocity,
             sguan->foc.Target_Speed,
             sguan->encoder.Real_Speed);
@@ -367,7 +367,7 @@ static void Control_VelCur_DOUBLE(SguanFOC_System_STRUCT *sguan){
     sguan->foc.Uq_in = sguan->control.Current_Q.run.Output + Uq_ff;
     #else // Open_PI_Control
     // 1.转速环LADRC线自抗扰计算
-    if (Control_Count == sguan->control.Response){
+    if (Control_Count >= sguan->control.Response){
         Transfer_Ladrc_Loop(&sguan->control.Speed,
             sguan->foc.Target_Speed,
             sguan->encoder.Real_Speed);
@@ -393,7 +393,7 @@ static void Control_VelCur_DOUBLE(SguanFOC_System_STRUCT *sguan){
         sguan->foc.Target_Id,
         sguan->current.Real_Id);
     Transfer_PID_Loop(&sguan->control.Current_Q,
-        sguan->foc.Target_Iq,
+        sguan->control.Speed.linear.Output,
         sguan->current.Real_Iq);
 
     // 5.结果输出到Ud和Uq给定
@@ -414,7 +414,7 @@ static void Control_PosVelCur_THREE(SguanFOC_System_STRUCT *sguan){
 
     #if Open_PI_Control
     // 1.位置环PD控制器计算
-    if (Control_Count == sguan->control.Response*sguan->control.Response){
+    if (Control_Count >= sguan->control.Response*sguan->control.Response){
         Transfer_PID_Loop(&sguan->control.Position,
             sguan->foc.Target_Pos,
             sguan->encoder.Real_Pos);
@@ -440,6 +440,7 @@ static void Control_PosVelCur_THREE(SguanFOC_System_STRUCT *sguan){
                 sguan->current.Real_Iq,
                 sguan->current.Real_Iq);
     #endif // Open_FW_Calculate
+
     // 5.电流环PI控制器计算
     Transfer_PID_Loop(&sguan->control.Current_D,
         sguan->foc.Target_Id,       // 默认D轴励磁为0
@@ -453,7 +454,7 @@ static void Control_PosVelCur_THREE(SguanFOC_System_STRUCT *sguan){
     sguan->foc.Uq_in = sguan->control.Current_Q.run.Output + Uq_ff;
     #else // Open_PI_Control
     // 1.位置环PD控制器计算
-    if (Control_Count == sguan->control.Response*sguan->control.Response){
+    if (Control_Count >= sguan->control.Response*sguan->control.Response){
         Transfer_PID_Loop(&sguan->control.Position,
             sguan->foc.Target_Pos,
             sguan->encoder.Real_Pos);
@@ -486,7 +487,7 @@ static void Control_PosVelCur_THREE(SguanFOC_System_STRUCT *sguan){
         sguan->foc.Target_Id,
         sguan->current.Real_Id);
     Transfer_PID_Loop(&sguan->control.Current_Q,
-        sguan->foc.Target_Iq,
+        sguan->control.Speed.linear.Output,
         sguan->current.Real_Iq);
 
     // 6.结果输出到Ud和Uq给定
@@ -571,7 +572,7 @@ static void Status_Switch_Loop(SguanFOC_System_STRUCT *sguan){
         sguan->status = MOTOR_STATUS_STANDBY;
     }
     if ((sguan->status == MOTOR_STATUS_EMERGENCY_STOP) || 
-        (sguan->status == MOTOR_STATUS_DISABLED)){
+        (sguan->status == MOTOR_STATUS_DISABLED) || (sguan->status < 4)){
         return; // 紧急停止和失能状态优先级最高, 直接返回不执行后续状态判断
     }
     if ((sguan->status != MOTOR_STATUS_UNINITIALIZED) && 
@@ -903,13 +904,13 @@ static void Sguan_PLL_Init(SguanFOC_System_STRUCT *sguan){
 static void Sguan_Start_Tick(void){
     if (Sguan.status == MOTOR_STATUS_UNINITIALIZED){
         // 用户自定义的电机参数和控制系统参数
+        User_InitialInit();
         User_MotorSet();
         User_ParameterSet();
         // 系统时间设定
         Sguan_SystemT_Set(&Sguan);
         // 各种控制系统的初始化
         Sguan.status = MOTOR_STATUS_INITIALIZING;
-        User_InitialInit();
         Sguan_BPF_Init(&Sguan);
         Sguan_Control_Init(&Sguan);
         Sguan_PLL_Init(&Sguan);
@@ -919,20 +920,14 @@ static void Sguan_Start_Tick(void){
         Offset_CurrentRead(&Sguan);
         //电机回零操作
         Sguan_Positioning_Set(&Sguan,0.3f*Sguan.motor.VBUS,0.0f);
-        User_Delay(1200);
+        User_Delay(1000);
         // 读取角度偏置
         Offset_EncoderRead(&Sguan);
         // 电机失能并进入正常工作状态
         Sguan_Positioning_Set(&Sguan,0.0f,0.0f);
         User_Delay(800);
         // 判断电机的极性,如果是SPMSM,D轴给定,可能停在0或者180度位置
-        Sguan_Positioning_Set(&Sguan,0.0f,0.2f*Sguan.motor.VBUS);
-        User_Delay(80);
-        float offset = User_Encoder_ReadRad();
-        if (offset < 0){
-            Sguan.encoder.Pos_offset += Value_PI*Sguan.motor.Encoder_Dir;
-        }
-        Sguan_Positioning_Set(&Sguan,0.0f,0.0f);
+        // 暂时还未书写
         //正常工作中(状态机运行)
         Sguan.status = MOTOR_STATUS_IDLE;
     }
@@ -958,13 +953,27 @@ void SguanFOC_High_Loop(void){
             Sguan_GeneratePWM_Loop(&Sguan);
         }
         if (Sguan.status >= 19){
-            // 电压给定归零
-            Sguan.foc.Ud_in = 0.0f;
-            Sguan.foc.Uq_in = 0.0f;
-            // 偏置数值归零
-            Sguan.encoder.Pos_offset = 0.0f;
-            Sguan.current.Pos_offset0 = 0.0f;
-            Sguan.current.Pos_offset1 = 0.0f;
+            static uint8_t status = 0xFF;
+            if (status != Sguan.status){
+                // 电压给定归零
+                Sguan.foc.Ud_in = 0.0f;
+                Sguan.foc.Uq_in = 0.0f;
+                // 偏置数值归零
+                Sguan.encoder.Pos_offset = 0.0f;
+                Sguan.current.Pos_offset0 = 0.0f;
+                Sguan.current.Pos_offset1 = 0.0f;
+                // 清零Target数值
+                Sguan.foc.Target_Id = 0.0f;
+                Sguan.foc.Target_Iq = 0.0f;
+                Sguan.foc.Target_Speed = 0.0f;
+                Sguan.foc.Target_Pos = 0.0f;
+                SVPWM_Tick(&Sguan,      // 清零电机状态
+                    Sguan.foc.sine,
+                    Sguan.foc.cosine,
+                    Sguan.foc.Ud_in/Sguan.motor.VBUS,
+                    Sguan.foc.Uq_in/Sguan.motor.VBUS);
+                status = Sguan.status;
+            }
         }
 
         #if Printf_Debug

@@ -6,7 +6,9 @@
 // 电机实体参数设置(根据实际需要填写)
 static inline void User_MotorSet(void){
     // 1.mode选择电机的运行模式
-    Sguan.mode = Current_SINGLE_MODE;
+    // Sguan.mode = Current_SINGLE_MODE;
+    // 如果你要在电机启动后主动切换模式，这个地方请不要使用
+    // 它会在每次启动时，刷新你的更改值
     // 2.flag电机标志位
     Sguan.flag.PWM_watchdog_limit = 10; // (uint8_t)PWM错误限幅
     // 3.identify电机参数辨识结果(根据实际电机参数填写，或者通过辨识算法得到)
