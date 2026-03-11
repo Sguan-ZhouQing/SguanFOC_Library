@@ -3,7 +3,7 @@
  * @GitHub: https://github.com/Sguan-ZhouQing
  * @Date: 2026-01-26 22:38:34
  * @LastEditors: 星必尘Sguan|3464647102@qq.com
- * @LastEditTime: 2026-03-11 01:27:00
+ * @LastEditTime: 2026-02-21 01:27:00
  * @FilePath: \stm_SguanFOCtest\SguanFOC\SguanFOC.c
  * @Description: SguanFOC库的“核心代码”实现
  * 
@@ -245,12 +245,13 @@ static void Sguan_Calculate_Loop(SguanFOC_System_STRUCT *sguan){
     sguan->encoder.Real_Rad = User_Encoder_ReadRad();
     Transfer_PLL_Loop(&sguan->encoder.pll,
                     sguan->mode,
-                    sguan->encoder.Real_Rad);
+                    (sguan->encoder.Real_Rad - sguan->encoder.Pos_offset));
     Transfer_BPF_Loop(&sguan->bpf.Encoder,
                     sguan->encoder.pll.go.OutWe*
                     sguan->motor.Encoder_Dir);
     sguan->encoder.Real_Speed = sguan->bpf.Encoder.filter.Output;
-    sguan->encoder.Real_Pos = sguan->encoder.pll.go.OutRe*sguan->motor.Encoder_Dir;
+    sguan->encoder.Real_Pos = sguan->encoder.pll.go.OutRe*
+                            sguan->motor.Encoder_Dir;
     sguan->encoder.Real_Erad = Value_normalize(
                             (sguan->encoder.Real_Rad - sguan->encoder.Pos_offset)*
                             sguan->motor.Poles*sguan->motor.Encoder_Dir);
