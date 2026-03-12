@@ -1,6 +1,9 @@
 #ifndef __SGUAN_FILTER_H
 #define __SGUAN_FILTER_H
 
+/* 外部函数声明 */
+#include "Sguan_math.h"
+
 typedef struct{
     float i[3];             // (数据)历史输入值
     float o[3];             // (数据)历史输出值
