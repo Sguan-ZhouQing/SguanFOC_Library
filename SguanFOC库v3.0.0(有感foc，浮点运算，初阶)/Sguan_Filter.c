@@ -13,15 +13,14 @@
 
 // 二阶典型环节参数初始化，主函数调用
 void BPF_Init(BPF_STRUCT *bpf){
-    double temp0 = bpf->T*bpf->Wc*2.828427124746f;
-    double temp1 = bpf->T*bpf->Wc;
+    double temp1 = bpf->T*bpf->Wc*2.828427124746f;
     double temp2 = bpf->T*bpf->T*bpf->Wc*bpf->Wc;
     bpf->filter.num[0] = (float)temp2;
     bpf->filter.num[1] = (float)(2*temp2);
     bpf->filter.num[2] = (float)temp2;
-    bpf->filter.den[0] = (float)(temp2+temp0+4);
+    bpf->filter.den[0] = (float)(temp2+temp1+4);
     bpf->filter.den[1] = (float)(-8+2*temp2);
-    bpf->filter.den[2] = (float)(temp2-temp0+4);
+    bpf->filter.den[2] = (float)(temp2-temp1+4);
     // 初始化为零
     for (int n = 0; n < 3; n++){
         bpf->filter.i[n] = 0;
