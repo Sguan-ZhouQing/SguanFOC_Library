@@ -172,28 +172,29 @@ static void Transfer_BPF_Loop(BPF_STRUCT *bpf,float input){
 
 // Transfer运算_速度锁相环
 static void Transfer_PLL_Loop(PLL_STRUCT *pll,uint8_t mode,float input_Rad){
-    float Rad_Error = input_Rad - Value_normalize(pll->go.OutRe);
-    // 计算角度误差,始终归一化到[-π, π)范围
-    if (Rad_Error >= Value_PI){
-        Rad_Error -= Value_PI*2;
-    }
-    if (Rad_Error <= -Value_PI){
-        Rad_Error += Value_PI*2;
-    }
-    
     if (mode == PosVelCur_THREE_MODE){
+        pll->go.Error = input_Rad - Value_normalize(pll->go.OutRe);
         // 位置环模式：PLL连续积分（可以超过2π）
         if (!pll->is_position_mode){
             pll->is_position_mode = 1;
         }
-    } else{
+    }
+    else{
+        pll->go.Error = input_Rad - pll->go.OutRe;
         // 非位置环模式：PLL输出归一化到[0, 2π)
         if (pll->is_position_mode){
             pll->is_position_mode = 0;
         }
     }
 
-    pll->go.Error = Rad_Error;
+    // 计算角度误差,始终归一化到[-π, π)范围
+    if (pll->go.Error >= Value_PI){
+        pll->go.Error -= Value_PI*2;
+    }
+    if (pll->go.Error <= -Value_PI){
+        pll->go.Error += Value_PI*2;
+    }
+
     PLL_Loop(pll);
     // 输出pll->go.OutWe;
     // 输出pll->go.OutRe;
@@ -245,16 +246,14 @@ static void Sguan_Calculate_Loop(SguanFOC_System_STRUCT *sguan){
     sguan->encoder.Real_Rad = User_Encoder_ReadRad();
     Transfer_PLL_Loop(&sguan->encoder.pll,
                     sguan->mode,
-                    (sguan->encoder.Real_Rad - sguan->encoder.Pos_offset));
+                    (sguan->encoder.Real_Rad - sguan->encoder.Pos_offset)*sguan->motor.Encoder_Dir);
     Transfer_BPF_Loop(&sguan->bpf.Encoder,
-                    sguan->encoder.pll.go.OutWe*
-                    sguan->motor.Encoder_Dir);
+                    sguan->encoder.pll.go.OutWe);
     sguan->encoder.Real_Speed = sguan->bpf.Encoder.filter.Output;
-    sguan->encoder.Real_Pos = sguan->encoder.pll.go.OutRe*
-                            sguan->motor.Encoder_Dir;
+    sguan->encoder.Real_Pos = sguan->encoder.pll.go.OutRe;
     sguan->encoder.Real_Erad = Value_normalize(
-                            (sguan->encoder.Real_Rad - sguan->encoder.Pos_offset)*
-                            sguan->motor.Poles*sguan->motor.Encoder_Dir);
+                            sguan->encoder.pll.go.OutRe*
+                            sguan->motor.Poles);
     sguan->encoder.Real_Espeed = sguan->encoder.Real_Speed*sguan->motor.Poles;
     fast_sin_cos(sguan->encoder.Real_Erad,&sguan->foc.sine,&sguan->foc.cosine);
     // 2.电机相线和各轴电流计算
