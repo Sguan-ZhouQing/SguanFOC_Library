@@ -1,10 +1,10 @@
-#ifndef __USERDATA_CALCULATE_H
-#define __USERDATA_CALCULATE_H
+#ifndef __USERDATA_CONFIG_H
+#define __USERDATA_CONFIG_H
 /* 电机控制User用户设置·数据计算 */
 
 /**
  * @description: 宏定义0或1决定“闭环控制系统”是否使用PI控制(默认开启)
- * @reminder: 0->电流环“内模控制”，转速环“LADRC”，位置环“PD控制” 
+ * @reminder: 0->电流环“PI控制”，转速环“LADRC”，位置环“PD控制” 
  * @reminder: 1->电流环“PI控制”，转速环“PI控制”，位置环“PD控制”
  * @return {*}
  */
@@ -19,26 +19,6 @@
 #define Open_FW_Calculate 0
 
 /**
- * @description: 宏定义0或1决定“Q31定点化运算”的开启与否(默认关闭)
- * @reminder: 0->浮点运算 | 1->定点运算
- * @return {*}
- */
-#define Open_Q31_Calculate 0
-
-/**
- * @description: 定点化运算的数据标幺(基值设计)
- * @return {*}
- */
-#define Qmax_Voltage 16             // 电压数据设定(单位为V伏特)
-#define Qmax_Current 8              // 电流数据设定(单位为A安培)
-#define Qmax_Inductor 0.001953125f  // 电感数据设定(单位为H亨利)
-#define Qmax_Resistor 0.5f          // 电阻数据设定(单位为Ω欧姆)
-#define Qmax_Flux 0.00390625f       // 磁链大小(单位为Wb韦伯)
-#define Qmax_Speed 256              // 速度大小(单位为rad/s弧度每秒)
-#define Qmax_Rad 128                // 角度大小(单位为rad弧度)
-#define Qmax_Time 0.00006103515625f // 常量标幺化(无数学单位)
-
-/**
  * @description: 宏定义决定UART或者CAN发送数据的模式
  * @reminder: (Printf_Send)0->发送正常数据
  * @reminder: 1->仅发送Debug数据，不发送正常数据
@@ -46,5 +26,18 @@
  */
 #define Printf_Debug 0
 
+/**
+ * @description: Q31定点化运算的数据标幺(基值设计)
+ * @return {*}
+ */
+#define Qmax_Voltage 16             // 电压数据设定(单位为V伏特)
+#define Qmax_Current 8              // 电流数据设定(单位为A安培)
+#define Qmax_Inductor 0.001953125f  // 电感数据设定(单位为H亨利)
+#define Qmax_Resistor 0.5f          // 电阻数据设定(单位为Ω欧姆)
+#define Qmax_Flux 0.00390625f       // 磁链大小(单位为Wb韦伯)
+#define Qmax_Rad 128                // 角度大小(单位为rad弧度)
+#define Qmax_Time 0.00006103515625f // 常量标幺化(无数学单位)
 
-#endif // USERDATA_CALCULATE_H
+
+
+#endif // USERDATA_CONFIG_H

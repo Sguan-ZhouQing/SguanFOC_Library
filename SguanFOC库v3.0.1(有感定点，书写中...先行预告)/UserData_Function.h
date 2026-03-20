@@ -7,6 +7,7 @@
 extern TIM_HandleTypeDef htim1;
 extern TIM_HandleTypeDef htim2;
 extern TIM_HandleTypeDef htim3;
+extern UART_HandleTypeDef huart1;
 extern volatile uint32_t ADC_InjectedValues[4];
 /* 用户自己的CODE END Includes */
 
@@ -81,6 +82,12 @@ static inline float User_Temperature_DataGet(void){
     
     // 如果不使用温度功能，返回-9999.0f（正常温度不会是这么大的负数）
     return -9999.0f;
+}
+
+/* ================= 驱动代码(驱动层) ================= */
+static inline void User_CorrespondSet(unsigned char *ch, unsigned short int size){
+    /* Your code for UART or CAN Signal Transmit Driver */
+    HAL_UART_Transmit(&huart1, ch, size, 0xFFFF);
 }
 
 

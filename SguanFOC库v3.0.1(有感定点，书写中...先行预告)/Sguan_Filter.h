@@ -2,7 +2,7 @@
 #define __SGUAN_FILTER_H
 
 /* 外部函数声明 */
-#include "Sguan_Calculate.h"
+#include "Sguan_Config.h"
 
 typedef struct{
     float i[3];             // (数据)历史输入值

@@ -3,8 +3,8 @@
  * @GitHub: https://github.com/Sguan-ZhouQing
  * @Date: 2026-01-26 22:38:34
  * @LastEditors: 星必尘Sguan|3464647102@qq.com
- * @LastEditTime: 2026-02-21 01:27:00
- * @FilePath: \stm_SguanFOCtest\SguanFOC\SguanFOC.c
+ * @LastEditTime: 2026-03-20 22:58:58
+ * @FilePath: \SguanFOC_Debug\SguanFOC\SguanFOC.c
  * @Description: SguanFOC库的“核心代码”实现
  * 
  * Copyright (c) 2026 by $星必尘Sguan, All Rights Reserved. 
@@ -208,21 +208,21 @@ static void Offset_EncoderRead(SguanFOC_System_STRUCT *sguan){
 // Offset读取电流偏置
 static void Offset_CurrentRead(SguanFOC_System_STRUCT *sguan){
     for (uint8_t i = 0; i < 24; i++){
-        sguan->current.Pos_offset0 += User_ReadADC_Raw(0);
-        sguan->current.Pos_offset1 += User_ReadADC_Raw(1);
+        sguan->current.Current_offset0 += User_ReadADC_Raw(0);
+        sguan->current.Current_offset1 += User_ReadADC_Raw(1);
         User_Delay(2);
     }
-    sguan->current.Pos_offset0 = sguan->current.Pos_offset0/24;
-    sguan->current.Pos_offset1 = sguan->current.Pos_offset1/24;
+    sguan->current.Current_offset0 = sguan->current.Current_offset0/24;
+    sguan->current.Current_offset1 = sguan->current.Current_offset1/24;
     sguan->current.Final_Gain = sguan->motor.MCU_Voltage/
         (sguan->motor.ADC_Precision*sguan->motor.Amplifier*sguan->motor.Sampling_Rs);
 }
 
 // Current读取当前的电流值并更新3相电流(已滤波)
 static void Current_ReadIabc(SguanFOC_System_STRUCT *sguan){
-    float I0 = (User_ReadADC_Raw(0) - sguan->current.Pos_offset0)*
+    float I0 = (User_ReadADC_Raw(0) - sguan->current.Current_offset0)*
                             sguan->current.Final_Gain*sguan->motor.Current_Dir0;
-    float I1 = (User_ReadADC_Raw(1) - sguan->current.Pos_offset1)*
+    float I1 = (User_ReadADC_Raw(1) - sguan->current.Current_offset1)*
                             sguan->current.Final_Gain*sguan->motor.Current_Dir1;
     float I2 = -(I0 + I1);
     if (sguan->motor.Current_Num == 0){  // AB采样(判断电流相序和电机方向)
@@ -960,8 +960,8 @@ void SguanFOC_High_Loop(void){
                 Sguan.foc.Uq_in = 0.0f;
                 // 偏置数值归零
                 Sguan.encoder.Pos_offset = 0.0f;
-                Sguan.current.Pos_offset0 = 0.0f;
-                Sguan.current.Pos_offset1 = 0.0f;
+                Sguan.current.Current_offset0 = 0.0f;
+                Sguan.current.Current_offset1 = 0.0f;
                 // 清零Target数值
                 Sguan.foc.Target_Id = 0.0f;
                 Sguan.foc.Target_Iq = 0.0f;

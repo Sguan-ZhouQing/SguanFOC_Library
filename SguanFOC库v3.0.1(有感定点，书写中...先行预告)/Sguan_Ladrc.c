@@ -3,8 +3,8 @@
  * @GitHub: https://github.com/Sguan-ZhouQing
  * @Date: 2026-02-16  00:27:53
  * @LastEditors: 星必尘Sguan|3464647102@qq.com
- * @LastEditTime: 2026-02-20 23:18:28
- * @FilePath: \stm_SguanFOCtest\SguanFOC\Sguan_Ladrc.c
+ * @LastEditTime: 2026-03-20 22:56:36
+ * @FilePath: \SguanFOC_Debug\SguanFOC\Sguan_Ladrc.c
  * @Description: SguanFOC库的“典型二阶线性自抗扰控制(LADRC)算法”实现
  * 
  * Copyright (c) 2026 by 星必尘Sguan, All Rights Reserved. 

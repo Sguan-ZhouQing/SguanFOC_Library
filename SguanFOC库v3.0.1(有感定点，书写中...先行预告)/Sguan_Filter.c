@@ -3,8 +3,8 @@
  * @GitHub: https://github.com/Sguan-ZhouQing
  * @Date: 2026-01-26 22:37:25
  * @LastEditors: 星必尘Sguan|3464647102@qq.com
- * @LastEditTime: 2026-02-16 00:47:53
- * @FilePath: \stm_SguanFOCtest\SguanFOC\Sguan_Filter.c
+ * @LastEditTime: 2026-03-20 22:56:07
+ * @FilePath: \SguanFOC_Debug\SguanFOC\Sguan_Filter.c
  * @Description: SguanFOC库的“二阶巴特沃斯滤低通滤波器”实现
  * 
  * Copyright (c) 2026 by $星必尘Sguan, All Rights Reserved. 

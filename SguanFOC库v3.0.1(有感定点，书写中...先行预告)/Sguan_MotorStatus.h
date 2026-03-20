@@ -1,9 +1,9 @@
 #ifndef __SGUAN_MOTORSTATUS_H
 #define __SGUAN_MOTORSTATUS_H
 
-/* 外部用户设置函数声明 */
+/* 外部函数声明 */
 #include "UserData_Status.h"
-#include <stdint.h>
+#include "Sguan_Config.h"
 
 // ====== 初始化与运行状态(状态) ======
 #define MOTOR_STATUS_STANDBY                0x00    // 待机（未初始化，准备中）

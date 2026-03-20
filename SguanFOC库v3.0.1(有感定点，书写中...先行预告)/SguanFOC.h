@@ -3,15 +3,25 @@
 
 /* USER CODE BEGIN Includes */
 // 电机控制核心函数文件声明
-#include "Sguan_Calculate.h"
+#include "Sguan_Config.h"
+#include "Sguan_DTC.h"
+#include "Sguan_EKF.h"
 #include "Sguan_Filter.h"
-#include "Sguan_FW.h"
+#include "Sguan_HFI.h"
+#include "Sguan_Identify.h"
+#include "Sguan_IQmath.h"
 #include "Sguan_Ladrc.h"
 #include "Sguan_math.h"
 #include "Sguan_MotorStatus.h"
+#include "Sguan_Nonlinear.h"
+#include "Sguan_NSD.h"
+#include "Sguan_Optimize.h"
 #include "Sguan_PID.h"
 #include "Sguan_PLL.h"
 #include "Sguan_printf.h"
+#include "Sguan_SMO.h"
+#include "Sguan_STA.h"
+#include "Sguan_SVPWM.h"
 /* USER CODE END Includes */
 
 #define Velocity_OPEN_MODE      0x00 // 速度开环(Uq_in电机方向测试和电机参数测算)
@@ -104,7 +114,7 @@ typedef struct{
 
 typedef struct{
     float Target_Speed;             // (期望速度)Target期望机械角速度
-    double Target_Pos;              // (期望角度)Target期望机械角度
+    float Target_Pos;              // (期望角度)Target期望机械角度
     float Target_Id;                // (期望电流)期望D轴电流
     float Target_Iq;                // (期望电流)期望Q轴电流
 
@@ -150,8 +160,8 @@ typedef struct{
     float Real_Ibeta;               // (Current中间量电流)beta轴电流
 
     float Final_Gain;               // (ADC增益)最终的ADC电流采样增益
-    int32_t Pos_offset0;            // (Current电流偏置)offset偏置位
-    int32_t Pos_offset1;            // (Current电流偏置)offset偏置位
+    int32_t Current_offset0;            // (Current电流偏置)offset偏置位
+    int32_t Current_offset1;            // (Current电流偏置)offset偏置位
 }MOTOR_CURRENT_STRUCT;
 
 typedef struct{

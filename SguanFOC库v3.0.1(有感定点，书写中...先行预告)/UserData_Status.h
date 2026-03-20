@@ -1,48 +1,49 @@
 #ifndef __USERDATA_STATUS_H
 #define __USERDATA_STATUS_H
+#include <stdint.h>
 /* 电机控制User用户设置·状态管理 */
 /* 用户自己的CODE BEGIN Includes */
 
 /* 用户自己的CODE END Includes */
 
 /* ================= 状态机任务信号(输入) ================= */
-static inline unsigned char MOTOR_STATUS_STANDBY_Signal(void){
-    unsigned char STANDBY_num = 0;
+static inline uint8_t MOTOR_STATUS_STANDBY_Signal(void){
+    uint8_t STANDBY_num = 0;
     /* 解除锁定信号(Emergency stop signal) */
     /* 输出0->不执行 输出1->解除锁定(进入待机状态) */
     return STANDBY_num;
 }
 
-static inline unsigned char MOTOR_STATUS_UNINITIALIZED_Signal(void){
-    unsigned char UNINITIALIZED_num = 0;
+static inline uint8_t MOTOR_STATUS_UNINITIALIZED_Signal(void){
+    uint8_t UNINITIALIZED_num = 0;
     /* 准备开始初始化信号(Emergency stop signal) */
     /* 输出0->待机 输出1->准备开始初始化 */
     return UNINITIALIZED_num;
 }
 
-static inline unsigned char MOTOR_STATUS_ENCODER_ERROR_Signal(void){
-    unsigned char ENCODER_num = 0;
+static inline uint8_t MOTOR_STATUS_ENCODER_ERROR_Signal(void){
+    uint8_t ENCODER_num = 0;
     /* 编码器错误信号(Emergency stop signal) */
     /* 输出0->正常运行 输出1->编码器错误(锁定) */
     return ENCODER_num;
 }
 
-static inline unsigned char MOTOR_STATUS_SENSOR_ERROR_Signal(void){
-    unsigned char SENSOR_num = 0;
+static inline uint8_t MOTOR_STATUS_SENSOR_ERROR_Signal(void){
+    uint8_t SENSOR_num = 0;
     /* 传感器错误信号(Emergency stop signal) */
     /* 输出0->正常运行 输出1->传感器错误(锁定) */
     return SENSOR_num;
 }
 
-static inline unsigned char MOTOR_STATUS_EMERGENCY_STOP_Signal(void){
-    unsigned char STOP_num = 0;
+static inline uint8_t MOTOR_STATUS_EMERGENCY_STOP_Signal(void){
+    uint8_t STOP_num = 0;
     /* 急停信号(Emergency stop signal) */
     /* 输出0->正常运行 输出1->启用急停(锁定) */
     return STOP_num;
 }
 
-static inline unsigned char MOTOR_STATUS_DISABLED_Signal(void){
-    unsigned char DISABLED_num = 0;
+static inline uint8_t MOTOR_STATUS_DISABLED_Signal(void){
+    uint8_t DISABLED_num = 0;
     /* 失能信号(Disabling signal) */
     /* 输出0->正常运行 输出1->启用失能 */
     return DISABLED_num;

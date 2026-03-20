@@ -3,8 +3,8 @@
  * @GitHub: https://github.com/Sguan-ZhouQing
  * @Date: 2026-02-06 03:54:11
  * @LastEditors: 星必尘Sguan|3464647102@qq.com
- * @LastEditTime: 2026-03-05 23:53:07
- * @FilePath: \stm_SguanFOCtest\SguanFOC\Sguan_math.c
+ * @LastEditTime: 2026-03-20 22:56:47
+ * @FilePath: \SguanFOC_Debug\SguanFOC\Sguan_math.c
  * @Description: SguanFOC库的“数学运算函数”实现
  * 
  * Copyright (c) 2026 by $星必尘Sguan, All Rights Reserved. 
@@ -17,105 +17,312 @@
 #define Value_SQRT3 1.73205080756887729353f
 #define Value_SQRT3_2 0.8660254f
 
-// 内部静态函数声明
-static float f1(float x);
-static float f2(float x);
-static void Overmod(float *d, float *q);
-
-// 快速sine和cosine求解的局部函数
-static float f1(float x){
-  float u = 1.3528548e-10f;
-  u = u * x + -2.4703144e-08f;
-  u = u * x + 2.7532926e-06f;
-  u = u * x + -0.00019840381f;
-  u = u * x + 0.0083333179f;
-  return u * x + -0.16666666f;
+// 重写fmodf函数
+static float Value_fmodf(float x, float y) {
+  if (y == 0.0f) return 0.0f;
+  int quotient = (int)(x / y); // 1次除法运算
+  return x - quotient * y;     // 1次乘1次减
 }
 
-// 快速sine和cosine求解的局部函数
-static float f2(float x){
-  float u = 1.7290616e-09f;
-  u = u * x + -2.7093486e-07f;
-  u = u * x + 2.4771643e-05f;
-  u = u * x + -0.0013887906f;
-  u = u * x + 0.041666519f;
-  return u * x + -0.49999991f;
+// 重写fabsf函数
+float Value_fabsf(float x){
+  union {
+      float f;
+      uint32_t i;
+  } u;
+  u.f = x;
+  u.i &= 0x7FFFFFFF; // 1次位与操作
+  return u.f;
 }
 
-// 快速求解sine
-float fast_sin(float x) {
-  int si = (int)(x * 0.31830988f);
-  x = x - (float)si * Value_PI;
-  if (si & 1) {
-    x = x > 0.0f ? x - Value_PI : x + Value_PI;
+// 重写isinf函数
+int Value_isinf(float x){
+    union{
+        float f;
+        uint32_t i;
+    } u = {x};
+    
+    // 单精度浮点数格式：
+    // 符号位(1bit) | 指数位(8bits) | 尾数位(23bits)
+    // 无穷大：指数位全1，尾数位全0
+    // 去除符号位后检查
+    uint32_t exp_mask = 0x7F800000;  // 指数位全1的掩码
+    uint32_t mant_mask = 0x007FFFFF;  // 尾数位掩码
+    
+    // 检查指数位是否全1且尾数位全0
+    if ((u.i & exp_mask) == exp_mask && (u.i & mant_mask) == 0) {
+        return 1;  // 是无穷大
+    }
+    return 0;  // 不是无穷大
+}
+
+// 重写isnan函数
+int Value_isnan(float x){
+    union{
+        float f;
+        uint32_t i;
+    } u = {x};
+    
+    uint32_t exp_mask = 0x7F800000;  // 指数位全1的掩码
+    uint32_t mant_mask = 0x007FFFFF;  // 尾数位掩码
+    if ((u.i & exp_mask) == exp_mask && (u.i & mant_mask) != 0) {
+        return 1;  // 是NaN
+    }
+    return 0;  // 不是NaN
+}
+
+// 重写sqrtf函数
+float Value_sqrtf(float x){
+    if (x < 0){
+        return 0.0f;  // 返回NaN（0/0产生NaN）
+    }
+    if (x == 0 || x == 1){
+        return x;
+    }
+    float guess = x;
+    float epsilon = 0.00001f;  // 精度要求
+    // 牛顿迭代公式：guess = (guess + x/guess) / 2
+    while (1) {
+        float new_guess = (guess + x / guess) * 0.5f;
+        if (new_guess > guess){
+            if (new_guess - guess < epsilon){
+                return new_guess;
+            }
+        } else {
+            if (guess - new_guess < epsilon){
+                return new_guess;
+            }
+        }
+        guess = new_guess;
+    }
+}
+
+// 数值限幅
+float Value_Limit(float val, float max, float min) {
+    if (val > max) return max;
+    if (val < min) return min;
+    return val;
+}
+
+// 参数取模
+float Value_normalize(float angle) {
+  float normalized = Value_fmodf(angle, Value_PI*2);
+  // 如果结果为负，加上2π使其在[0, 2π)范围内
+  if (normalized < 0) {
+      normalized += Value_PI*2;
   }
-  return x + x * x * x * f1(x * x);
+  return normalized;
 }
 
-// 快速求解cosine
-float fast_cos(float x) {
-  int si = (int)(x * 0.31830988f);
-  x = x - (float)si * Value_PI;
-  if (si & 1) {
-    x = x > 0.0f ? x - Value_PI : x + Value_PI;
+
+
+static const float sin_tab[513] = {
+    0, 0.012296f, 0.024589f, 0.036879f, 0.049164f, 0.061441f, 0.073708f, 0.085965f, 0.098208f, 0.11044f, 0.12265f,
+    0.13484f, 0.14702f, 0.15917f, 0.17129f, 0.18339f, 0.19547f, 0.20751f, 0.21952f, 0.2315f, 0.24345f, 0.25535f,
+    0.26722f, 0.27905f, 0.29084f, 0.30258f, 0.31427f, 0.32592f, 0.33752f, 0.34907f, 0.36057f, 0.37201f, 0.38339f,
+    0.39472f, 0.40599f, 0.41719f, 0.42834f, 0.43941f, 0.45043f, 0.46137f, 0.47224f, 0.48305f, 0.49378f, 0.50443f,
+    0.51501f, 0.52551f, 0.53593f, 0.54627f, 0.55653f, 0.5667f, 0.57679f, 0.58679f, 0.5967f, 0.60652f, 0.61625f,
+    0.62589f, 0.63543f, 0.64488f, 0.65423f, 0.66348f, 0.67263f, 0.68167f, 0.69062f, 0.69946f, 0.70819f, 0.71682f,
+    0.72534f, 0.73375f, 0.74205f, 0.75023f, 0.75831f, 0.76626f, 0.77411f, 0.78183f, 0.78944f, 0.79693f, 0.80429f,
+    0.81154f, 0.81866f, 0.82566f, 0.83254f, 0.83928f, 0.84591f, 0.8524f, 0.85876f, 0.865f, 0.8711f, 0.87708f, 0.88292f,
+    0.88862f, 0.89419f, 0.89963f, 0.90493f, 0.9101f, 0.91512f, 0.92001f, 0.92476f, 0.92937f, 0.93384f, 0.93816f,
+    0.94235f, 0.94639f, 0.95029f, 0.95405f, 0.95766f, 0.96113f, 0.96445f, 0.96763f, 0.97066f, 0.97354f, 0.97628f,
+    0.97887f, 0.98131f, 0.9836f, 0.98574f, 0.98774f, 0.98958f, 0.99128f, 0.99282f, 0.99422f, 0.99546f, 0.99656f,
+    0.9975f, 0.99829f, 0.99894f, 0.99943f, 0.99977f, 0.99996f, 1.0f, 0.99988f, 0.99962f, 0.9992f, 0.99863f, 0.99792f,
+    0.99705f, 0.99603f, 0.99486f, 0.99354f, 0.99207f, 0.99045f, 0.98868f, 0.98676f, 0.98469f, 0.98247f, 0.9801f,
+    0.97759f, 0.97493f, 0.97212f, 0.96916f, 0.96606f, 0.96281f, 0.95941f, 0.95587f, 0.95219f, 0.94836f, 0.94439f,
+    0.94028f, 0.93602f, 0.93162f, 0.92708f, 0.9224f, 0.91758f, 0.91263f, 0.90753f, 0.9023f, 0.89693f, 0.89142f,
+    0.88579f, 0.88001f, 0.87411f, 0.86807f, 0.8619f, 0.8556f, 0.84917f, 0.84261f, 0.83593f, 0.82911f, 0.82218f,
+    0.81512f, 0.80793f, 0.80062f, 0.7932f, 0.78565f, 0.77798f, 0.7702f, 0.7623f, 0.75428f, 0.74615f, 0.73791f, 0.72956f,
+    0.72109f, 0.71252f, 0.70384f, 0.69505f, 0.68616f, 0.67716f, 0.66806f, 0.65886f, 0.64956f, 0.64017f, 0.63067f,
+    0.62108f, 0.6114f, 0.60162f, 0.59176f, 0.5818f, 0.57176f, 0.56163f, 0.55141f, 0.54111f, 0.53073f, 0.52027f,
+    0.50973f, 0.49911f, 0.48842f, 0.47765f, 0.46682f, 0.45591f, 0.44493f, 0.43388f, 0.42277f, 0.4116f, 0.40036f,
+    0.38906f, 0.37771f, 0.36629f, 0.35483f, 0.3433f, 0.33173f, 0.32011f, 0.30843f, 0.29671f, 0.28495f, 0.27314f,
+    0.26129f, 0.2494f, 0.23748f, 0.22552f, 0.21352f, 0.20149f, 0.18943f, 0.17735f, 0.16523f, 0.15309f, 0.14093f,
+    0.12875f, 0.11655f, 0.10432f, 0.092088f, 0.079838f, 0.067576f, 0.055303f, 0.043022f, 0.030735f, 0.018443f,
+    0.0061479f, -0.0061479f, -0.018443f, -0.030735f, -0.043022f, -0.055303f, -0.067576f, -0.079838f, -0.092088f,
+    -0.10432f, -0.11655f, -0.12875f, -0.14093f, -0.15309f, -0.16523f, -0.17735f, -0.18943f, -0.20149f, -0.21352f,
+    -0.22552f, -0.23748f, -0.2494f, -0.26129f, -0.27314f, -0.28495f, -0.29671f, -0.30843f, -0.32011f, -0.33173f,
+    -0.3433f, -0.35483f, -0.36629f, -0.37771f, -0.38906f, -0.40036f, -0.4116f, -0.42277f, -0.43388f, -0.44493f,
+    -0.45591f, -0.46682f, -0.47765f, -0.48842f, -0.49911f, -0.50973f, -0.52027f, -0.53073f, -0.54111f, -0.55141f,
+    -0.56163f, -0.57176f, -0.5818f, -0.59176f, -0.60162f, -0.6114f, -0.62108f, -0.63067f, -0.64017f, -0.64956f,
+    -0.65886f, -0.66806f, -0.67716f, -0.68616f, -0.69505f, -0.70384f, -0.71252f, -0.72109f, -0.72956f, -0.73791f,
+    -0.74615f, -0.75428f, -0.7623f, -0.7702f, -0.77798f, -0.78565f, -0.7932f, -0.80062f, -0.80793f, -0.81512f,
+    -0.82218f, -0.82911f, -0.83593f, -0.84261f, -0.84917f, -0.8556f, -0.8619f, -0.86807f, -0.87411f, -0.88001f,
+    -0.88579f, -0.89142f, -0.89693f, -0.9023f, -0.90753f, -0.91263f, -0.91758f, -0.9224f, -0.92708f, -0.93162f,
+    -0.93602f, -0.94028f, -0.94439f, -0.94836f, -0.95219f, -0.95587f, -0.95941f, -0.96281f, -0.96606f, -0.96916f,
+    -0.97212f, -0.97493f, -0.97759f, -0.9801f, -0.98247f, -0.98469f, -0.98676f, -0.98868f, -0.99045f, -0.99207f,
+    -0.99354f, -0.99486f, -0.99603f, -0.99705f, -0.99792f, -0.99863f, -0.9992f, -0.99962f, -0.99988f, -1.0f, -0.99996f,
+    -0.99977f, -0.99943f, -0.99894f, -0.99829f, -0.9975f, -0.99656f, -0.99546f, -0.99422f, -0.99282f, -0.99128f,
+    -0.98958f, -0.98774f, -0.98574f, -0.9836f, -0.98131f, -0.97887f, -0.97628f, -0.97354f, -0.97066f, -0.96763f,
+    -0.96445f, -0.96113f, -0.95766f, -0.95405f, -0.95029f, -0.94639f, -0.94235f, -0.93816f, -0.93384f, -0.92937f,
+    -0.92476f, -0.92001f, -0.91512f, -0.9101f, -0.90493f, -0.89963f, -0.89419f, -0.88862f, -0.88292f, -0.87708f,
+    -0.8711f, -0.865f, -0.85876f, -0.8524f, -0.84591f, -0.83928f, -0.83254f, -0.82566f, -0.81866f, -0.81154f, -0.80429f,
+    -0.79693f, -0.78944f, -0.78183f, -0.77411f, -0.76626f, -0.75831f, -0.75023f, -0.74205f, -0.73375f, -0.72534f,
+    -0.71682f, -0.70819f, -0.69946f, -0.69062f, -0.68167f, -0.67263f, -0.66348f, -0.65423f, -0.64488f, -0.63543f,
+    -0.62589f, -0.61625f, -0.60652f, -0.5967f, -0.58679f, -0.57679f, -0.5667f, -0.55653f, -0.54627f, -0.53593f,
+    -0.52551f, -0.51501f, -0.50443f, -0.49378f, -0.48305f, -0.47224f, -0.46137f, -0.45043f, -0.43941f, -0.42834f,
+    -0.41719f, -0.40599f, -0.39472f, -0.38339f, -0.37201f, -0.36057f, -0.34907f, -0.33752f, -0.32592f, -0.31427f,
+    -0.30258f, -0.29084f, -0.27905f, -0.26722f, -0.25535f, -0.24345f, -0.2315f, -0.21952f, -0.20751f, -0.19547f,
+    -0.18339f, -0.17129f, -0.15917f, -0.14702f, -0.13484f, -0.12265f, -0.11044f, -0.098208f, -0.085965f, -0.073708f,
+    -0.061441f, -0.049164f, -0.036879f, -0.024589f, -0.012296f, 0
+};
+
+// 快速正弦算法
+float fast_sin(float theta) {
+  if (theta > Value_2PI && theta > 0){
+      theta = theta - Value_2PI;
   }
-  return 1.0f + x * x * f2(x * x);
+  else if (theta < 0){
+      theta = theta + Value_2PI;
+  }
+
+  return sin_tab[(int) (81.4873308f * theta)];
 }
 
 // 快速求解sine和cosine
 void fast_sin_cos(float x, float *sin_x, float *cos_x) {
-  int si = (int)(x * 0.31830988f);
-  x = x - (float)si * Value_PI;
-  if (si & 1) {
-    x = x > 0.0f ? x - Value_PI : x + Value_PI;
-  }
-  *sin_x = x + x * x * x * f1(x * x);
-  *cos_x = 1.0f + x * x * f2(x * x);
+  *sin_x = fast_sin(x);
+  *cos_x = fast_cos(x);
 }
+
 
 // 对DQ轴电压进行幅值限制，防止过调制
 static void Overmod(float *d, float *q){
-    // 计算合成“矢量幅值的平方”
-    float Vref = (*d)*(*d) + (*q)*(*q);
-    
-    if (Vref > 1.0f) {
-      float scale = 1.0f / Value_sqrtf(Vref);
-      *d *= scale;
-      *q *= scale;
-      // 幅值限制处理,如果“幅值平方”超过 1,进行等比例缩放
-    }
+  // 计算合成“矢量幅值的平方”
+  float Vref = (*d)*(*d) + (*q)*(*q);
+  
+  if (Vref > 1.0f) {
+    float scale = 1.0f / Value_sqrtf(Vref);
+    *d *= scale;
+    *q *= scale;
+    // 幅值限制处理,如果“幅值平方”超过 1,进行等比例缩放
+  }
 }
 
-// 电机SVPWM空间矢量调制函数
-void SVPWM(float d, float q, float sin_phi, float cos_phi, float *d_u, float *d_v, float *d_w){
-  d = Value_Limit(d,1,-1);   // 限幅函数
-  q = Value_Limit(q,1,-1);
-
-  Overmod(&d, &q);    // 过调制处理
-
-  const int v[6][3] = {{1, 0, 0}, {1, 1, 0}, {0, 1, 0}, {0, 1, 1}, {0, 0, 1}, {1, 0, 1}};
-  const int K_to_sector[] = {4, 6, 5, 5, 3, 1, 2, 2};
-  float alpha,beta;
-  ipark(&alpha, &beta, d, q, sin_phi, cos_phi);
-
-  int A = (beta > 0);
-  int B = (Value_fabsf(beta) > Value_SQRT3 * Value_fabsf(alpha));
-  int C = (alpha > 0);
-  int K = 4 * A + 2 * B + C;
-  int sector = K_to_sector[K];
-
-  float angle_data0 = sector * Value_rad60;
-  float angle_data1 = angle_data0 - Value_rad60;
-  float sin_m,cos_m,sin_n,cos_n;
-  fast_sin_cos(angle_data0,&sin_m,&cos_m);
-  fast_sin_cos(angle_data1,&sin_n,&cos_n);
-
-  float t_m = sin_m * alpha - cos_m * beta;
-  float t_n = beta * cos_n - alpha * sin_n;
-  float t_0 = 1 - t_m - t_n;
-  *d_u = t_m * v[sector - 1][0] + t_n * v[sector % 6][0] + t_0 / 2;
-  *d_v = t_m * v[sector - 1][1] + t_n * v[sector % 6][1] + t_0 / 2;
-  *d_w = t_m * v[sector - 1][2] + t_n * v[sector % 6][2] + t_0 / 2;
+/**
+ * SVPWM 函数 - C语言版本
+ * @param d: D轴电压，归一化范围 0-1
+ * @param q: Q轴电压，归一化范围 0-1
+ * @param sin_phi: 电角度的正弦值
+ * @param cos_phi: 电角度的余弦值
+ * @param d_u: 输出U相占空比，归一化到0-1
+ * @param d_v: 输出V相占空比，归一化到0-1
+ * @param d_w: 输出W相占空比，归一化到0-1
+ */
+void SVPWM(float d, float q, float sin_phi, float cos_phi, 
+          float *d_u, float *d_v, float *d_w){
+    // 1. 幅值限制，防止过调制
+    float d_limited = d;
+    float q_limited = q;
+    Overmod(&d_limited, &q_limited);
+    
+    // 2. 帕克逆变换 (IPARK)
+    float u_alpha = d_limited * cos_phi - q_limited * sin_phi;
+    float u_beta = q_limited * cos_phi + d_limited * sin_phi;
+    
+    // 3. SVPWM实现
+    const float ts = 1.0f;  // 周期归一化
+    
+    float u1 = u_beta;
+    float u2 = -0.8660254037844386f * u_alpha - 0.5f * u_beta;
+    float u3 = 0.8660254037844386f * u_alpha - 0.5f * u_beta;
+    
+    uint8_t sector = (u1 > 0.0f) + ((u2 > 0.0f) << 1) + ((u3 > 0.0f) << 2);
+    
+    float t_a, t_b, t_c;
+    float k_svpwm;
+    
+    if (sector == 5) {
+        float t4 = u3;
+        float t6 = u1;
+        float sum = t4 + t6;
+        if (sum > ts) {
+            k_svpwm = ts / sum;
+            t4 = k_svpwm * t4;
+            t6 = k_svpwm * t6;
+        }
+        float t7 = (ts - t4 - t6) / 2.0f;
+        t_a = t4 + t6 + t7;
+        t_b = t6 + t7;
+        t_c = t7;
+    } else if (sector == 1) {
+        float t2 = -u3;
+        float t6 = -u2;
+        float sum = t2 + t6;
+        if (sum > ts) {
+            k_svpwm = ts / sum;
+            t2 = k_svpwm * t2;
+            t6 = k_svpwm * t6;
+        }
+        float t7 = (ts - t2 - t6) / 2.0f;
+        t_a = t6 + t7;
+        t_b = t2 + t6 + t7;
+        t_c = t7;
+    } else if (sector == 3) {
+        float t2 = u1;
+        float t3 = u2;
+        float sum = t2 + t3;
+        if (sum > ts) {
+            k_svpwm = ts / sum;
+            t2 = k_svpwm * t2;
+            t3 = k_svpwm * t3;
+        }
+        float t7 = (ts - t2 - t3) / 2.0f;
+        t_a = t7;
+        t_b = t2 + t3 + t7;
+        t_c = t3 + t7;
+    } else if (sector == 2) {
+        float t1 = -u1;
+        float t3 = -u3;
+        float sum = t1 + t3;
+        if (sum > ts) {
+            k_svpwm = ts / sum;
+            t1 = k_svpwm * t1;
+            t3 = k_svpwm * t3;
+        }
+        float t7 = (ts - t1 - t3) / 2.0f;
+        t_a = t7;
+        t_b = t3 + t7;
+        t_c = t1 + t3 + t7;
+    } else if (sector == 6) {
+        float t1 = u2;
+        float t5 = u3;
+        float sum = t1 + t5;
+        if (sum > ts) {
+            k_svpwm = ts / sum;
+            t1 = k_svpwm * t1;
+            t5 = k_svpwm * t5;
+        }
+        float t7 = (ts - t1 - t5) / 2.0f;
+        t_a = t5 + t7;
+        t_b = t7;
+        t_c = t1 + t5 + t7;
+    } else if (sector == 4) {
+        float t4 = -u2;
+        float t5 = -u1;
+        float sum = t4 + t5;
+        if (sum > ts) {
+            k_svpwm = ts / sum;
+            t4 = k_svpwm * t4;
+            t5 = k_svpwm * t5;
+        }
+        float t7 = (ts - t4 - t5) / 2.0f;
+        t_a = t4 + t5 + t7;
+        t_b = t7;
+        t_c = t5 + t7;
+    } else {
+        // 零矢量（sector == 0 或无效扇区）
+        t_a = 0.5f;
+        t_b = 0.5f;
+        t_c = 0.5f;
+    }
+    
+    // 4. 将输出归一化到0-1范围
+    // 原始t_a, t_b, t_c范围是0-1，但需要确保在0-1范围内
+    *d_u = Value_Limit(t_a, 1.0f, 0.0f);
+    *d_v = Value_Limit(t_b, 1.0f, 0.0f);
+    *d_w = Value_Limit(t_c, 1.0f, 0.0f);
 }
 
 // 克拉克变换

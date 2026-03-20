@@ -2,7 +2,7 @@
 #define __SGUAN_PRINTF_H
 
 /* 外部函数声明 */
-#include "Sguan_Calculate.h"
+#include "Sguan_Config.h"
 
 /**
  * @description: 自定义数据发送的个数(默认为8)

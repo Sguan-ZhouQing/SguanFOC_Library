@@ -3,15 +3,15 @@
  * @GitHub: https://github.com/Sguan-ZhouQing
  * @Date: 2026-01-27 00:07:53
  * @LastEditors: 星必尘Sguan|3464647102@qq.com
- * @LastEditTime: 2026-02-19 22:52:41
- * @FilePath: \stm_SguanFOCtest\SguanFOC\Sguan_printf.c
+ * @LastEditTime: 2026-03-20 22:57:44
+ * @FilePath: \SguanFOC_Debug\SguanFOC\Sguan_printf.c
  * @Description: SguanFOC库的“JustFloat通讯协议”实现
  * 
  * Copyright (c) 2026 by $星必尘Sguan, All Rights Reserved. 
  */
 #include "Sguan_printf.h"
 /* 外部函数文件声明 */
-#include "UserData_Correspond.h"
+#include "UserData_Function.h"
 #include "UserData_UserControl.h"
 #include <stdio.h>
 #include <string.h>
@@ -124,5 +124,4 @@ void Printf_Adjust(void){
     }
     memset(Sguan_PrintfBuff, 0, sizeof(Sguan_PrintfBuff));
 }
-
 

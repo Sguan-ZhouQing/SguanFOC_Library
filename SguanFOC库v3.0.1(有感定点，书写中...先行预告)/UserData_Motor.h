@@ -6,7 +6,9 @@
 // 电机实体参数设置(根据实际需要填写)
 static inline void User_MotorSet(void){
     // 1.mode选择电机的运行模式
-    Sguan.mode = PosVelCur_THREE_MODE;
+    // Sguan.mode = Current_SINGLE_MODE;
+    // 如果你要在电机启动后主动切换模式，这个地方请不要使用
+    // 它会在每次启动时，刷新你的更改值
     // 2.flag电机标志位
     Sguan.flag.PWM_watchdog_limit = 10; // (uint8_t)PWM错误限幅
     // 3.identify电机参数辨识结果(根据实际电机参数填写，或者通过辨识算法得到)
@@ -16,7 +18,7 @@ static inline void User_MotorSet(void){
     Sguan.identify.Rs = 0.19067f;       // (float)相线电阻
     Sguan.identify.Flux = 0.00028043f;  // (float)磁链
     // 4.motor电机参数辨识
-    Sguan.motor.Poles = 7;              // (uint8_t)极对极数
+    Sguan.motor.Poles = 7;              // (uint8_t)极对数
     Sguan.motor.VBUS = 12.0f;           // (float)母线电压
 
     Sguan.motor.Motor_Dir = 1;          // (int8_t)电机方向1->正向，负1->负向
@@ -33,13 +35,19 @@ static inline void User_MotorSet(void){
     Sguan.motor.MCU_Voltage = 3.3f;     // (float)DSP/单片机的ADC电压基准
     Sguan.motor.Sampling_Rs = 0.005f;   // (float)采样电阻大小
     // 5.电机安全设计
-    Sguan.safe.Dcur_MAX = 10.0f;        // (float)电机最大电流D轴限制
-    Sguan.safe.Qcur_MAX = 10.0f;        // (float)电机最大电流Q轴限制
-
     Sguan.safe.VBUS_MAX = 14.0f;        // (float)母线电压值波动MAX阈值
     Sguan.safe.VBUS_MIM = 10.0f;        // (float)母线电压值波动MIN阈值
+    Sguan.safe.VBUS_watchdog_limit = 1000;
+
     Sguan.safe.Temp_MAX = 60.0f;        // (float)驱动器允许最大温度
     Sguan.safe.Temp_MIN = -20.0f;       // (float)驱动器允许最小温度
+    Sguan.safe.Temp_watchdog_limit = 1000;
+
+    Sguan.safe.Dcur_MAX = 60.0f;        // (float)电机最大电流D轴限制
+    Sguan.safe.Qcur_MAX = 60.0f;        // (float)电机最大电流Q轴限制
+    Sguan.safe.DQcur_watchdog_limit = 1000;
+
+    Sguan.safe.DISABLED_watchdog_limit = 1000;
     // 6.系统定时中断周期设计
     Sguan.PMSM_RUN_T = 0.00005f;        // (float)系统电机运行时间周期
 }   

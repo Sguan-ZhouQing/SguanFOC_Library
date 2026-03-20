@@ -3,8 +3,8 @@
  * @GitHub: https://github.com/Sguan-ZhouQing
  * @Date: 2026-01-26 22:50:37
  * @LastEditors: 星必尘Sguan|3464647102@qq.com
- * @LastEditTime: 2026-02-14 00:40:33
- * @FilePath: \stm_SguanFOCtest\SguanFOC\Sguan_PLL.c
+ * @LastEditTime: 2026-03-20 22:57:34
+ * @FilePath: \SguanFOC_Debug\SguanFOC\Sguan_PLL.c
  * @Description: SguanFOC库的“开环PLL锁相环”实现
  * 
  * Copyright (c) 2026 by $星必尘Sguan, All Rights Reserved. 
@@ -43,5 +43,4 @@ void PLL_Loop(PLL_STRUCT *pll){
     pll->go.Xo = pll->go.OutWe;
     pll->go.Yo = pll->go.OutRe;
 }
-
 
