@@ -45,7 +45,7 @@ void STA_Init(STA_STRUCT *sta){
  * @return {float} 饱和函数输出值
  */
 static float STA_SignFunction(STA_STRUCT *sta){
-    float s_abs = fabsf(sta->run.s);
+    float s_abs = Value_fabsf(sta->run.s);
     
     // 边界层内的线性区
     if(s_abs < sta->boundary){
@@ -72,7 +72,7 @@ void STA_Loop(STA_STRUCT *sta){
     float sign_s = STA_SignFunction(sta);
     
     // 3. 计算非线性项 u1 = k1 * |s|^(1/2) * sign(s)
-    float nonlinear = sta->k1 * sqrtf(fabsf(sta->run.s)) * sign_s;
+    float nonlinear = sta->k1 * Value_sqrtf(Value_fabsf(sta->run.s)) * sign_s;
     
     // 4. 积分项计算 u2 = ∫ k2 * sign(s) dt
     if(sta->k2 != 0.0f){

@@ -13,8 +13,8 @@ typedef struct{
     float Fbk;      // (输出数据)Real真实反馈数据
     float Output;   // (输出数据)Output输出
 
-    float I_num[2]; // (中间量)积分传递函数分子系数
-    float D_num[2]; // (中间量)微分传递函数分子系数
+    float I_num; // (中间量)积分传递函数分子系数
+    float D_num; // (中间量)微分传递函数分子系数
     float D_den[2]; // (中间量)微分传递函数分母系数
 }RUN_STRUCT;
 

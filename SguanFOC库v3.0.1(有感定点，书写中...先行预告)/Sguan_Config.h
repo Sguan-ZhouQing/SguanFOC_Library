@@ -3,6 +3,8 @@
 
 #include <stdint.h>
 #include <stdio.h>
+#include "Sguan_math.h"
+
 
 
 #endif // USERDATA_CONFIG_H
