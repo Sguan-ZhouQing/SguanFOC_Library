@@ -1,9 +1,10 @@
-# SguanFOC - High-Performance Field-Oriented Control Library [中文](README.md) / [English](README_EN.md)
+# SguanFOC - High-Performance Field-Oriented Control Library
 ![Version](https://img.shields.io/badge/Version-3.0.0-blue)
 ![License](https://img.shields.io/badge/License-MIT-green)
 ![Language](https://img.shields.io/badge/Language-C-00599C)
 <img src="https://img.shields.io/badge/🔄_Full_FOC-Out-of-the-Box-red">
 ![Platform](https://img.shields.io/badge/Platform-ARM%20%7C%20DSP%20%7C%20Any_C_MCU-orange)
+[中文](README.md) / [English](README_EN.md)
 
 ---
 
