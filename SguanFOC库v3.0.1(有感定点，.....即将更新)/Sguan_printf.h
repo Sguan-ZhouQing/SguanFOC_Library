@@ -1,7 +1,7 @@
 #ifndef __SGUAN_PRINTF_H
 #define __SGUAN_PRINTF_H
 
-/* 外部函数声明 */
+/* SguanFOC配置文件声明 */
 #include "Sguan_Config.h"
 
 /**

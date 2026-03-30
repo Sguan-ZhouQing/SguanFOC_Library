@@ -11,21 +11,8 @@
  */
 #include "Sguan_SVPWM.h"
 
+// 常量宏定义声明
 #define Value_INV_SQRT3 0.5773502691896257f
-static void Overmod(float *d, float *q);
-
-// 对DQ轴电压进行幅值限制，防止过调制
-static void Overmod(float *d, float *q){
-  // 计算合成“矢量幅值的平方”
-  float Vref = (*d)*(*d) + (*q)*(*q);
-  
-  if (Vref > 1.0f) {
-    float scale = 1.0f / Value_sqrtf(Vref);
-    *d *= scale;
-    *q *= scale;
-    // 幅值限制处理,如果“幅值平方”超过 1,进行等比例缩放
-  }
-}
 
 /**
  * SVPWM 函数 - C语言版本
@@ -37,29 +24,22 @@ static void Overmod(float *d, float *q){
  * @param d_v: 输出V相占空比，归一化到0-1
  * @param d_w: 输出W相占空比，归一化到0-1
  */
-void SVPWM(float d, float q, float sin_phi, float cos_phi, 
-          float *d_u, float *d_v, float *d_w){
-    // 1. 幅值限制，防止过调制
-    float d_limited = d;
-    float q_limited = q;
-    Overmod(&d_limited, &q_limited);
-    
-    // 2. 帕克逆变换 (IPARK)
-    float u_alpha = d_limited * cos_phi - q_limited * sin_phi;
-    float u_beta = q_limited * cos_phi + d_limited * sin_phi;
-    
-    // 3. SVPWM实现
+void SVPWM(float u_alpha, float u_beta, 
+        float *d_u, float *d_v, float *d_w){
+    // 1. SVPWM实现
     const float ts = 1.0f;  // 周期归一化
     
     float u1 = u_beta;
     float u2 = -0.8660254037844386f * u_alpha - 0.5f * u_beta;
     float u3 = 0.8660254037844386f * u_alpha - 0.5f * u_beta;
     
+    // 2.扇区数值计算
     uint8_t sector = (u1 > 0.0f) + ((u2 > 0.0f) << 1) + ((u3 > 0.0f) << 2);
     
     float t_a, t_b, t_c;
     float k_svpwm;
     
+    // 3.PWM占用时间幅值
     if (sector == 5) {
         float t4 = u3;
         float t6 = u1;
@@ -169,3 +149,125 @@ void ipark(float *u_alpha,float *u_beta,float u_d,float u_q,float sine,float cos
   *u_alpha = u_d * cosine - u_q * sine;
   *u_beta = u_q * cosine + u_d * sine;
 }
+
+
+// ============================ Q31 版本代码 ============================
+#define Value_INV_SQRT3_q31 1239850240
+
+void SVPWM_q31(Q31_t u_alpha, Q31_t u_beta, 
+        Q31_t *d_u, Q31_t *d_v, Q31_t *d_w){
+    const Q31_t ts = Q31_MAX;
+    
+    Q31_t u1 = u_beta;
+    Q31_t u2 = IQmath_Q31_mul(-1859775360,u_alpha) - IQmath_Q31_mul(Q31_HALF,u_beta);
+    Q31_t u3 = IQmath_Q31_mul(1859775360,u_alpha) - IQmath_Q31_mul(Q31_HALF,u_beta);
+    
+    uint8_t sector = (u1 > 0) + ((u2 > 0) << 1) + ((u3 > 0) << 2);
+    
+    Q31_t t_a, t_b, t_c;
+    Q31_t k_svpwm;
+    
+    if (sector == 5) {
+        Q31_t t4 = u3;
+        Q31_t t6 = u1;
+        Q31_t sum = t4 + t6;
+        if (sum > ts) {
+            k_svpwm = IQmath_Q31_div(ts,sum);
+            t4 = IQmath_Q31_mul(k_svpwm,t4);
+            t6 = IQmath_Q31_mul(k_svpwm,t6);
+        }
+        Q31_t t7 = (ts - t4 - t6) / 2;
+        t_a = t4 + t6 + t7;
+        t_b = t6 + t7;
+        t_c = t7;
+    } else if (sector == 1) {
+        Q31_t t2 = -u3;
+        Q31_t t6 = -u2;
+        Q31_t sum = t2 + t6;
+        if (sum > ts) {
+            k_svpwm = IQmath_Q31_div(ts,sum);
+            t2 = IQmath_Q31_mul(k_svpwm,t2);
+            t6 = IQmath_Q31_mul(k_svpwm,t6);
+        }
+        Q31_t t7 = (ts - t2 - t6) / 2;
+        t_a = t6 + t7;
+        t_b = t2 + t6 + t7;
+        t_c = t7;
+    } else if (sector == 3) {
+        Q31_t t2 = u1;
+        Q31_t t3 = u2;
+        Q31_t sum = t2 + t3;
+        if (sum > ts) {
+            k_svpwm = IQmath_Q31_div(ts,sum);
+            t2 = IQmath_Q31_mul(k_svpwm,t2);
+            t3 = IQmath_Q31_mul(k_svpwm,t3);
+        }
+        Q31_t t7 = (ts - t2 - t3) / 2;
+        t_a = t7;
+        t_b = t2 + t3 + t7;
+        t_c = t3 + t7;
+    } else if (sector == 2) {
+        Q31_t t1 = -u1;
+        Q31_t t3 = -u3;
+        Q31_t sum = t1 + t3;
+        if (sum > ts) {
+            k_svpwm = IQmath_Q31_div(ts,sum);
+            t1 = IQmath_Q31_mul(k_svpwm,t1);
+            t3 = IQmath_Q31_mul(k_svpwm,t3);
+        }
+        Q31_t t7 = (ts - t1 - t3) / 2;
+        t_a = t7;
+        t_b = t3 + t7;
+        t_c = t1 + t3 + t7;
+    } else if (sector == 6) {
+        Q31_t t1 = u2;
+        Q31_t t5 = u3;
+        Q31_t sum = t1 + t5;
+        if (sum > ts) {
+            k_svpwm = IQmath_Q31_div(ts,sum);
+            t1 = IQmath_Q31_mul(k_svpwm,t1);
+            t5 = IQmath_Q31_mul(k_svpwm,t5);
+        }
+        Q31_t t7 = (ts - t1 - t5) / 2;
+        t_a = t5 + t7;
+        t_b = t7;
+        t_c = t1 + t5 + t7;
+    } else if (sector == 4) {
+        Q31_t t4 = -u2;
+        Q31_t t5 = -u1;
+        Q31_t sum = t4 + t5;
+        if (sum > ts) {
+            k_svpwm = IQmath_Q31_div(ts,sum);
+            t4 = IQmath_Q31_mul(k_svpwm,t4);
+            t5 = IQmath_Q31_mul(k_svpwm,t5);
+        }
+        Q31_t t7 = (ts - t4 - t5) / 2;
+        t_a = t4 + t5 + t7;
+        t_b = t7;
+        t_c = t5 + t7;
+    } else {
+        t_a = Q31_HALF;
+        t_b = Q31_HALF;
+        t_c = Q31_HALF;
+    }
+
+    *d_u = IQmath_Q31_Limit(t_a);
+    *d_v = IQmath_Q31_Limit(t_b);
+    *d_w = IQmath_Q31_Limit(t_c);
+}
+
+void clarke_q31(Q31_t *i_alpha,Q31_t *i_beta,Q31_t i_a,Q31_t i_b) {
+  *i_alpha = i_a;
+  *i_beta = (i_a + 2 * i_b) * Value_INV_SQRT3_q31;
+}
+
+void park_q31(Q31_t *i_d,Q31_t *i_q,Q31_t i_alpha,Q31_t i_beta,Q31_t sine,Q31_t cosine) {
+  *i_d = IQmath_Q31_mul(i_alpha,cosine) + IQmath_Q31_mul(i_beta,sine);
+  *i_q = IQmath_Q31_mul(i_beta,cosine) - IQmath_Q31_mul(i_alpha,sine);
+}
+
+void ipark_q31(Q31_t *u_alpha,Q31_t *u_beta,Q31_t u_d,Q31_t u_q,Q31_t sine,Q31_t cosine) {
+  *u_alpha = IQmath_Q31_mul(u_d,cosine) - IQmath_Q31_mul(u_q,sine);
+  *u_beta = IQmath_Q31_mul(u_q,cosine) + IQmath_Q31_mul(u_d,sine);
+}
+

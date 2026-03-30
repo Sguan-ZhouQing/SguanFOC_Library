@@ -1,7 +1,7 @@
 #ifndef __SGUAN_MOTORSTATUS_H
 #define __SGUAN_MOTORSTATUS_H
 
-/* 外部函数声明 */
+/* SguanFOC配置文件声明 */
 #include "UserData_Status.h"
 #include "Sguan_Config.h"
 

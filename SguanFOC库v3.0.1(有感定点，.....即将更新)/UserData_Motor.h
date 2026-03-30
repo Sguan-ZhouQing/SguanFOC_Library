@@ -48,8 +48,6 @@ static inline void User_MotorSet(void){
     Sguan.safe.DQcur_watchdog_limit = 1000;
 
     Sguan.safe.DISABLED_watchdog_limit = 1000;
-    // 6.系统定时中断周期设计
-    Sguan.PMSM_RUN_T = 0.00005f;        // (float)系统电机运行时间周期
 }   
 
 

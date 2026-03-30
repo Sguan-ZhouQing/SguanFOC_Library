@@ -5,29 +5,27 @@
 
 static inline void User_ParameterSet(void){
     // 1.bpf低通滤波器设计
-    Sguan.bpf.CurrentD.Wc = 31415.96f;              // 电机D轴电流滤波->截止频率(默认参数)
-    Sguan.bpf.CurrentQ.Wc = 31415.96f;              // 电机Q轴电流滤波->截止频率(默认参数)
-    Sguan.bpf.Encoder.Wc = 300.0f;                  // 速度信号滤波->截止频率(默认参数)
+    Sguan.lpf.CurrentD.Wc = 31415.96f;              // 电机D轴电流滤波->截止频率(默认参数)
+    Sguan.lpf.CurrentQ.Wc = 31415.96f;              // 电机Q轴电流滤波->截止频率(默认参数)
+    Sguan.lpf.Encoder.Wc = 300.0f;                  // 速度信号滤波->截止频率(默认参数)
     // 2.pid闭环控制系统设计
     Sguan.control.Current_D.Wc = 100.0f;            // PID电流环D轴参数->截止频率(默认参数)
-    // Sguan.control.Current_D.Kp = 0.261f;            // PID电流环D轴参数->Kp【PID参数自适应】
-    Sguan.control.Current_D.Kp = 1.198f/4.0f;            // PID电流环D轴参数->Kp【PID参数自适应】
-    // Sguan.control.Current_D.Ki = 958.4111f;         // PID电流环D轴参数->Ki【PID参数自适应】
-    Sguan.control.Current_D.Ki = 3849.5694f/4.0f;         // PID电流环D轴参数->Ki【PID参数自适应】
+    Sguan.control.Current_D.Kp = 0.2995f;           // PID电流环D轴参数->Kp【PID参数自适应】
+    Sguan.control.Current_D.Ki = 962.39f;           // PID电流环D轴参数->Ki【PID参数自适应】
     Sguan.control.Current_D.Kd = 0.0f;              // PID电流环D轴参数->Kd【PID参数自适应】
     Sguan.control.Current_D.OutMax = 12.0f;         // PID电流环D轴参数->最大限幅(默认参数)
     Sguan.control.Current_D.OutMin = -12.0f;        // PID电流环D轴参数->最小限幅(默认参数)
-    Sguan.control.Current_D.IntMax = 150.0f;        // PID电流环D轴参数->积分项上限(默认参数)
-    Sguan.control.Current_D.IntMin = -150.0f;       // PID电流环D轴参数->积分项下限(默认参数)
+    Sguan.control.Current_D.IntMax = 50.0f;        // PID电流环D轴参数->积分项上限(默认参数)
+    Sguan.control.Current_D.IntMin = -50.0f;       // PID电流环D轴参数->积分项下限(默认参数)
     /* =========================== 分割线 ========================== */
     Sguan.control.Current_Q.Wc = 100.0f;            // PID电流环Q轴参数->截止频率(默认参数)
-    Sguan.control.Current_Q.Kp = 1.198f;            // PID电流环Q轴参数->Kp【PID参数自适应】
-    Sguan.control.Current_Q.Ki = 3849.5694f;         // PID电流环Q轴参数->Ki【PID参数自适应】
+    Sguan.control.Current_Q.Kp = 0.2995f;            // PID电流环Q轴参数->Kp【PID参数自适应】
+    Sguan.control.Current_Q.Ki = 962.39f;         // PID电流环Q轴参数->Ki【PID参数自适应】
     Sguan.control.Current_Q.Kd = 0.0f;              // PID电流环Q轴参数->Kd【PID参数自适应】
     Sguan.control.Current_Q.OutMax = 12.0f;         // PID电流环Q轴参数->最大限幅(默认参数)
     Sguan.control.Current_Q.OutMin = -12.0f;        // PID电流环Q轴参数->最小限幅(默认参数)
-    Sguan.control.Current_Q.IntMax = 150.0f;        // PID电流环Q轴参数->积分项上限(默认参数)
-    Sguan.control.Current_Q.IntMin = -150.0f;       // PID电流环Q轴参数->积分项下限(默认参数)
+    Sguan.control.Current_Q.IntMax = 50.0f;        // PID电流环Q轴参数->积分项上限(默认参数)
+    Sguan.control.Current_Q.IntMin = -50.0f;       // PID电流环Q轴参数->积分项下限(默认参数)
 
     #if Open_PI_Control
     Sguan.control.Velocity.Wc = 100.0f;             // 双PID速度外环参数(默认参数)
@@ -39,13 +37,14 @@ static inline void User_ParameterSet(void){
     Sguan.control.Velocity.IntMax = 15000.0f;       // 双PID速度外环参数->积分项上限(默认参数)
     Sguan.control.Velocity.IntMin = -15000.0f;      // 双PID速度外环参数->积分项下限(默认参数)
     #else // Open_PI_Control
-    Sguan.control.Speed.r = 60.0f;                  // LADRC线自抗扰“速度环”跟踪系数
-    Sguan.control.Speed.b0 = 1200000.0f;            // LADRC线自抗扰“速度环”补偿系数
-    Sguan.control.Speed.wc = 210.0f;                // LADRC线自抗扰“速度环”控制器带宽
-    Sguan.control.Speed.OutMax = 10.5f;             // LADRC线自抗扰“速度环”输出上限
-    Sguan.control.Speed.OutMin = -10.5f;            // LADRC线自抗扰“速度环”输出下限
+    Sguan.control.Speed.boundary = 5.0f;
+    Sguan.control.Speed.k1 = 0.35f;
+    Sguan.control.Speed.k2 = 100.0f;
+    Sguan.control.Speed.IntMax = 1200.0f;
+    Sguan.control.Speed.IntMin = -1200.0f;
+    Sguan.control.Speed.OutMax = 10.5f;
+    Sguan.control.Speed.OutMin = -10.5f;
     #endif // Open_PI_Control
-
     Sguan.control.Position.Wc = 100.0f;             // 高性能伺服三环pos(默认参数)
     Sguan.control.Position.Kp = 7.0f;               // 高性能伺服三环pos【PID参数自适应】
     Sguan.control.Position.Ki = 0.0f;               // 高性能伺服三环pos【PID参数自适应】
