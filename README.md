@@ -23,15 +23,15 @@ SguanFOC Library Evolution
 SguanFOC库v3.0.0 ->
 定位：有感FOC电机控制算法库  浮点运算
 电机状态机  优化的数学运算  Justfloat串口协议
-PLL锁相环速度跟踪  PID闭环控制  IMC内模控制
+PLL锁相环速度跟踪  PID闭环控制  IMC内模思想
 LADRC线自抗扰控制  MTPA弱磁控制  前馈解耦
 巴特沃斯滤波器  printf重定向  用户接口提供
 
 SguanFOC库v3.0.1 ->
 定位：有感FOC电机控制算法库  Q31定点运算
 电机状态机  优化的数学运算  Justfloat串口协议
-PLL锁相环速度跟踪  PID闭环控制  IMC内模控制
-LADRC线自抗扰控制  MTPA弱磁控制  前馈解耦
+PLL锁相环速度跟踪  PID闭环控制  IMC内模思想
+STA二阶滑膜控制  MTPA弱磁控制  前馈解耦
 巴特沃斯滤波器  printf重定向  用户接口提供
 
 SguanFOC库v3.1.0 ->
@@ -40,7 +40,7 @@ SguanFOC库v3.1.0 ->
 HFI高频方波注入与转子位置估算
 SMO静止坐标系滑膜观测器算法
 NSD转子极性辨识  电机参数辨识
-PLL锁相环速度跟踪  PID闭环控制  IMC内模控制
+PLL锁相环速度跟踪  PID闭环控制  STA滑模控制
 LADRC线自抗扰控制  MTPA弱磁控制  前馈解耦
 巴特沃斯滤波器  printf重定向  用户接口提供
 
@@ -50,7 +50,7 @@ SguanFOC库v3.1.1 ->
 HFI高频方波注入与转子位置估算
 SMO静止坐标系滑膜观测器算法
 NSD转子极性辨识  电机参数辨识
-PLL锁相环速度跟踪  PID闭环控制  IMC内模控制
+PLL锁相环速度跟踪  PID闭环控制  STA滑模控制 
 LADRC线自抗扰控制  MTPA弱磁控制  前馈解耦
 巴特沃斯滤波器  printf重定向  用户接口提供
 
@@ -72,7 +72,7 @@ SguanFOC库v3.2.0 ->待加入扩展Kerman滤波器,ModbusRTU的RS485通信，更
 │  │   状态机层       │    │   算法层        │    │   通信层     │  │
 │  │  ═════════════  │    │  ═════════════  │    │  ═════════  │  │
 │  │ • STANDBY       │    │ • PID           │    │ • JustFloat │  │
-│  │ • INITIALIZING  │    │ • IMC           │    │ • printf    │  │
+│  │ • INITIALIZING  │    │ • STA           │    │ • printf    │  │
 │  │ • CALIBRATING   │    │ • LADRC         │    │ • UART/CAN  │  │
 │  │ • IDLE          │    │ • MTPA          │    │ • Modbus*   │  │
 │  │ • TORQUE_CTRL   │    │ • PLL           │    └─────────────┘  │

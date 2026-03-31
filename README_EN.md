@@ -18,15 +18,15 @@ SguanFOC Library Evolution
 SguanFOC Library v3.0.0 ->
 Target: Sensor-based FOC motor control | Floating-point
 Motor state machine | Optimized math | Justfloat UART protocol
-PLL speed tracking | PID closed-loop | IMC internal model control
+PLL speed tracking | PID closed-loop | IMC inner mold concept
 LADRC linear ADRC | MTPA flux-weakening | Feedforward decoupling
 Butterworth filter | printf redirection | User HAL interface
 
 SguanFOC Library v3.0.1 ->
 Target: Sensor-based FOC motor control | Q31 fixed-point
 Motor state machine | Optimized math | Justfloat UART protocol
-PLL speed tracking | PID closed-loop | IMC internal model control
-LADRC linear ADRC | MTPA flux-weakening | Feedforward decoupling
+PLL speed tracking | PID closed-loop | IMC inner mold concept
+Synovial control | MTPA flux-weakening | Feedforward decoupling
 Butterworth filter | printf redirection | User HAL interface
 
 SguanFOC Library v3.1.0 ->
@@ -35,7 +35,7 @@ Motor state machine | Optimized math | Justfloat UART protocol
 HFI high-frequency square-wave injection & rotor position estimation
 SMO sliding-mode observer in stationary frame
 NSD rotor polarity identification | Motor parameter identification
-PLL speed tracking | PID closed-loop | IMC internal model control
+PLL speed tracking | PID closed-loop | Second-order synovial control
 LADRC linear ADRC | MTPA flux-weakening | Feedforward decoupling
 Butterworth filter | printf redirection | User HAL interface
 
@@ -45,7 +45,7 @@ Motor state machine | Optimized math | Justfloat UART protocol
 HFI high-frequency square-wave injection & rotor position estimation
 SMO sliding-mode observer in stationary frame
 NSD rotor polarity identification | Motor parameter identification
-PLL speed tracking | PID closed-loop | IMC internal model control
+PLL speed tracking | PID closed-loop | Second-order synovial control
 LADRC linear ADRC | MTPA flux-weakening | Feedforward decoupling
 Butterworth filter | printf redirection | User HAL interface
 
@@ -65,7 +65,7 @@ SguanFOC Library v3.2.0 -> Planned: Extended Kalman filter, ModbusRTU over RS485
 │  │ State Machine   │    │ Algorithm Layer │    │ Communication│  │
 │  │ ════════════════│    │ ════════════════│    │ ════════════│  │
 │  │ • STANDBY       │    │ • PID           │    │ • JustFloat │  │
-│  │ • INITIALIZING  │    │ • IMC           │    │ • printf    │  │
+│  │ • INITIALIZING  │    │ • STA           │    │ • printf    │  │
 │  │ • CALIBRATING   │    │ • LADRC         │    │ • UART/CAN  │  │
 │  │ • IDLE          │    │ • MTPA          │    │ • Modbus*   │  │
 │  │ • TORQUE_CTRL   │    │ • PLL           │    └─────────────┘  │
