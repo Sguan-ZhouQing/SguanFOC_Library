@@ -9,14 +9,10 @@ typedef struct{
     float integral;         // (数据)积分项累积值
     float output;           // (输出数据)控制器输出
     
-    float ref;              // (输入数据)期望输入值
-    float fbk;              // (输入数据)真实反馈值
+    float Ref;              // (输入数据)期望输入值
+    float Fbk;              // (输入数据)真实反馈值
 
     uint8_t IntegralFrozen_flag; // (中间量)积分抗饱和
-
-    float nonlinear;
-    float abs;
-    float sign_s;
 }STA_RUN_STRUCT;
 
 typedef struct{
@@ -43,8 +39,8 @@ typedef struct{
     Q31_t integral;         // (数据)积分项累积值
     Q31_t output;           // (输出数据)控制器输出
 
-    Q31_t ref;              // (输入数据)期望输入值
-    Q31_t fbk;              // (输入数据)真实反馈值
+    Q31_t Ref;              // (输入数据)期望输入值
+    Q31_t Fbk;              // (输入数据)真实反馈值
 
     uint8_t IntegralFrozen_flag; // (中间量)积分抗饱和
     
@@ -59,10 +55,6 @@ typedef struct{
 
     Q31_t IntMax;           // (数据)积分项上限
     Q31_t IntMin;           // (数据)积分项下限
-
-    Q31_t nonlinear;
-    Q31_t abs;
-    Q31_t sign_s;
 }STA_RUN_STRUCT_q31;
 
 typedef struct{

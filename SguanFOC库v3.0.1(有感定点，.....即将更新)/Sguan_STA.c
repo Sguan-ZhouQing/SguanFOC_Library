@@ -24,8 +24,8 @@ void STA_Init(STA_STRUCT *sta){
     sta->sta.s = 0.0f;
     sta->sta.integral = 0.0f;
     sta->sta.output = 0.0f;
-    sta->sta.ref = 0.0f;
-    sta->sta.fbk = 0.0f;
+    sta->sta.Ref = 0.0f;
+    sta->sta.Fbk = 0.0f;
     // 积分抗饱和标志位
     sta->sta.IntegralFrozen_flag = 0;
 }
@@ -53,14 +53,14 @@ static float STA_SignFunction(STA_STRUCT *sta,float s_abs){
  */
 void STA_Loop(STA_STRUCT *sta){
     // 1. 计算滑模面(速度误差)
-    sta->sta.s = sta->sta.ref - sta->sta.fbk;
+    sta->sta.s = sta->sta.Ref - sta->sta.Fbk;
     
     // 2. 获取饱和函数值(替代符号函数)
-    sta->sta.abs = Value_fabsf(sta->sta.s);
-    sta->sta.sign_s = STA_SignFunction(sta,sta->sta.abs);
+    float abs = Value_fabsf(sta->sta.s);
+    float sign_s = STA_SignFunction(sta,abs);
     
     // 3. 计算非线性项 u1 = k1 * |s|^(1/2) * sign(s)
-    sta->sta.nonlinear = sta->k1 * Value_sqrtf(sta->sta.abs) * sta->sta.sign_s;
+    float nonlinear = sta->k1 * Value_sqrtf(abs) * sign_s;
     
     // 4. 积分项计算 u2 = ∫ k2 * sign(s) dt
     if(sta->k2 != 0.0f){
@@ -77,7 +77,7 @@ void STA_Loop(STA_STRUCT *sta){
         }
         else{
             // 正常积分
-            sta->sta.integral += sta->k2 * sta->sta.sign_s * sta->T;
+            sta->sta.integral += sta->k2 * sign_s * sta->T;
             
             // 积分限幅检查
             if(sta->sta.integral > sta->IntMax){
@@ -92,7 +92,7 @@ void STA_Loop(STA_STRUCT *sta){
     }
     
     // 5. 计算总输出 u = u1 + u2
-    sta->sta.output = sta->sta.nonlinear + sta->sta.integral;
+    sta->sta.output = nonlinear + sta->sta.integral;
     
     // 6. 输出限幅
     sta->sta.output = Value_Limit(sta->sta.output, sta->OutMax, sta->OutMin);
@@ -106,8 +106,8 @@ uint8_t STA_Init_q31(STA_STRUCT_q31 *sta){
     sta->sta.s = 0;
     sta->sta.integral = 0;
     sta->sta.output = 0;
-    sta->sta.ref = 0;
-    sta->sta.fbk = 0;
+    sta->sta.Ref = 0;
+    sta->sta.Fbk = 0;
 
     sta->sta.IntegralFrozen_flag = 0;
 
@@ -144,14 +144,14 @@ static Q31_t STA_SignFunction_q31(STA_STRUCT_q31 *sta,Q31_t s_abs){
 }
 
 void STA_Loop_q31(STA_STRUCT_q31 *sta){
-    sta->sta.s = sta->sta.ref - sta->sta.fbk;
+    sta->sta.s = sta->sta.Ref - sta->sta.Fbk;
     
-    sta->sta.abs = Value_ads_q31(sta->sta.s);
-    sta->sta.sign_s = STA_SignFunction_q31(sta,sta->sta.abs);
-    sta->sta.nonlinear = IQmath_Q31_mul(
+    Q31_t abs = Value_ads_q31(sta->sta.s);
+    Q31_t sign_s = STA_SignFunction_q31(sta,abs);
+    Q31_t nonlinear = IQmath_Q31_mul(
                     IQmath_Q31_mul(
-                    sta->sta.k1,Value_sqrt_q31(sta->sta.abs)),
-                    sta->sta.sign_s);
+                    sta->sta.k1,Value_sqrt_q31(abs)),
+                    sign_s);
     
     if(sta->sta.k2){
         if(sta->sta.IntegralFrozen_flag){
@@ -162,7 +162,7 @@ void STA_Loop_q31(STA_STRUCT_q31 *sta){
         }
         else{
             sta->sta.integral += IQmath_Q31_mul(
-                                IQmath_Q31_mul(sta->sta.k2,sta->sta.sign_s),
+                                IQmath_Q31_mul(sta->sta.k2,sign_s),
                                 sta->sta.T);
             
             if(sta->sta.integral > sta->sta.IntMax){
@@ -176,7 +176,7 @@ void STA_Loop_q31(STA_STRUCT_q31 *sta){
         }
     }
     
-    sta->sta.output = sta->sta.nonlinear + sta->sta.integral;
+    sta->sta.output = nonlinear + sta->sta.integral;
     sta->sta.output = Value_Limit_q31(sta->sta.output, sta->sta.OutMax, sta->sta.OutMin);
 }
 

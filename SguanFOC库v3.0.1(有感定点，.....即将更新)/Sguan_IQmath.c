@@ -34,13 +34,6 @@ static const int64_t Q31_MIN_64 = -2147483648LL;
 
 // ============================ float 版本代码 ============================
 
-// 重写fmodf函数
-static float Value_fmodf(float x, float y) {
-  if (y == 0.0f) return 0.0f;
-  int quotient = (int)(x / y); // 1次除法运算
-  return x - quotient * y;     // 1次乘1次减
-}
-
 // 重写fabsf函数
 float Value_fabsf(float x){
   union{
@@ -67,7 +60,7 @@ int Value_isinf(float x){
     uint32_t mant_mask = 0x007FFFFF;  // 尾数位掩码
     
     // 检查指数位是否全1且尾数位全0
-    if ((u.i & exp_mask) == exp_mask && (u.i & mant_mask) == 0) {
+    if ((u.i & exp_mask) == exp_mask && (u.i & mant_mask) == 0){
         return 1;  // 是无穷大
     }
     return 0;  // 不是无穷大
@@ -115,20 +108,14 @@ float Value_sqrtf(float x){
 }
 
 // 数值限幅float版本
-float Value_Limit(float val, float max, float min) {
+float Value_Limit(float val, float max, float min){
     if (val > max) return max;
     if (val < min) return min;
     return val;
 }
 
 // 参数取模[0, 2π)
-float Value_normalize(float angle) {
-    // float normalized = Value_fmodf(angle, Value_PI*2);
-    // // 如果结果为负，加上2π使其在[0, 2π)范围内
-    // if (normalized < 0) {
-    //     normalized += Value_PI*2;
-    // }
-    // return normalized;
+float Value_normalize(float angle){
     while (1) {
         if (angle > 6.2831854f)
             angle -= 6.2831854f;

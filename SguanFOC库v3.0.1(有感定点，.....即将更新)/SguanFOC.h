@@ -28,6 +28,10 @@ typedef struct{
     uint8_t in_PWM_Calc_ISR;        // (互斥锁)标记是否在PWM计算中断中
 }MOTOR_FLAG_STRUCT;
 
+
+// =============================== float 版本代码 ===============================
+
+#if !CONFIG_Q31
 typedef struct{
     LPF_STRUCT CurrentD;            // (电流数据)电机D轴滤波
     LPF_STRUCT CurrentQ;            // (电流数据)电机Q轴滤波
@@ -68,10 +72,6 @@ typedef struct{
     float Sampling_Rs;              // (参数设计)采样电阻的阻值大小
 }MOTOR_QUANTIZE_STRUCT;
 
-
-// =============================== float 版本代码 ===============================
-
-#if !CONFIG_Q31
 typedef struct{
     float Ld;                       // (电机实体参数)D轴电感
     float Lq;                       // (电机实体参数)Q轴电感
@@ -180,6 +180,47 @@ typedef struct{
 
 #else // CONFIG_Q31
 typedef struct{
+    LPF_STRUCT_q31 CurrentD;            // (电流数据)电机D轴滤波
+    LPF_STRUCT_q31 CurrentQ;            // (电流数据)电机Q轴滤波
+    LPF_STRUCT_q31 Encoder;             // (速度数据)速度信号滤波
+}MOTOR_LPF_STRUCT_q31;
+
+typedef struct{
+    PID_STRUCT_q31 Current_D;           // (电流单环)PID电流环D轴参数
+    PID_STRUCT_q31 Current_Q;           // (电流单环)PID电流环Q轴参数
+
+    #if Open_PI_Control
+    PID_STRUCT_q31 Velocity;            // (速度-电流双环)双PID速度外环参数
+    #else // Open_PI_Control
+    STA_STRUCT_q31 Speed;
+    #endif // Open/_PI_Control
+    
+    PID_STRUCT_q31 Position;            // (高性能伺服三环)Position
+
+    uint8_t Response;               // (参数设计)响应带宽倍数
+}MOTOR_CONTROL_STRUCT_q31;
+
+typedef struct{
+    uint8_t Poles;                  // (电机实体参数)电机极对极数
+    float VBUS;                     // (电机实体参数)母线电压
+    Q31_t VBUS_q31;                 // (电机实体参数)母线电压
+    
+    int8_t Motor_Dir;               // (参数设计)电机的运行方向设计
+    int8_t PWM_Dir;                 // (参数设计)PWM占空比高低对应
+    uint16_t Duty;                  // (参数设计)PWM满占空比
+
+    int8_t Encoder_Dir;             // (参数设计)编码器的方向设置
+
+    int8_t Current_Dir0;            // (参数设计)电流采样方向0
+    int8_t Current_Dir1;            // (参数设计)电流采样方向1
+    uint8_t Current_Num;            // (参数设计)电流通道0->AB相，1->AC相，2->BC相
+    uint32_t ADC_Precision;         // (参数设计)ADC采样精度,如12位精度为4096
+    float Amplifier;                // (参数设计)运放的放大倍数
+    float MCU_Voltage;              // (参数设计)DSP/单片机的ADC基准电压
+    float Sampling_Rs;              // (参数设计)采样电阻的阻值大小
+}MOTOR_QUANTIZE_STRUCT_q31;
+
+typedef struct{
     float Ld;                       // (电机实体参数)D轴电感
     float Lq;                       // (电机实体参数)Q轴电感
     float Ls;                       // (电机实体参数)相线电感
@@ -191,7 +232,7 @@ typedef struct{
     Q31_t Ls_q31;                       // (电机实体参数)相线电感
     Q31_t Rs_q31;                       // (电机实体参数)相线电阻
     Q31_t Flux_q31;                     // (电机实体参数)电机磁链
-}MOTOR_IDENTIFY_STRUCT;
+}MOTOR_IDENTIFY_STRUCT_q31;
 
 typedef struct{    
     float VBUS_MAX;                 // (参数设计)母线电压值波动MAX阈值
@@ -258,7 +299,7 @@ typedef struct{
 }MOTOR_FOC_STRUCT_q31;
 
 typedef struct{
-    PLL_STRUCT pll;                 // (PLL锁相环)锁相环结构体
+    PLL_STRUCT_q31 pll;                 // (PLL锁相环)锁相环结构体
 
     float Real_Speed;               // (Encoder速度)Real实际机械角速度
     float Real_Pos;                // (Encoder多圈角度)Real实际机械角度
@@ -312,15 +353,14 @@ typedef struct{
     uint8_t IQmath_Error;         // 【数据】Q31_Init_Error定点标志位
     MOTOR_FLAG_STRUCT flag;         // 【有参数设计】flag电机运行标志位
     
-    MOTOR_LPF_STRUCT lpf;           // 【有参数设计】bpf低通滤波器设计
-    MOTOR_CONTROL_STRUCT control;   // 【有参数设计】闭环控制系统设计
-    MOTOR_QUANTIZE_STRUCT motor;    // 【有参数设计】motor电机参数量化
-    MOTOR_IDENTIFY_STRUCT identify; // 【数据】identify电机参数辨识结果
-    
-    MOTOR_SAFE_STRUCT safe;         // 【有参数设计】safe电机安全设置
-    MOTOR_FOC_STRUCT foc;           // 【有参数设计】foc控制的参数输入“缓存”
-    MOTOR_ENCODER_STRUCT encoder;   // 【数据】电机角速度和角度信息“缓存”
-    MOTOR_CURRENT_STRUCT current;   // 【数据】电机电流采样信息“缓存”
+    MOTOR_LPF_STRUCT_q31 lpf;           // 【有参数设计】bpf低通滤波器设计
+    MOTOR_CONTROL_STRUCT_q31 control;   // 【有参数设计】闭环控制系统设计
+    MOTOR_QUANTIZE_STRUCT_q31 motor;    // 【有参数设计】motor电机参数量化
+    MOTOR_IDENTIFY_STRUCT_q31 identify; // 【数据】identify电机参数辨识结果
+    MOTOR_SAFE_STRUCT_q31 safe;         // 【有参数设计】safe电机安全设置
+    MOTOR_FOC_STRUCT_q31 foc;           // 【有参数设计】foc控制的参数输入“缓存”
+    MOTOR_ENCODER_STRUCT_q31 encoder;   // 【数据】电机角速度和角度信息“缓存”
+    MOTOR_CURRENT_STRUCT_q31 current;   // 【数据】电机电流采样信息“缓存”
 
     PRINTF_STRUCT TXdata;           // 【数据】data串口或CAN发送的信息
 }SguanFOC_System_STRUCT;

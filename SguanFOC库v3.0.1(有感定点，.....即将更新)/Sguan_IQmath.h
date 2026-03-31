@@ -72,6 +72,7 @@ Q31_t IQmath_Q31_convert_base(Q31_t q, float src_base, float dst_base);
 
 #define Value_PI_q31 IQmath_Q31_from_float(Value_PI,Q_Rad)
 #define Value_2PI_q31 IQmath_Q31_from_float(Value_2PI,Q_Rad)
+#define Value_1_Rad_q31 IQmath_Q31_from_float(1.0f,1.0f/Q_Rad)
 
 #define IQmath_Q31_Shift_Right(x, n)    ((Q31_t)((int64_t)(x) >> (n)))
 #define IQmath_Q31_Shift_Left(x, n)     ((Q31_t)((int64_t)(x) << (n)))

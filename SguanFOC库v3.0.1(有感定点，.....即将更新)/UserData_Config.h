@@ -40,7 +40,7 @@
  * @reminder: 1->开启浮点转定点的运算(量纲，需要参数标幺化)
  * @return {*}
  */
-#define Open_Q31_Calculate 0
+#define Open_Q31_Calculate 1
 
 /**
  * @description: Q31定点化运算的数据标幺(基值设计)
