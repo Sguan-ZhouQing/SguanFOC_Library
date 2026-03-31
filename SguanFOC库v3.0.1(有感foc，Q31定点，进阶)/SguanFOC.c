@@ -3,7 +3,7 @@
  * @GitHub: https://github.com/Sguan-ZhouQing
  * @Date: 2026-01-26 22:38:34
  * @LastEditors: 星必尘Sguan|3464647102@qq.com
- * @LastEditTime: 2026-03-20 22:58:58
+ * @LastEditTime: 2026-04-01 03:44:33
  * @FilePath: \SguanFOC_Debug\SguanFOC\SguanFOC.c
  * @Description: SguanFOC库的“核心代码”实现
  * 
@@ -351,14 +351,14 @@ static void Control_Current_SINGLE(SguanFOC_System_STRUCT *sguan){
     float Uq_ff = sguan->encoder.Real_Espeed*sguan->identify.Ld*sguan->current.Real_Id + 
                     sguan->encoder.Real_Espeed*sguan->identify.Flux;
 
-    // 2.弱磁控制
-    #if Open_FW_Calculate
-    FW_MTPA_Loop(&sguan->foc.Target_Id,
+    // 2.MTPA控制
+    #if CONFIG_MTPA
+    MTPA_Loop(&sguan->foc.Target_Id,
                 sguan->identify.Flux,
                 sguan->identify.Ld,
                 sguan->current.Real_Iq,
                 sguan->current.Real_Iq);
-    #endif // Open_FW_Calculate
+    #endif // CONFIG_MTPA
 
     // 3.电流环PI控制器计算
     Transfer_PID_Loop(&sguan->control.Current_D,
@@ -397,14 +397,14 @@ static void Control_VelCur_DOUBLE(SguanFOC_System_STRUCT *sguan){
     float Uq_ff = sguan->encoder.Real_Espeed*sguan->identify.Ld*sguan->current.Real_Id + 
                     sguan->encoder.Real_Espeed*sguan->identify.Flux;
 
-    // 3.弱磁控制
-    #if Open_FW_Calculate
-    FW_MTPA_Loop(&sguan->foc.Target_Id,
+    // 3.MTPA控制
+    #if CONFIG_MTPA
+    MTPA_Loop(&sguan->foc.Target_Id,
                 sguan->identify.Flux,
                 sguan->identify.Ld,
                 sguan->current.Real_Iq,
                 sguan->current.Real_Iq);
-    #endif // Open_FW_Calculate
+    #endif // CONFIG_MTPA
 
     // 4.电流环PI控制器计算
     Transfer_PID_Loop(&sguan->control.Current_D,
@@ -485,14 +485,14 @@ static void Control_PosVelCur_THREE(SguanFOC_System_STRUCT *sguan){
     float Uq_ff = sguan->encoder.Real_Espeed*sguan->identify.Ld*sguan->current.Real_Id + 
                     sguan->encoder.Real_Espeed*sguan->identify.Flux;
 
-    // 4.弱磁控制
-    #if Open_FW_Calculate
-    FW_MTPA_Loop(&sguan->foc.Target_Id,
+    // 4.MTPA控制
+    #if CONFIG_MTPA
+    MTPA_Loop(&sguan->foc.Target_Id,
                 sguan->identify.Flux,
                 sguan->identify.Ld,
                 sguan->current.Real_Iq,
                 sguan->current.Real_Iq);
-    #endif // Open_FW_Calculate
+    #endif // CONFIG_MTPA
 
     // 5.电流环PI控制器计算
     Transfer_PID_Loop(&sguan->control.Current_D,
@@ -592,6 +592,7 @@ static void Sguan_GeneratePWM_Loop(SguanFOC_System_STRUCT *sguan){
         sguan->mode = Velocity_OPEN_MODE;
         Control_Tick[Velocity_OPEN_MODE](sguan);
     }
+
     SVPWM_Tick(sguan,
         sguan->foc.sine,        // sin正弦值给定
         sguan->foc.cosine,      // cos余弦值给定
@@ -602,11 +603,52 @@ static void Sguan_GeneratePWM_Loop(SguanFOC_System_STRUCT *sguan){
 // =============================== float 版本代码(代码实现) =============================
 #else // CONFIG_Q31
 static void IQmath_Calculate_Init_Tick_q31(SguanFOC_System_STRUCT *sguan){
+    Sguan.identify.Ld_q31 = IQmath_Q31_from_float(Sguan.identify.Ld,BASE_Inductor);
+    Sguan.identify.Lq_q31 = IQmath_Q31_from_float(Sguan.identify.Lq,BASE_Inductor);
+    Sguan.identify.Rs_q31 = IQmath_Q31_from_float(Sguan.identify.Rs,BASE_Resistor);
+    Sguan.identify.Flux_q31 = IQmath_Q31_from_float(Sguan.identify.Flux,BASE_Flux);
 
+    Sguan.motor.VBUS_q31 = IQmath_Q31_from_float(Sguan.motor.VBUS,BASE_Voltage);
+
+    Sguan.safe.Dcur_MAX_q31 = IQmath_Q31_from_float(Sguan.safe.Dcur_MAX,BASE_Current);
+    Sguan.safe.Qcur_MAX_q31 = IQmath_Q31_from_float(Sguan.safe.Qcur_MAX,BASE_Current);
+    Sguan.safe.Current_limit_q31 = IQmath_Q31_from_float(Sguan.safe.Current_limit,BASE_Current);
+    Sguan.safe.Speed_limit_q31 = IQmath_Q31_from_float(Sguan.safe.Speed_limit,BASE_Speed);
+    Sguan.safe.Position_limit_q31 = IQmath_Q31_from_float(Sguan.safe.Position_limit,BASE_Rad);
 }
 
 static void IQmath_Calculate_High_Tick_q31(SguanFOC_System_STRUCT *sguan){
-
+    #if CONFIG_Float
+    sguan->encoder.Real_Speed = IQmath_Q31_to_float(sguan->encoder.Real_Speed_q31,BASE_Speed);
+    sguan->encoder.Real_Pos = IQmath_Q31_to_float(sguan->encoder.Real_Pos_q31,BASE_Speed);
+    sguan->current.Real_Id = IQmath_Q31_to_float(sguan->current.Real_Id_q31,BASE_Current);
+    sguan->current.Real_Iq = IQmath_Q31_to_float(sguan->current.Real_Iq_q31,BASE_Current);
+    #endif // CONFIG_Float
+    // 上面为定点转浮点线程，下面为RX浮点转定点线程
+    if (sguan->IQmath_RX[0] != sguan->foc.Target_Speed){
+        sguan->foc.Target_Speed_q31 = IQmath_Q31_from_float(sguan->foc.Target_Speed,BASE_Speed);
+        sguan->IQmath_RX[0] = sguan->foc.Target_Speed;
+    }
+    if (sguan->IQmath_RX[0] != sguan->foc.Target_Pos){
+        sguan->foc.Target_Pos_q31 = IQmath_Q31_from_float(sguan->foc.Target_Pos,BASE_Rad);
+        sguan->IQmath_RX[0] = sguan->foc.Target_Pos;
+    }
+    if (sguan->IQmath_RX[0] != sguan->foc.Target_Id){
+        sguan->foc.Target_Id_q31 = IQmath_Q31_from_float(sguan->foc.Target_Id,BASE_Current);
+        sguan->IQmath_RX[0] = sguan->foc.Target_Id;
+    }
+    if (sguan->IQmath_RX[0] != sguan->foc.Target_Iq){
+        sguan->foc.Target_Iq_q31 = IQmath_Q31_from_float(sguan->foc.Target_Iq,BASE_Current);
+        sguan->IQmath_RX[0] = sguan->foc.Target_Iq;
+    }
+    if (sguan->IQmath_RX[0] != sguan->foc.Ud_in){
+        sguan->foc.Ud_in_q31 = IQmath_Q31_from_float(sguan->foc.Ud_in,BASE_Voltage);
+        sguan->IQmath_RX[0] = sguan->foc.Ud_in;
+    }
+    if (sguan->IQmath_RX[0] != sguan->foc.Uq_in){
+        sguan->foc.Uq_in_q31 = IQmath_Q31_from_float(sguan->foc.Uq_in,BASE_Voltage);
+        sguan->IQmath_RX[0] = sguan->foc.Uq_in;
+    }
 }
 
 #if !CONFIG_PI
@@ -758,13 +800,13 @@ static void Control_Current_SINGLE_q31(SguanFOC_System_STRUCT *sguan){
                     sguan->identify.Flux_q31)),
                     Value_1_Rad_q31);
 
-    #if Open_FW_Calculate
-    FW_MTPA_Loop(&sguan->foc.Target_Id,
-                sguan->identify.Flux,
-                sguan->identify.Ld,
-                sguan->current.Real_Iq,
-                sguan->current.Real_Iq);
-    #endif // Open_FW_Calculate
+    #if CONFIG_MTPA
+    MTPA_Loop_q31(&sguan->foc.Target_Id_q31,
+                sguan->identify.Flux_q31,
+                sguan->identify.Ld_q31,
+                sguan->current.Real_Iq_q31,
+                sguan->current.Real_Iq_q31);
+    #endif // CONFIG_MTPA
 
     Transfer_PID_Loop_q31(&sguan->control.Current_D,
         sguan->foc.Target_Id_q31,
@@ -804,13 +846,13 @@ static void Control_VelCur_DOUBLE_q31(SguanFOC_System_STRUCT *sguan){
                     sguan->identify.Flux_q31)),
                     Value_1_Rad_q31);
 
-    #if Open_FW_Calculate
-    FW_MTPA_Loop(&sguan->foc.Target_Id,
-                sguan->identify.Flux,
-                sguan->identify.Ld,
-                sguan->current.Real_Iq,
-                sguan->current.Real_Iq);
-    #endif // Open_FW_Calculate
+    #if CONFIG_MTPA
+    MTPA_Loop_q31(&sguan->foc.Target_Id_q31,
+                sguan->identify.Flux_q31,
+                sguan->identify.Ld_q31,
+                sguan->current.Real_Iq_q31,
+                sguan->current.Real_Iq_q31);
+    #endif // CONFIG_MTPA
 
     Transfer_PID_Loop_q31(&sguan->control.Current_D,
         sguan->foc.Target_Id_q31,
@@ -840,13 +882,13 @@ static void Control_VelCur_DOUBLE_q31(SguanFOC_System_STRUCT *sguan){
                     sguan->identify.Flux_q31)),
                     Value_1_Rad_q31);
 
-    #if Open_FW_Calculate
-    FW_MTPA_Loop(&sguan->foc.Target_Id,
-                sguan->identify.Flux,
-                sguan->identify.Ld,
-                sguan->current.Real_Iq,
-                sguan->current.Real_Iq);
-    #endif // Open_FW_Calculate
+    #if CONFIG_MTPA
+    MTPA_Loop_q31(&sguan->foc.Target_Id_q31,
+                sguan->identify.Flux_q31,
+                sguan->identify.Ld_q31,
+                sguan->current.Real_Iq_q31,
+                sguan->current.Real_Iq_q31);
+    #endif // CONFIG_MTPA
 
     Transfer_PID_Loop_q31(&sguan->control.Current_D,
         sguan->foc.Target_Id_q31,
@@ -893,13 +935,13 @@ static void Control_PosVelCur_THREE_q31(SguanFOC_System_STRUCT *sguan){
                     sguan->identify.Flux_q31)),
                     Value_1_Rad_q31);
 
-    #if Open_FW_Calculate
-    FW_MTPA_Loop(&sguan->foc.Target_Id,
-                sguan->identify.Flux,
-                sguan->identify.Ld,
-                sguan->current.Real_Iq,
-                sguan->current.Real_Iq);
-    #endif // Open_FW_Calculate
+    #if CONFIG_MTPA
+    MTPA_Loop_q31(&sguan->foc.Target_Id_q31,
+                sguan->identify.Flux_q31,
+                sguan->identify.Ld_q31,
+                sguan->current.Real_Iq_q31,
+                sguan->current.Real_Iq_q31);
+    #endif // CONFIG_MTPA
 
     Transfer_PID_Loop_q31(&sguan->control.Current_D,
         sguan->foc.Target_Id_q31,
@@ -935,13 +977,13 @@ static void Control_PosVelCur_THREE_q31(SguanFOC_System_STRUCT *sguan){
                     sguan->identify.Flux_q31)),
                     Value_1_Rad_q31);
 
-    #if Open_FW_Calculate
-    FW_MTPA_Loop(&sguan->foc.Target_Id,
-                sguan->identify.Flux,
-                sguan->identify.Ld,
-                sguan->current.Real_Iq,
-                sguan->current.Real_Iq);
-    #endif // Open_FW_Calculate
+    #if CONFIG_MTPA
+    MTPA_Loop_q31(&sguan->foc.Target_Id_q31,
+                sguan->identify.Flux_q31,
+                sguan->identify.Ld_q31,
+                sguan->current.Real_Iq_q31,
+                sguan->current.Real_Iq_q31);
+    #endif // CONFIG_MTPA
 
     Transfer_PID_Loop_q31(&sguan->control.Current_D,
         sguan->foc.Target_Id_q31,
@@ -965,22 +1007,18 @@ static void SVPWM_Tick_q31(SguanFOC_System_STRUCT *sguan,
 
     SVPWM_q31(U_alpha,U_beta,
         &sguan->foc.Du_q31,
-        &sguan->foc.Du_q31,
-        &sguan->foc.Du_q31);
-    
-    sguan->foc.Du = IQmath_Q31_to_float(sguan->foc.Du_q31,1.0f);
-    sguan->foc.Dv = IQmath_Q31_to_float(sguan->foc.Du_q31,1.0f);
-    sguan->foc.Dw = IQmath_Q31_to_float(sguan->foc.Du_q31,1.0f);
+        &sguan->foc.Dv_q31,
+        &sguan->foc.Dw_q31);
 
     if (sguan->motor.PWM_Dir == 1){
-        sguan->foc.Duty_u = (uint16_t)(sguan->foc.Du*sguan->motor.Duty);
-        sguan->foc.Duty_v = (uint16_t)(sguan->foc.Dv*sguan->motor.Duty);
-        sguan->foc.Duty_w = (uint16_t)(sguan->foc.Dw*sguan->motor.Duty);
+        sguan->foc.Duty_u = (uint16_t)(IQmath_Q31_mul(sguan->foc.Du_q31,sguan->motor.Duty));
+        sguan->foc.Duty_v = (uint16_t)(IQmath_Q31_mul(sguan->foc.Dv_q31,sguan->motor.Duty));
+        sguan->foc.Duty_w = (uint16_t)(IQmath_Q31_mul(sguan->foc.Dw_q31,sguan->motor.Duty));
     }
     else if (sguan->motor.PWM_Dir == -1){
-        sguan->foc.Duty_u = (uint16_t)((1.0f - sguan->foc.Du)*sguan->motor.Duty);
-        sguan->foc.Duty_v = (uint16_t)((1.0f - sguan->foc.Dv)*sguan->motor.Duty);
-        sguan->foc.Duty_w = (uint16_t)((1.0f - sguan->foc.Dw)*sguan->motor.Duty);
+        sguan->foc.Duty_u = (uint16_t)(IQmath_Q31_mul((Q31_MAX - sguan->foc.Du_q31),sguan->motor.Duty));
+        sguan->foc.Duty_v = (uint16_t)(IQmath_Q31_mul((Q31_MAX - sguan->foc.Dv_q31),sguan->motor.Duty));
+        sguan->foc.Duty_w = (uint16_t)(IQmath_Q31_mul((Q31_MAX - sguan->foc.Dw_q31),sguan->motor.Duty));
     }
     if (sguan->motor.Motor_Dir == -1){
         uint16_t duty_temp = sguan->foc.Duty_u;
@@ -998,8 +1036,6 @@ static void Sguan_GeneratePWM_Loop_q31(SguanFOC_System_STRUCT *sguan){
         sguan->mode = Velocity_OPEN_MODE;
         Control_Tick_q31[Velocity_OPEN_MODE](sguan);
     }
-    Q31_t d = IQmath_Q31_from_float(sguan->foc.Ud_in/sguan->motor.VBUS,1.0f);
-    Q31_t q = IQmath_Q31_from_float(sguan->foc.Uq_in/sguan->motor.VBUS,1.0f);
 
     SVPWM_Tick_q31(sguan,
         sguan->foc.sine_q31,
@@ -1064,10 +1100,17 @@ static void Status_Temp_UNDERTEMPERATURE(SguanFOC_System_STRUCT *sguan,uint32_t 
 
 // Status判断过流保护状态
 static void Status_Current_OVERCURRENT(SguanFOC_System_STRUCT *sguan,uint32_t *count){
+    #if !CONFIG_Q31
     if ((sguan->current.Real_Id > sguan->safe.Dcur_MAX) || 
         ((sguan->current.Real_Iq > sguan->safe.Qcur_MAX))){
         Status_Switch_STANDBY(sguan,count);
     }
+    #else // CONFIG_Q31
+    if ((sguan->current.Real_Id_q31 > sguan->safe.Dcur_MAX_q31) || 
+        ((sguan->current.Real_Iq_q31 > sguan->safe.Qcur_MAX_q31))){
+        Status_Switch_STANDBY(sguan,count);
+    }
+    #endif // CONFIG_Q31
 }
 
 // Status判断并切换状态机
@@ -1120,11 +1163,19 @@ static void Status_Switch_Loop(SguanFOC_System_STRUCT *sguan){
         }
     }
     // 3.过流保护
+    #if !CONFIG_Q31
     if ((sguan->status != MOTOR_STATUS_OVERCURRENT) && 
         (sguan->current.Real_Id > sguan->safe.Dcur_MAX) || 
         (sguan->current.Real_Iq > sguan->safe.Qcur_MAX)){
         sguan->status = MOTOR_STATUS_OVERCURRENT;
     }
+    #else // CONFIG_Q31
+    if ((sguan->status != MOTOR_STATUS_OVERCURRENT) && 
+        (sguan->current.Real_Id_q31 > sguan->safe.Dcur_MAX_q31) || 
+        (sguan->current.Real_Iq_q31 > sguan->safe.Qcur_MAX_q31)){
+        sguan->status = MOTOR_STATUS_OVERCURRENT;
+    }
+    #endif // CONFIG_Q31
     // 4.编码错误
     #if !MOTOR_CONTROL
     if ((sguan->status != MOTOR_STATUS_ENCODER_ERROR) && 
@@ -1142,57 +1193,111 @@ static void Status_Switch_Loop(SguanFOC_System_STRUCT *sguan){
     }
 
     // ====== 运行状态(当前反馈) ======
+    #if !CONFIG_Q31
     // 1.力矩模式检测
     if ((sguan->mode == Current_SINGLE_MODE) && 
         (sguan->status != MOTOR_STATUS_TORQUE_CONTROL) && 
-        (sguan->current.Real_Iq > (sguan->foc.Target_Iq - 0.2f)) && 
-        (sguan->current.Real_Iq < (sguan->foc.Target_Iq + 0.2f))){
+        (sguan->current.Real_Iq > (sguan->foc.Target_Iq - sguan->safe.Current_limit)) && 
+        (sguan->current.Real_Iq < (sguan->foc.Target_Iq + sguan->safe.Current_limit))){
         sguan->status = MOTOR_STATUS_TORQUE_CONTROL;
     }
     if ((sguan->mode == Current_SINGLE_MODE) && 
         (sguan->status != MOTOR_STATUS_TORQUE_INCREASING) && 
-        (sguan->current.Real_Iq < (sguan->foc.Target_Iq + 0.2f))){
+        (sguan->current.Real_Iq < (sguan->foc.Target_Iq + sguan->safe.Current_limit))){
         sguan->status = MOTOR_STATUS_TORQUE_INCREASING;
     }
     if ((sguan->mode == Current_SINGLE_MODE) && 
         (sguan->status != MOTOR_STATUS_TORQUE_DECREASING) && 
-        (sguan->current.Real_Iq > (sguan->foc.Target_Iq - 0.2f))){
+        (sguan->current.Real_Iq > (sguan->foc.Target_Iq - sguan->safe.Current_limit))){
         sguan->status = MOTOR_STATUS_TORQUE_DECREASING;
     }
     // 2.速度模式检测
     if ((sguan->mode == VelCur_DOUBLE_MODE) && 
         (sguan->status != MOTOR_STATUS_CONST_SPEED) && 
-        (sguan->encoder.Real_Speed > sguan->foc.Target_Speed - 6.0f) && 
-        (sguan->encoder.Real_Speed < sguan->foc.Target_Speed + 6.0f)){
+        (sguan->encoder.Real_Speed > sguan->foc.Target_Speed - sguan->safe.Speed_limit) && 
+        (sguan->encoder.Real_Speed < sguan->foc.Target_Speed + sguan->safe.Speed_limit)){
         sguan->status = MOTOR_STATUS_CONST_SPEED;
     }
     if ((sguan->mode == VelCur_DOUBLE_MODE) && 
         (sguan->status != MOTOR_STATUS_ACCELERATING) && 
-        (sguan->encoder.Real_Speed < sguan->foc.Target_Speed + 6.0f)){
+        (sguan->encoder.Real_Speed < sguan->foc.Target_Speed + sguan->safe.Speed_limit)){
         sguan->status = MOTOR_STATUS_ACCELERATING;
     }
     if ((sguan->mode == VelCur_DOUBLE_MODE) && 
         (sguan->status != MOTOR_STATUS_DECELERATING) && 
-        (sguan->encoder.Real_Speed > sguan->foc.Target_Speed - 6.0f)){
+        (sguan->encoder.Real_Speed > sguan->foc.Target_Speed - sguan->safe.Speed_limit)){
         sguan->status = MOTOR_STATUS_DECELERATING;
     }
     // 3.位置模式检测
     if ((sguan->mode == PosVelCur_THREE_MODE) && 
         (sguan->status != MOTOR_STATUS_POSITION_HOLD) && 
-        (sguan->encoder.Real_Pos > sguan->foc.Target_Pos - 1.0f) && 
-        (sguan->encoder.Real_Pos < sguan->foc.Target_Pos + 1.0f)){
+        (sguan->encoder.Real_Pos > sguan->foc.Target_Pos - sguan->safe.Position_limit) && 
+        (sguan->encoder.Real_Pos < sguan->foc.Target_Pos + sguan->safe.Position_limit)){
         sguan->status = MOTOR_STATUS_POSITION_HOLD;
     }
     if ((sguan->mode == PosVelCur_THREE_MODE) && 
         (sguan->status != MOTOR_STATUS_POSITION_INCREASING) && 
-        (sguan->encoder.Real_Pos < sguan->foc.Target_Pos + 1.0f)){
+        (sguan->encoder.Real_Pos < sguan->foc.Target_Pos + sguan->safe.Position_limit)){
         sguan->status = MOTOR_STATUS_POSITION_INCREASING;
     }
     if ((sguan->mode == PosVelCur_THREE_MODE) && 
         (sguan->status != MOTOR_STATUS_POSITION_DECREASING) && 
-        (sguan->encoder.Real_Pos > sguan->foc.Target_Pos - 1.0f)){
+        (sguan->encoder.Real_Pos > sguan->foc.Target_Pos - sguan->safe.Position_limit)){
         sguan->status = MOTOR_STATUS_POSITION_DECREASING;
     }
+    #else // CONFIG_Q31
+    // 1.力矩模式检测
+    if ((sguan->mode == Current_SINGLE_MODE) && 
+        (sguan->status != MOTOR_STATUS_TORQUE_CONTROL) && 
+        (sguan->current.Real_Iq_q31 > (sguan->foc.Target_Iq_q31 - sguan->safe.Current_limit_q31)) && 
+        (sguan->current.Real_Iq_q31 < (sguan->foc.Target_Iq_q31 + sguan->safe.Current_limit_q31))){
+        sguan->status = MOTOR_STATUS_TORQUE_CONTROL;
+    }
+    if ((sguan->mode == Current_SINGLE_MODE) && 
+        (sguan->status != MOTOR_STATUS_TORQUE_INCREASING) && 
+        (sguan->current.Real_Iq_q31 < (sguan->foc.Target_Iq_q31 + sguan->safe.Current_limit_q31))){
+        sguan->status = MOTOR_STATUS_TORQUE_INCREASING;
+    }
+    if ((sguan->mode == Current_SINGLE_MODE) && 
+        (sguan->status != MOTOR_STATUS_TORQUE_DECREASING) && 
+        (sguan->current.Real_Iq_q31 > (sguan->foc.Target_Iq_q31 - sguan->safe.Current_limit_q31))){
+        sguan->status = MOTOR_STATUS_TORQUE_DECREASING;
+    }
+    // 2.速度模式检测
+    if ((sguan->mode == VelCur_DOUBLE_MODE) && 
+        (sguan->status != MOTOR_STATUS_CONST_SPEED) && 
+        (sguan->encoder.Real_Speed_q31 > sguan->foc.Target_Speed_q31 - sguan->safe.Speed_limit_q31) && 
+        (sguan->encoder.Real_Speed_q31 < sguan->foc.Target_Speed_q31 + sguan->safe.Speed_limit_q31)){
+        sguan->status = MOTOR_STATUS_CONST_SPEED;
+    }
+    if ((sguan->mode == VelCur_DOUBLE_MODE) && 
+        (sguan->status != MOTOR_STATUS_ACCELERATING) && 
+        (sguan->encoder.Real_Speed_q31 < sguan->foc.Target_Speed_q31 + sguan->safe.Speed_limit_q31)){
+        sguan->status = MOTOR_STATUS_ACCELERATING;
+    }
+    if ((sguan->mode == VelCur_DOUBLE_MODE) && 
+        (sguan->status != MOTOR_STATUS_DECELERATING) && 
+        (sguan->encoder.Real_Speed_q31 > sguan->foc.Target_Speed_q31 - sguan->safe.Speed_limit_q31)){
+        sguan->status = MOTOR_STATUS_DECELERATING;
+    }
+    // 3.位置模式检测
+    if ((sguan->mode == PosVelCur_THREE_MODE) && 
+        (sguan->status != MOTOR_STATUS_POSITION_HOLD) && 
+        (sguan->encoder.Real_Pos_q31 > sguan->foc.Target_Pos_q31 - sguan->safe.Position_limit_q31) && 
+        (sguan->encoder.Real_Pos_q31 < sguan->foc.Target_Pos_q31 + sguan->safe.Position_limit_q31)){
+        sguan->status = MOTOR_STATUS_POSITION_HOLD;
+    }
+    if ((sguan->mode == PosVelCur_THREE_MODE) && 
+        (sguan->status != MOTOR_STATUS_POSITION_INCREASING) && 
+        (sguan->encoder.Real_Pos_q31 < sguan->foc.Target_Pos_q31 + sguan->safe.Position_limit_q31)){
+        sguan->status = MOTOR_STATUS_POSITION_INCREASING;
+    }
+    if ((sguan->mode == PosVelCur_THREE_MODE) && 
+        (sguan->status != MOTOR_STATUS_POSITION_DECREASING) && 
+        (sguan->encoder.Real_Pos_q31 > sguan->foc.Target_Pos_q31 - sguan->safe.Position_limit_q31)){
+        sguan->status = MOTOR_STATUS_POSITION_DECREASING;
+    }
+    #endif // CONFIG_Q31
 }
 
 // Status定时器中断调用的状态机运行函数
@@ -1346,7 +1451,7 @@ static void Sguan_Positioning_Set(SguanFOC_System_STRUCT *sguan,float Ud,float U
     Q31_t q = IQmath_Q31_from_float(Uq,BASE_Voltage);
     SVPWM_Tick_q31(sguan,0,Q31_MAX,
         IQmath_Q31_div(d,sguan->motor.VBUS_q31),
-        IQmath_Q31_div(q,sguan->motor.VBUS));
+        IQmath_Q31_div(q,sguan->motor.VBUS_q31));
     #endif // CONFIG_Q31
 }
 

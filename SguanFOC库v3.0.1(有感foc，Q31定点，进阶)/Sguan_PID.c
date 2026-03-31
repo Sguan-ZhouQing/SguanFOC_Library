@@ -3,7 +3,7 @@
  * @GitHub: https://github.com/Sguan-ZhouQing
  * @Date: 2026-01-26 22:38:09
  * @LastEditors: 星必尘Sguan|3464647102@qq.com
- * @LastEditTime: 2026-03-20 22:57:23
+ * @LastEditTime: 2026-04-01 03:45:16
  * @FilePath: \SguanFOC_Debug\SguanFOC\Sguan_PID.c
  * @Description: SguanFOC库的“开环PID算法”实现
  * 

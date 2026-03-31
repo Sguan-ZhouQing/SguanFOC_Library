@@ -3,7 +3,7 @@
  * @GitHub: https://github.com/Sguan-ZhouQing
  * @Date: 2026-03-20 10:21:01
  * @LastEditors: 星必尘Sguan|3464647102@qq.com
- * @LastEditTime: 2026-03-20 22:58:19
+ * @LastEditTime: 2026-04-01 03:44:41
  * @FilePath: \SguanFOC_Debug\SguanFOC\Sguan_SVPWM.c
  * @Description: SguanFOC库的“七段式SVPWM空间矢量合成”实现
  * 
@@ -250,15 +250,14 @@ void SVPWM_q31(Q31_t u_alpha, Q31_t u_beta,
         t_b = Q31_HALF;
         t_c = Q31_HALF;
     }
-
-    *d_u = IQmath_Q31_Limit(t_a);
-    *d_v = IQmath_Q31_Limit(t_b);
-    *d_w = IQmath_Q31_Limit(t_c);
+    *d_u = t_a;
+    *d_v = t_b;
+    *d_w = t_c;
 }
 
 void clarke_q31(Q31_t *i_alpha,Q31_t *i_beta,Q31_t i_a,Q31_t i_b) {
   *i_alpha = i_a;
-  *i_beta = (i_a + 2 * i_b) * Value_INV_SQRT3_q31;
+  *i_beta = IQmath_Q31_mul((i_a + 2 * i_b), Value_INV_SQRT3_q31);
 }
 
 void park_q31(Q31_t *i_d,Q31_t *i_q,Q31_t i_alpha,Q31_t i_beta,Q31_t sine,Q31_t cosine) {

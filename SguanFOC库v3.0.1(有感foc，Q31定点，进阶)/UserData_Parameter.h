@@ -49,8 +49,8 @@ static inline void User_ParameterSet(void){
     Sguan.control.Position.Kp = 7.0f;               // 高性能伺服三环pos(核心参数)
     Sguan.control.Position.Ki = 0.0f;               // 高性能伺服三环pos(参数)
     Sguan.control.Position.Kd = 0.0f;               // 高性能伺服三环pos(核心参数)
-    Sguan.control.Position.OutMax = 270.0f;         // 高性能伺服三环pos(默认参数)
-    Sguan.control.Position.OutMin = -270.0f;        // 高性能伺服三环pos(默认参数)
+    Sguan.control.Position.OutMax = 230.0f;         // 高性能伺服三环pos(默认参数)
+    Sguan.control.Position.OutMin = -230.0f;        // 高性能伺服三环pos(默认参数)
     Sguan.control.Position.IntMax = 150.0f;         // 高性能伺服三环pos->积分项上限(默认参数)
     Sguan.control.Position.IntMin = -150.0f;        // 高性能伺服三环pos->积分项下限(默认参数)
 

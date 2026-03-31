@@ -66,6 +66,7 @@ static inline void User_CO_Adjust(float CO){
 
 static inline void User_UserTX(void){
     /* 仅传入主循环printf发送的数据，如TXdata.fdata[0],默认最多12个 */
+    /* like:
     Sguan.TXdata.fdata[0] = Sguan.status;
     Sguan.TXdata.fdata[1] = Sguan.encoder.Real_Speed;
     Sguan.TXdata.fdata[2] = Sguan.foc.Target_Speed;
@@ -78,6 +79,7 @@ static inline void User_UserTX(void){
     Sguan.TXdata.fdata[9] = Sguan.encoder.Real_Pos;
     Sguan.TXdata.fdata[10] = Sguan.encoder.Pos_offset;
     Sguan.TXdata.fdata[11] = Sguan.mode;
+    */
 }
 
 

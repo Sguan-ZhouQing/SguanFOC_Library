@@ -3,7 +3,7 @@
  * @GitHub: https://github.com/Sguan-ZhouQing
  * @Date: 2026-02-26 22:37:25
  * @LastEditors: 星必尘Sguan|3464647102@qq.com
- * @LastEditTime: 2026-03-20 22:58:14
+ * @LastEditTime: 2026-04-01 03:44:52
  * @FilePath: \SguanFOC_Debug\SguanFOC\Sguan_STA.c
  * @Description: SguanFOC库的“二阶滑膜控制算法(基于误差和误差微分)”实现
  * 

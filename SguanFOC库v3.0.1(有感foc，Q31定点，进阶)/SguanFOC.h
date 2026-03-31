@@ -75,7 +75,6 @@ typedef struct{
 typedef struct{
     float Ld;                           // (电机实体参数)D轴电感
     float Lq;                           // (电机实体参数)Q轴电感
-    float Ls;                           // (电机实体参数)相线电感
     float Rs;                           // (电机实体参数)相线电阻
     float Flux;                         // (电机实体参数)电机磁链
 }MOTOR_IDENTIFY_STRUCT;
@@ -101,6 +100,10 @@ typedef struct{
     // 如果有电机过流预警，电机正常运行...经过Sguan_Low_Loop()的DQcur_watchdog_limit此运行周期
     // 若2-10次，中间有一次再触发过流警告，电机停转进待机
     // 若首次后10次，都未再触发，电机以后都正常运行
+
+    float Current_limit;                // (参数设计)电流正负区间设计，电流状态机判断
+    float Speed_limit;                  // (参数设计)速度正负区间设计，速度状态机判断
+    float Position_limit;               // (参数设计)位置正负区间设计，位置状态机判断
 
     uint32_t DISABLED_watchdog_limit;   //(参数设计)电机DISABLED状态机进待机模式的延时周期
 }MOTOR_SAFE_STRUCT;
@@ -223,13 +226,11 @@ typedef struct{
 typedef struct{
     float Ld;                           // (电机实体参数)D轴电感
     float Lq;                           // (电机实体参数)Q轴电感
-    float Ls;                           // (电机实体参数)相线电感
     float Rs;                           // (电机实体参数)相线电阻
     float Flux;                         // (电机实体参数)电机磁链
 
     Q31_t Ld_q31;                       // (电机实体参数)D轴电感
     Q31_t Lq_q31;                       // (电机实体参数)Q轴电感
-    Q31_t Ls_q31;                       // (电机实体参数)相线电感
     Q31_t Rs_q31;                       // (电机实体参数)相线电阻
     Q31_t Flux_q31;                     // (电机实体参数)电机磁链
 }MOTOR_IDENTIFY_STRUCT_q31;
@@ -251,12 +252,22 @@ typedef struct{
  
     float Dcur_MAX;                     // (参数设计)电机最大电流D轴限制
     float Qcur_MAX;                     // (参数设计)电机最大电流Q轴限制
+    Q31_t Dcur_MAX_q31;                 // (参数设计)电机最大电流D轴限制
+    Q31_t Qcur_MAX_q31;                 // (参数设计)电机最大电流Q轴限制
     uint32_t DQcur_watchdog_limit;      // (参数设计)过流保护的警告周期
     // 如果有电机过流预警，电机正常运行...经过Sguan_Low_Loop()的DQcur_watchdog_limit此运行周期
     // 若2-10次，中间有一次再触发过流警告，电机停转进待机
     // 若首次后10次，都未再触发，电机以后都正常运行
 
-    uint32_t DISABLED_watchdog_limit;   //(参数设计)电机DISABLED状态机进待机模式的延时周期
+    float Current_limit;                // (参数设计)电流正负区间设计，电流状态机判断
+    float Speed_limit;                  // (参数设计)速度正负区间设计，速度状态机判断
+    float Position_limit;               // (参数设计)位置正负区间设计，位置状态机判断
+
+    Q31_t Current_limit_q31;                // (参数设计)电流正负区间设计，电流状态机判断
+    Q31_t Speed_limit_q31;                  // (参数设计)速度正负区间设计，速度状态机判断
+    Q31_t Position_limit_q31;               // (参数设计)位置正负区间设计，位置状态机判断
+
+    uint32_t DISABLED_watchdog_limit;   // (参数设计)电机DISABLED状态机进待机模式的延时周期
 }MOTOR_SAFE_STRUCT_q31;
 
 typedef struct{
@@ -298,8 +309,10 @@ typedef struct{
 typedef struct{
     PLL_STRUCT_q31 pll;                 // (PLL锁相环)锁相环结构体
 
+    #if CONFIG_Float
     float Real_Speed;                   // (Encoder速度)Real实际机械角速度
     float Real_Pos;                     // (Encoder多圈角度)Real实际机械角度
+    #endif // CONFIG_Float
 
     Q31_t Real_Speed_q31;               // (Encoder速度)Real实际机械角速度
     Q31_t Real_Pos_q31;                 // (Encoder多圈角度)Real实际机械角度
@@ -311,8 +324,10 @@ typedef struct{
 }MOTOR_ENCODER_STRUCT_q31;
 
 typedef struct{
+    #if CONFIG_Float
     float Real_Id;                      // (Current电流)Real实际D轴电流
     float Real_Iq;                      // (Current电流)Real实际Q轴电流
+    #endif // CONFIG_Float
 
     Q31_t Real_Id_q31;                  // (Current电流)Real实际D轴电流
     Q31_t Real_Iq_q31;                  // (Current电流)Real实际Q轴电流
@@ -333,8 +348,10 @@ typedef struct{
 typedef struct{
     uint8_t status;                     // 【数据】status存储电机运行状态
     uint8_t mode;                       // 【有参数设计】mode选择电机的运行模式
-    uint8_t IQmath_Error;               // 【数据】Q31_Init_Error定点标志位
     MOTOR_FLAG_STRUCT flag;             // 【有参数设计】flag电机运行标志位
+    
+    uint8_t IQmath_Error;               // 【数据】Q31_Init_Error定点标志位
+    float IQmath_RX[6];                 // 【数据】Q31转换“定点数”标志位
     
     MOTOR_LPF_STRUCT_q31 lpf;           // 【有参数设计】bpf低通滤波器设计
     MOTOR_CONTROL_STRUCT_q31 control;   // 【有参数设计】闭环控制系统设计

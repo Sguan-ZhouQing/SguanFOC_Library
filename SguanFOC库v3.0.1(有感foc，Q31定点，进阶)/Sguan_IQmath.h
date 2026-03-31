@@ -89,7 +89,8 @@ void fast_sin_cos_q31(float x, Q31_t *sin_x, Q31_t *cos_x);
 uint8_t IQmath_ReadBit(uint8_t reg, uint8_t n);
 void IQmath_SetBit(uint8_t *reg, uint8_t n, uint8_t Bit);
 
-// 定点化初始化失败协议
+/* 
+1.协议(Sguan.IQmath_Error)
 #define Error_Filter_Current    0x01 // 0.Filter“电流滤波”定点初始化失败
 #define Error_Filter_Encoder    0x02 // 1.Filter“编码器滤波”定点初始化失败
 #define Error_PID_Current       0x04 // 2.PID“电流环”定点初始化失败
@@ -97,6 +98,9 @@ void IQmath_SetBit(uint8_t *reg, uint8_t n, uint8_t Bit);
 #define Error_STA_Speed         0x10 // 4.STA“速度环”定点初始化失败
 #define Error_PID_Position      0x20 // 5.PID“位置环”定点初始化失败
 #define Error_PLL_Encoder       0x40 // 6.PLL“位置环”定点初始化失败
+*/
+
+
 
 
 #endif // SGUAN_IQMATH_H

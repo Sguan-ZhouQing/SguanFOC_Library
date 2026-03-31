@@ -8,6 +8,7 @@
 #define CONFIG_MTPA         Open_MTPA_Calculate
 #define CONFIG_FW           Open_FW_Calculate
 #define CONFIG_Q31          Open_Q31_Calculate
+#define CONFIG_Float        Open_float_Calculate
 #define CONFIG_Debug        Open_Printf_Debug
 
 
@@ -15,12 +16,13 @@
 // 标幺化基准值(Config)
 #define BASE_Time           Q_Time
 #define BASE_Rad            Q_Rad
-#define BASE_Speed          Q_Speed
-#define BASE_Hz             Q_Hz
 #define BASE_Current        Q_Current
 #define BASE_Voltage        Q_Voltage
+#define BASE_Speed          Q_Speed
+#define BASE_Hz             Q_Hz
 #define BASE_Inductor       Q_Inductor
 #define BASE_Flux           Q_Flux
+#define BASE_Resistor       Q_Resistor
 
 // 默认数值缩放倍率(Sguan_Fiter)
 #define BASE_Filter_Num     16.0f
