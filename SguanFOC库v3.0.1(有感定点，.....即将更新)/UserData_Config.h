@@ -48,15 +48,15 @@
  * @return {*}
  */
 #define Q_Resistor 0.5f                     // 电阻数据设定(单位为Ω欧姆)
-#define Q_Flux 0.00390625f                  // 磁链大小(单位为Wb韦伯)
-#define Q_Inductor (Q_Voltage/Q_Current)    // 电感数据设定(单位为H亨利)
 
-#define Q_Time 0.00390625f                 	// 常量标幺化(单位为s)
-#define Q_Rad 512.0f                        // 角度大小(单位为rad弧度)
+#define Q_Time 0.0078125f                 	// 常量标幺化(单位为s)
+#define Q_Rad 128.0f                        // 角度大小(单位为rad弧度)
 #define Q_Speed (Q_Rad/Q_Time)              // 角速度大小(单位rad/s)
 #define Q_Hz (1.0f/Q_Time)                  // 频率Hz的大小(单位1/s)
 #define Q_Current 64.0f                     // 电流数据设定(单位为A安培)
 #define Q_Voltage 128.0f                    // 电压数据设定(单位为V伏特)
+#define Q_Inductor ((Q_Voltage*Q_Time)/Q_Current) // 电感数据设定(单位为H亨利)
+#define Q_Flux (Q_Voltage*Q_Time)           // 磁链大小(单位为Wb韦伯)
 
 
 // 定时器中断参数设计

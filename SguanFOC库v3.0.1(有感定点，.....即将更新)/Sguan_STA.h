@@ -13,6 +13,10 @@ typedef struct{
     float fbk;              // (输入数据)真实反馈值
 
     uint8_t IntegralFrozen_flag; // (中间量)积分抗饱和
+
+    float nonlinear;
+    float abs;
+    float sign_s;
 }STA_RUN_STRUCT;
 
 typedef struct{
@@ -55,6 +59,10 @@ typedef struct{
 
     Q31_t IntMax;           // (数据)积分项上限
     Q31_t IntMin;           // (数据)积分项下限
+
+    Q31_t nonlinear;
+    Q31_t abs;
+    Q31_t sign_s;
 }STA_RUN_STRUCT_q31;
 
 typedef struct{
@@ -76,7 +84,7 @@ typedef struct{
 void STA_Init(STA_STRUCT *sta);
 void STA_Loop(STA_STRUCT *sta);
 
-void STA_Init_q31(STA_STRUCT_q31 *sta);
+uint8_t STA_Init_q31(STA_STRUCT_q31 *sta);
 void STA_Loop_q31(STA_STRUCT_q31 *sta);
 
 

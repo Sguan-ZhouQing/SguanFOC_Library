@@ -44,11 +44,11 @@ float fast_sin(float x);
 void fast_sin_cos(float x, float *sin_x, float *cos_x);
 
 
-// ============================ Q31 版本代码 ============================
+// ============================ Q31 版本代码 =============================
 
 // Q31版本C标准库及参数限制函数
 Q31_t Value_ads_q31(Q31_t x);
-Q31_t Value_sqrt_q31(Q31_t x);
+Q31_t Value_sqrt_q31(Q31_t input);
 Q31_t Value_Limit_q31(Q31_t val, Q31_t max, Q31_t min);
 Q31_t Value_normalize_q31(Q31_t angle_q31);
 
@@ -73,13 +73,29 @@ Q31_t IQmath_Q31_convert_base(Q31_t q, float src_base, float dst_base);
 #define Value_PI_q31 IQmath_Q31_from_float(Value_PI,Q_Rad)
 #define Value_2PI_q31 IQmath_Q31_from_float(Value_2PI,Q_Rad)
 
-#define IQmath_Q31_Shift_Right(x, n)    (IQmath_Q31_Limit((Q31_t)((int64_t)(x) >> (n))))
-#define IQmath_Q31_Shift_Left(x, n)     (IQmath_Q31_Limit((Q31_t)((int64_t)(x) << (n))))
+#define IQmath_Q31_Shift_Right(x, n)    ((Q31_t)((int64_t)(x) >> (n)))
+#define IQmath_Q31_Shift_Left(x, n)     ((Q31_t)((int64_t)(x) << (n)))
 
 // 快速正余弦求解Q31版本
 #define fast_cos_q31(x) fast_sin_q31(1.5707963f - x);
 Q31_t fast_sin_q31(float x);
 void fast_sin_cos_q31(float x, Q31_t *sin_x, Q31_t *cos_x);
+
+
+// ============================ 定点初始化 协议层 ============================
+
+// 读写uint8_t寄存器数值
+uint8_t IQmath_ReadBit(uint8_t reg, uint8_t n);
+void IQmath_SetBit(uint8_t *reg, uint8_t n, uint8_t Bit);
+
+// 定点化初始化失败协议
+#define Error_Filter_Current    0x01 // 0.Filter“电流滤波”定点初始化失败
+#define Error_Filter_Encoder    0x02 // 1.Filter“编码器滤波”定点初始化失败
+#define Error_PID_Current       0x04 // 2.PID“电流环”定点初始化失败
+#define Error_PID_Velocity      0x08 // 3.PID“速度环”定点初始化失败
+#define Error_STA_Speed         0x10 // 4.STA“速度环”定点初始化失败
+#define Error_PID_Position      0x20 // 5.PID“位置环”定点初始化失败
+#define Error_PLL_Encoder       0x40 // 6.PLL“位置环”定点初始化失败
 
 
 #endif // SGUAN_IQMATH_H

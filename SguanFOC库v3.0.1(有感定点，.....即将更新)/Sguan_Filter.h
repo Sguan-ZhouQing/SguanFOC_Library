@@ -46,7 +46,7 @@ typedef struct{
 void LPF_Init(LPF_STRUCT *bpf);
 void LPF_Loop(LPF_STRUCT *bpf);
 
-void LPF_Init_q31(LPF_STRUCT_q31 *bpf);
+uint8_t LPF_Init_q31(LPF_STRUCT_q31 *bpf);
 void LPF_Loop_q31(LPF_STRUCT_q31 *bpf);
 
 

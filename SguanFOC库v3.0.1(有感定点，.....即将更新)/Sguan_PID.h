@@ -86,7 +86,7 @@ typedef struct{
 void PID_Init(PID_STRUCT *pid);
 void PID_Loop(PID_STRUCT *pid);
 
-void PID_Init_q31(PID_STRUCT_q31 *pid);
+uint8_t PID_Init_q31(PID_STRUCT_q31 *pid);
 void PID_Loop_q31(PID_STRUCT_q31 *pid);
 
 

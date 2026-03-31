@@ -309,6 +309,7 @@ typedef struct{
 typedef struct{
     uint8_t status;                 // 【数据】status存储电机运行状态
     uint8_t mode;                   // 【有参数设计】mode选择电机的运行模式
+    uint8_t IQmath_Error;         // 【数据】Q31_Init_Error定点标志位
     MOTOR_FLAG_STRUCT flag;         // 【有参数设计】flag电机运行标志位
     
     MOTOR_LPF_STRUCT lpf;           // 【有参数设计】bpf低通滤波器设计

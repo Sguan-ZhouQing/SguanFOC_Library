@@ -80,13 +80,16 @@ void PID_Loop(PID_STRUCT *pid){
 
 // ============================ Q31 版本代码 ============================
 
-void PID_Init_q31(PID_STRUCT_q31 *pid){
+uint8_t PID_Init_q31(PID_STRUCT_q31 *pid){
     double temp0 = pid->T*pid->Ki;
     double temp1 = pid->T*pid->Wc;
-    double temp2 = pid->Kd*pid->Wc;     // 电流->电压  电流为1  电压为64  Gs=64=电压/电流
-    pid->run.P_num = IQmath_Q31_from_float(pid->Kp,pid->BASE_Out/pid->BASE_In);
-    pid->run.I_num = IQmath_Q31_from_float((float)(temp0/2.0),pid->BASE_Out/pid->BASE_In);
-    pid->run.D_num = IQmath_Q31_from_float((float)(2*temp2/(2+temp1)),pid->BASE_Out/pid->BASE_In);
+    double temp2 = pid->Kd*pid->Wc;     // Rad->Speed Speed->Current
+    pid->run.P_num = IQmath_Q31_from_float(
+                    pid->Kp,(pid->BASE_Out/pid->BASE_In));
+    pid->run.I_num = IQmath_Q31_from_float(
+                    (float)(temp0/2.0),(pid->BASE_Out/pid->BASE_In));
+    pid->run.D_num = IQmath_Q31_from_float(
+                    (float)(2*temp2/(2+temp1)),(pid->BASE_Out/pid->BASE_In));
     pid->run.D_den = IQmath_Q31_from_float((float)((-2+temp1)/(2+temp1)),1.0f);
 
     pid->run.OutMax = IQmath_Q31_from_float(pid->OutMax,pid->BASE_Out);
@@ -104,6 +107,16 @@ void PID_Init_q31(PID_STRUCT_q31 *pid){
     pid->run.Fbk = 0;
     pid->run.Output = 0;
     pid->run.IntegralFrozen_flag = 0;
+
+    if ((pid->Kp <= (pid->BASE_Out/pid->BASE_In)) && 
+        ((temp0/2.0) <= (pid->BASE_Out/pid->BASE_In)) && 
+        ((2*temp2/(2+temp1)) <= (pid->BASE_Out/pid->BASE_In)) && 
+        (((-2+temp1)/(2+temp1)) <= 1.0f)){
+        return 0x00;
+    }
+    else{
+        return 0x01;
+    }
 }
 
 void PID_Loop_q31(PID_STRUCT_q31 *pid){
@@ -121,10 +134,9 @@ void PID_Loop_q31(PID_STRUCT_q31 *pid){
                 pid->run.IntegralFrozen_flag = 0;
             }
         } else{
-            Q31_t Io = IQmath_Q31_mul(pid->run.I_num,pid->run.i[0]) + 
+            pid->run.Io[0] = IQmath_Q31_mul(pid->run.I_num,pid->run.i[0]) + 
                     IQmath_Q31_mul(pid->run.I_num,pid->run.i[1]) + 
                     pid->run.Io[1];
-            pid->run.Io[0] = IQmath_Q31_Limit(Io);
             
             if (pid->run.Io[0] > pid->run.IntMax){
                 pid->run.Io[0] = pid->run.IntMax;
@@ -137,10 +149,9 @@ void PID_Loop_q31(PID_STRUCT_q31 *pid){
         }
     }
     if (pid->Kd){
-        Q31_t Do = IQmath_Q31_mul(pid->run.D_num,pid->run.i[0]) - 
+        pid->run.Do[0] = IQmath_Q31_mul(pid->run.D_num,pid->run.i[0]) - 
                         IQmath_Q31_mul(pid->run.D_den,pid->run.Do[1]) + 
                         IQmath_Q31_mul(pid->run.D_num,pid->run.i[1]);
-        pid->run.Do[0] = IQmath_Q31_Limit(Do);
     }
     pid->run.Do[0] = IQmath_Q31_mul(pid->run.i[0],pid->run.P_num);
     pid->run.Output = pid->run.Io[0] + pid->run.Do[0];

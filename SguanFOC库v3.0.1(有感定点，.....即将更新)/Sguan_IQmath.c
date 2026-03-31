@@ -224,38 +224,47 @@ void fast_sin_cos(float x, float *sin_x, float *cos_x) {
 
 // int32_t 版本绝对值函数（位运算实现）
 Q31_t Value_ads_q31(Q31_t x){
-    union{
-        int32_t  num;  // 有符号整数
-        uint32_t bits; // 无符号位操作专用
-    }u;
-    
-    u.num = x;
-    u.bits &= 0x7FFFFFFF;  // 清除最高位符号位，保留数值位
-    return u.num;
+    return (x < 0) ? -x : x;
 }
 
-// int32_t整数开平方（输入必须 >= 0，返回整数平方根）
-Q31_t Value_sqrt_q31(Q31_t x){
-    // 负数直接返回 0（和你浮点版逻辑一致）
-    if (x < 0){
-        return 0;
+// int32_t整数开平方（查表法，求整数平方根）
+Q31_t Value_sqrt_q31(Q31_t input){
+    int64_t x = (int64_t)input << 31;
+    // 负数直接返回 0
+    if (x <= 0) return 0;
+    
+    // 初始估计：使用最高位位置估算
+    int64_t guess = 1;
+    
+    // 快速找到最高位位置（类似log2）
+    // 对于32位以上，使用位移快速估算初始值
+    if (x > (1LL << 60)) {
+        guess = 1LL << 30;
+    } else if (x > (1LL << 50)) {
+        guess = 1LL << 25;
+    } else if (x > (1LL << 40)) {
+        guess = 1LL << 20;
+    } else if (x > (1LL << 30)) {
+        guess = 1LL << 15;
+    } else if (x > (1LL << 20)) {
+        guess = 1LL << 10;
+    } else if (x > (1LL << 10)) {
+        guess = 1LL << 5;
     }
-    // 0 和 1 直接返回自身
-    if (x == 0 || x == 1){
-        return x;
+    
+    // 牛顿迭代法： guess = (guess + x/guess) / 2
+    // 迭代4-6次即可达到足够精度
+    for (int i = 0; i < 6; i++) {
+        int64_t new_guess = (guess + x / guess) >> 1;
+        // 当误差小于1时停止迭代
+        if (new_guess == guess || new_guess == guess - 1) {
+            break;
+        }
+        guess = new_guess;
     }
-
-    int32_t guess = x;       // 初始猜测值
-    int32_t prev;
-    const int32_t epsilon = 1; // 整数精度 1 即可
-
-    // 整数牛顿迭代法
-    do {
-        prev = guess;
-        guess = (guess + x / guess) / 2; // 核心公式
-    } while (prev - guess > epsilon);   // 整数精度判断
-
-    return guess;
+    
+    // 返回整数部分
+    return (Q31_t)guess;
 }
 
 // 数值限幅Q31版本
@@ -388,10 +397,11 @@ Q15_t IQmath_Q15_div(Q15_t a, Q15_t b){
 // 定点代码限幅函数
 Q31_t IQmath_Q31_Limit(Q31_t value){
     if (value > Q31_MAX){
-        value = Q31_MAX;
+        return Q31_MAX;
     } else if (value < Q31_MIN){
-        value = Q31_MIN;
+        return Q31_MIN;
     }
+    return value;
 }
 
 /**
@@ -679,3 +689,19 @@ void fast_sin_cos_q31(float x, Q31_t *sin_x, Q31_t *cos_x){
 }
 
 
+// ============================ 定点初始化 协议层 ============================
+
+// 读寄存器位的实际数值
+uint8_t IQmath_ReadBit(uint8_t reg, uint8_t n){
+    return (reg & (1 << n)) ? 1 : 0;
+}
+
+// 写寄存器为1或者0(单独写)
+void IQmath_SetBit(uint8_t *reg, uint8_t n, uint8_t Bit){
+    if (Bit){
+        *reg |= (1 << n);
+    }
+    else{
+        *reg &= ~(1 << n);
+    }
+}

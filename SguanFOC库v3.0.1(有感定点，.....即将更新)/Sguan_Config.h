@@ -19,6 +19,8 @@
 #define BASE_Hz             Q_Hz
 #define BASE_Current        Q_Current
 #define BASE_Voltage        Q_Voltage
+#define BASE_Inductor       Q_Inductor
+#define BASE_Flux           Q_Flux
 
 // 默认数值缩放倍率(Sguan_Fiter)
 #define BASE_Filter_Num     16.0f
@@ -31,10 +33,6 @@
 // #define BASE_Num         16.0f
 // #define INT32_Num_16     IQmath_Q31_from_float(1.0f,BASE_Num)
 // #define SHIFT_Num        4
-
-// 默认数值缩放倍率(Sguan_STA)
-#define BASE_STA_Num        8.0f
-#define SHIFT_STA_Num       3
 
 
 // ======================== 控制系统离散周期 宏定义 =========================

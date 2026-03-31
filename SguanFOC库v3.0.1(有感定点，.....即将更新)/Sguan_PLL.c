@@ -48,10 +48,10 @@ void PLL_Loop(PLL_STRUCT *pll){
 
 // ============================ Q31 版本代码 ============================
 
-void PLL_Init_q31(PLL_STRUCT_q31 *pll){
+uint8_t PLL_Init_q31(PLL_STRUCT_q31 *pll){
     double temp0 = pll->T*pll->Ki;
-    pll->go.X_num[0] = IQmath_Q31_from_float((float)((2*pll->Kp+temp0)/2.0),BASE_Hz*BASE_PLL_Num);
-    pll->go.X_num[1] = IQmath_Q31_from_float((float)((-2*pll->Kp+temp0)/2.0),BASE_Hz*BASE_PLL_Num);
+    pll->go.X_num[0] = IQmath_Q31_from_float((float)((2*pll->Kp+temp0)/2.0),(BASE_Hz*BASE_PLL_Num));
+    pll->go.X_num[1] = IQmath_Q31_from_float((float)((-2*pll->Kp+temp0)/2.0),(BASE_Hz*BASE_PLL_Num));
     pll->go.Y_num = IQmath_Q31_from_float((float)(pll->T/2.0),BASE_Time);
 
     pll->is_position_mode = 0;
@@ -61,6 +61,15 @@ void PLL_Init_q31(PLL_STRUCT_q31 *pll){
     pll->go.OutWe = 0;
     pll->go.OutRe = 0;
     pll->go.Error = 0;
+
+    if ((((2*pll->Kp+temp0)/2.0) <= (BASE_Hz*BASE_PLL_Num)) && 
+        (((-2*pll->Kp+temp0)/2.0) <= (BASE_Hz*BASE_PLL_Num)) && 
+        ((pll->T/2.0) <= BASE_Time)){
+        return 0x00;
+    }
+    else{
+        return 0x01;
+    }
 }
 
 void PLL_Loop_q31(PLL_STRUCT_q31 *pll){
@@ -69,9 +78,8 @@ void PLL_Loop_q31(PLL_STRUCT_q31 *pll){
                 IQmath_Q31_mul(pll->go.Xo,INT32_PLL_Num_16);
     pll->go.OutWe = IQmath_Q31_Shift_Left(OutWe,SHIFT_PLL_Num);
 
-    Q31_t OutRe = IQmath_Q31_mul(pll->go.Y_num,pll->go.OutWe) + 
+    pll->go.OutRe = IQmath_Q31_mul(pll->go.Y_num,pll->go.OutWe) + 
                 IQmath_Q31_mul(pll->go.Y_num,pll->go.Xo) + pll->go.Yo;
-    pll->go.OutRe = IQmath_Q31_Limit(OutRe);
 
     if (!pll->is_position_mode){
         pll->go.OutRe = Value_normalize_q31(pll->go.OutRe);

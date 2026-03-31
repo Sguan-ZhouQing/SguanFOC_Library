@@ -59,7 +59,7 @@ void LPF_Loop(LPF_STRUCT *lpf){
 
 // ============================ Q31 版本代码 ============================
 
-void LPF_Init_q31(LPF_STRUCT_q31 *lpf){
+uint8_t LPF_Init_q31(LPF_STRUCT_q31 *lpf){
     double temp1 = lpf->T*lpf->Wc*2.828427124746;
     double temp2 = lpf->T*lpf->T*lpf->Wc*lpf->Wc;
     lpf->filter.num[0] = IQmath_Q31_from_float((float)(temp2/(temp2+temp1+4.0)),BASE_Filter_Num);
@@ -74,6 +74,17 @@ void LPF_Init_q31(LPF_STRUCT_q31 *lpf){
     }
     lpf->filter.Input = 0;
     lpf->filter.Output = 0;
+
+    if (((temp2/(temp2+temp1+4.0)) <= BASE_Filter_Num) && 
+        (((2.0*temp2)/(temp2+temp1+4.0)) <= BASE_Filter_Num) && 
+        ((temp2/(temp2+temp1+4.0)) <= BASE_Filter_Num) && 
+        (((-8.0+2.0*temp2)/(temp2+temp1+4.0)) <= BASE_Filter_Num) && 
+        (((temp2-temp1+4.0)/(temp2+temp1+4.0)) <= BASE_Filter_Num)){
+        return 0x00;
+    }
+    else{
+        return 0x01;
+    }
 }
 
 void LPF_Loop_q31(LPF_STRUCT_q31 *lpf){

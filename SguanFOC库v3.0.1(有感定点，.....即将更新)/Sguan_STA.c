@@ -56,11 +56,11 @@ void STA_Loop(STA_STRUCT *sta){
     sta->sta.s = sta->sta.ref - sta->sta.fbk;
     
     // 2. 获取饱和函数值(替代符号函数)
-    float abs = Value_fabsf(sta->sta.s);
-    float sign_s = STA_SignFunction(sta,abs);
+    sta->sta.abs = Value_fabsf(sta->sta.s);
+    sta->sta.sign_s = STA_SignFunction(sta,sta->sta.abs);
     
     // 3. 计算非线性项 u1 = k1 * |s|^(1/2) * sign(s)
-    float nonlinear = sta->k1 * Value_sqrtf(abs) * sign_s;
+    sta->sta.nonlinear = sta->k1 * Value_sqrtf(sta->sta.abs) * sta->sta.sign_s;
     
     // 4. 积分项计算 u2 = ∫ k2 * sign(s) dt
     if(sta->k2 != 0.0f){
@@ -77,7 +77,7 @@ void STA_Loop(STA_STRUCT *sta){
         }
         else{
             // 正常积分
-            sta->sta.integral += sta->k2 * sign_s * sta->T;
+            sta->sta.integral += sta->k2 * sta->sta.sign_s * sta->T;
             
             // 积分限幅检查
             if(sta->sta.integral > sta->IntMax){
@@ -92,7 +92,7 @@ void STA_Loop(STA_STRUCT *sta){
     }
     
     // 5. 计算总输出 u = u1 + u2
-    sta->sta.output = nonlinear + sta->sta.integral;
+    sta->sta.output = sta->sta.nonlinear + sta->sta.integral;
     
     // 6. 输出限幅
     sta->sta.output = Value_Limit(sta->sta.output, sta->OutMax, sta->OutMin);
@@ -102,7 +102,7 @@ void STA_Loop(STA_STRUCT *sta){
 // ============================ Q31 版本代码 ============================
 static Q31_t STA_SignFunction_q31(STA_STRUCT_q31 *sta,Q31_t s_abs);
 
-void STA_Init_q31(STA_STRUCT_q31 *sta){
+uint8_t STA_Init_q31(STA_STRUCT_q31 *sta){
     sta->sta.s = 0;
     sta->sta.integral = 0;
     sta->sta.output = 0;
@@ -113,8 +113,8 @@ void STA_Init_q31(STA_STRUCT_q31 *sta){
 
     sta->sta.boundary = IQmath_Q31_from_float(sta->boundary,BASE_Speed);
     
-    sta->sta.k1 = IQmath_Q31_from_float(sta->k1,(1.0f/Value_sqrtf(BASE_Speed))*BASE_Current*BASE_STA_Num);
-    sta->sta.k2 = IQmath_Q31_from_float(sta->k2,BASE_Current/BASE_Time);
+    sta->sta.k1 = IQmath_Q31_from_float(sta->k1,((1.0f/Value_sqrtf(BASE_Speed))*BASE_Current));
+    sta->sta.k2 = IQmath_Q31_from_float(sta->k2,(BASE_Current/BASE_Time));
     sta->sta.T = IQmath_Q31_from_float(sta->T,BASE_Time);
 
     sta->sta.OutMax = IQmath_Q31_from_float(sta->OutMax,BASE_Current);
@@ -122,26 +122,38 @@ void STA_Init_q31(STA_STRUCT_q31 *sta){
     
     sta->sta.IntMax = IQmath_Q31_from_float(sta->IntMax,BASE_Current);
     sta->sta.IntMin = IQmath_Q31_from_float(sta->IntMin,BASE_Current);
+
+    if ((sta->boundary <= BASE_Speed) && 
+        (sta->k1 <= ((1.0f/Value_sqrtf(BASE_Speed))*BASE_Current)) && 
+        (sta->k2 <= (BASE_Current/BASE_Time)) && 
+        (sta->T <= BASE_Time)){
+        return 0x00;
+    }
+    else{
+        return 0x01;
+    }
 }
 
 static Q31_t STA_SignFunction_q31(STA_STRUCT_q31 *sta,Q31_t s_abs){    
     if(s_abs < sta->sta.boundary){
-        return sta->sta.s / sta->sta.boundary;
+        return IQmath_Q31_div(sta->sta.s,sta->sta.boundary);
     }
     else{
-        return (sta->sta.s > 0) ? (Q31_t)1 : (Q31_t)(-1);
+        return (sta->sta.s > 0) ? Q31_MAX : Q31_MIN;
     }
 }
 
 void STA_Loop_q31(STA_STRUCT_q31 *sta){
     sta->sta.s = sta->sta.ref - sta->sta.fbk;
     
-    Q31_t abs = Value_ads_q31(sta->sta.s);
-    Q31_t sign_s = STA_SignFunction_q31(sta,abs);
-    Q31_t nonlinear = sta->sta.k1 * Value_sqrt_q31(abs) * sign_s;
-    nonlinear = IQmath_Q31_Limit(nonlinear);
+    sta->sta.abs = Value_ads_q31(sta->sta.s);
+    sta->sta.sign_s = STA_SignFunction_q31(sta,sta->sta.abs);
+    sta->sta.nonlinear = IQmath_Q31_mul(
+                    IQmath_Q31_mul(
+                    sta->sta.k1,Value_sqrt_q31(sta->sta.abs)),
+                    sta->sta.sign_s);
     
-    if(sta->k2 != 0){
+    if(sta->sta.k2){
         if(sta->sta.IntegralFrozen_flag){
             if((IQmath_Q31_mul(sta->sta.s,sta->sta.integral) < 0) ||
                (sta->sta.integral < sta->sta.IntMax && sta->sta.integral > sta->sta.IntMin)){
@@ -150,7 +162,7 @@ void STA_Loop_q31(STA_STRUCT_q31 *sta){
         }
         else{
             sta->sta.integral += IQmath_Q31_mul(
-                                IQmath_Q31_mul(sta->sta.k2,sign_s),
+                                IQmath_Q31_mul(sta->sta.k2,sta->sta.sign_s),
                                 sta->sta.T);
             
             if(sta->sta.integral > sta->sta.IntMax){
@@ -164,7 +176,7 @@ void STA_Loop_q31(STA_STRUCT_q31 *sta){
         }
     }
     
-    sta->sta.output = nonlinear + sta->sta.integral;
+    sta->sta.output = sta->sta.nonlinear + sta->sta.integral;
     sta->sta.output = Value_Limit_q31(sta->sta.output, sta->sta.OutMax, sta->sta.OutMin);
 }
 

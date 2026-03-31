@@ -54,7 +54,7 @@ typedef struct{
 void PLL_Init(PLL_STRUCT *pll);
 void PLL_Loop(PLL_STRUCT *pll);
 
-void PLL_Init_q31(PLL_STRUCT_q31 *pll);
+uint8_t PLL_Init_q31(PLL_STRUCT_q31 *pll);
 void PLL_Loop_q31(PLL_STRUCT_q31 *pll);
 
 
