@@ -148,8 +148,11 @@ static void Sguan_PLL_Init(SguanFOC_System_STRUCT *sguan);
 static void Sguan_Start_Tick(void);
 
 
-// =============================== Q31 版本代码(仅声明) ==============================
+// =============================== Q31 版本代码(仅声明) =============================
 #if CONFIG_Q31
+// 0.初始化浮点转Q31和实时浮点转定点
+static void IQmath_Calculate_Init_Tick_q31(SguanFOC_System_STRUCT *sguan);
+static void IQmath_Calculate_High_Tick_q31(SguanFOC_System_STRUCT *sguan);
 // 1.Transfer传递函数的离散化运算，采用双线性变换
 #if CONFIG_PI
 static void Transfer_STA_Loop_q31(STA_STRUCT_q31 *sta,Q31_t Ref,Q31_t Fbk);
@@ -598,6 +601,14 @@ static void Sguan_GeneratePWM_Loop(SguanFOC_System_STRUCT *sguan){
 
 // =============================== float 版本代码(代码实现) =============================
 #else // CONFIG_Q31
+static void IQmath_Calculate_Init_Tick_q31(SguanFOC_System_STRUCT *sguan){
+
+}
+
+static void IQmath_Calculate_High_Tick_q31(SguanFOC_System_STRUCT *sguan){
+
+}
+
 #if !CONFIG_PI
 static void Transfer_STA_Loop_q31(STA_STRUCT_q31 *sta,Q31_t Ref,Q31_t Fbk){
     sta->sta.Ref = Ref;
@@ -1418,6 +1429,9 @@ static void Sguan_Start_Tick(void){
         Sguan_SystemT_Set(&Sguan);
         // 各种控制系统的初始化
         Sguan.status = MOTOR_STATUS_INITIALIZING;
+        #if CONFIG_Q31
+        IQmath_Calculate_Init_Tick_q31(&Sguan);
+        #endif // CONFIG_Q31
         Sguan_LPF_Init(&Sguan);
         Sguan_Control_Init(&Sguan);
         Sguan_PLL_Init(&Sguan);
@@ -1468,6 +1482,7 @@ void SguanFOC_High_Loop(void){
             // 运算PID并执行SVPWM(如果计算超时，会更新错误状态并停用此线程)
             Sguan_GeneratePWM_Loop(&Sguan);
             #else // CONFIG_Q31
+            IQmath_Calculate_High_Tick_q31(&Sguan);
             Sguan_Calculate_Loop_q31(&Sguan);
             Sguan_GeneratePWM_Loop_q31(&Sguan);
             #endif // CONFIG_Q31
@@ -1596,7 +1611,7 @@ void SguanFOC_main_Loop(void){
     else if (Sguan.status >= 19){
         static uint8_t count = 0;
         count++;
-        if (count > 5){
+        if (count > 10){
             Printf_Normal_Loop(&Sguan);
             count = 0;
         }

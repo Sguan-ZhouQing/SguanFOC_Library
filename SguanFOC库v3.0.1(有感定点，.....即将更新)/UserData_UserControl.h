@@ -74,9 +74,9 @@ static inline void User_UserTX(void){
     Sguan.TXdata.fdata[5] = Sguan.foc.Target_Id;
     Sguan.TXdata.fdata[6] = Sguan.foc.Target_Iq;
     Sguan.TXdata.fdata[7] = Sguan.foc.Uq_in;
-    Sguan.TXdata.fdata[8] = Sguan.current.Real_Ia;
+    // Sguan.TXdata.fdata[8] = Sguan.current.Real_Ia;
     Sguan.TXdata.fdata[9] = Sguan.encoder.Real_Pos;
-    Sguan.TXdata.fdata[10] = Sguan.encoder.Pos_offset;
+    // Sguan.TXdata.fdata[10] = Sguan.encoder.Pos_offset;
     Sguan.TXdata.fdata[11] = Sguan.mode;
 }
 
