@@ -1,11 +1,14 @@
 #ifndef __SGUAN_OPTIMIZE_H
 #define __SGUAN_OPTIMIZE_H
 
-/* 外部函数声明 */
+/* SguanFOC配置文件声明 */
 #include "Sguan_Config.h"
 
-void FW_Loop(float *Target_id,float flux,float Ld,float Lq,float iq);
+// 最大转矩电流比
+void MTPA_Loop(float *Target_id,float flux,float Ld,float Lq,float iq);
 
+// 弱磁控制(待写)
+// 三次谐波注入(待写)
 
 
 #endif // SGUAN_OPTIMIZE_H

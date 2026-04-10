@@ -3,7 +3,7 @@
  * @GitHub: https://github.com/Sguan-ZhouQing
  * @Date: 2026-03-20 10:21:01
  * @LastEditors: 星必尘Sguan|3464647102@qq.com
- * @LastEditTime: 2026-03-20 22:58:19
+ * @LastEditTime: 2026-04-09 17:25:03
  * @FilePath: \SguanFOC_Debug\SguanFOC\Sguan_SVPWM.c
  * @Description: SguanFOC库的“七段式SVPWM空间矢量合成”实现
  * 
@@ -11,21 +11,8 @@
  */
 #include "Sguan_SVPWM.h"
 
+// 常量宏定义声明
 #define Value_INV_SQRT3 0.5773502691896257f
-static void Overmod(float *d, float *q);
-
-// 对DQ轴电压进行幅值限制，防止过调制
-static void Overmod(float *d, float *q){
-  // 计算合成“矢量幅值的平方”
-  float Vref = (*d)*(*d) + (*q)*(*q);
-  
-  if (Vref > 1.0f) {
-    float scale = 1.0f / Value_sqrtf(Vref);
-    *d *= scale;
-    *q *= scale;
-    // 幅值限制处理,如果“幅值平方”超过 1,进行等比例缩放
-  }
-}
 
 /**
  * SVPWM 函数 - C语言版本
@@ -37,29 +24,22 @@ static void Overmod(float *d, float *q){
  * @param d_v: 输出V相占空比，归一化到0-1
  * @param d_w: 输出W相占空比，归一化到0-1
  */
-void SVPWM(float d, float q, float sin_phi, float cos_phi, 
-          float *d_u, float *d_v, float *d_w){
-    // 1. 幅值限制，防止过调制
-    float d_limited = d;
-    float q_limited = q;
-    Overmod(&d_limited, &q_limited);
-    
-    // 2. 帕克逆变换 (IPARK)
-    float u_alpha,u_beta;
-    ipark(&u_alpha,&u_beta,d,q,sin_phi,cos_phi);
-    
-    // 3. SVPWM实现
+void SVPWM(float u_alpha, float u_beta, 
+        float *d_u, float *d_v, float *d_w){
+    // 1. SVPWM实现
     const float ts = 1.0f;  // 周期归一化
     
     float u1 = u_beta;
     float u2 = -0.8660254037844386f * u_alpha - 0.5f * u_beta;
     float u3 = 0.8660254037844386f * u_alpha - 0.5f * u_beta;
     
+    // 2.扇区数值计算
     uint8_t sector = (u1 > 0.0f) + ((u2 > 0.0f) << 1) + ((u3 > 0.0f) << 2);
     
     float t_a, t_b, t_c;
     float k_svpwm;
     
+    // 3.PWM占用时间幅值
     if (sector == 5) {
         float t4 = u3;
         float t6 = u1;
@@ -169,3 +149,4 @@ void ipark(float *u_alpha,float *u_beta,float u_d,float u_q,float sine,float cos
   *u_alpha = u_d * cosine - u_q * sine;
   *u_beta = u_q * cosine + u_d * sine;
 }
+

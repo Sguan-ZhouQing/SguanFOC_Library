@@ -1,7 +1,7 @@
 #ifndef __SGUAN_FILTER_H
 #define __SGUAN_FILTER_H
 
-/* 外部函数声明 */
+/* SguanFOC配置文件声明 */
 #include "Sguan_Config.h"
 
 typedef struct{
@@ -20,10 +20,10 @@ typedef struct{
 
     double Wc;              // (参数设计)Wc巴特沃斯截止频率
     double T;               // (参数设计)T周期
-}BPF_STRUCT;
+}LPF_STRUCT;
 
-void BPF_Init(BPF_STRUCT *bpf);
-void BPF_Loop(BPF_STRUCT *bpf);
+void LPF_Init(LPF_STRUCT *bpf);
+void LPF_Loop(LPF_STRUCT *bpf);
 
 
 #endif // SGUAN_FILTER_H

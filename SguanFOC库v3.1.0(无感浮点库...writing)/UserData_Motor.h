@@ -14,7 +14,6 @@ static inline void User_MotorSet(void){
     // 3.identify电机参数辨识结果(根据实际电机参数填写，或者通过辨识算法得到)
     Sguan.identify.Ld = 0.0000519338f;  // (float)D轴电感
     Sguan.identify.Lq = 0.0000519338f;  // (float)Q轴电感
-    Sguan.identify.Ls = 0.0000519338f;  // (float)相线电感
     Sguan.identify.Rs = 0.19067f;       // (float)相线电阻
     Sguan.identify.Flux = 0.00028043f;  // (float)磁链
     // 4.motor电机参数辨识
@@ -47,9 +46,11 @@ static inline void User_MotorSet(void){
     Sguan.safe.Qcur_MAX = 60.0f;        // (float)电机最大电流Q轴限制
     Sguan.safe.DQcur_watchdog_limit = 1000;
 
+    Sguan.safe.Current_limit = 0.5f;    // (float)电机->电流状态机判断的电流范围
+    Sguan.safe.Speed_limit = 5.0f;      // (float)电机->速度状态机判断的速度范围
+    Sguan.safe.Position_limit = 1.0f;   // (float)电机->位置状态机判断的位置范围
+
     Sguan.safe.DISABLED_watchdog_limit = 1000;
-    // 6.系统定时中断周期设计
-    Sguan.PMSM_RUN_T = 0.00005f;        // (float)系统电机运行时间周期
 }   
 
 

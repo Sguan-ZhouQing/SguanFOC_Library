@@ -3,7 +3,7 @@
  * @GitHub: https://github.com/Sguan-ZhouQing
  * @Date: 2026-01-26 22:43:42
  * @LastEditors: 星必尘Sguan|3464647102@qq.com
- * @LastEditTime: 2026-03-20 22:56:59
+ * @LastEditTime: 2026-04-09 17:23:47
  * @FilePath: \SguanFOC_Debug\SguanFOC\Sguan_MotorStatus.c
  * @Description: SguanFOC库的“电机状态机”实现
  * 

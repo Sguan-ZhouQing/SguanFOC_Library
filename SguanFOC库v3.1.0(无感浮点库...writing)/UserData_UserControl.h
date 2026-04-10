@@ -32,27 +32,22 @@ static inline void User_AO_Adjust(float AO){
     default:
         break;
     }
-    // Sguan.foc.Target_Iq = AO;
-    // Sguan.foc.Target_Speed = AO;
-    // Sguan.foc.Target_Pos = AO;
-    // Sguan.foc.Uq_in = AO;
 }
 
 static inline void User_BO_Adjust(float BO){
     /* Your code for Parameter set */
-    // if ((0.0f < BO) && (BO < 1.0f)){
-    //     Sguan.mode = 0x00;
-    // }
-    // else if ((1.0f <= BO) && (BO < 2.0f)){
-    //     Sguan.mode = 0x01;
-    // }
-    // else if ((2.0f <= BO) && (BO < 3.0f)){
-    //     Sguan.mode = 0x02;
-    // }
-    // else if ((3.0f <= BO) && (BO < 10.0f)){
-    //     Sguan.mode = 0x03;
-    // }
-    Sguan.control.Speed.b0 = BO;
+    if ((0.0f < BO) && (BO < 1.0f)){
+        Sguan.mode = 0x00;
+    }
+    else if ((1.0f <= BO) && (BO < 2.0f)){
+        Sguan.mode = 0x01;
+    }
+    else if ((2.0f <= BO) && (BO < 3.0f)){
+        Sguan.mode = 0x02;
+    }
+    else if ((3.0f <= BO) && (BO < 10.0f)){
+        Sguan.mode = 0x03;
+    }
 }
 
 static inline void User_CO_Adjust(float CO){
@@ -68,16 +63,16 @@ static inline void User_CO_Adjust(float CO){
 static inline void User_UserTX(void){
     /* 仅传入主循环printf发送的数据，如TXdata.fdata[0],默认最多12个 */
     Sguan.TXdata.fdata[0] = Sguan.status;
-    Sguan.TXdata.fdata[1] = Sguan.encoder.Real_Speed;
-    Sguan.TXdata.fdata[2] = Sguan.foc.Target_Speed;
-    Sguan.TXdata.fdata[3] = Sguan.current.Real_Id;
-    Sguan.TXdata.fdata[4] = Sguan.current.Real_Iq;
-    Sguan.TXdata.fdata[5] = Sguan.foc.Target_Id;
-    Sguan.TXdata.fdata[6] = Sguan.foc.Target_Iq;
-    Sguan.TXdata.fdata[7] = Sguan.foc.Uq_in;
-    Sguan.TXdata.fdata[8] = Sguan.current.Real_Ia;
-    Sguan.TXdata.fdata[9] = Sguan.encoder.Real_Pos;
-    Sguan.TXdata.fdata[10] = Sguan.encoder.Pos_offset;
+    // Sguan.TXdata.fdata[1] = Sguan.encoder.Real_Speed_q31;
+    // Sguan.TXdata.fdata[2] = Sguan.foc.Target_Speed;
+    // Sguan.TXdata.fdata[3] = Sguan.current.Real_Id_q31;
+    // Sguan.TXdata.fdata[4] = Sguan.current.Real_Iq_q31;
+    // Sguan.TXdata.fdata[5] = Sguan.foc.Target_Id;
+    // Sguan.TXdata.fdata[6] = Sguan.foc.Target_Iq;
+    // Sguan.TXdata.fdata[7] = Sguan.foc.Uq_in;
+    // Sguan.TXdata.fdata[8] = Sguan.current.Real_Ia_q31;
+    // Sguan.TXdata.fdata[9] = Sguan.current.Real_Ibeta_q31;
+    // Sguan.TXdata.fdata[10] = Sguan.encoder.Real_Pos_q31;
     Sguan.TXdata.fdata[11] = Sguan.mode;
 }
 

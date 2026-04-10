@@ -3,7 +3,7 @@
  * @GitHub: https://github.com/Sguan-ZhouQing
  * @Date: 2026-01-26 22:50:37
  * @LastEditors: 星必尘Sguan|3464647102@qq.com
- * @LastEditTime: 2026-03-20 22:57:34
+ * @LastEditTime: 2026-04-09 17:24:17
  * @FilePath: \SguanFOC_Debug\SguanFOC\Sguan_PLL.c
  * @Description: SguanFOC库的“开环PLL锁相环”实现
  * 
@@ -14,8 +14,9 @@
 // 锁相环PLL核心参数初始化，主函数调用
 void PLL_Init(PLL_STRUCT *pll){
     double temp0 = pll->T*pll->Ki;
-    pll->go.X_num[0] = (float)(2*pll->Kp+temp0);
-    pll->go.X_num[1] = (float)(-2*pll->Kp+temp0);
+    pll->go.X_num[0] = (float)((2*pll->Kp+temp0)/2.0);
+    pll->go.X_num[1] = (float)((-2*pll->Kp+temp0)/2.0);
+    pll->go.Y_num = (float)(pll->T/2.0);
     // 初始化为零
     pll->is_position_mode = 0; // 默认非位置环mode
     pll->go.i = 0;
@@ -29,11 +30,11 @@ void PLL_Init(PLL_STRUCT *pll){
 // 闭环控制运算的定时器中断服务函数
 void PLL_Loop(PLL_STRUCT *pll){
     // 计算PI控制器(并输出We)
-    pll->go.OutWe = (pll->go.X_num[0]*pll->go.Error + pll->go.X_num[1]*pll->go.i 
-                + 2.0f*pll->go.Xo) / 2.0f;
+    pll->go.OutWe = pll->go.X_num[0]*pll->go.Error + pll->go.X_num[1]*pll->go.i 
+                + pll->go.Xo;
     // 计算积分器(并输出Re)
-    pll->go.OutRe = (pll->T*pll->go.OutWe + pll->T*pll->go.Xo 
-                + 2.0f*pll->go.Yo) / 2.0f;
+    pll->go.OutRe = pll->go.Y_num*pll->go.OutWe + pll->go.Y_num*pll->go.Xo 
+                + pll->go.Yo;
     if (!pll->is_position_mode){
         // 非位置环模式：使用normalize_angle函数归一化到[0, 2π)
         pll->go.OutRe = Value_normalize(pll->go.OutRe);

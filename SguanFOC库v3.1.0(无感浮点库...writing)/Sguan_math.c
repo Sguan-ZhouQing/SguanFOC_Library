@@ -1,35 +1,22 @@
 /*
  * @Author: 星必尘Sguan
  * @GitHub: https://github.com/Sguan-ZhouQing
- * @Date: 2026-02-06 03:54:11
+ * @Date: 2026-02-26 22:37:35
  * @LastEditors: 星必尘Sguan|3464647102@qq.com
- * @LastEditTime: 2026-03-20 22:56:47
+ * @LastEditTime: 2026-04-09 17:23:27
  * @FilePath: \SguanFOC_Debug\SguanFOC\Sguan_math.c
- * @Description: SguanFOC库的“数学运算函数”实现
+ * @Description: SguanFOC库的“math库”实现
  * 
- * Copyright (c) 2026 by $星必尘Sguan, All Rights Reserved. 
+ * Copyright (c) 2026 by 星必尘Sguan, All Rights Reserved. 
  */
-#include "Sguan_math.h"
-#include "stdint.h"
-
-// 内部宏定义声明
-#define Value_rad60 1.047197551196598f
-#define Value_SQRT3 1.73205080756887729353f
-#define Value_SQRT3_2 0.8660254f
-
-// 重写fmodf函数
-static float Value_fmodf(float x, float y) {
-  if (y == 0.0f) return 0.0f;
-  int quotient = (int)(x / y); // 1次除法运算
-  return x - quotient * y;     // 1次乘1次减
-}
+#include "Sguan_math.h" // 里面已经包含"Sguan_IQmath.h"
 
 // 重写fabsf函数
 float Value_fabsf(float x){
-  union {
-      float f;
-      uint32_t i;
-  } u;
+  union{
+    float f;
+    uint32_t i;
+  }u;
   u.f = x;
   u.i &= 0x7FFFFFFF; // 1次位与操作
   return u.f;
@@ -50,7 +37,7 @@ int Value_isinf(float x){
     uint32_t mant_mask = 0x007FFFFF;  // 尾数位掩码
     
     // 检查指数位是否全1且尾数位全0
-    if ((u.i & exp_mask) == exp_mask && (u.i & mant_mask) == 0) {
+    if ((u.i & exp_mask) == exp_mask && (u.i & mant_mask) == 0){
         return 1;  // 是无穷大
     }
     return 0;  // 不是无穷大
@@ -97,21 +84,24 @@ float Value_sqrtf(float x){
     }
 }
 
-// 数值限幅
-float Value_Limit(float val, float max, float min) {
+// 数值限幅float版本
+float Value_Limit(float val, float max, float min){
     if (val > max) return max;
     if (val < min) return min;
     return val;
 }
 
-// 参数取模
-float Value_normalize(float angle) {
-  float normalized = Value_fmodf(angle, Value_PI*2);
-  // 如果结果为负，加上2π使其在[0, 2π)范围内
-  if (normalized < 0) {
-      normalized += Value_PI*2;
-  }
-  return normalized;
+// 参数取模[0, 2π)
+float Value_normalize(float angle){
+    while (1) {
+        if (angle > 6.2831854f)
+            angle -= 6.2831854f;
+        else if (angle < 0)
+            angle += 6.2831854f;
+        else
+            break;
+    }
+    return angle;
 }
 
 // 查表法求得float的角度正余弦值
@@ -172,13 +162,15 @@ const float sin_tab[512] = {
 
 // 快速正弦算法
 float fast_sin(float theta) {
-    while (theta >= Value_2PI) {
-        theta -= Value_2PI;
+    while (1) {
+        if (theta > 6.2831854f)
+            theta = theta - 6.2831854f;
+        else if (theta < 0)
+            theta = theta + 6.2831854f;
+        else
+            break;
     }
-    while (theta < 0.0f) {
-        theta += Value_2PI;
-    }
-    float idx_f = theta * (512.0f / Value_2PI);
+    float idx_f = theta * Value_512_2PI;
     int idx = (int)idx_f;
     
     // 边界保护
@@ -193,5 +185,4 @@ void fast_sin_cos(float x, float *sin_x, float *cos_x) {
   *sin_x = fast_sin(x);
   *cos_x = fast_cos(x);
 }
-
 

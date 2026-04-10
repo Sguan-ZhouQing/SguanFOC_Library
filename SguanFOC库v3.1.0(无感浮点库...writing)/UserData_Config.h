@@ -3,41 +3,58 @@
 /* 电机控制User用户设置·数据计算 */
 
 /**
- * @description: 宏定义0或1决定“闭环控制系统”是否使用PI控制(默认开启)
- * @reminder: 0->电流环“PI控制”，转速环“LADRC”，位置环“PD控制” 
+ * @description: 宏定义0或1决定“闭环控制系统”是否使用PI控制(默认关闭)
+ * @reminder: 0->电流环“PI控制”，转速环“STA二阶滑膜控制”，位置环“PD控制” 
  * @reminder: 1->电流环“PI控制”，转速环“PI控制”，位置环“PD控制”
+ * @reminder: 2->电流环“PI控制”，转速环“PI控制”，位置环“PD控制”
+ * @reminder: 3->电流环“PI控制”，转速环“PI控制”，位置环“PD控制”
  * @return {*}
  */
-#define Open_PI_Control 0
+#define Switch_Control_Calculate 0
 
 /**
- * @description: 宏定义0或1决定“FW弱磁控制”是否开启(默认开启)
+ * @description: 宏定义0或1决定“MTPA最大转矩控制控制”是否开启(开启最优)
+ * @reminder: 0->不开启IPMSM的MTPA最大转矩控制
+ * @reminder: 1->开启最大转矩控制控制
+ * @return {*}
+ */
+#define Open_Current_Feedforward 1
+
+/**
+ * @description: 宏定义0或1决定“MTPA最大转矩控制控制”是否开启(开启最优)
+ * @reminder: 0->不开启IPMSM的MTPA最大转矩控制
+ * @reminder: 1->开启最大转矩控制控制
+ * @return {*}
+ */
+#define Open_Velocity_Feedforward 1
+
+/**
+ * @description: 宏定义0或1决定“MTPA最大转矩控制控制”是否开启(默认关闭)
+ * @reminder: 0->不开启IPMSM的MTPA最大转矩控制
+ * @reminder: 1->开启最大转矩控制控制
+ * @return {*}
+ */
+#define Open_MTPA_Calculate 0
+
+/**
+ * @description: 宏定义0或1决定“FW弱磁控制”是否开启(默认关闭)
  * @reminder: 0->不开启IPMSM的弱磁控制
- * @reminder: 1->开启基于MTPA的弱磁控制
+ * @reminder: 1->开启弱磁控制
  * @return {*}
  */
 #define Open_FW_Calculate 0
 
 /**
  * @description: 宏定义决定UART或者CAN发送数据的模式
- * @reminder: (Printf_Send)0->发送正常数据
+ * @reminder: (Open_Printf_Debug)0->发送正常数据
  * @reminder: 1->仅发送Debug数据，不发送正常数据
  * @return {*}
  */
-#define Printf_Debug 0
+#define Open_Printf_Debug 0
 
-/**
- * @description: Q31定点化运算的数据标幺(基值设计)
- * @return {*}
- */
-#define Qmax_Voltage 16             // 电压数据设定(单位为V伏特)
-#define Qmax_Current 8              // 电流数据设定(单位为A安培)
-#define Qmax_Inductor 0.001953125f  // 电感数据设定(单位为H亨利)
-#define Qmax_Resistor 0.5f          // 电阻数据设定(单位为Ω欧姆)
-#define Qmax_Flux 0.00390625f       // 磁链大小(单位为Wb韦伯)
-#define Qmax_Rad 128                // 角度大小(单位为rad弧度)
-#define Qmax_Time 0.00006103515625f // 常量标幺化(无数学单位)
 
+// 定时器中断参数设计
+#define TIM_T 1e-4                          // 最大频率的控制周期
 
 
 #endif // USERDATA_CONFIG_H

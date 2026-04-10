@@ -1,11 +1,21 @@
-#ifndef __USERDATA_CONFIG_H
-#define __USERDATA_CONFIG_H
+#ifndef __SGUAN_CONFIG_H
+#define __SGUAN_CONFIG_H
 
-#include <stdint.h>
-#include <stdio.h>
 #include "Sguan_math.h"
-#include "Sguan_IQmath.h"
+#include "UserData_Config.h"
+
+// ============================ 系统配置 宏定义 ============================
+#define CONFIG_Control      Switch_Control_Calculate
+#define CONFIG_CurFF        Open_Current_Feedforward
+#define CONFIG_VelFF        Open_Velocity_Feedforward
+#define CONFIG_MTPA         Open_MTPA_Calculate
+#define CONFIG_FW           Open_FW_Calculate
+#define CONFIG_Debug        Open_Printf_Debug
 
 
+// ======================== 控制系统离散周期 宏定义 =========================
+// 离散控制周期大小
+#define PMSM_RUN_T          TIM_T
 
-#endif // USERDATA_CONFIG_H
+
+#endif // SGUAN_CONFIG_H
