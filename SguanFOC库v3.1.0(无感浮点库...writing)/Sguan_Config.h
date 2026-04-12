@@ -8,6 +8,7 @@
 #define CONFIG_Control      Switch_Control_Calculate
 #define CONFIG_CurFF        Open_Current_Feedforward
 #define CONFIG_VelFF        Open_Velocity_Feedforward
+#define CONFIG_DOB        Open_DOB_Calculate
 #define CONFIG_MTPA         Open_MTPA_Calculate
 #define CONFIG_FW           Open_FW_Calculate
 #define CONFIG_Debug        Open_Printf_Debug

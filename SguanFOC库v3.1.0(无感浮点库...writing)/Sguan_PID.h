@@ -15,7 +15,7 @@ typedef struct{
 
     float I_num;            // (中间量)积分传递函数分子系数
     float D_num;            // (中间量)微分传递函数分子系数
-    float D_den[2];         // (中间量)微分传递函数分母系数
+    float D_den;            // (中间量)微分传递函数分母系数
 
     uint8_t IntegralFrozen_flag; // (中间量)积分抗饱和
 }RUN_STRUCT;

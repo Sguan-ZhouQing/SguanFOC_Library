@@ -3,35 +3,43 @@
 /* 电机控制User用户设置·数据计算 */
 
 /**
- * @description: 宏定义0或1决定“闭环控制系统”是否使用PI控制(默认关闭)
- * @reminder: 0->电流环“PI控制”，转速环“STA二阶滑膜控制”，位置环“PD控制” 
- * @reminder: 1->电流环“PI控制”，转速环“PI控制”，位置环“PD控制”
- * @reminder: 2->电流环“PI控制”，转速环“PI控制”，位置环“PD控制”
- * @reminder: 3->电流环“PI控制”，转速环“PI控制”，位置环“PD控制”
+ * @description: 宏定义0或1决定“闭环控制系统”是否使用PI控制(默认使用PI控制)
+ * @reminder: 0->电流环“PI控制”，转速环“PI控制”，位置环“PD控制” 
+ * @reminder: 1->电流环“PI控制”，转速环“Ladrc线性自抗扰控制”，位置环“PD控制”
+ * @reminder: 2->电流环“PI控制”，转速环“SMC传统滑模控制”，位置环“PD控制”
+ * @reminder: 3->电流环“PI控制”，转速环“STA超螺旋二阶滑模控制”，位置环“PD控制”
  * @return {*}
  */
 #define Switch_Control_Calculate 0
 
 /**
- * @description: 宏定义0或1决定“MTPA最大转矩控制控制”是否开启(开启最优)
- * @reminder: 0->不开启IPMSM的MTPA最大转矩控制
- * @reminder: 1->开启最大转矩控制控制
+ * @description: 宏定义0或1决定“电流前馈”是否开启(开启最优)
+ * @reminder: 0->不开启电流的前馈解耦
+ * @reminder: 1->开启电流的前馈解耦
  * @return {*}
  */
 #define Open_Current_Feedforward 1
 
 /**
- * @description: 宏定义0或1决定“MTPA最大转矩控制控制”是否开启(开启最优)
- * @reminder: 0->不开启IPMSM的MTPA最大转矩控制
- * @reminder: 1->开启最大转矩控制控制
+ * @description: 宏定义0或1决定“速度前馈”是否开启(开启最优)
+ * @reminder: 0->不开启速度的有功阻尼“速度解耦”
+ * @reminder: 1->开启速度的有功阻尼“速度解耦”
  * @return {*}
  */
 #define Open_Velocity_Feedforward 1
 
 /**
+ * @description: 宏定义0或1决定“超螺旋滑模扰动观测器”是否开启(开启最优)
+ * @reminder: 0->不开启STA_SMDO
+ * @reminder: 1->开启STA_SMDO
+ * @return {*}
+ */
+#define Open_DOB_Calculate 1
+
+/**
  * @description: 宏定义0或1决定“MTPA最大转矩控制控制”是否开启(默认关闭)
  * @reminder: 0->不开启IPMSM的MTPA最大转矩控制
- * @reminder: 1->开启最大转矩控制控制
+ * @reminder: 1->开启最大转矩控制控制(凸极电机需要)
  * @return {*}
  */
 #define Open_MTPA_Calculate 0
@@ -39,7 +47,7 @@
 /**
  * @description: 宏定义0或1决定“FW弱磁控制”是否开启(默认关闭)
  * @reminder: 0->不开启IPMSM的弱磁控制
- * @reminder: 1->开启弱磁控制
+ * @reminder: 1->开启弱磁控制(凸极电机需要)
  * @return {*}
  */
 #define Open_FW_Calculate 0

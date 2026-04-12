@@ -33,12 +33,19 @@ SguanFOC_System_STRUCT Sguan = {0};
  * @param {PLL_STRUCT} *pll (估算)PLL速度跟踪锁相环
  * @return {*}
  */
-#if !CONFIG_Control
+#if CONFIG_Control==1
+static void Transfer_Ladrc_Loop(LADRC_STRUCT *ladrc,float Ref,float Fbk);
+#elif CONFIG_Control==2
+static void Transfer_SMC_Loop(SMC_STRUCT *smc,float Ref,float Fbk);
+#elif CONFIG_Control==3
 static void Transfer_STA_Loop(STA_STRUCT *sta,float Ref,float Fbk);
 #endif // CONFIG_Control
 static void Transfer_PID_Loop(PID_STRUCT *pid,float Ref,float Fbk);
 static void Transfer_LPF_Loop(LPF_STRUCT *lpf,float input);
 static void Transfer_PLL_Loop(PLL_STRUCT *pll,uint8_t mode,float input_Rad);
+#if CONFIG_DOB
+static void Transfer_DOB_Loop(DOB_STRUCT *dob,float Iq_in,float Wm_in,float *Wm,float *Fd);
+#endif // CONFIG_DOB
 /**
  * @description: 2.Offset内部静态函数声明
  * @param {SguanFOC_System_STRUCT} *sguan
@@ -147,8 +154,20 @@ static void Sguan_Start_Tick(void);
 
 
 // =============================== float 版本代码(代码实现) =============================
-// Transfer运算_STA二阶滑膜控制
-#if !CONFIG_Control
+// Transfer运算_LADRC控制
+#if CONFIG_Control==1
+static void Transfer_Ladrc_Loop(LADRC_STRUCT *ladrc,float Ref,float Fbk){
+
+}
+
+// Transfer运算_SMC控制
+#elif CONFIG_Control==2
+static void Transfer_SMC_Loop(SMC_STRUCT *smc,float Ref,float Fbk){
+
+}
+
+// Transfer运算_STA控制
+#elif CONFIG_Control==3
 static void Transfer_STA_Loop(STA_STRUCT *sta,float Ref,float Fbk){
     sta->sta.Ref = Ref;
     sta->sta.Fbk = Fbk;
@@ -202,6 +221,12 @@ static void Transfer_PLL_Loop(PLL_STRUCT *pll,uint8_t mode,float input_Rad){
     // 输出pll->go.OutRe;
 }
 
+#if CONFIG_DOB
+static void Transfer_DOB_Loop(DOB_STRUCT *dob,float Iq_in,float Wm_in,float *Wm,float *Fd){
+
+}
+#endif // CONFIG_DOB
+
 // Offset读取编码器偏置
 static void Offset_EncoderRead(SguanFOC_System_STRUCT *sguan){
     for (uint8_t i = 0; i < 10; i++){
@@ -224,7 +249,7 @@ static void Offset_CurrentRead(SguanFOC_System_STRUCT *sguan){
         (sguan->motor.ADC_Precision*sguan->motor.Amplifier*sguan->motor.Sampling_Rs);
 }
 
-// Current读取当前的电流值并更新3相电流(已滤波)
+// Current读取当前的电流值并更新3相电流(未滤波)
 static void Current_ReadIabc(SguanFOC_System_STRUCT *sguan){
     float I0 = (User_ReadADC_Raw(0) - sguan->current.Current_offset0)*
                             sguan->current.Final_Gain*sguan->motor.Current_Dir0;
@@ -968,7 +993,7 @@ void SguanFOC_High_Loop(void){
             // 运算PID并执行SVPWM(如果计算超时，会更新错误状态并停用此线程)
             Sguan_GeneratePWM_Loop(&Sguan);
         }
-        if (Sguan.status >= 19){
+        if (Sguan.status >= 19 || Sguan.status == 0){
             static uint8_t status = 0xFF;
             if (status != Sguan.status){
                 // 电压给定归零

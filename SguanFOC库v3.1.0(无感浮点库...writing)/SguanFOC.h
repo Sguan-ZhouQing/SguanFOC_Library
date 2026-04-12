@@ -3,13 +3,16 @@
 
 /* USER CODE BEGIN Includes */
 // 电机控制核心函数文件声明
-#include "Sguan_Config.h"
+#include "Sguan_DOB.h"
+#include "Sguan_Feedforward.h"
 #include "Sguan_Filter.h"
+#include "Sguan_Ladrc.h"
 #include "Sguan_MotorStatus.h"
 #include "Sguan_Optimize.h"
 #include "Sguan_PID.h"
 #include "Sguan_PLL.h"
 #include "Sguan_printf.h"
+#include "Sguan_SMC.h"
 #include "Sguan_STA.h"
 #include "Sguan_SVPWM.h"
 /* USER CODE END Includes */

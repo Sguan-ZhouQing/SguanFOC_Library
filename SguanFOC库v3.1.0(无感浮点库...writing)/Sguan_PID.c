@@ -13,13 +13,12 @@
 
 // 闭环系统PID核心参数初始化，主函数调用
 void PID_Init(PID_STRUCT *pid){
-    double temp0 = pid->T*pid->Ki;
+    double temp0 = pid->T*pid->Ki/2.0;
     double temp1 = pid->T*pid->Wc;
     double temp2 = pid->Kd*pid->Wc;
     pid->run.I_num = (float)temp0;
-    pid->run.D_num = (float)(2*temp2);
-    pid->run.D_den[0] = (float)(2+temp1);
-    pid->run.D_den[1] = (float)(-2+temp1);
+    pid->run.D_num = (float)((2*temp2)/(-2+temp1));
+    pid->run.D_den = (float)((2+temp1)/(-2+temp1));
     // 初始化为零
     for (int n = 0; n < 2; n++){
         pid->run.i[n] = 0;
@@ -55,8 +54,8 @@ void PID_Loop(PID_STRUCT *pid){
             }
         } else {
             // 正常计算积分
-            pid->run.Io[0] = (pid->run.I_num*pid->run.i[0] + pid->run.I_num*pid->run.i[1] 
-                        + 2.0f*pid->run.Io[1]) / 2.0f;
+            pid->run.Io[0] = pid->run.I_num*pid->run.i[0] + pid->run.I_num*pid->run.i[1] 
+                        + pid->run.Io[1];
             
             // 检查是否达到限幅，达到则冻结积分
             if (pid->run.Io[0] > pid->IntMax) {
@@ -70,8 +69,8 @@ void PID_Loop(PID_STRUCT *pid){
         }
     }
     if (pid->Kd){
-        pid->run.Do[0] = (pid->run.D_num*pid->run.i[0] - pid->run.D_num*pid->run.i[1] 
-                    - pid->run.D_den[1]*pid->run.Do[1]) / pid->run.D_den[0];
+        pid->run.Do[0] = pid->run.D_num*pid->run.i[0] - pid->run.D_num*pid->run.i[1] 
+                    - pid->run.D_den*pid->run.Do[1];
     }
     pid->run.Output = pid->run.i[0]*pid->Kp + pid->run.Io[0] + pid->run.Do[0];
     pid->run.Output = Value_Limit(pid->run.Output,pid->OutMax,pid->OutMin);
