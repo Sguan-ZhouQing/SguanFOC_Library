@@ -41,11 +41,15 @@ typedef struct{
     PID_STRUCT Current_D;               // (电流单环)PID电流环D轴参数
     PID_STRUCT Current_Q;               // (电流单环)PID电流环Q轴参数
 
-    #if Open_PI_Control
+    #if CONFIG_Control==0
     PID_STRUCT Velocity;                // (速度-电流双环)双PID速度外环参数
-    #else // Open_PI_Control
-    STA_STRUCT Speed;                   // (速度-电流双环)双PID速度外环参数
-    #endif // Open/_PI_Control
+    #elif CONFIG_Control==1
+    LADRC_STRUCT Velocity;              // (速度-电流双环)LADRC速度外环参数
+    #elif CONFIG_Control==2
+    SMC_STRUCT Velocity;                // (速度-电流双环)SMC速度外环参数
+    #elif CONFIG_Control==3
+    STA_STRUCT Velocity;                // (速度-电流双环)STA速度外环参数
+    #endif // Open/_PI_Contro
     
     PID_STRUCT Position;                // (高性能伺服三环)Position
 

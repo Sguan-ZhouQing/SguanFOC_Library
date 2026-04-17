@@ -19,44 +19,44 @@ static void Ladrc_LinearControlRate(LADRC_STRUCT *ladrc);
 // 线性跟踪微分器(LTD) - 安排过渡过程
 static void Ladrc_LTD(LADRC_STRUCT *ladrc){
     // 最速控制综合函数 fh = -r^2*(v1-Ref) - 2*r*v2
-    ladrc->linear.fh = -ladrc->r * ladrc->r * (ladrc->linear.v1 - ladrc->linear.Ref) 
-                    - 2.0f * ladrc->r * ladrc->linear.v2;
+    ladrc->run.fh = -ladrc->r * ladrc->r * (ladrc->run.v1 - ladrc->run.Ref) 
+                    - 2.0f * ladrc->r * ladrc->run.v2;
     
     // 离散化更新 v1 = v1 + h*v2, v2 = v2 + h*fh
-    ladrc->linear.v1 += ladrc->linear.v2 * ladrc->T;
-    ladrc->linear.v2 += ladrc->linear.fh * ladrc->T;
+    ladrc->run.v1 += ladrc->run.v2 * ladrc->T;
+    ladrc->run.v2 += ladrc->run.fh * ladrc->T;
 }
 
 // 线性扩张状态观测器(LESO) - 估计系统状态和总扰动
 static void Ladrc_LESO(LADRC_STRUCT *ladrc){
     // 观测器误差 e = z1 - Fbk
-    ladrc->linear.e = ladrc->linear.z1 - ladrc->linear.Fbk;
+    ladrc->run.e = ladrc->run.z1 - ladrc->run.Fbk;
     
     /* 扩张状态观测器离散方程
      * z1 += (z2 - beta01*e) * h
      * z2 += (z3 - beta02*e + b0*u_sat) * h
      * z3 += (-beta03*e) * h
      */
-    ladrc->linear.z1 += (ladrc->linear.z2 - ladrc->data.beta01 * ladrc->linear.e) * ladrc->T;
-    ladrc->linear.z2 += (ladrc->linear.z3 - ladrc->data.beta02 * ladrc->linear.e 
-                     + ladrc->b0 * ladrc->linear.Output) * ladrc->T;
-    ladrc->linear.z3 += (-ladrc->data.beta03 * ladrc->linear.e) * ladrc->T;
+    ladrc->run.z1 += (ladrc->run.z2 - ladrc->data.beta01 * ladrc->run.e) * ladrc->T;
+    ladrc->run.z2 += (ladrc->run.z3 - ladrc->data.beta02 * ladrc->run.e 
+                     + ladrc->b0 * ladrc->run.Output) * ladrc->T;
+    ladrc->run.z3 += (-ladrc->data.beta03 * ladrc->run.e) * ladrc->T;
 }
 
 // 线性控制率(LSEF/LF) - 计算控制量
 static void Ladrc_LinearControlRate(LADRC_STRUCT *ladrc){
     // 误差计算 e1 = v1 - z1, e2 = v2 - z2
-    ladrc->linear.e1 = ladrc->linear.v1 - ladrc->linear.z1;
-    ladrc->linear.e2 = ladrc->linear.v2 - ladrc->linear.z2;
+    ladrc->run.e1 = ladrc->run.v1 - ladrc->run.z1;
+    ladrc->run.e2 = ladrc->run.v2 - ladrc->run.z2;
     
     // 线性反馈控制率 u0 = Kp*e1 + Kd*e2
-    ladrc->linear.u0 = ladrc->data.Kp * ladrc->linear.e1 + ladrc->data.Kd * ladrc->linear.e2;
+    ladrc->run.u0 = ladrc->data.Kp * ladrc->run.e1 + ladrc->data.Kd * ladrc->run.e2;
     
     // 扰动补偿 u = (u0 - z3) / b0
-    ladrc->linear.Output = (ladrc->linear.u0 - ladrc->linear.z3) / ladrc->b0;
+    ladrc->run.Output = (ladrc->run.u0 - ladrc->run.z3) / ladrc->b0;
     
     // 输出限幅
-    ladrc->linear.Output = Value_Limit(ladrc->linear.Output, ladrc->OutMax, ladrc->OutMin);
+    ladrc->run.Output = Value_Limit(ladrc->run.Output, ladrc->OutMax, ladrc->OutMin);
 }
 
 /**
@@ -82,19 +82,19 @@ void Ladrc_Init(LADRC_STRUCT *ladrc){
     ladrc->OutMin = -2000.0f;
     
     // 初始化所有运行变量为零
-    ladrc->linear.v1 = 0.0f;
-    ladrc->linear.v2 = 0.0f;
-    ladrc->linear.z1 = 0.0f;
-    ladrc->linear.z2 = 0.0f;
-    ladrc->linear.z3 = 0.0f;
-    ladrc->linear.Ref = 0.0f;
-    ladrc->linear.Fbk = 0.0f;
-    ladrc->linear.Output = 0.0f;
-    ladrc->linear.e = 0.0f;
-    ladrc->linear.e1 = 0.0f;
-    ladrc->linear.e2 = 0.0f;
-    ladrc->linear.u0 = 0.0f;
-    ladrc->linear.fh = 0.0f;
+    ladrc->run.v1 = 0.0f;
+    ladrc->run.v2 = 0.0f;
+    ladrc->run.z1 = 0.0f;
+    ladrc->run.z2 = 0.0f;
+    ladrc->run.z3 = 0.0f;
+    ladrc->run.Ref = 0.0f;
+    ladrc->run.Fbk = 0.0f;
+    ladrc->run.Output = 0.0f;
+    ladrc->run.e = 0.0f;
+    ladrc->run.e1 = 0.0f;
+    ladrc->run.e2 = 0.0f;
+    ladrc->run.u0 = 0.0f;
+    ladrc->run.fh = 0.0f;
 }
 
 /**

@@ -27,7 +27,7 @@ static inline void User_ParameterSet(void){
     Sguan.control.Current_Q.IntMax = 50.0f;         // PID电流环Q轴参数->积分项上限(默认参数)
     Sguan.control.Current_Q.IntMin = -50.0f;        // PID电流环Q轴参数->积分项下限(默认参数)
 
-    #if Open_PI_Control
+    #if Switch_Control_Calculate==0
     Sguan.control.Velocity.Wc = 100.0f;             // 双PID速度外环参数(默认参数)
     Sguan.control.Velocity.Kp = 0.06f;              // 双PID速度外环参数(核心参数)
     Sguan.control.Velocity.Ki = 0.4f;               // 双PID速度外环参数(核心参数)
@@ -36,14 +36,27 @@ static inline void User_ParameterSet(void){
     Sguan.control.Velocity.OutMin = -10.5f;         // 双PID速度外环参数(默认参数)
     Sguan.control.Velocity.IntMax = 15000.0f;       // 双PID速度外环参数->积分项上限(默认参数)
     Sguan.control.Velocity.IntMin = -15000.0f;      // 双PID速度外环参数->积分项下限(默认参数)
-    #else // Open_PI_Control
-    Sguan.control.Speed.boundary = 12.0f;           // STA二阶滑膜转速环->边界厚度
-    Sguan.control.Speed.k1 = 0.36f;                 // STA二阶滑膜转速环->比例项增益
-    Sguan.control.Speed.k2 = 52.0f;                 // STA二阶滑膜转速环->积分项增益
-    Sguan.control.Speed.OutMax = 10.5f;             // STA二阶滑膜转速环->输出限幅
-    Sguan.control.Speed.OutMin = -10.5f;            // STA二阶滑膜转速环->输出限幅
-    Sguan.control.Speed.IntMax = 50.0f;             // STA二阶滑膜转速环->积分限幅
-    Sguan.control.Speed.IntMin = -50.0f;            // STA二阶滑膜转速环->积分限幅
+    #elif Switch_Control_Calculate==1
+    Sguan.control.Velocity.r = 50.0f;               // LADRC线自抗扰->速度因子
+    Sguan.control.Velocity.b0 = 1.2e6;              // LADRC线自抗扰->控制量增益
+    Sguan.control.Velocity.wc = 200.0f;             // LADRC线自抗扰->控制器带宽
+    Sguan.control.Velocity.OutMax = 10.5f;          // LADRC线自抗扰->输出上限
+    Sguan.control.Velocity.OutMin = -10.5f;         // LADRC线自抗扰->输出下限
+    #elif Switch_Control_Calculate==2
+    Sguan.control.Velocity.Wc = 100.0f;             // SMC传统滑模控制->微分环节一阶低通滤波
+    Sguan.control.Velocity.miu = 200.0f;            // SMC传统滑模控制->不连续控制增益
+    Sguan.control.Velocity.q = 30.0f;               // SMC传统滑模控制->切换项增益
+    Sguan.control.Velocity.C = 2000.0f;             // SMC传统滑模控制->动态响应增益
+    Sguan.control.Velocity.IntMax = 10.5;           // SMC传统滑模控制->积分上限
+    Sguan.control.Velocity.IntMin = -10.5f;         // SMC传统滑模控制->积分下限
+    #elif Switch_Control_Calculate==3
+    Sguan.control.Velocity.boundary = 12.0f;        // STA二阶滑膜转速环->边界厚度
+    Sguan.control.Velocity.k1 = 0.36f;              // STA二阶滑膜转速环->比例项增益
+    Sguan.control.Velocity.k2 = 52.0f;              // STA二阶滑膜转速环->积分项增益
+    Sguan.control.Velocity.OutMax = 10.5f;          // STA二阶滑膜转速环->输出限幅
+    Sguan.control.Velocity.OutMin = -10.5f;         // STA二阶滑膜转速环->输出限幅
+    Sguan.control.Velocity.IntMax = 50.0f;          // STA二阶滑膜转速环->积分限幅
+    Sguan.control.Velocity.IntMin = -50.0f;         // STA二阶滑膜转速环->积分限幅
     #endif // Open_PI_Control
     Sguan.control.Position.Wc = 100.0f;             // 高性能伺服三环pos(默认参数)
     Sguan.control.Position.Kp = 7.0f;               // 高性能伺服三环pos(核心参数)

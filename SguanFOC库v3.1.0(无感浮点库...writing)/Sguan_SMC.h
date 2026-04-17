@@ -24,7 +24,7 @@ typedef struct{
 }TRADITION_STRUCT;
 
 typedef struct{
-    TRADITION_STRUCT tradition; // (结构体)传统滑模控制
+    TRADITION_STRUCT run; // (结构体)传统滑模控制
 
     uint8_t Pn;             // (电机数据)极对数
     double Flux;            // (电机数据)磁链

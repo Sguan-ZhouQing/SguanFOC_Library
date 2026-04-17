@@ -39,7 +39,7 @@ typedef struct{
 }DATA_STRUCT;
 
 typedef struct{
-    LINEAR_STRUCT linear;  // (结构体)LADRC运算结构体
+    LINEAR_STRUCT run;  // (结构体)LADRC运算结构体
     DATA_STRUCT data;   // (结构体)控制器自动计算的参数
         
     float T;            // (参数设计)积分步长_采样周期
