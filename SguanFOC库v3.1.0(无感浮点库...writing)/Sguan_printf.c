@@ -3,13 +3,14 @@
  * @GitHub: https://github.com/Sguan-ZhouQing
  * @Date: 2026-01-27 00:07:53
  * @LastEditors: 星必尘Sguan|3464647102@qq.com
- * @LastEditTime: 2026-04-09 17:24:35
+ * @LastEditTime: 2026-04-20 19:19:53
  * @FilePath: \SguanFOC_Debug\SguanFOC\Sguan_printf.c
  * @Description: SguanFOC库的“JustFloat通讯协议”实现
  * 
  * Copyright (c) 2026 by $星必尘Sguan, All Rights Reserved. 
  */
 #include "Sguan_printf.h"
+
 /* 外部函数文件声明 */
 #include "UserData_Function.h"
 #include "UserData_UserControl.h"
@@ -20,7 +21,7 @@ static float Get_Data(void);
 uint8_t Sguan_PrintfBuff[200];
 
 
-/* ================= 重定向设计 BEGIN ================= */
+/* ==================== 重定向设计 BEGIN =================== */
 // 支持printf函数，而无需选择MicroLIB
 #if 1
 #pragma import(__use_no_semihosting)
@@ -41,7 +42,7 @@ int fputc(int ch,FILE *f){
 	User_CorrespondSet((uint8_t *)&ch,1);
 	return ch;
 }
-/* ================= 重定向设计 END ================= */
+/* ==================== 重定向设计 END =================== */
 
 
 // [接收]数据解析函数(格式：AO=13.14?)
@@ -97,18 +98,12 @@ static float Get_Data(void){
 }
 
 // [初始化]初始化JustFloat数据帧尾
-void Printf_Init(PRINTF_STRUCT *str){
+void Printf_TX_Init(PRINTF_STRUCT *str){
     str->tail[0] = 0x00;
     str->tail[1] = 0x00;
     str->tail[2] = 0x80;
     str->tail[3] = 0x7f;
     /* JustFloa数据帧尾格式 */
-}
-
-// [发送]发送数据Tick函数，发送周期可自定
-void Printf_Loop(PRINTF_STRUCT *str){
-    // 发送JustFloat数据
-    User_CorrespondSet((uint8_t *)str,sizeof(PRINTF_STRUCT));
 }
 
 // [接收]实时参数调整函数（需要根据你的实际结构体定义进行调整）
@@ -126,3 +121,45 @@ void Printf_Adjust(void){
     memset(Sguan_PrintfBuff, 0, sizeof(Sguan_PrintfBuff));
 }
 
+/**
+ * @description: 发送数据Tick函数，发送周期可自定
+ * @param {PRINTF_STRUCT} *str
+ * @return {*}
+ */
+void Printf_TX_Loop(PRINTF_STRUCT *str){
+    // 用户数据填写(串口或者CAN通信)
+    User_UserTX();
+    // 发送JustFloat数据
+    User_CorrespondSet((uint8_t *)str,sizeof(PRINTF_STRUCT));
+}
+
+/**
+ * @description: 函数调用Loop运行函数
+ * @param {uint8_t} *data
+ * @param {uint16_t} length
+ * @return {*}
+ */
+void Printf_RX_Loop(uint8_t *data, uint16_t length){
+    if(length > sizeof(Sguan_PrintfBuff)){
+        length = sizeof(Sguan_PrintfBuff);
+    }
+
+    for(uint16_t i = 0; i < length; i++){
+        if(data[i] == '?'){
+            Printf_Adjust();
+            // 内存对齐的优化清零
+            uint32_t *p32 = (uint32_t*)Sguan_PrintfBuff;
+            uint16_t size = sizeof(Sguan_PrintfBuff);
+            // 按4字节清空
+            for(uint16_t j = 0; j < size / 4; j++){
+                p32[j] = 0;
+            }
+            // 处理剩余字节
+            uint8_t *p8 = (uint8_t*)&p32[size / 4];
+            for(uint16_t j = 0; j < size % 4; j++){
+                p8[j] = 0;
+            }
+            break;
+        }
+    }
+}

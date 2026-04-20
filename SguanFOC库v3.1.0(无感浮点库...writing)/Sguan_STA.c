@@ -3,7 +3,7 @@
  * @GitHub: https://github.com/Sguan-ZhouQing
  * @Date: 2026-02-26 22:37:25
  * @LastEditors: 星必尘Sguan|3464647102@qq.com
- * @LastEditTime: 2026-04-09 17:24:48
+ * @LastEditTime: 2026-04-19 01:03:01
  * @FilePath: \SguanFOC_Debug\SguanFOC\Sguan_STA.c
  * @Description: SguanFOC库的“STA超螺旋，简化版二阶滑模控制算法”实现
  * 

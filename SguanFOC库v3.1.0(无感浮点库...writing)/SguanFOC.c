@@ -3,7 +3,7 @@
  * @GitHub: https://github.com/Sguan-ZhouQing
  * @Date: 2026-01-26 22:38:34
  * @LastEditors: 星必尘Sguan|3464647102@qq.com
- * @LastEditTime: 2026-04-09 17:25:19
+ * @LastEditTime: 2026-04-19 01:03:24
  * @FilePath: \SguanFOC_Debug\SguanFOC\SguanFOC.c
  * @Description: SguanFOC库的“核心代码”实现
  * 
@@ -28,48 +28,56 @@ SguanFOC_System_STRUCT Sguan = {0};
  * @description: 1.Transfer传递函数的离散化运算，采用双线性变换
  * @param {PID_STRUCT} *pid (控制)PID闭环控制系统运算
  * @param {LADRC_STRUCT} *ladrc (控制)LADRC线自抗扰运算
- * @param {INTERNALMODEL_STRUCT} *im (控制)IMC内模控制
+ * @param {SMC_STRUCT} *smc (控制)SMC传统滑模控制运算
+ * @param {STA_STRUCT} *sta (控制)STA超螺旋简化滑模运算
  * @param {BPF_STRUCT} *bpf (滤波)BPF二阶巴特沃斯低通滤波
  * @param {PLL_STRUCT} *pll (估算)PLL速度跟踪锁相环
+ * @param {DOB_STRUCT} *dob (观测器)DOB超螺旋滑模扰动观测器
  * @return {*}
  */
-#if CONFIG_Control==1
-static void Transfer_Ladrc_Loop(LADRC_STRUCT *ladrc,float Ref,float Fbk);
-#elif CONFIG_Control==2
-static void Transfer_SMC_Loop(SMC_STRUCT *smc,float Ref,float Fbk);
-#elif CONFIG_Control==3
-static void Transfer_STA_Loop(STA_STRUCT *sta,float Ref,float Fbk);
-#endif // CONFIG_Control
-static void Transfer_PID_Loop(PID_STRUCT *pid,float Ref,float Fbk);
-static void (*const Transfer_Tick[])(SguanFOC_System_STRUCT *,float Ref,float Fbk)={
-    Transfer_PID_Loop
+static void Transfer_PID_Loop(void *pid,float Ref,float Fbk);
+static void Transfer_Ladrc_Loop(void *ladrc,float Ref,float Fbk);
+static void Transfer_SMC_Loop(void *smc,float Ref,float Fbk);
+static void Transfer_STA_Loop(void *sta,float Ref,float Fbk);
+static void (*const CtrlFunc_Tick[])(void *, float, float)={
+    /*CtrlFunc_Tick[CONFIG_CtrlVel](*)或者CtrlFunc_Tick[CONFIG_CtrlPos](*)*/
+    Transfer_PID_Loop,          // PID
+    Transfer_Ladrc_Loop,        // Ladrc
+    Transfer_SMC_Loop,          // SMC
+    Transfer_STA_Loop           // STA
 };
 static void Transfer_LPF_Loop(LPF_STRUCT *lpf,float input);
 static void Transfer_PLL_Loop(PLL_STRUCT *pll,uint8_t mode,float input_Rad);
 #if CONFIG_DOB
-static void Transfer_DOB_Loop(DOB_STRUCT *dob,float Iq_in,float Wm_in,float *Wm,float *Fd);
+static void Transfer_DOB_Loop(DOB_STRUCT *dob,float Iq,float Wm);
 #endif // CONFIG_DOB
 /**
- * @description: 2.Offset内部静态函数声明
+ * @description: 2.Transfer传递函数的初始化
+ * @param {SguanFOC_System_STRUCT} *sguan
+ * @return {*}
+ */
+static Transfer_Init(SguanFOC_System_STRUCT *sguan);
+/**
+ * @description: 3.Offset内部静态函数声明
  * @param {SguanFOC_System_STRUCT} *sguan
  * @return {*}
  */
 static void Offset_EncoderRead(SguanFOC_System_STRUCT *sguan);
 static void Offset_CurrentRead(SguanFOC_System_STRUCT *sguan);
 /**
- * @description: 3.Current内部静态函数声明
+ * @description: 4.Current内部静态函数声明
  * @param {SguanFOC_System_STRUCT} *sguan
  * @return {*}
  */
 static void Current_ReadIabc(SguanFOC_System_STRUCT *sguan);
 /**
- * @description: 4.Sguan_Calculate_Loop内部静态函数声明
+ * @description: 5.Sguan_Calculate_Loop内部静态函数声明
  * @param {SguanFOC_System_STRUCT} *sguan
  * @return {*}
  */
-static void Sguan_Calculate_Loop(SguanFOC_System_STRUCT *sguan);
+// static void Sguan_Calculate_Loop(SguanFOC_System_STRUCT *sguan);
 /**
- * @description: 5.Control运算及其模式切换
+ * @description: 6.Control运算及其模式切换
  * @param {SguanFOC_System_STRUCT} *sguan
  * @return {*}
  */
@@ -85,7 +93,7 @@ static void (*const Control_Tick[])(SguanFOC_System_STRUCT*)={
     Control_PosVelCur_THREE     // PosVelCur_THREE_MODE= 3
 };
 /**
- * @description: 6.SVPWM电机驱动的马鞍波生成
+ * @description: 7.SVPWM电机驱动的马鞍波生成
  * @param {SguanFOC_System_STRUCT} *sguan
  * @param {float} d
  * @param {float} q
@@ -94,22 +102,22 @@ static void (*const Control_Tick[])(SguanFOC_System_STRUCT*)={
 static void SVPWM_Tick(SguanFOC_System_STRUCT *sguan,
                     float sine,
                     float cosine,
-                    float d_set,
-                    float q_set);
+                    float d_duty,
+                    float q_duty);
 /**
- * @description: 7.Sguan_GeneratePWM_Loop定时计算并执行
+ * @description: 8.Sguan_GeneratePWM_Loop定时计算并执行
  * @param {SguanFOC_System_STRUCT} *sguan
  * @return {*}
  */
-static void Sguan_GeneratePWM_Loop(SguanFOC_System_STRUCT *sguan);
+// static void Sguan_GeneratePWM_Loop(SguanFOC_System_STRUCT *sguan);
 /**
- * @description: 8.Data母线电压和驱动器物理温度数据更新
+ * @description: 9.Data母线电压和驱动器物理温度数据更新
  * @param {SguanFOC_System_STRUCT} *sguan
  * @return {*}
  */
 static void Data_Protection_Loop(SguanFOC_System_STRUCT *sguan);
 /**
- * @description: 9.Status判断并切换状态机
+ * @description: 10.Status判断并切换状态机
  * @param {SguanFOC_System_STRUCT} *sguan
  * @param {uint32_t} *count
  * @return {*}
@@ -124,21 +132,23 @@ static void Status_Current_OVERCURRENT(SguanFOC_System_STRUCT *sguan,uint32_t *c
 static void Status_Switch_Loop(SguanFOC_System_STRUCT *sguan);
 static void Status_RUN_Loop(SguanFOC_System_STRUCT *sguan);
 /**
- * @description: 10.Printf数据发送Debug和正常模式
+ * @description: 11.Printf数据发送Debug和正常模式
  * @param {SguanFOC_System_STRUCT} *sguan
  * @return {*}
  */
-#if Open_Printf_Debug
+#if CONFIG_Debug
 static void Printf_Debug_Loop(SguanFOC_System_STRUCT *sguan);
-#else // Open_Printf_Debug
+#else // CONFIG_Debug
 static void Printf_Normal_Loop(SguanFOC_System_STRUCT *sguan);
-#endif // Open_Printf_Debug
+#endif // CONFIG_Debug
 /**
- * @description: 11.Sguan...Set各种控制电机参数的设置
+ * @description: 12.Sguan...Set各种控制电机参数的设置
  * @param {SguanFOC_System_STRUCT} *sguan
  * @return {*}
  */
 static void Sguan_SystemT_Set(SguanFOC_System_STRUCT *sguan);
+
+
 static void Sguan_Positioning_Set(SguanFOC_System_STRUCT *sguan,float Ud,float Uq);
 /**
  * @description: 12.Sguan...Init各种控制系统的初始化
@@ -150,42 +160,50 @@ static void Sguan_Control_Init(SguanFOC_System_STRUCT *sguan);
 static void Sguan_PLL_Init(SguanFOC_System_STRUCT *sguan);
 static void Sguan_DOB_Init(SguanFOC_System_STRUCT *sguan);
 /**
- * @description: 13.Sguan...Tick电机总初始化与校准
+ * @description: 13.Sguan...Loop电机总初始化与校准
  * @param {SguanFOC_System_STRUCT} *sguan
  * @return {*}
  */
-static void Sguan_Start_Tick(void);
+static void Sguan_Calculate_Loop(SguanFOC_System_STRUCT *sguan);
+static void Sguan_GeneratePWM_Loop(SguanFOC_System_STRUCT *sguan);
+static void Sguan_ReInit_Loop(SguanFOC_System_STRUCT *sguan);
 
 
 // =============================== float 版本代码(代码实现) =============================
-// Transfer运算_LADRC控制
-#if CONFIG_Control==1
-static void Transfer_Ladrc_Loop(LADRC_STRUCT *ladrc,float Ref,float Fbk){
+// Transfer运算_PID运算
+static void Transfer_PID_Loop(void *pid,float Ref,float Fbk){
+    PID_STRUCT *p = (PID_STRUCT*)pid;
+    p->run.Ref = Ref;
+    p->run.Fbk = Fbk;
+    PID_Loop(p);
+    // 输出pid->run.Output;
+}
 
+// Transfer运算_LADRC控制
+static void Transfer_Ladrc_Loop(void *ladrc,float Ref,float Fbk){
+    LADRC_STRUCT *p = (LADRC_STRUCT*)ladrc;
+    p->run.Ref = Ref;
+    p->run.Fbk = Fbk;
+    Ladrc_Loop(p);
+    // 输出ladrc->run.Output;
 }
 
 // Transfer运算_SMC控制
-#elif CONFIG_Control==2
-static void Transfer_SMC_Loop(SMC_STRUCT *smc,float Ref,float Fbk){
-
+static void Transfer_SMC_Loop(void *smc,float Ref,float Fbk){
+    SMC_STRUCT *p = (SMC_STRUCT*)smc;
+    p->run.Ref = Ref;
+    p->run.Fbk = Fbk;
+    SMC_Loop(p);
+    // 输出SMC->run.Output;
 }
 
 // Transfer运算_STA控制
-#elif CONFIG_Control==3
-static void Transfer_STA_Loop(STA_STRUCT *sta,float Ref,float Fbk){
-    sta->sta.Ref = Ref;
-    sta->sta.Fbk = Fbk;
-    STA_Loop(sta);
-    // 输出sta->sta.Output;
-}
-#endif // CONFIG_Control
-
-// Transfer运算_PID运算
-static void Transfer_PID_Loop(PID_STRUCT *pid,float Ref,float Fbk){
-    pid->run.Ref = Ref;
-    pid->run.Fbk = Fbk;
-    PID_Loop(pid);
-    // 输出pid->run.Output;
+static void Transfer_STA_Loop(void *sta,float Ref,float Fbk){
+    STA_STRUCT *p = (STA_STRUCT*)sta;
+    p->run.Ref = Ref;
+    p->run.Fbk = Fbk;
+    STA_Loop(p);
+    // 输出sta->run.Output;
 }
 
 // Transfer运算_二阶巴特沃斯低通滤波器
@@ -226,10 +244,18 @@ static void Transfer_PLL_Loop(PLL_STRUCT *pll,uint8_t mode,float input_Rad){
 }
 
 #if CONFIG_DOB
-static void Transfer_DOB_Loop(DOB_STRUCT *dob,float Iq_in,float Wm_in,float *Wm,float *Fd){
-
+static void Transfer_DOB_Loop(DOB_STRUCT *dob,float Iq,float Wm){
+    dob->smdo.Input_Iq = Iq;
+    dob->smdo.Input_Wm = Wm;
+    DOB_Loop(dob);
+    // 输出dob->smdo.Output_Fd;
+    // 输出dob->smdo.Output_Wm;
 }
 #endif // CONFIG_DOB
+
+static Transfer_Init(SguanFOC_System_STRUCT *sguan){
+
+}
 
 // Offset读取编码器偏置
 static void Offset_EncoderRead(SguanFOC_System_STRUCT *sguan){
@@ -542,10 +568,10 @@ static void Control_PosVelCur_THREE(SguanFOC_System_STRUCT *sguan){
 static void SVPWM_Tick(SguanFOC_System_STRUCT *sguan,
                     float sine,
                     float cosine,
-                    float d_set,
-                    float q_set){
+                    float d_duty,
+                    float q_duty){
     float U_alpha,U_beta;
-    ipark(&U_alpha,&U_beta,d_set,q_set,sine,cosine);
+    ipark(&U_alpha,&U_beta,d_duty,q_duty,sine,cosine);
     
     SVPWM(U_alpha,U_beta,
         &sguan->foc.Du,
@@ -574,19 +600,13 @@ static void Sguan_GeneratePWM_Loop(SguanFOC_System_STRUCT *sguan){
     // 用户实时控制的参数传入
     User_UserControl();
     // PID运算PWM大小并执行
-    if (sguan->mode < 4){
-        Control_Tick[sguan->mode](sguan);
-    } else{
-        // 错误处理：自动跳转到默认速度开环模式
-        sguan->mode = Velocity_OPEN_MODE;
-        Control_Tick[Velocity_OPEN_MODE](sguan);
-    }
+    Control_Tick[Value_set(sguan->mode,5,0)](sguan);
 
     SVPWM_Tick(sguan,
         sguan->foc.sine,        // sin正弦值给定
         sguan->foc.cosine,      // cos余弦值给定
-        sguan->foc.Ud_in/sguan->motor.VBUS,
-        sguan->foc.Uq_in/sguan->motor.VBUS);
+        (sguan->foc.Ud_in/sguan->motor.VBUS),
+        (sguan->foc.Uq_in/sguan->motor.VBUS));
 }
 
 
@@ -653,17 +673,17 @@ static void Status_Current_OVERCURRENT(SguanFOC_System_STRUCT *sguan,uint32_t *c
 static void Status_Switch_Loop(SguanFOC_System_STRUCT *sguan){
     // ====== 安全状态(状态) ======
     if ((sguan->status != MOTOR_STATUS_EMERGENCY_STOP) && 
-        MOTOR_STATUS_EMERGENCY_STOP_Signal()){
+        EMERGENCY_STOP_Signal()){
         sguan->status = MOTOR_STATUS_EMERGENCY_STOP;
     }
     if ((sguan->status != MOTOR_STATUS_DISABLED) && 
-        MOTOR_STATUS_DISABLED_Signal()){
+        DISABLED_Signal()){
         sguan->status = MOTOR_STATUS_DISABLED;
     }
 
     // ====== 初始化与运行状态(状态) ======
     if ((sguan->status != MOTOR_STATUS_STANDBY) && 
-        MOTOR_STATUS_STANDBY_Signal()){ // [重要]接收到待机信号后，解除锁定状态...进入待机状态
+        STANDBY_Signal()){ // [重要]接收到待机信号后，解除锁定状态...进入待机状态
         sguan->status = MOTOR_STATUS_STANDBY;
     }
     if ((sguan->status == MOTOR_STATUS_EMERGENCY_STOP) || 
@@ -671,7 +691,7 @@ static void Status_Switch_Loop(SguanFOC_System_STRUCT *sguan){
         return; // 紧急停止和失能状态优先级最高, 直接返回不执行后续状态判断
     }
     if ((sguan->status != MOTOR_STATUS_UNINITIALIZED) && 
-        MOTOR_STATUS_UNINITIALIZED_Signal()){ // [重要]接收到开始信号后，切换到未初始化状态...准备初始化
+        UNINITIALIZED_Signal()){ // [重要]接收到开始信号后，切换到未初始化状态...准备初始化
         sguan->status = MOTOR_STATUS_UNINITIALIZED;
     }
 
@@ -706,12 +726,12 @@ static void Status_Switch_Loop(SguanFOC_System_STRUCT *sguan){
     }
     // 4.编码错误
     if ((sguan->status != MOTOR_STATUS_ENCODER_ERROR) && 
-        MOTOR_STATUS_ENCODER_ERROR_Signal()){
+        ENCODER_ERROR_Signal()){
         sguan->status = MOTOR_STATUS_ENCODER_ERROR;
     }
     // 5.传感器错误
     if ((sguan->status != MOTOR_STATUS_SENSOR_ERROR) && 
-        MOTOR_STATUS_SENSOR_ERROR_Signal()){
+        SENSOR_ERROR_Signal()){
         sguan->status = MOTOR_STATUS_SENSOR_ERROR;
     }
     if (sguan->status >= 14 && sguan->status < 21){
@@ -835,7 +855,7 @@ static void Status_RUN_Loop(SguanFOC_System_STRUCT *sguan){
 
 
 // Printf电机调试信息发送
-#if Open_Printf_Debug
+#if CONFIG_Debug
 static void Printf_Debug_Loop(SguanFOC_System_STRUCT *sguan){
     static uint8_t status = 0xFF;
     static uint32_t count = 0;
@@ -879,15 +899,13 @@ static void Printf_Debug_Loop(SguanFOC_System_STRUCT *sguan){
         status = sguan->status;
     }
 }
-#else // Open_Printf_Debug
+#else // CONFIG_Debug
 // Printf电机数据正常发送
 static void Printf_Normal_Loop(SguanFOC_System_STRUCT *sguan){
-    // 用户数据填写(串口或者CAN通信)
-    User_UserTX();
-    // 发送数据to上位机
-    Printf_Loop(&Sguan.TXdata);
+    // 发送数据到上位机
+    Printf_TX_Loop(&Sguan.TXdata);
 }
-#endif // Open_Printf_Debug
+#endif // CONFIG_Debug
 
 
 // Sguan...Set系统时钟设置(定时器中断周期)
@@ -950,10 +968,13 @@ static void Sguan_PLL_Init(SguanFOC_System_STRUCT *sguan){
     PLL_Init(&sguan->encoder.pll);
 }
 
+#if CONFIG_DOB
 // Sguan...Init扰动观测器DOB
 static void Sguan_DOB_Init(SguanFOC_System_STRUCT *sguan){
-
+    // DOB超螺旋滑模扰动观测器
+    DOB_Init(&sguan->control.Disturbance);
 }
+#endif // CONFIG_DOB
 
 // Sguan...Tick系统开始的核心文件，主任务初始化函数
 static void Sguan_Start_Tick(void){
@@ -969,7 +990,7 @@ static void Sguan_Start_Tick(void){
         Sguan_LPF_Init(&Sguan);
         Sguan_Control_Init(&Sguan);
         Sguan_PLL_Init(&Sguan);
-        Printf_Init(&Sguan.TXdata);
+        Printf_TX_Init(&Sguan.TXdata);
         // 读取电流偏置
         Sguan.status = MOTOR_STATUS_CALIBRATING;
         Offset_CurrentRead(&Sguan);
@@ -1000,11 +1021,12 @@ void SguanFOC_High_Loop(void){
         Sguan.flag.PWM_Calc = 1;
         PWM_watchdog_counter = 0;
 
+        // (如果计算超时，会更新错误状态并停用此线程)
         // 如果在初始化完成，进入函数
         if (Sguan.status > 3 && Sguan.status < 19){          
             // 计算编码器和电流
             Sguan_Calculate_Loop(&Sguan);
-            // 运算PID并执行SVPWM(如果计算超时，会更新错误状态并停用此线程)
+            // 运算PID并执行SVPWM
             Sguan_GeneratePWM_Loop(&Sguan);
         }
         if (Sguan.status >= 19 || Sguan.status == 0){
@@ -1025,15 +1047,15 @@ void SguanFOC_High_Loop(void){
                 SVPWM_Tick(&Sguan,      // 清零电机状态
                     Sguan.foc.sine,
                     Sguan.foc.cosine,
-                    Sguan.foc.Ud_in/Sguan.motor.VBUS,
-                    Sguan.foc.Uq_in/Sguan.motor.VBUS);
+                    (Sguan.foc.Ud_in/Sguan.motor.VBUS),
+                    (Sguan.foc.Uq_in/Sguan.motor.VBUS));
                 status = Sguan.status;
             }
         }
 
-        #if Printf_Debug
+        #if CONFIG_Debug
         Printf_Debug_Loop(&Sguan);
-        #endif // Printf_Debug
+        #endif // CONFIG_Debug
         Sguan.flag.PWM_Calc = 0;
     }
     else{
@@ -1073,28 +1095,9 @@ void SguanFOC_Low_Loop(void){
  * @return {*}
  */
 void SguanFOC_Printf_Loop(uint8_t *data, uint16_t length){
-    if(length > sizeof(Sguan_PrintfBuff)){
-        length = sizeof(Sguan_PrintfBuff);
-    }
-
-    for(uint16_t i = 0; i < length; i++){
-        if(data[i] == '?'){
-            Printf_Adjust();
-            // 内存对齐的优化清零
-            uint32_t *p32 = (uint32_t*)Sguan_PrintfBuff;
-            uint16_t size = sizeof(Sguan_PrintfBuff);
-            // 按4字节清空
-            for(uint16_t j = 0; j < size / 4; j++){
-                p32[j] = 0;
-            }
-            // 处理剩余字节
-            uint8_t *p8 = (uint8_t*)&p32[size / 4];
-            for(uint16_t j = 0; j < size % 4; j++){
-                p8[j] = 0;
-            }
-            break;
-        }
-    }
+    // 微控制器接收来自上位机的消息
+    // 解析数据的格式like：AO=16.8?
+    Printf_RX_Loop(data,length);
 }
 
 /**
@@ -1104,18 +1107,8 @@ void SguanFOC_Printf_Loop(uint8_t *data, uint16_t length){
  */
 void SguanFOC_main_Loop(void){
     Sguan_Start_Tick();
-    #if !Printf_Debug
-    if (Sguan.status > 3 && Sguan.status < 19){
-        Printf_Normal_Loop(&Sguan);
-    }
-    else if (Sguan.status >= 19){
-        static uint8_t count = 0;
-        count++;
-        if (count > 10){
-            Printf_Normal_Loop(&Sguan);
-            count = 0;
-        }
-    }
-    #endif // Printf_Debug
+    #if !CONFIG_Debug
+    Printf_Normal_Loop(&Sguan);
+    #endif // CONFIG_Debug
 }
 

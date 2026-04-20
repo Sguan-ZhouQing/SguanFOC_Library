@@ -8,7 +8,6 @@
 void MTPA_Loop(float *Target_id,float flux,float Ld,float Lq,float iq);
 
 // 弱磁控制(待写)
-// 三次谐波注入(待写)
 
 
 #endif // SGUAN_OPTIMIZE_H

@@ -3,7 +3,7 @@
  * @GitHub: https://github.com/Sguan-ZhouQing
  * @Date: 2026-01-26 22:50:37
  * @LastEditors: 星必尘Sguan|3464647102@qq.com
- * @LastEditTime: 2026-04-09 17:24:17
+ * @LastEditTime: 2026-04-19 01:01:05
  * @FilePath: \SguanFOC_Debug\SguanFOC\Sguan_PLL.c
  * @Description: SguanFOC库的“开环PLL锁相环”实现
  * 

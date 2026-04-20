@@ -3,14 +3,13 @@
  * @GitHub: https://github.com/Sguan-ZhouQing
  * @Date: 2026-04-09 16:26:33
  * @LastEditors: 星必尘Sguan|3464647102@qq.com
- * @LastEditTime: 2026-04-10 16:12:23
+ * @LastEditTime: 2026-04-19 00:59:53
  * @FilePath: \SguanFOC_Debug\SguanFOC\Sguan_Feedforward.c
  * @Description: SguanFOC库的“前馈环节(提高系统稳定性)”实现
  * 
  * Copyright (c) 2026 by $星必尘Sguan, All Rights Reserved. 
  */
 #include "Sguan_Feedforward.h"
-
 
 // D轴电流前馈
 float Feedforward_CurrentD(float Espeed,float Lq,float Iq){

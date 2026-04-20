@@ -3,58 +3,73 @@
 
 /* USER CODE BEGIN Includes */
 // 电机控制核心函数文件声明
-#include "Sguan_DOB.h"
-#include "Sguan_Feedforward.h"
-#include "Sguan_Filter.h"
-#include "Sguan_Ladrc.h"
-#include "Sguan_MotorStatus.h"
-#include "Sguan_Optimize.h"
-#include "Sguan_PID.h"
-#include "Sguan_PLL.h"
-#include "Sguan_printf.h"
-#include "Sguan_SMC.h"
-#include "Sguan_STA.h"
-#include "Sguan_SVPWM.h"
+#include "Sguan_DOB.h"                  // DOB超螺旋滑模扰动观测器
+#include "Sguan_Feedforward.h"          // Feedforward前馈环节
+#include "Sguan_Filter.h"               // Filter巴特沃斯滤波器
+#include "Sguan_Ladrc.h"                // Ladrc线自抗扰控制
+#include "Sguan_MotorStatus.h"          // MotorStatus电机状态机
+#include "Sguan_Optimize.h"             // Optimize电机优化算法
+#include "Sguan_PID.h"                  // PID传统闭环控制
+#include "Sguan_PLL.h"                  // PLL角度跟踪“锁相环”
+#include "Sguan_printf.h"               // printf通信调试
+#include "Sguan_SMC.h"                  // SMC传统滑模控制
+#include "Sguan_SPWM.h"                 // SPWM零序分量注入法的PWM调制
+#include "Sguan_STA.h"                  // STA超螺旋简化滑模控制
+#include "Sguan_SVPWM.h"                // SVPWM七段式空间矢量PWM调制
 /* USER CODE END Includes */
 
-#define Velocity_OPEN_MODE          0x00 // 速度开环(Uq_in电机方向测试和电机参数测算)
-#define Current_SINGLE_MODE         0x01 // 电流单闭环(力矩控制)
-#define VelCur_DOUBLE_MODE          0x02 // 速度-电流串级闭环控制
-#define PosVelCur_THREE_MODE        0x03 // 位置-速度-电流多环
+#define VF_OPENLOOP_MODE        0x00    // VF压频比开环控制(Sguan.foc.Target_Speed，开环角度)
+#define IF_OPENLOOP_MODE        0x01    // IF流频比开环控制(Sguan.foc.Target_Speed，开环角度)
+#define Velocity_OPEN_MODE      0x02    // 速度开环(Sguan.foc.Uq_in，闭环角度)
+
+#define Current_SINGLE_MODE     0x03    // 电流单闭环(Sguan.foc.Target_Iq)
+#define VelCur_DOUBLE_MODE      0x04    // 速度-电流串级闭环(Sguan.foc.Target_Speed)
+#define PosVelCur_THREE_MODE    0x05    // 位置-速度-电流三环(Sguan.foc.Target_Pos)
 
 typedef struct{
-    uint8_t Angle_Calc;                 // 电机读取角度校正和转子极性辨识“标志位”
-
     uint8_t PWM_Calc;                   // PWM计算“标志位”
-    uint8_t PWM_watchdog_limit;         // PWM错误限幅(uint8_t够用，PWM计算不能错误太多次)
-
+    uint8_t PWM_watchdog_limit;         // PWM错误限幅(PWM计算不能中断错误太多次)
     uint8_t in_PWM_Calc_ISR;            // (互斥锁)标记是否在PWM计算中断中
 }MOTOR_FLAG_STRUCT;
 
 typedef struct{
-    LPF_STRUCT CurrentD;                // (电流数据)电机D轴滤波
-    LPF_STRUCT CurrentQ;                // (电流数据)电机Q轴滤波
-    LPF_STRUCT Encoder;                 // (速度数据)速度信号滤波
-}MOTOR_LPF_STRUCT;
-
-typedef struct{
+    // ====================== 1.传递函数“控制器” ===========================
     PID_STRUCT Current_D;               // (电流单环)PID电流环D轴参数
     PID_STRUCT Current_Q;               // (电流单环)PID电流环Q轴参数
 
-    #if CONFIG_Control==0
-    PID_STRUCT Velocity;                // (速度-电流双环)双PID速度外环参数
-    #elif CONFIG_Control==1
+    #if CONFIG_CtrlVel==1
     LADRC_STRUCT Velocity;              // (速度-电流双环)LADRC速度外环参数
-    #elif CONFIG_Control==2
+    #elif CONFIG_CtrlVel==2
     SMC_STRUCT Velocity;                // (速度-电流双环)SMC速度外环参数
-    #elif CONFIG_Control==3
+    #elif CONFIG_CtrlVel==3
     STA_STRUCT Velocity;                // (速度-电流双环)STA速度外环参数
-    #endif // Open/_PI_Contro
-    
-    PID_STRUCT Position;                // (高性能伺服三环)Position
+    #else  // CONFIG_CtrlVel
+    PID_STRUCT Velocity;                // (速度-电流双环)双PID速度外环参数
+    #endif // CONFIG_CtrlVel
+
+    #if CONFIG_CtrlPos==1
+    LADRC_STRUCT Position;              // (高性能伺服三环)Position的LADRC
+    #elif CONFIG_CtrlPos==2
+    SMC_STRUCT Position;                // (高性能伺服三环)Position的SMC
+    #elif CONFIG_CtrlPos==3
+    STA_STRUCT Position;                // (高性能伺服三环)Position的STA
+    #else  // CONFIG_CtrlPos
+    PID_STRUCT Position;                // (高性能伺服三环)Position的PID
+    #endif // CONFIG_CtrlPos
 
     uint8_t Response;                   // (参数设计)响应带宽倍数
-}MOTOR_CONTROL_STRUCT;
+
+    // ====================== 2.传递函数“滤波器” ===========================
+    LPF_STRUCT CurrentD;                // (电流数据)电机D轴滤波
+    LPF_STRUCT CurrentQ;                // (电流数据)电机Q轴滤波
+    LPF_STRUCT Encoder;                 // (速度数据)速度信号滤波
+
+    // ==================== 3.传递函数“锁相环及观测器” ======================
+    PLL_STRUCT PLL;                     // (PLL锁相环)角度跟踪锁相环
+    #if CONFIG_DOB
+    DOB_STRUCT DOB;                     // (超螺旋滑模扰动观测器)DOB
+    #endif // CONFIG_DOB
+}MOTOR_TRANSFER_STRUCT;
 
 typedef struct{
     uint8_t Poles;                      // (电机实体参数)电机极对极数
@@ -139,8 +154,6 @@ typedef struct{
 }MOTOR_FOC_STRUCT;
 
 typedef struct{
-    PLL_STRUCT pll;                     // (PLL锁相环)锁相环结构体
-
     float Real_Speed;                   // (Encoder速度)Real实际机械角速度
     double Real_Pos;                    // (Encoder多圈角度)Real实际机械角度
     float Real_Rad;                     // (Encoder单圈角度)Real实际机械角度
@@ -171,19 +184,18 @@ typedef struct{
     uint8_t mode;                       // 【有参数设计】mode选择电机的运行模式
     MOTOR_FLAG_STRUCT flag;             // 【有参数设计】flag电机运行标志位
     
-    MOTOR_LPF_STRUCT lpf;               // 【有参数设计】bpf低通滤波器设计
-    MOTOR_CONTROL_STRUCT control;       // 【有参数设计】闭环控制系统设计
+    MOTOR_TRANSFER_STRUCT Transfer;     // 【有参数设计】Transfer传递函数
+
     MOTOR_QUANTIZE_STRUCT motor;        // 【有参数设计】motor电机参数量化
     MOTOR_IDENTIFY_STRUCT identify;     // 【数据】identify电机参数辨识结果
-    
     MOTOR_SAFE_STRUCT safe;             // 【有参数设计】safe电机安全设置
-    MOTOR_FOC_STRUCT foc;               // 【有参数设计】foc控制的参数输入“缓存”
-    MOTOR_ENCODER_STRUCT encoder;       // 【数据】电机角速度和角度信息“缓存”
-    MOTOR_CURRENT_STRUCT current;       // 【数据】电机电流采样信息“缓存”
+    
+    MOTOR_FOC_STRUCT foc;               // 【有参数设计】foc控制的参数
+    MOTOR_ENCODER_STRUCT encoder;       // 【数据】电机角速度和角度信息
+    MOTOR_CURRENT_STRUCT current;       // 【数据】电机电流采样信息缓存
 
     PRINTF_STRUCT TXdata;               // 【数据】data串口或CAN发送的信息
 }SguanFOC_System_STRUCT;
-
 
 // 电机控制核心结构体声明
 extern SguanFOC_System_STRUCT Sguan;

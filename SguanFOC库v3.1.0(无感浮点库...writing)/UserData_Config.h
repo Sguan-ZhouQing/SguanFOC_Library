@@ -3,14 +3,32 @@
 /* 电机控制User用户设置·数据计算 */
 
 /**
- * @description: 宏定义0或1决定“闭环控制系统”是否使用PI控制(默认使用PI控制)
- * @reminder: 0->电流环“PI控制”，转速环“PI控制”，位置环“PD控制” 
- * @reminder: 1->电流环“PI控制”，转速环“Ladrc线性自抗扰控制”，位置环“PD控制”
- * @reminder: 2->电流环“PI控制”，转速环“SMC传统滑模控制”，位置环“PD控制”
- * @reminder: 3->电流环“PI控制”，转速环“STA超螺旋二阶滑模控制”，位置环“PD控制”
+ * @description: 宏定义0-3决定“电机速度环”的控制方式(默认使用PI控制)
+ * @reminder: 0->电流环“PI控制”，转速环“PI控制”
+ * @reminder: 1->电流环“PI控制”，转速环“Ladrc线性自抗扰控制”
+ * @reminder: 2->电流环“PI控制”，转速环“SMC传统滑模控制”
+ * @reminder: 3->电流环“PI控制”，转速环“STA超螺旋二阶滑模控制”
  * @return {*}
  */
-#define Switch_Control_Calculate 0
+#define Switch_Control_Velocity 0
+
+/**
+ * @description: 宏定义0-3决定“电机位置环”的控制方式(默认使用PD控制)
+ * @reminder: 0->位置环“PD控制” 
+ * @reminder: 1->位置环“Ladrc线性自抗扰控制”
+ * @reminder: 2->位置环“SMC传统滑模控制”
+ * @reminder: 3->位置环“STA超螺旋二阶滑模控制”
+ * @return {*}
+ */
+#define Switch_Control_Position 0
+
+/**
+ * @description: 宏定义0或1决定“电机矢量控制底层算法”(默认使用SVPWM)
+ * @reminder: 0->使用七段式的SVPWM空间矢量合成的电机控制技术
+ * @reminder: 1->使用带“三次谐波注入”优化后的SPWM脉宽调制技术
+ * @return {*}
+ */
+#define Switch_PWM_Calculate 0
 
 /**
  * @description: 宏定义0或1决定“电流前馈”是否开启(开启最优)

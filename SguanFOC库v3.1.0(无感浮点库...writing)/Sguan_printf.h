@@ -18,9 +18,9 @@ typedef struct{
 extern uint8_t Sguan_PrintfBuff[200];
 
 // 函数定义声明
-void Printf_Init(PRINTF_STRUCT *str);
-void Printf_Loop(PRINTF_STRUCT *str);
-void Printf_Adjust(void);
+void Printf_TX_Init(PRINTF_STRUCT *str);
+void Printf_TX_Loop(PRINTF_STRUCT *str);
+void Printf_RX_Loop(uint8_t *data, uint16_t length);
 
 
 #endif // SGUAN_PRINTF_H

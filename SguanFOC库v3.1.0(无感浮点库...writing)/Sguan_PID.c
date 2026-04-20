@@ -3,7 +3,7 @@
  * @GitHub: https://github.com/Sguan-ZhouQing
  * @Date: 2026-01-26 22:38:09
  * @LastEditors: 星必尘Sguan|3464647102@qq.com
- * @LastEditTime: 2026-04-09 17:24:07
+ * @LastEditTime: 2026-04-19 01:00:54
  * @FilePath: \SguanFOC_Debug\SguanFOC\Sguan_PID.c
  * @Description: SguanFOC库的“开环PID算法”实现
  * 
@@ -41,7 +41,7 @@ void PID_Loop(PID_STRUCT *pid){
     pid->run.i[0] = pid->run.Ref - pid->run.Fbk;
     if (pid->Ki){
         // 判断是否需要冻结积分
-        if (pid->run.IntegralFrozen_flag) {
+        if (pid->run.IntegralFrozen_flag){
             // 如果积分已冻结，保持上次的积分值
             pid->run.Io[0] = pid->run.Io[1];
             
@@ -49,7 +49,7 @@ void PID_Loop(PID_STRUCT *pid){
             // 情况1：误差反向（误差符号与积分输出符号相反）
             // 情况2：积分值回到限幅范围内
             if ((pid->run.i[0] * pid->run.Io[0] < 0) ||  // 误差反向
-                (pid->run.Io[0] < pid->IntMax && pid->run.Io[0] > pid->IntMin)) {  // 回到范围内
+                (pid->run.Io[0] < pid->IntMax && pid->run.Io[0] > pid->IntMin)){
                 pid->run.IntegralFrozen_flag = 0;
             }
         } else {
@@ -58,11 +58,11 @@ void PID_Loop(PID_STRUCT *pid){
                         + pid->run.Io[1];
             
             // 检查是否达到限幅，达到则冻结积分
-            if (pid->run.Io[0] > pid->IntMax) {
+            if (pid->run.Io[0] > pid->IntMax){
                 pid->run.Io[0] = pid->IntMax;
                 pid->run.IntegralFrozen_flag = 1;
             }
-            else if (pid->run.Io[0] < pid->IntMin) {
+            else if (pid->run.Io[0] < pid->IntMin){
                 pid->run.Io[0] = pid->IntMin;
                 pid->run.IntegralFrozen_flag = 1;
             }

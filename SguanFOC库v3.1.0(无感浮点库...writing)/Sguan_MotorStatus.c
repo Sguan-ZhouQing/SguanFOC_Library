@@ -3,7 +3,7 @@
  * @GitHub: https://github.com/Sguan-ZhouQing
  * @Date: 2026-01-26 22:43:42
  * @LastEditors: 星必尘Sguan|3464647102@qq.com
- * @LastEditTime: 2026-04-09 17:23:47
+ * @LastEditTime: 2026-04-19 01:00:38
  * @FilePath: \SguanFOC_Debug\SguanFOC\Sguan_MotorStatus.c
  * @Description: SguanFOC库的“电机状态机”实现
  * 
@@ -14,46 +14,42 @@
 // 函数指针数组（按枚举顺序排列）
 static void (*const status_handlers[])(void) = {
     // 初始化与运行状态
-    MOTOR_STATUS_STANDBY_Loop,
-    MOTOR_STATUS_UNINITIALIZED_Loop,
-    MOTOR_STATUS_INITIALIZING_Loop,
-    MOTOR_STATUS_CALIBRATING_Loop,
+    STANDBY_Loop,
+    UNINITIALIZED_Loop,
+    INITIALIZING_Loop,
+    CALIBRATING_Loop,
     
     // 运行状态
-    MOTOR_STATUS_IDLE_Loop,
-    MOTOR_STATUS_TORQUE_INCREASING_Loop,
-    MOTOR_STATUS_TORQUE_DECREASING_Loop,
-    MOTOR_STATUS_TORQUE_CONTROL_Loop,
-    MOTOR_STATUS_ACCELERATING_Loop,
-    MOTOR_STATUS_DECELERATING_Loop,
-    MOTOR_STATUS_CONST_SPEED_Loop,
-    MOTOR_STATUS_POSITION_INCREASING_Loop,
-    MOTOR_STATUS_POSITION_DECREASING_Loop,
-    MOTOR_STATUS_POSITION_HOLD_Loop,
+    IDLE_Loop,
+    TORQUE_INCREASING_Loop,
+    TORQUE_DECREASING_Loop,
+    TORQUE_CONTROL_Loop,
+    ACCELERATING_Loop,
+    DECELERATING_Loop,
+    CONST_SPEED_Loop,
+    POSITION_INCREASING_Loop,
+    POSITION_DECREASING_Loop,
+    POSITION_HOLD_Loop,
     
     // 硬件错误
-    MOTOR_STATUS_OVERVOLTAGE_Loop,
-    MOTOR_STATUS_UNDERVOLTAGE_Loop,
-    MOTOR_STATUS_OVERTEMPERATURE_Loop,
-    MOTOR_STATUS_UNDERTEMPERATURE_Loop,
-    MOTOR_STATUS_OVERCURRENT_Loop,
-    MOTOR_STATUS_ENCODER_ERROR_Loop,
-    MOTOR_STATUS_SENSOR_ERROR_Loop,
-    MOTOR_STATUS_PWM_CALC_FAULT_Loop,
+    OVERVOLTAGE_Loop,
+    UNDERVOLTAGE_Loop,
+    OVERTEMPERATURE_Loop,
+    UNDERTEMPERATURE_Loop,
+    OVERCURRENT_Loop,
+    ENCODER_ERROR_Loop,
+    SENSOR_ERROR_Loop,
+    PWM_CALC_FAULT_Loop,
     
     // 安全状态
-    MOTOR_STATUS_EMERGENCY_STOP_Loop,
-    MOTOR_STATUS_DISABLED_Loop
+    EMERGENCY_STOP_Loop,
+    DISABLED_Loop
 };
 
 // 核心函数MotorStatus_Loop函数
 void MotorStatus_Loop(uint8_t *status){
-    if (*status < 24){
-        status_handlers[*status]();
-    } else{
-        // 错误处理：记录日志并跳转到安全状态
-        *status = MOTOR_STATUS_STANDBY;
-        status_handlers[MOTOR_STATUS_STANDBY]();
-    }
+    // 运行状态机任务指示函数
+    // 带“输入参数”数值限定
+    status_handlers[Value_set(*status,23,0)]();
 }
 

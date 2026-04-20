@@ -3,9 +3,9 @@
  * @GitHub: https://github.com/Sguan-ZhouQing
  * @Date: 2026-02-26 22:37:25
  * @LastEditors: 星必尘Sguan|3464647102@qq.com
- * @LastEditTime: 2026-04-09 17:23:57
+ * @LastEditTime: 2026-04-19 01:00:46
  * @FilePath: \SguanFOC_Debug\SguanFOC\Sguan_Optimize.c
- * @Description: SguanFOC库的“MTPA和FW弱磁控制，三次谐波注入”实现
+ * @Description: SguanFOC库的“MTPA和FW弱磁控制的电机优化算法”实现
  * 
  * Copyright (c) 2026 by $星必尘Sguan, All Rights Reserved. 
  */

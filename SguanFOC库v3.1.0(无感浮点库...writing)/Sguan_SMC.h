@@ -13,8 +13,6 @@ typedef struct{
     float I_num;            // (中间量)积分的传递函数分子系数
     float D_num;            // (中间量)微分的传递函数分子系数
     float D_den;            // (中间量)微分的传递函数分母系数
-    
-    float Gain;             // (中间量)电机输入增益
 
     float Ref;              // (输入数据)Target期望数值
     float Fbk;              // (输出数据)Real真实反馈数据
@@ -24,18 +22,15 @@ typedef struct{
 }TRADITION_STRUCT;
 
 typedef struct{
-    TRADITION_STRUCT run; // (结构体)传统滑模控制
-
-    uint8_t Pn;             // (电机数据)极对数
-    double Flux;            // (电机数据)磁链
-    double J;               // (电机数据)转动惯量
-
+    TRADITION_STRUCT run;   // (结构体)传统滑模控制
+    
     double Wc;              // (参数设计)Wc微分环节一阶低通滤波
     double T;               // (参数设计)离散周期
-
+    
     float miu;              // (参数设计)不连续控制增益
     float q;                // (参数设计)切换项增益
     float C;                // (参数设计)动态响应增益
+    float Gain;             // (参数设计)电机输入增益
 
     float IntMax;           // (参数设计)积分项上限,即输出限幅
     float IntMin;           // (参数设计)积分项下限,即输出限幅
