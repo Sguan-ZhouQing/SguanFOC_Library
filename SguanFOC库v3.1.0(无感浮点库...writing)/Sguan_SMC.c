@@ -12,6 +12,12 @@
 #include "Sguan_SMC.h"
 
 // 传统滑模控制SMC的初始化函数
+
+/**
+ * @description: 
+ * @param {SMC_STRUCT} *smc
+ * @return {*}
+ */
 void SMC_Init(SMC_STRUCT *smc){
     double temp0 = smc->T*smc->Wc;
     smc->run.I_num = (float)(smc->T/2.0);
@@ -31,14 +37,20 @@ void SMC_Init(SMC_STRUCT *smc){
 }
 
 // 传统滑模控制SMC的离散运行函数
+
+/**
+ * @description: 
+ * @param {SMC_STRUCT} *smc
+ * @return {*}
+ */
 void SMC_Loop(SMC_STRUCT *smc){
-    // 计算误差和滑模微分
+    // 1.计算误差和滑模微分
     float Error_value = smc->run.Ref - smc->run.Fbk;
     float D_value = smc->run.D_num*(Error_value + smc->run.D_i) - 
                 smc->run.D_den*smc->run.D_o;
     float Value = (smc->C*Error_value + D_value)*smc->Gain;
 
-    // 计算滑模积分
+    // 2.计算滑模积分
     float I_in;
     if (Value > 0){
         I_in = (smc->q + smc->miu)*Value + smc->C*D_value;
@@ -48,7 +60,7 @@ void SMC_Loop(SMC_STRUCT *smc){
     }
     smc->run.Output = smc->run.I_num*(I_in + smc->run.I_i) + smc->run.I_o;
 
-    // 积分限幅
+    // 3.积分限幅
     if (smc->run.IntegralFrozen_flag){
         // 如果积分已冻结，保持上次的积分值
         smc->run.Output = smc->run.I_o;
@@ -76,7 +88,7 @@ void SMC_Loop(SMC_STRUCT *smc){
         }
     }
 
-    // 更新历史输入输出值
+    // 4.更新历史输入输出值
     smc->run.D_i = Error_value;
     smc->run.D_o = D_value;
     smc->run.I_i = I_in;

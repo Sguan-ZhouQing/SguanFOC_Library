@@ -8,6 +8,8 @@
 #define CONFIG_CtrlVel      Switch_Control_Velocity
 #define CONFIG_CtrlPos      Switch_Control_Position
 #define CONFIG_PWM          Switch_PWM_Calculate
+#define CONFIG_Hall         Switch_Hall_Compensate
+#define CONFIG_Identify     Switch_MOTOR_Identify
 #define CONFIG_CurFF        Open_Current_Feedforward
 #define CONFIG_VelFF        Open_Velocity_Feedforward
 #define CONFIG_DOB          Open_DOB_Calculate

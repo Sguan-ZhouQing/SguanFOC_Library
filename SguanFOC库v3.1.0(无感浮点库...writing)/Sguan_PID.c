@@ -12,6 +12,12 @@
 #include "Sguan_PID.h"
 
 // 闭环系统PID核心参数初始化，主函数调用
+
+/**
+ * @description: 
+ * @param {PID_STRUCT} *pid
+ * @return {*}
+ */
 void PID_Init(PID_STRUCT *pid){
     double temp0 = pid->T*pid->Ki/2.0;
     double temp1 = pid->T*pid->Wc;
@@ -32,12 +38,19 @@ void PID_Init(PID_STRUCT *pid){
 }
 
 // 闭环控制运算的定时器中断服务函数
+
+/**
+ * @description: 
+ * @param {PID_STRUCT} *pid
+ * @return {*}
+ */
 void PID_Loop(PID_STRUCT *pid){
-    // 刷新历史输入和输出数值
+    // 1.刷新历史输入和输出数值
     pid->run.i[1] = pid->run.i[0];
     pid->run.Io[1] = pid->run.Io[0];
     pid->run.Do[1] = pid->run.Do[0];
-    // 更新当前输入
+    
+    // 2.计算比例、积分、微分项
     pid->run.i[0] = pid->run.Ref - pid->run.Fbk;
     if (pid->Ki){
         // 判断是否需要冻结积分
@@ -72,7 +85,11 @@ void PID_Loop(PID_STRUCT *pid){
         pid->run.Do[0] = pid->run.D_num*pid->run.i[0] - pid->run.D_num*pid->run.i[1] 
                     - pid->run.D_den*pid->run.Do[1];
     }
+
+    // 3.运算控制器输出量
     pid->run.Output = pid->run.i[0]*pid->Kp + pid->run.Io[0] + pid->run.Do[0];
+
+    // 4.输出限幅
     pid->run.Output = Value_Limit(pid->run.Output,pid->OutMax,pid->OutMin);
 }
 

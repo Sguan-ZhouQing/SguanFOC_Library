@@ -12,16 +12,40 @@
 #include "Sguan_Feedforward.h"
 
 // D轴电流前馈
+
+/**
+ * @description: 
+ * @param {float} Espeed
+ * @param {float} Lq
+ * @param {float} Iq
+ * @return {*}
+ */
 float Feedforward_CurrentD(float Espeed,float Lq,float Iq){
     return -(Espeed*Lq*Iq);
 }
 
 // Q轴电流前馈
+
+/**
+ * @description: 
+ * @param {float} Espeed
+ * @param {float} Ld
+ * @param {float} Id
+ * @param {float} Flux
+ * @return {*}
+ */
 float Feedforward_CurrentQ(float Espeed,float Ld,float Id,float Flux){
     return Espeed*(Ld*Id + Flux);
 }
 
 // 转速环速度前馈
+
+/**
+ * @description: 
+ * @param {float} Speed
+ * @param {float} Ba
+ * @return {*}
+ */
 float Feedforward_Velocity(float Speed,float Ba){
     return -Speed*Ba;
 }

@@ -1,6 +1,7 @@
 #ifndef __USERDATA_FUNCTION_H
 #define __USERDATA_FUNCTION_H
 /* 电机控制User用户设置·功能接口 */
+#include <stdint.h>
 /* 用户自己的CODE BEGIN Includes */
 #include "main.h"
 
@@ -31,19 +32,19 @@ static inline void User_Delay(unsigned int ms){
     HAL_Delay(ms);
 }
 
-static inline signed int User_ReadADC_Raw(unsigned char Current_CH){
+static inline int32_t User_ReadADC_Raw(int32_t Current_CH){
     // 电流采样通道0->AB相，1->AC相，2->BC相
     // Sguan.motor.Current_Num值自定义采样通道
     // 用户在UserData_Motor.h中定义“这个值”
-    signed int ADC_num = 0;
+    int32_t ADC_num = 0;
     switch (Current_CH){
     case 0:
         /* Your code for Motor CH0 raw */
-        ADC_num = (signed int)ADC_InjectedValues[1];
+        ADC_num = (int32_t)ADC_InjectedValues[1];
         break;
     case 1:
         /* Your code for Motor CH1 raw */
-        ADC_num = (signed int)ADC_InjectedValues[2];
+        ADC_num = (int32_t)ADC_InjectedValues[2];
         break;
     default:
         break;
@@ -53,14 +54,21 @@ static inline signed int User_ReadADC_Raw(unsigned char Current_CH){
 
 static inline float User_Encoder_ReadRad(void){
     float Rad_num = 0.0f;
-    /* Your code for encoder radian position (0-2pi) if you use SensorFOC */
+    /* Your code for encoder radian position (0-2pi) if you use Absolute SensorFOC */
     Rad_num = SS_Encoder_GetRad();
     return Rad_num;
 }
 
-static inline void User_PwmDuty_Set(unsigned short int Duty_u,
-                                unsigned short int Duty_v,
-                                unsigned short int Duty_w){
+static inline float User_Encoder_ReadHall(){
+    float Rad_num = 0.0f;
+    /* Your code for encoder UVW Signal if you use Hall SensorFOC */
+    Rad_num = SS_Encoder_GetRad();
+    return Rad_num;
+}
+
+static inline void User_PwmDuty_Set(uint32_t Duty_u,
+                                uint32_t Duty_v,
+                                uint32_t Duty_w){
     /* Your code for Motor PWM_CH0~2 duty set */
     /* 若是使用正常6相，设置死区补偿，可在此设计 */
     __HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_1,Duty_u);

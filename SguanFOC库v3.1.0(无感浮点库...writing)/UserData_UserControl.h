@@ -8,12 +8,6 @@ extern volatile uint32_t ADC_InjectedValues[4];
 
 /* 用户自己的CODE END Includes */
 
-static inline void User_UserControl(void){
-    /* 仅传入需要实时控制的数据，如Target_Speed */
-    // Sguan.foc.Target_Speed = 0.0f;
-    // Sguan.foc.Uq_in = ADC_InjectedValues[3]*10.0f/4096.0f;
-}
-
 static inline void User_AO_Adjust(float AO){
     /* Your code for Parameter set */
     switch (Sguan.mode){

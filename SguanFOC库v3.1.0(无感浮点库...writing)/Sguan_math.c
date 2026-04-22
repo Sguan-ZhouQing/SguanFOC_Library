@@ -12,7 +12,6 @@
 #include "Sguan_math.h" // 里面已经包含"Sguan_IQmath.h"
 
 // 常量宏定义声明
-#define Value_INV_SQRT3 0.5773502691896257f
 #define Value_512_2PI       81.487330863050417f
 
 // 数值max判断函数

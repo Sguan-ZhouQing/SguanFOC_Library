@@ -3,7 +3,7 @@
  * @GitHub: https://github.com/Sguan-ZhouQing
  * @Date: 2026-01-27 00:07:53
  * @LastEditors: 星必尘Sguan|3464647102@qq.com
- * @LastEditTime: 2026-04-20 19:19:53
+ * @LastEditTime: 2026-04-22 15:26:29
  * @FilePath: \SguanFOC_Debug\SguanFOC\Sguan_printf.c
  * @Description: SguanFOC库的“JustFloat通讯协议”实现
  * 
@@ -18,6 +18,7 @@
 #include <string.h>
 /* 内部函数文件声明 */
 static float Get_Data(void);
+static void Printf_Adjust(void);
 uint8_t Sguan_PrintfBuff[200];
 
 
@@ -97,17 +98,8 @@ static float Get_Data(void){
     return data_return;
 }
 
-// [初始化]初始化JustFloat数据帧尾
-void Printf_TX_Init(PRINTF_STRUCT *str){
-    str->tail[0] = 0x00;
-    str->tail[1] = 0x00;
-    str->tail[2] = 0x80;
-    str->tail[3] = 0x7f;
-    /* JustFloa数据帧尾格式 */
-}
-
 // [接收]实时参数调整函数（需要根据你的实际结构体定义进行调整）
-void Printf_Adjust(void){
+static void Printf_Adjust(void){
     float data_Get = Get_Data();
     if(Sguan_PrintfBuff[0]=='A' && Sguan_PrintfBuff[1]=='O'){
         User_AO_Adjust(data_Get);
@@ -119,6 +111,21 @@ void Printf_Adjust(void){
         User_CO_Adjust(data_Get);
     }
     memset(Sguan_PrintfBuff, 0, sizeof(Sguan_PrintfBuff));
+}
+
+// [初始化]初始化JustFloat数据帧尾
+
+/**
+ * @description: 
+ * @param {PRINTF_STRUCT} *str
+ * @return {*}
+ */
+void Printf_TX_Init(PRINTF_STRUCT *str){
+    str->tail[0] = 0x00;
+    str->tail[1] = 0x00;
+    str->tail[2] = 0x80;
+    str->tail[3] = 0x7f;
+    /* JustFloa数据帧尾格式 */
 }
 
 /**

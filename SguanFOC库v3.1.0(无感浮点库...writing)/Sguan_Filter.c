@@ -3,7 +3,7 @@
  * @GitHub: https://github.com/Sguan-ZhouQing
  * @Date: 2026-01-26 22:37:25
  * @LastEditors: 星必尘Sguan|3464647102@qq.com
- * @LastEditTime: 2026-04-19 01:00:04
+ * @LastEditTime: 2026-04-22 15:23:31
  * @FilePath: \SguanFOC_Debug\SguanFOC\Sguan_Filter.c
  * @Description: SguanFOC库的“二阶巴特沃斯滤低通滤波器”实现
  * 
@@ -12,6 +12,12 @@
 #include "Sguan_Filter.h"
 
 // 二阶典型环节参数初始化，主函数调用
+
+/**
+ * @description: 
+ * @param {LPF_STRUCT} *lpf
+ * @return {*}
+ */
 void LPF_Init(LPF_STRUCT *lpf){
     double temp1 = lpf->T*lpf->Wc*2.828427124746f;
     double temp2 = lpf->T*lpf->T*lpf->Wc*lpf->Wc;
@@ -31,14 +37,20 @@ void LPF_Init(LPF_STRUCT *lpf){
 }
 
 // 定时器1ms中断服务函数
+
+/**
+ * @description: 
+ * @param {LPF_STRUCT} *lpf
+ * @return {*}
+ */
 void LPF_Loop(LPF_STRUCT *lpf){
-    // 更新历史输入和输出数值
+    // 1.更新历史输入和输出数值
     for (int n = 2; n > 0; n--){
         lpf->filter.i[n] = lpf->filter.i[n-1];
         lpf->filter.o[n] = lpf->filter.o[n-1];
     }
 
-    // 更新当前输入,计算输出
+    // 2.更新当前输入,计算输出
     lpf->filter.i[0] = lpf->filter.Input;
     float num = lpf->filter.num[0] * lpf->filter.i[0] + 
                 lpf->filter.num[1] * lpf->filter.i[1] + 
@@ -46,7 +58,7 @@ void LPF_Loop(LPF_STRUCT *lpf){
     float den = lpf->filter.den[1] * lpf->filter.o[1] + 
                 lpf->filter.den[2] * lpf->filter.o[2];
 
-    // 安全检查并输出结果，避免除以零或产生NaN/Inf
+    // 3.安全检查并输出结果，避免除以零或产生NaN/Inf
     if (lpf->filter.den[0] != 0.0f && !Value_isnan(den) && !Value_isinf(den)) {
         lpf->filter.o[0] = (num - den) / lpf->filter.den[0];
     }

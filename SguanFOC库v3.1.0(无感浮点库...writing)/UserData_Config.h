@@ -31,6 +31,17 @@
 #define Switch_PWM_Calculate 0
 
 /**
+ * @description: 宏定义0或1决定“电机参数辨识”额外数据的测量(默认关闭，首次上电需要1)
+ * @reminder: 0->不开启电机的参数辨识，针对B和J
+ * @reminder: 1->开启辨识，只执行基础的Rs、Ld、Lq和Sguan.identify.Encoder_Dir
+ * @reminder: 2->开启辨识，执行所有辨识，包括额外的B、J和Flux...需调好电机闭环回路才可开启
+ * @reminder: （所有任务之前，可提前填入粗略的参数，让电机勉强运行起来）
+ * @reminder: （选择2号宏定义，需调好电机闭环回路才可开启...会占用电机运行时间）
+ * @return {*}
+ */
+#define Switch_MOTOR_Identify 0
+
+/**
  * @description: 宏定义0或1决定“电流前馈”是否开启(开启最优)
  * @reminder: 0->不开启电流的前馈解耦
  * @reminder: 1->开启电流的前馈解耦

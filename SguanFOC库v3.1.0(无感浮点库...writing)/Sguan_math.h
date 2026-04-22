@@ -9,6 +9,7 @@
 #define Value_PI            3.141592653589793f
 #define Value_PI_2          1.570796326794896f
 #define Value_2PI           6.283185307179586f
+#define Value_INV_SQRT3     0.5773502691896257f
 #define Value_SQRT3_2       0.8660254037844386f
 
 // 重写C标准库Value...f

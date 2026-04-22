@@ -13,29 +13,20 @@
 
 /**
  * SPWM 函数 - 带三次“零序分量注入”优化的SPWM（等效SVPWM）
- * @param u_alpha: Alpha轴电压，归一化范围 -0.577~0.577（最大线性调制区）
- * @param u_beta: Beta轴电压，归一化范围 -0.577~0.577
+ * @param u_alpha: Alpha轴电压，归一化范围 -0.577~0.577(最大线性调制区)
+ * @param u_beta: Beta轴电压，归一化范围 -0.577~0.577(最大线性调制区)
  * @param d_u: 输出U相占空比，归一化到0-1
  * @param d_v: 输出V相占空比，归一化到0-1
  * @param d_w: 输出W相占空比，归一化到0-1
- * 
- * 说明：SPWM + 三次谐波注入等效于SVPWM，需要将u_alpha/u_beta乘以系数1/sqrt(3)
- *       才能达到和SVPWM相同的电压利用率
  */
 void SPWM(float u_alpha, float u_beta, 
           float *d_u, float *d_v, float *d_w) {
     
-    // 重要：SPWM+三次谐波注入需要幅值缩放才能等效SVPWM
-    // SVPWM的最大线性调制比为 2/sqrt(3) ≈ 1.1547 倍于传统SPWM
-    // 因此需要将输入电压乘以 1/sqrt(3) ≈ 0.57735 进行补偿
-    const float INV_SQRT3 = 0.5773502691896257f;
-    float u_alpha_scaled = u_alpha * INV_SQRT3;
-    float u_beta_scaled = u_beta * INV_SQRT3;
-    
+    // SPWM+三次谐波注入需要幅值缩放才能等效SVPWM
     // 1. 等幅值逆变换 → 三相电压(范围 -0.577 到 0.577)
-    float u_a = u_alpha_scaled;
-    float u_b = -0.5f * u_alpha_scaled + Value_SQRT3_2 * u_beta_scaled;
-    float u_c = -0.5f * u_alpha_scaled - Value_SQRT3_2 * u_beta_scaled;
+    float u_a = u_alpha * Value_INV_SQRT3;
+    float u_b = (-0.5f*u_alpha + Value_SQRT3_2*u_beta)*Value_INV_SQRT3;
+    float u_c = (-0.5f*u_alpha - Value_SQRT3_2*u_beta)*Value_INV_SQRT3;
     
     // 2. 注入零序分量(三次谐波)，等效 SVPWM
     float u_max = Value_maxf(u_a, Value_maxf(u_b, u_c));

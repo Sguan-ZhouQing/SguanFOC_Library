@@ -12,6 +12,12 @@
 #include "Sguan_DOB.h"
 
 // 超螺旋滑模DOB的初始化函数
+
+/**
+ * @description: 
+ * @param {DOB_STRUCT} *dob
+ * @return {*}
+ */
 void DOB_Init(DOB_STRUCT *dob){
     dob->smdo.num = (float)(dob->T/2.0);
     dob->smdo.Gain0 = (float)(1.5*dob->Pn*dob->Flux/dob->J);
@@ -29,6 +35,12 @@ void DOB_Init(DOB_STRUCT *dob){
 }
 
 // 超螺旋滑模DOB的离散运行函数
+
+/**
+ * @description: 
+ * @param {DOB_STRUCT} *dob
+ * @return {*}
+ */
 void DOB_Loop(DOB_STRUCT *dob){
     // 计算扰动转矩大小
     float dob_0,dob_1,dob_2;

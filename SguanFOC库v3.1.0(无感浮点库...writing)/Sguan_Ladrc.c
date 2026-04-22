@@ -3,7 +3,7 @@
  * @GitHub: https://github.com/Sguan-ZhouQing
  * @Date: 2026-02-16  00:27:53
  * @LastEditors: 星必尘Sguan|3464647102@qq.com
- * @LastEditTime: 2026-04-19 01:00:16
+ * @LastEditTime: 2026-04-22 15:25:03
  * @FilePath: \SguanFOC_Debug\SguanFOC\Sguan_Ladrc.c
  * @Description: SguanFOC库的“典型二阶线性自抗扰控制(LADRC)算法”实现
  * 
@@ -103,13 +103,13 @@ void Ladrc_Init(LADRC_STRUCT *ladrc){
  * @return {void}
  */
 void Ladrc_Loop(LADRC_STRUCT *ladrc){
-    /* 跟踪微分器 - 安排过渡过程 */
+    // 1.跟踪微分器 - 安排过渡过程
     Ladrc_LTD(ladrc);
     
-    /* 扩张状态观测器 - 估计状态和扰动 */
+    // 2.扩张状态观测器 - 估计状态和扰动
     Ladrc_LESO(ladrc);
     
-    /* 线性控制率 - 计算控制量 */
+    // 3.线性控制率 - 计算控制量
     Ladrc_LinearControlRate(ladrc);
 }
 

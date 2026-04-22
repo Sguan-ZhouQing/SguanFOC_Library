@@ -6,6 +6,8 @@
 #include "Sguan_DOB.h"                  // DOB超螺旋滑模扰动观测器
 #include "Sguan_Feedforward.h"          // Feedforward前馈环节
 #include "Sguan_Filter.h"               // Filter巴特沃斯滤波器
+#include "Sguan_Hall.h"                 // Hall三霍尔信号处理
+#include "Sguan_Identify.h"             // Identify电机参数辨识
 #include "Sguan_Ladrc.h"                // Ladrc线自抗扰控制
 #include "Sguan_MotorStatus.h"          // MotorStatus电机状态机
 #include "Sguan_Optimize.h"             // Optimize电机优化算法
@@ -18,13 +20,28 @@
 #include "Sguan_SVPWM.h"                // SVPWM七段式空间矢量PWM调制
 /* USER CODE END Includes */
 
-#define VF_OPENLOOP_MODE        0x00    // VF压频比开环控制(Sguan.foc.Target_Speed，开环角度)
-#define IF_OPENLOOP_MODE        0x01    // IF流频比开环控制(Sguan.foc.Target_Speed，开环角度)
-#define Velocity_OPEN_MODE      0x02    // 速度开环(Sguan.foc.Uq_in，闭环角度)
-
+// ╔═══════════════════════════════════════════════════════╗
+// ║                       开环控制模式                     ║
+// ╚═══════════════════════════════════════════════════════╝
+#define VF_OPENLOOP_MODE        0x00    // VF压频比开环(Sguan.foc.Target_Speed，Sguan.foc.Uq_in)
+#define IF_OPENLOOP_MODE        0x01    // IF流频比开环(Sguan.foc.Target_Speed，Sguan.foc.Target_Iq)
+// ╔═══════════════════════════════════════════════════════╗
+// ║                   闭环控制模式（有传感器）              ║
+// ╚═══════════════════════════════════════════════════════╝
+#define Voltag_OPEN_MODE        0x02    // 电压开环(Sguan.foc.Uq_in)
 #define Current_SINGLE_MODE     0x03    // 电流单闭环(Sguan.foc.Target_Iq)
 #define VelCur_DOUBLE_MODE      0x04    // 速度-电流串级闭环(Sguan.foc.Target_Speed)
 #define PosVelCur_THREE_MODE    0x05    // 位置-速度-电流三环(Sguan.foc.Target_Pos)
+// ╔═══════════════════════════════════════════════════════╗
+// ║                   霍尔控制模式（有传感器）              ║
+// ╚═══════════════════════════════════════════════════════╝
+#define Sensor_Hall_MODE        0x06    // 有感霍尔_转速环(Sguan.foc.Target_Speed)
+// ╔═══════════════════════════════════════════════════════╗
+// ║                   无感控制模式（无传感器）              ║
+// ╚═══════════════════════════════════════════════════════╝
+#define Sensorless_HFI_MODE     0x07    // 高频注入_转速环(Sguan.foc.Target_Speed)
+#define Sensorless_SMO_MODE     0x08    // 滑模观测_转速环(Sguan.foc.Target_Speed)
+#define Sensorless_HS_MODE      0x09    // 前两结合_转速环(Sguan.foc.Target_Speed)
 
 typedef struct{
     uint8_t PWM_Calc;                   // PWM计算“标志位”
@@ -60,9 +77,9 @@ typedef struct{
     uint8_t Response;                   // (参数设计)响应带宽倍数
 
     // ====================== 2.传递函数“滤波器” ===========================
-    LPF_STRUCT CurrentD;                // (电流数据)电机D轴滤波
-    LPF_STRUCT CurrentQ;                // (电流数据)电机Q轴滤波
-    LPF_STRUCT Encoder;                 // (速度数据)速度信号滤波
+    LPF_STRUCT LPF_D;                   // (电流数据)电机D轴滤波
+    LPF_STRUCT LPF_Q;                   // (电流数据)电机Q轴滤波
+    LPF_STRUCT LPF_encoder;             // (速度数据)速度信号滤波
 
     // ==================== 3.传递函数“锁相环及观测器” ======================
     PLL_STRUCT PLL;                     // (PLL锁相环)角度跟踪锁相环
@@ -72,14 +89,14 @@ typedef struct{
 }MOTOR_TRANSFER_STRUCT;
 
 typedef struct{
-    uint8_t Poles;                      // (电机实体参数)电机极对极数
+    IDENTIFY_STRUCT identify;           // (参数辨识)电机的核心实体参数
+
+    uint8_t Poles;                      // (电机实体参数)电机极对数
     float VBUS;                         // (电机实体参数)母线电压
 
     int8_t Motor_Dir;                   // (参数设计)电机的运行方向设计
     int8_t PWM_Dir;                     // (参数设计)PWM占空比高低对应
-    uint16_t Duty;                      // (参数设计)PWM满占空比
-
-    int8_t Encoder_Dir;                 // (参数设计)编码器的方向设置
+    uint32_t Duty;                      // (参数设计)PWM满占空比
 
     int8_t Current_Dir0;                // (参数设计)电流采样方向0
     int8_t Current_Dir1;                // (参数设计)电流采样方向1
@@ -89,16 +106,6 @@ typedef struct{
     float MCU_Voltage;                  // (参数设计)DSP/单片机的ADC基准电压
     float Sampling_Rs;                  // (参数设计)采样电阻的阻值大小
 }MOTOR_QUANTIZE_STRUCT;
-
-typedef struct{
-    float Ld;                           // (电机实体参数)D轴电感
-    float Lq;                           // (电机实体参数)Q轴电感
-    float Rs;                           // (电机实体参数)相线电阻
-    float Flux;                         // (电机实体参数)电机磁链
-
-    float B;                            // (电机实体参数)粘性阻尼
-    float J;                            // (电机实体参数)转动惯量
-}MOTOR_IDENTIFY_STRUCT;
 
 typedef struct{    
     float VBUS_MAX;                     // (参数设计)母线电压值波动MAX阈值
@@ -138,9 +145,9 @@ typedef struct{
     float Ud_in;                        // (输入值)D轴电压输入
     float Uq_in;                        // (输入值)Q轴电压输入
 
-    uint16_t Duty_u;                    // (输入值)U相占空比输入0~pwmMAX
-    uint16_t Duty_v;                    // (输入值)V相占空比输入0~pwmMAX
-    uint16_t Duty_w;                    // (输入值)W相占空比输入0~pwmMAX
+    uint32_t Duty_u;                    // (输入值)U相占空比输入0~pwmMAX
+    uint32_t Duty_v;                    // (输入值)V相占空比输入0~pwmMAX
+    uint32_t Duty_w;                    // (输入值)W相占空比输入0~pwmMAX
 
     float Du;                           // (数据)U相占空比输入0~1
     float Dv;                           // (数据)V相占空比输入0~1
@@ -182,13 +189,12 @@ typedef struct{
 typedef struct{
     uint8_t status;                     // 【数据】status存储电机运行状态
     uint8_t mode;                       // 【有参数设计】mode选择电机的运行模式
-    MOTOR_FLAG_STRUCT flag;             // 【有参数设计】flag电机运行标志位
     
-    MOTOR_TRANSFER_STRUCT Transfer;     // 【有参数设计】Transfer传递函数
-
+    MOTOR_TRANSFER_STRUCT transfer;     // 【有参数设计】Transfer传递函数
+    
     MOTOR_QUANTIZE_STRUCT motor;        // 【有参数设计】motor电机参数量化
-    MOTOR_IDENTIFY_STRUCT identify;     // 【数据】identify电机参数辨识结果
     MOTOR_SAFE_STRUCT safe;             // 【有参数设计】safe电机安全设置
+    MOTOR_FLAG_STRUCT flag;             // 【有参数设计】flag电机运行标志位
     
     MOTOR_FOC_STRUCT foc;               // 【有参数设计】foc控制的参数
     MOTOR_ENCODER_STRUCT encoder;       // 【数据】电机角速度和角度信息
