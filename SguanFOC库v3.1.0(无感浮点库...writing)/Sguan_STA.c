@@ -33,7 +33,7 @@ static float STA_SignFunction(STA_STRUCT *sta,float s_abs){
  */
 void STA_Init(STA_STRUCT *sta){
     // 初始化所有运行变量为零
-    sta->run.I_num = (float)(sta->k2*sta->T);
+    sta->run.I_num = (float)((sta->k2*sta->T)/2.0);
 
     // 初始化为零
     sta->run.s[0] = 0.0f;

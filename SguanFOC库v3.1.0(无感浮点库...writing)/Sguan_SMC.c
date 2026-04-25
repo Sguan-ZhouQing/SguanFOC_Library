@@ -19,15 +19,11 @@
  * @return {*}
  */
 void SMC_Init(SMC_STRUCT *smc){
-    double temp0 = smc->T*smc->Wc;
-    smc->run.I_num = (float)(smc->T/2.0);
-    smc->run.D_num = (float)((2*smc->Wc)/(-2+temp0));
-    smc->run.D_den = (float)((2+temp0)/(-2+temp0));
+    smc->run.I_num = smc->T/2.0f;
     // 初始化为零
     smc->run.I_i = 0.0f;
     smc->run.I_o = 0.0f;
     smc->run.D_i = 0.0f;
-    smc->run.D_o = 0.0f;
 
     smc->run.Ref = 0.0f;
     smc->run.Fbk = 0.0f;
@@ -46,19 +42,17 @@ void SMC_Init(SMC_STRUCT *smc){
 void SMC_Loop(SMC_STRUCT *smc){
     // 1.计算误差和滑模微分
     float Error_value = smc->run.Ref - smc->run.Fbk;
-    float D_value = smc->run.D_num*(Error_value + smc->run.D_i) - 
-                smc->run.D_den*smc->run.D_o;
-    float Value = (smc->C*Error_value + D_value)*smc->Gain;
+    float D_value = (Error_value - smc->run.D_i)*smc->T;
+    float Value = smc->C*Error_value + D_value;
 
-    // 2.计算滑模积分
+    // 2.计算滑模积分输入量
     float I_in;
     if (Value > 0){
-        I_in = (smc->q + smc->miu)*Value + smc->C*D_value;
+        I_in = (smc->q*Value + smc->miu + smc->C*D_value)*smc->Gain;
     }
     else{
-        I_in = (smc->q - smc->miu)*Value + smc->C*D_value;
+        I_in = (smc->q*Value - smc->miu + smc->C*D_value)*smc->Gain;
     }
-    smc->run.Output = smc->run.I_num*(I_in + smc->run.I_i) + smc->run.I_o;
 
     // 3.积分限幅
     if (smc->run.IntegralFrozen_flag){
@@ -90,9 +84,7 @@ void SMC_Loop(SMC_STRUCT *smc){
 
     // 4.更新历史输入输出值
     smc->run.D_i = Error_value;
-    smc->run.D_o = D_value;
     smc->run.I_i = I_in;
     smc->run.I_o = smc->run.Output;
 }
-
 
