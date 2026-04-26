@@ -11,6 +11,7 @@
 #define Value_2PI           6.283185307179586f
 #define Value_INV_SQRT3     0.5773502691896257f
 #define Value_SQRT3_2       0.8660254037844386f
+#define Value_2_SQRT2       2.8284271247461903f 
 
 // 重写C标准库Value...f
 float Value_maxf(float a, float b);

@@ -81,8 +81,7 @@ void STA_Loop(STA_STRUCT *sta){
         }
         else{
             // 正常计算积分
-            sta->run.Io = sta->run.I_num*(sta->run.s[0] + sta->run.s[1]) 
-                        + sta->run.Io;
+            sta->run.Io += sta->run.I_num*(sta->run.s[0] + sta->run.s[1]);
             
             // 积分限幅检查
             if(sta->run.Io > sta->IntMax){

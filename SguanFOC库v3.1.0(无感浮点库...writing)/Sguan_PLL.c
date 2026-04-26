@@ -37,12 +37,11 @@ void PLL_Init(PLL_STRUCT *pll){
  */
 void PLL_Loop(PLL_STRUCT *pll){
     // 1.计算PI控制器(并输出We)
-    pll->go.OutWe = pll->go.X_num[0]*pll->go.Error + 
-                    pll->go.X_num[1]*pll->go.We_i + pll->go.OutWe;
+    pll->go.OutWe += pll->go.X_num[0]*pll->go.Error + 
+                    pll->go.X_num[1]*pll->go.We_i;
 
     // 2.计算积分器(并输出Re)
-    pll->go.OutRe = pll->go.Y_num*(pll->go.OutWe + pll->go.Re_i) 
-                + pll->go.OutRe;
+    pll->go.OutRe += pll->go.Y_num*(pll->go.OutWe + pll->go.Re_i);
     if (!pll->is_position_mode){
         // 非位置环模式：使用normalize_angle函数归一化到[0, 2π)
         pll->go.OutRe = Value_normalize(pll->go.OutRe);

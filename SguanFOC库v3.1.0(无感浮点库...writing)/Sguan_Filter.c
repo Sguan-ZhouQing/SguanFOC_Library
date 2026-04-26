@@ -17,19 +17,18 @@
  * @return {*}
  */
 void LPF_Init(LPF_STRUCT *lpf){
-    double temp1 = lpf->T*lpf->Wc*2.828427124746f;
+    double temp1 = lpf->T*lpf->Wc*((double)Value_2_SQRT2);
     double temp2 = lpf->T*lpf->T*lpf->Wc*lpf->Wc;
-    lpf->filter.num[0] = (float)temp2;
-    lpf->filter.num[1] = (float)(2*temp2);
-    lpf->filter.num[2] = (float)temp2;
-    lpf->filter.den[0] = (float)(temp2+temp1+4);
-    lpf->filter.den[1] = (float)(-8+2*temp2);
-    lpf->filter.den[2] = (float)(temp2-temp1+4);
+    lpf->filter.num[0] = (float)(temp2/(temp2+temp1+4));
+    lpf->filter.num[1] = (float)((2*temp2)/(temp2+temp1+4));
+    lpf->filter.num[2] = (float)(temp2/(temp2+temp1+4));
+    lpf->filter.den[0] = (float)(-8+2*temp2)/(temp2+temp1+4);
+    lpf->filter.den[1] = (float)(temp2-temp1+4)/(temp2+temp1+4);
     // 初始化为零
-    for (int n = 0; n < 3; n++){
-        lpf->filter.i[n] = 0.0f;
-        lpf->filter.o[n] = 0.0f;
-    }
+    lpf->filter.i[0] = 0.0f;
+    lpf->filter.i[1] = 0.0f;
+    lpf->filter.o[0] = 0.0f;
+    lpf->filter.o[1] = 0.0f;
     lpf->filter.Input = 0.0f;
     lpf->filter.Output = 0.0f;
 }
@@ -40,28 +39,16 @@ void LPF_Init(LPF_STRUCT *lpf){
  * @return {*}
  */
 void LPF_Loop(LPF_STRUCT *lpf){
-    // 1.更新当前输入,计算输出
-    lpf->filter.i[0] = lpf->filter.Input;
-    float num = lpf->filter.num[0] * lpf->filter.i[0] + 
-                lpf->filter.num[1] * lpf->filter.i[1] + 
-                lpf->filter.num[2] * lpf->filter.i[2];
-    float den = lpf->filter.den[1] * lpf->filter.o[0] + 
-                lpf->filter.den[2] * lpf->filter.o[1];
+    // 1.带入差分方程，计算输出
+    lpf->filter.Output = lpf->filter.num[0] * lpf->filter.Input + 
+                        lpf->filter.num[1] * lpf->filter.i[0] + 
+                        lpf->filter.num[2] * lpf->filter.i[1] - 
+                        lpf->filter.den[0] * lpf->filter.o[0] - 
+                        lpf->filter.den[1] * lpf->filter.o[1];
 
-    // 2.安全检查并输出结果，避免除以零或产生NaN/Inf
-    if ((lpf->filter.den[0] != 0.0f) && 
-        !Value_isnan(den) && 
-        !Value_isinf(den)) {
-        lpf->filter.Output = (num - den)/lpf->filter.den[0];
-    }
-    if (Value_isnan(lpf->filter.Output) || 
-        Value_isinf(lpf->filter.Output)) {
-        lpf->filter.Output = 0.0f;
-    }
-
-    // 3.更新历史输入和输出数值
-    lpf->filter.i[2] = lpf->filter.i[1];
+    // 1.更新历史输入和输出数值
     lpf->filter.i[1] = lpf->filter.i[0];
+    lpf->filter.i[0] = lpf->filter.Input;
     lpf->filter.o[1] = lpf->filter.o[0];
     lpf->filter.o[0] = lpf->filter.Output;
 }

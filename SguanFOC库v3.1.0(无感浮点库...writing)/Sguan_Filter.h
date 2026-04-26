@@ -5,14 +5,14 @@
 #include "Sguan_Config.h"
 
 typedef struct{
-    float i[3];             // (数据)历史输入值
+    float i[2];             // (数据)历史输入值
     float o[2];             // (数据)历史输出值
 
     float Input;            // (数据)Input输入
     float Output;           // (数据)Output输出
 
     float num[3];           // (中间量)传递函数分子系数
-    float den[3];           // (中间量)传递函数分母系数
+    float den[2];           // (中间量)传递函数分母系数
 }FILTER_STRUCT;
 
 typedef struct{

@@ -63,8 +63,7 @@ void SMC_Loop(SMC_STRUCT *smc){
         }
     } else{
         // 正常计算积分
-        smc->run.Output = smc->run.I_num*(I_in + smc->run.I_i) + 
-                             smc->run.Output;
+        smc->run.Output += smc->run.I_num*(I_in + smc->run.I_i);
         
         // 检查是否达到限幅，达到则冻结积分
         if (smc->run.Output > smc->IntMax){

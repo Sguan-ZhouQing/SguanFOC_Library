@@ -56,8 +56,7 @@ void PID_Loop(PID_STRUCT *pid){
             }
         } else {
             // 正常计算积分
-            pid->run.Io = pid->run.I_num*(pid->run.i[0] + pid->run.i[1]) 
-                        + pid->run.Io;
+            pid->run.Io += pid->run.I_num*(pid->run.i[0] + pid->run.i[1]);
             
             // 检查是否达到限幅，达到则冻结积分
             if (pid->run.Io > pid->IntMax){

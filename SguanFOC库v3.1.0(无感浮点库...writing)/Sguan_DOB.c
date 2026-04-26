@@ -51,8 +51,7 @@ void DOB_Loop(DOB_STRUCT *dob){
         sign = -1.0f;
     }
     temp_fd = sign*dob->K2;
-    dob->smdo.Output_Fd = dob->smdo.I_num*(temp_fd + dob->smdo.Fd_i) + 
-                        dob->smdo.Output_Fd;
+    dob->smdo.Output_Fd += dob->smdo.I_num*(temp_fd + dob->smdo.Fd_i);
     dob->smdo.Output_Fd = Value_Limit(dob->smdo.Output_Fd,
                                     dob->OutMax_Fd,
                                     dob->OutMin_Fd);

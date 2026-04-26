@@ -70,7 +70,7 @@ void PID_Loop(PID_STRUCT *pid){
         }
     }
     if (pid->Kd){
-        pid->run.Do[0] = (pid->run.D_num*pid->run.i[0] - pid->run.D_num*pid->run.i[1] 
+        pid->run.Do[0] = (pid->run.D_num*pid->run.i[0] + pid->run.D_num*pid->run.i[1] 
                     - pid->run.D_den[1]*pid->run.Do[1]) / pid->run.D_den[0];
     }
     pid->run.Output = pid->run.i[0]*pid->Kp + pid->run.Io[0] + pid->run.Do[0];
