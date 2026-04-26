@@ -23,12 +23,11 @@ void PLL_Init(PLL_STRUCT *pll){
     pll->go.Y_num = (float)(pll->T/2.0);
     // 初始化为零
     pll->is_position_mode = 0; // 默认非位置环mode
-    pll->go.i = 0;
-    pll->go.Xo = 0;
-    pll->go.Yo = 0;
-    pll->go.OutWe = 0;
-    pll->go.OutRe = 0;
-    pll->go.Error = 0;
+    pll->go.We_i = 0.0f;
+    pll->go.Re_i = 0.0f;
+    pll->go.OutWe = 0.0f;
+    pll->go.OutRe = 0.0f;
+    pll->go.Error = 0.0f;
 }
 
 /**
@@ -38,20 +37,19 @@ void PLL_Init(PLL_STRUCT *pll){
  */
 void PLL_Loop(PLL_STRUCT *pll){
     // 1.计算PI控制器(并输出We)
-    pll->go.OutWe = pll->go.X_num[0]*pll->go.Error + pll->go.X_num[1]*pll->go.i 
-                + pll->go.Xo;
+    pll->go.OutWe = pll->go.X_num[0]*pll->go.Error + 
+                    pll->go.X_num[1]*pll->go.We_i + pll->go.OutWe;
 
     // 2.计算积分器(并输出Re)
-    pll->go.OutRe = pll->go.Y_num*pll->go.OutWe + pll->go.Y_num*pll->go.Xo 
-                + pll->go.Yo;
+    pll->go.OutRe = pll->go.Y_num*(pll->go.OutWe + pll->go.Re_i) 
+                + pll->go.OutRe;
     if (!pll->is_position_mode){
         // 非位置环模式：使用normalize_angle函数归一化到[0, 2π)
         pll->go.OutRe = Value_normalize(pll->go.OutRe);
     }
 
     // 3.更新历史输入和输出数值
-    pll->go.i = pll->go.Error;
-    pll->go.Xo = pll->go.OutWe;
-    pll->go.Yo = pll->go.OutRe;
+    pll->go.We_i = pll->go.Error;
+    pll->go.Re_i = pll->go.OutWe;
 }
 

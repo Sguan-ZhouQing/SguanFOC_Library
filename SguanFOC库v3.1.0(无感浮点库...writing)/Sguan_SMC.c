@@ -20,7 +20,6 @@ void SMC_Init(SMC_STRUCT *smc){
     smc->run.I_num = smc->T/2.0f;
     // 初始化为零
     smc->run.I_i = 0.0f;
-    smc->run.I_o = 0.0f;
     smc->run.D_i = 0.0f;
 
     smc->run.Ref = 0.0f;
@@ -53,19 +52,19 @@ void SMC_Loop(SMC_STRUCT *smc){
     // 3.积分限幅
     if (smc->run.IntegralFrozen_flag){
         // 如果积分已冻结，保持上次的积分值
-        smc->run.Output = smc->run.I_o;
         
         // 检查是否可以解除冻结
         // 情况1：误差反向（误差符号与积分输出符号相反）
         // 情况2：积分值回到限幅范围内
         if ((I_in * smc->run.Output < 0) ||  // 误差反向
-            (smc->run.Output < smc->IntMax && smc->run.Output > smc->IntMin)){
+            ((smc->run.Output < smc->IntMax) && 
+            (smc->run.Output > smc->IntMin))){
             smc->run.IntegralFrozen_flag = 0;
         }
     } else{
         // 正常计算积分
         smc->run.Output = smc->run.I_num*(I_in + smc->run.I_i) + 
-                            smc->run.I_o;
+                             smc->run.Output;
         
         // 检查是否达到限幅，达到则冻结积分
         if (smc->run.Output > smc->IntMax){
@@ -81,6 +80,5 @@ void SMC_Loop(SMC_STRUCT *smc){
     // 4.更新历史输入输出值
     smc->run.D_i = Error_value;
     smc->run.I_i = I_in;
-    smc->run.I_o = smc->run.Output;
 }
 

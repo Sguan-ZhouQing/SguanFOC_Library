@@ -6,7 +6,6 @@
 
 typedef struct{
     float I_i;              // (数据)积分项历史输入
-    float I_o;              // (数据)积分项历史输出
     float D_i;              // (数据)微分项历史输入
 
     float I_num;            // (中间量)积分的传递函数分子系数
@@ -23,7 +22,7 @@ typedef struct{
 typedef struct{
     TRADITION_STRUCT run;   // (结构体)传统滑模控制
     
-    float T;               // (参数设计)离散周期
+    float T;                // (参数设计)离散周期
     
     float miu;              // (参数设计)不连续控制增益
     float q;                // (参数设计)切换项增益

@@ -17,15 +17,14 @@
  * @return {*}
  */
 void DOB_Init(DOB_STRUCT *dob){
-    dob->smdo.num = (float)(dob->T/2.0);
-    dob->smdo.Gain0 = (float)(1.5*dob->Pn*dob->Flux/dob->J);
-    dob->smdo.Gain1 = (float)(dob->B/dob->J);
-	dob->smdo.Gain2 = (float)(1.0/dob->J);
+    dob->smdo.I_num = (float)(dob->T/2.0);
+    dob->smdo.O_num = (float)((dob->J*dob->T)/(2.0*dob->J + dob->B*dob->T));
+    dob->smdo.O_den = (float)((2.0*dob->J - dob->B*dob->T)/
+                                (2.0*dob->J + dob->B*dob->T));
+    dob->smdo.Gain0 = (float)((1.5*dob->Pn*dob->Flux)/dob->J);
+    dob->smdo.Gain1 = (float)(1.0/dob->J);
     // 初始化为零
-    dob->smdo.Fd_i = 0.0f;
-    dob->smdo.Wm_i = 0.0f;
-    dob->smdo.Fd_o = 0.0f;
-    dob->smdo.Wm_o = 0.0f;
+    dob->smdo.Output_Wm = 0.0f;
 
     dob->smdo.Input_Iq = 0.0f;
     dob->smdo.Input_Wm = 0.0f;
@@ -39,37 +38,39 @@ void DOB_Init(DOB_STRUCT *dob){
  * @return {*}
  */
 void DOB_Loop(DOB_STRUCT *dob){
-    // 计算扰动转矩大小
-    float dob_0,dob_1,sign;
-    dob_0 = dob->smdo.Input_Iq*dob->smdo.Gain0;
-    dob_1 = dob->smdo.Wm_o*dob->smdo.Gain1;
-    float temp = dob->smdo.Wm_o - dob->smdo.Input_Wm;
-    if (temp > 0){
-        sign = Value_sqrtf(
-            Value_fabsf(temp));
+    // 1.创建局部变量，并运算(part0)
+    float part_main,part0,part1,part2,error_wm,sign,temp_fd;
+    part0 = dob->smdo.Input_Iq*dob->smdo.Gain0;
+
+    // 2.计算扰动力矩(part1)
+    error_wm = dob->smdo.Output_Wm - dob->smdo.Input_Wm;
+    if (error_wm > 0){
+        sign = 1.0f;
     }
     else{
-        sign = -Value_sqrtf(
-            Value_fabsf(temp));
+        sign = -1.0f;
     }
+    temp_fd = sign*dob->K2;
+    dob->smdo.Output_Fd = dob->smdo.I_num*(temp_fd + dob->smdo.Fd_i) + 
+                        dob->smdo.Output_Fd;
+    dob->smdo.Output_Fd = Value_Limit(dob->smdo.Output_Fd,
+                                    dob->OutMax_Fd,
+                                    dob->OutMin_Fd);
+    part1 = dob->smdo.Output_Fd*dob->smdo.Gain1;
+    
+    // 3.计算不连续量(part3)
+    part2 = Value_sqrtf(Value_fabsf(error_wm))*sign*dob->K1;
 
-    // 预估扰动转矩
-    dob->smdo.Output_Fd = dob->smdo.num*(sign + dob->smdo.Fd_i) + 
-                        dob->smdo.Fd_o;
-	dob->smdo.Output_Fd *= dob->K2;
-    dob->smdo.Output_Fd = Value_Limit(dob->smdo.Output_Fd,dob->OutMax,dob->OutMin);
+    // 4.总积分项
+    part_main = part0 - part1 - part2;
+    dob->smdo.Output_Wm = dob->smdo.O_num*(part_main + dob->smdo.Wm_i) + 
+                        dob->smdo.O_den*dob->smdo.Output_Wm;
+    dob->smdo.Output_Wm = Value_Limit(dob->smdo.Output_Wm,
+                                    dob->OutMax_Wm,
+                                    dob->OutMin_Wm);
 
-    // 预估机械角速度
-    float Wm_in = dob_0 - dob_1 - dob->K1*sign - dob->smdo.Output_Fd*dob->smdo.Gain2;
-    dob->smdo.Output_Wm = dob->smdo.num*(Wm_in + dob->smdo.Wm_i) + 
-                        dob->smdo.Wm_o;
-    dob->smdo.Output_Wm = Value_Limit(dob->smdo.Output_Wm,dob->OutMax,dob->OutMin);
-
-    // 更新历史输入输出值
-    dob->smdo.Fd_i = sign;
-    dob->smdo.Wm_i = Wm_in;
-    dob->smdo.Fd_o = dob->smdo.Output_Fd;
-    dob->smdo.Wm_o = dob->smdo.Output_Wm;
+    // 5.更新历史输入输出值
+    dob->smdo.Fd_i = temp_fd;
+    dob->smdo.Wm_i = part_main;
 }
-
 

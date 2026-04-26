@@ -19,12 +19,12 @@ static void Ladrc_LinearControlRate(LADRC_STRUCT *ladrc);
 // 线性跟踪微分器(LTD) - 安排过渡过程
 static void Ladrc_LTD(LADRC_STRUCT *ladrc){
     // 最速控制综合函数 fh = -r^2*(v1-Ref) - 2*r*v2
-    ladrc->run.fh = -ladrc->r * ladrc->r * (ladrc->run.v1 - ladrc->run.Ref) 
-                    - 2.0f * ladrc->r * ladrc->run.v2;
+    ladrc->run.fh = -ladrc->r*ladrc->r*(ladrc->run.v1 - ladrc->run.Ref) 
+                    -2.0f*ladrc->r*ladrc->run.v2;
     
     // 离散化更新 v1 = v1 + h*v2, v2 = v2 + h*fh
-    ladrc->run.v1 += ladrc->run.v2 * ladrc->T;
-    ladrc->run.v2 += ladrc->run.fh * ladrc->T;
+    ladrc->run.v1 += ladrc->run.v2*ladrc->T;
+    ladrc->run.v2 += ladrc->run.fh*ladrc->T;
 }
 
 // 线性扩张状态观测器(LESO) - 估计系统状态和总扰动
@@ -37,10 +37,10 @@ static void Ladrc_LESO(LADRC_STRUCT *ladrc){
      * z2 += (z3 - beta02*e + b0*u_sat) * h
      * z3 += (-beta03*e) * h
      */
-    ladrc->run.z1 += (ladrc->run.z2 - ladrc->data.beta01 * ladrc->run.e) * ladrc->T;
-    ladrc->run.z2 += (ladrc->run.z3 - ladrc->data.beta02 * ladrc->run.e 
-                     + ladrc->b0 * ladrc->run.Output) * ladrc->T;
-    ladrc->run.z3 += (-ladrc->data.beta03 * ladrc->run.e) * ladrc->T;
+    ladrc->run.z1 += (ladrc->run.z2 - ladrc->data.beta01*ladrc->run.e)*ladrc->T;
+    ladrc->run.z2 += (ladrc->run.z3 - ladrc->data.beta02*ladrc->run.e 
+                     + ladrc->b0*ladrc->run.Output)*ladrc->T;
+    ladrc->run.z3 += (-ladrc->data.beta03*ladrc->run.e)*ladrc->T;
 }
 
 // 线性控制率(LSEF/LF) - 计算控制量
@@ -50,13 +50,16 @@ static void Ladrc_LinearControlRate(LADRC_STRUCT *ladrc){
     ladrc->run.e2 = ladrc->run.v2 - ladrc->run.z2;
     
     // 线性反馈控制率 u0 = Kp*e1 + Kd*e2
-    ladrc->run.u0 = ladrc->data.Kp * ladrc->run.e1 + ladrc->data.Kd * ladrc->run.e2;
+    ladrc->run.u0 = ladrc->data.Kp*ladrc->run.e1 + 
+                        ladrc->data.Kd*ladrc->run.e2;
     
     // 扰动补偿 u = (u0 - z3) / b0
-    ladrc->run.Output = (ladrc->run.u0 - ladrc->run.z3) / ladrc->b0;
+    ladrc->run.Output = (ladrc->run.u0 - ladrc->run.z3)/ladrc->b0;
     
     // 输出限幅
-    ladrc->run.Output = Value_Limit(ladrc->run.Output, ladrc->OutMax, ladrc->OutMin);
+    ladrc->run.Output = Value_Limit(ladrc->run.Output, 
+                                    ladrc->OutMax, 
+                                    ladrc->OutMin);
 }
 
 /**
@@ -66,16 +69,16 @@ static void Ladrc_LinearControlRate(LADRC_STRUCT *ladrc){
  */
 void Ladrc_Init(LADRC_STRUCT *ladrc){
     // 控制器参数设置
-    ladrc->data.w0 = 4.0f * ladrc->wc;     // 观测器带宽
+    ladrc->data.w0 = 4.0f*ladrc->wc;     // 观测器带宽
     
     // 计算观测器系数
-    ladrc->data.beta01 = 3.0f * ladrc->data.w0;
-    ladrc->data.beta02 = 3.0f * ladrc->data.w0 * ladrc->data.w0;
-    ladrc->data.beta03 = ladrc->data.w0 * ladrc->data.w0 * ladrc->data.w0;
+    ladrc->data.beta01 = 3.0f*ladrc->data.w0;
+    ladrc->data.beta02 = 3.0f*ladrc->data.w0*ladrc->data.w0;
+    ladrc->data.beta03 = ladrc->data.w0*ladrc->data.w0*ladrc->data.w0;
     
     // 计算控制器系数
-    ladrc->data.Kp = ladrc->wc * ladrc->wc;
-    ladrc->data.Kd = 2.0f * ladrc->wc;
+    ladrc->data.Kp = ladrc->wc*ladrc->wc;
+    ladrc->data.Kd = 2.0f*ladrc->wc;
     
     // 默认输出限幅
     ladrc->OutMax = 2000.0f;

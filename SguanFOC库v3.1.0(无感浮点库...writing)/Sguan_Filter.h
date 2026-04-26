@@ -6,7 +6,7 @@
 
 typedef struct{
     float i[3];             // (数据)历史输入值
-    float o[3];             // (数据)历史输出值
+    float o[2];             // (数据)历史输出值
 
     float Input;            // (数据)Input输入
     float Output;           // (数据)Output输出

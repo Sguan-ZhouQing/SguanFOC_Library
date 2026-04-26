@@ -6,7 +6,7 @@
 
 typedef struct{
     float s[2];             // (数据)滑模面当前值
-    float Io[2];            // (数据)历史积分值
+    float Io;            // (数据)历史积分值
     float I_num;            // (数据)历史积分值
     
     float Ref;              // (输入数据)期望输入值

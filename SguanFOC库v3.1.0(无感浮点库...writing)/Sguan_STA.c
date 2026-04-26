@@ -38,11 +38,11 @@ void STA_Init(STA_STRUCT *sta){
     // 初始化为零
     sta->run.s[0] = 0.0f;
     sta->run.s[1] = 0.0f;
-    sta->run.Io[0] = 0.0f;
-    sta->run.Io[1] = 0.0f;
+    sta->run.Io = 0.0f;
     sta->run.Output = 0.0f;
     sta->run.Ref = 0.0f;
     sta->run.Fbk = 0.0f;
+
     // 积分抗饱和标志位
     sta->run.IntegralFrozen_flag = 0;
 }
@@ -53,57 +53,56 @@ void STA_Init(STA_STRUCT *sta){
  * @return {void}
  */
 void STA_Loop(STA_STRUCT *sta){
-    // 1.刷新历史输入和输出数值
-    sta->run.s[1] = sta->run.s[0];
-    sta->run.Io[1] = sta->run.Io[0];
-
-    // 2.计算滑模面(速度误差)
+    // 1.计算滑模面(速度误差)
     sta->run.s[0] = sta->run.Ref - sta->run.Fbk;
     
-    // 3.获取饱和函数值(替代符号函数)
+    // 2.获取饱和函数值(替代符号函数)
     float abs = Value_fabsf(sta->run.s[0]);
     float sign_s = STA_SignFunction(sta,abs);
     
-    // 4.计算非线性项 u1 = k1 * |s|^(1/2) * sign(s)
+    // 3.计算非线性项 u1 = k1 * |s|^(1/2) * sign(s)
     float nonlinear = sta->k1 * Value_sqrtf(abs) * sign_s;
     
-    // 5.积分项计算 u2 = ∫ k2 * sign(s) dt
-    if(sta->k2 != 0.0f){
+    // 4.积分项计算 u2 = ∫ k2 * sign(s) dt
+    if(sta->k2){
         // 判断是否需要冻结积分
         if(sta->run.IntegralFrozen_flag){
             // 如果积分已冻结，保持上次的积分值
-            sta->run.Io[0] = sta->run.Io[1];
 
             // 积分已冻结，保持上次值
             // 检查是否可以解除冻结
             // 情况1：滑模面符号与积分项符号相反(系统正在退出饱和)
             // 情况2：积分值回到限幅范围内
-            if((sta->run.s[0] * sta->run.Io[0] < 0) ||
-               (sta->run.Io[0] < sta->IntMax && sta->run.Io[0] > sta->IntMin)){
+            if((sta->run.s[0] * sta->run.Io < 0) ||
+               ((sta->run.Io < sta->IntMax) && 
+               (sta->run.Io > sta->IntMin))){
                 sta->run.IntegralFrozen_flag = 0;
             }
         }
         else{
             // 正常计算积分
-            sta->run.Io[0] = sta->run.I_num*sta->run.s[0] + sta->run.I_num*sta->run.s[1] 
-                        + sta->run.Io[1];
+            sta->run.Io = sta->run.I_num*(sta->run.s[0] + sta->run.s[1]) 
+                        + sta->run.Io;
             
             // 积分限幅检查
-            if(sta->run.Io[0] > sta->IntMax){
-                sta->run.Io[0] = sta->IntMax;
+            if(sta->run.Io > sta->IntMax){
+                sta->run.Io = sta->IntMax;
                 sta->run.IntegralFrozen_flag = 1;
             }
-            else if(sta->run.Io[0] < sta->IntMin){
-                sta->run.Io[0] = sta->IntMin;
+            else if(sta->run.Io < sta->IntMin){
+                sta->run.Io = sta->IntMin;
                 sta->run.IntegralFrozen_flag = 1;
             }
         }
     }
     
-    // 6.计算总输出 u = u1 + u2
-    sta->run.Output = nonlinear + sta->run.Io[0];
-    
-    // 7.输出限幅
-    sta->run.Output = Value_Limit(sta->run.Output, sta->OutMax, sta->OutMin);
+    // 5.计算总输出并限幅
+    sta->run.Output = nonlinear + sta->run.Io;
+    sta->run.Output = Value_Limit(sta->run.Output, 
+                                sta->OutMax, 
+                                sta->OutMin);
+
+    // 6.刷新历史输入和输出数值
+    sta->run.s[1] = sta->run.s[0];
 }
 

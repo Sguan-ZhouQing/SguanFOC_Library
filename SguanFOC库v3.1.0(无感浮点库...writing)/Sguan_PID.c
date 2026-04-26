@@ -24,15 +24,13 @@ void PID_Init(PID_STRUCT *pid){
     pid->run.D_num = (float)((2*temp2)/(-2+temp1));
     pid->run.D_den = (float)((2+temp1)/(-2+temp1));
     // 初始化为零
-    for (int n = 0; n < 2; n++){
-        pid->run.i[n] = 0;
-        pid->run.Io[n] = 0;
-        pid->run.Do[n] = 0;
-    }
-    pid->run.Ref = 0;
-    pid->run.Fbk = 0;
-    pid->run.Output = 0;
-    pid->run.IntegralFrozen_flag = 0;
+    pid->run.i[0] = 0.0f;
+    pid->run.i[1] = 0.0f;
+
+    pid->run.Ref = 0.0f;
+    pid->run.Fbk = 0.0f;
+    pid->run.Output = 0.0f;
+    pid->run.IntegralFrozen_flag = 0.0f;
 }
 
 /**
@@ -41,51 +39,51 @@ void PID_Init(PID_STRUCT *pid){
  * @return {*}
  */
 void PID_Loop(PID_STRUCT *pid){
-    // 1.刷新历史输入和输出数值
-    pid->run.i[1] = pid->run.i[0];
-    pid->run.Io[1] = pid->run.Io[0];
-    pid->run.Do[1] = pid->run.Do[0];
-    
-    // 2.计算比例、积分、微分项
+    // 1.计算比例、积分、微分项
     pid->run.i[0] = pid->run.Ref - pid->run.Fbk;
     if (pid->Ki){
         // 判断是否需要冻结积分
         if (pid->run.IntegralFrozen_flag){
             // 如果积分已冻结，保持上次的积分值
-            pid->run.Io[0] = pid->run.Io[1];
             
             // 检查是否可以解除冻结
             // 情况1：误差反向（误差符号与积分输出符号相反）
             // 情况2：积分值回到限幅范围内
-            if ((pid->run.i[0] * pid->run.Io[0] < 0) ||  // 误差反向
-                (pid->run.Io[0] < pid->IntMax && pid->run.Io[0] > pid->IntMin)){
+            if ((pid->run.i[0]*pid->run.Io < 0) ||  // 误差反向
+                ((pid->run.Io < pid->IntMax) && 
+                (pid->run.Io > pid->IntMin))){
                 pid->run.IntegralFrozen_flag = 0;
             }
         } else {
             // 正常计算积分
-            pid->run.Io[0] = pid->run.I_num*pid->run.i[0] + pid->run.I_num*pid->run.i[1] 
-                        + pid->run.Io[1];
+            pid->run.Io = pid->run.I_num*(pid->run.i[0] + pid->run.i[1]) 
+                        + pid->run.Io;
             
             // 检查是否达到限幅，达到则冻结积分
-            if (pid->run.Io[0] > pid->IntMax){
-                pid->run.Io[0] = pid->IntMax;
+            if (pid->run.Io > pid->IntMax){
+                pid->run.Io = pid->IntMax;
                 pid->run.IntegralFrozen_flag = 1;
             }
-            else if (pid->run.Io[0] < pid->IntMin){
-                pid->run.Io[0] = pid->IntMin;
+            else if (pid->run.Io < pid->IntMin){
+                pid->run.Io = pid->IntMin;
                 pid->run.IntegralFrozen_flag = 1;
             }
         }
     }
     if (pid->Kd){
-        pid->run.Do[0] = pid->run.D_num*pid->run.i[0] + pid->run.D_num*pid->run.i[1] 
-                    - pid->run.D_den*pid->run.Do[1];
+        pid->run.Do = pid->run.D_num*(pid->run.i[0] + pid->run.i[1]) -  
+                    pid->run.D_den*pid->run.Do;
     }
 
-    // 3.运算控制器输出量
-    pid->run.Output = pid->run.i[0]*pid->Kp + pid->run.Io[0] + pid->run.Do[0];
+    // 2.运算控制器输出量
+    pid->run.Output = pid->run.i[0]*pid->Kp + pid->run.Io + pid->run.Do;
 
-    // 4.输出限幅
-    pid->run.Output = Value_Limit(pid->run.Output,pid->OutMax,pid->OutMin);
+    // 3.输出限幅
+    pid->run.Output = Value_Limit(pid->run.Output, 
+                                pid->OutMax, 
+                                pid->OutMin);
+    
+    // 4.刷新历史输入和输出数值
+    pid->run.i[1] = pid->run.i[0];
 }
 

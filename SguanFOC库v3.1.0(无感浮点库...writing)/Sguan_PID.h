@@ -6,8 +6,8 @@
 
 typedef struct{
     float i[2];             // (数据)数据历史输入值
-    float Io[2];            // (数据)积分历史输出值
-    float Do[2];            // (数据)微分历史输出值
+    float Io;               // (数据)积分历史输出值
+    float Do;               // (数据)微分历史输出值
 
     float Ref;              // (输入数据)Target期望数值
     float Fbk;              // (输出数据)Real真实反馈数据
