@@ -11,10 +11,8 @@
  */
 #include "Sguan_PID.h"
 
-// 闭环系统PID核心参数初始化，主函数调用
-
 /**
- * @description: 
+ * @description: 闭环系统PID核心参数初始化
  * @param {PID_STRUCT} *pid
  * @return {*}
  */
@@ -37,10 +35,8 @@ void PID_Init(PID_STRUCT *pid){
     pid->run.IntegralFrozen_flag = 0;
 }
 
-// 闭环控制运算的定时器中断服务函数
-
 /**
- * @description: 
+ * @description: 闭环控制运算的离散服务函数
  * @param {PID_STRUCT} *pid
  * @return {*}
  */

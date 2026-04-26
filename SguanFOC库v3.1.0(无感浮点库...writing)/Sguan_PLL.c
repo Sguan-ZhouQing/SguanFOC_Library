@@ -11,10 +11,8 @@
  */
 #include "Sguan_PLL.h"
 
-// 锁相环PLL核心参数初始化，主函数调用
-
 /**
- * @description: 
+ * @description: 锁相环PLL核心参数初始化
  * @param {PLL_STRUCT} *pll
  * @return {*}
  */
@@ -33,10 +31,8 @@ void PLL_Init(PLL_STRUCT *pll){
     pll->go.Error = 0;
 }
 
-// 闭环控制运算的定时器中断服务函数
-
 /**
- * @description: 
+ * @description: 锁相环运算的离散函数
  * @param {PLL_STRUCT} *pll
  * @return {*}
  */

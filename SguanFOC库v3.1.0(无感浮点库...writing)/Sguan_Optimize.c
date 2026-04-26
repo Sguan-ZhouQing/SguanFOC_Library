@@ -11,10 +11,8 @@
  */
 #include "Sguan_Optimize.h"
 
-// 经典最大转矩电流id计算公式
-
 /**
- * @description: 
+ * @description: 经典最大转矩电流id计算公式
  * @param {float} *Target_id
  * @param {float} flux
  * @param {float} Ld
@@ -28,3 +26,7 @@ void MTPA_Loop(float *Target_id,float flux,float Ld,float Lq,float iq){
                 ((Ld - Lq)*4);
 }
 
+
+void FW_Loop(void){
+    
+}

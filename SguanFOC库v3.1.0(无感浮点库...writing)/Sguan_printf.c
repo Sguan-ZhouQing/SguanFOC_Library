@@ -113,10 +113,8 @@ static void Printf_Adjust(void){
     memset(Sguan_PrintfBuff, 0, sizeof(Sguan_PrintfBuff));
 }
 
-// [初始化]初始化JustFloat数据帧尾
-
 /**
- * @description: 
+ * @description: 初始化JustFloat数据帧尾
  * @param {PRINTF_STRUCT} *str
  * @return {*}
  */
@@ -170,3 +168,4 @@ void Printf_RX_Loop(uint8_t *data, uint16_t length){
         }
     }
 }
+

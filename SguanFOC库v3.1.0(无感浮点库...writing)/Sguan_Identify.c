@@ -13,7 +13,7 @@
 #include "Sguan_Identify.h"
 
 /**
- * @description: 
+ * @description: 电机参数辨识简易版
  * @param {IDENTIFY_STRUCT} *identify
  * @param {uint32_t} ms
  * @return {*}

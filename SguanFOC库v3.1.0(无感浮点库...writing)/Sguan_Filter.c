@@ -11,10 +11,8 @@
  */
 #include "Sguan_Filter.h"
 
-// 二阶典型环节参数初始化，主函数调用
-
 /**
- * @description: 
+ * @description: 二阶低通滤波器参数初始化
  * @param {LPF_STRUCT} *lpf
  * @return {*}
  */
@@ -36,10 +34,8 @@ void LPF_Init(LPF_STRUCT *lpf){
     lpf->filter.Output = 0;
 }
 
-// 定时器1ms中断服务函数
-
 /**
- * @description: 
+ * @description: 滤波器离散服务函数
  * @param {LPF_STRUCT} *lpf
  * @return {*}
  */

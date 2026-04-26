@@ -11,10 +11,8 @@
  */
 #include "Sguan_Hall.h"
 
-// 霍尔信号处理的运行函数
-
 /**
- * @description: 
+ * @description: 霍尔信号处理的运行函数
  * @param {uint8_t} Signal_A
  * @param {uint8_t} Signal_B
  * @param {uint8_t} Signal_C

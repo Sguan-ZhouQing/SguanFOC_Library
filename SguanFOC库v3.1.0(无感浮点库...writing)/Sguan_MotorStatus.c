@@ -46,10 +46,8 @@ static void (*const status_handlers[])(void) = {
     DISABLED_Loop
 };
 
-// 核心函数MotorStatus_Loop函数
-
 /**
- * @description: 
+ * @description: 核心函数MotorStatus_Loop函数
  * @param {uint8_t} *status
  * @return {*}
  */

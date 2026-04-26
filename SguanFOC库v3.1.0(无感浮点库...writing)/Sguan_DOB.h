@@ -13,6 +13,7 @@ typedef struct{
 
     float Gain0;            // (中间量)输入增益
     float Gain1;            // (中间量)输入增益
+	float Gain2;            // (中间量)输入增益
 
     float Input_Iq;         // (输入数据)输真实的Q轴电流
     float Input_Wm;         // (输入数据)真实的机械角速度
