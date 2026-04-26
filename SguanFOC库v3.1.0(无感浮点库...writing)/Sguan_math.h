@@ -6,12 +6,12 @@
 #include <stdio.h>
 
 // 常量宏定义
-#define Value_PI            3.141592653589793f
-#define Value_PI_2          1.570796326794896f
-#define Value_2PI           6.283185307179586f
-#define Value_INV_SQRT3     0.5773502691896257f
-#define Value_SQRT3_2       0.8660254037844386f
-#define Value_2_SQRT2       2.8284271247461903f 
+#define Value_PI            3.141592653589793f      // 圆周率数值
+#define Value_PI_2          1.570796326794896f      // 二分之一pi
+#define Value_2PI           6.283185307179586f      // 2pi的数值
+#define Value_INV_SQRT3     0.5773502691896257f     // 根号三分之壹
+#define Value_SQRT3_2       0.8660254037844386f     // 二分之根号三
+#define Value_2_SQRT2       2.8284271247461903f     // 根号二分之二
 
 // 重写C标准库Value...f
 float Value_maxf(float a, float b);
