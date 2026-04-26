@@ -36,18 +36,16 @@ void SMC_Init(SMC_STRUCT *smc){
  */
 void SMC_Loop(SMC_STRUCT *smc){
     // 1.计算误差和滑模微分
-    float Error_value = smc->run.Ref - smc->run.Fbk;
-    float D_value = (Error_value - smc->run.D_i)/smc->T;
-    float Value = smc->C*Error_value + D_value;
+    float Error_value,D_value,Value,I_in;
+    Error_value = smc->run.Ref - smc->run.Fbk;
+    D_value = (Error_value - smc->run.D_i)/smc->T;
+    Value = smc->C*Error_value + D_value;
 
     // 2.计算滑模积分输入量
-    float I_in;
-    if (Value > 0){
-        I_in = (smc->q*Value + smc->miu + smc->C*D_value)*smc->Gain;
-    }
-    else{
-        I_in = (smc->q*Value - smc->miu + smc->C*D_value)*smc->Gain;
-    }
+    I_in = (Value_Sign(Value)*smc->miu + 
+                smc->q*Value + 
+                smc->C*D_value)*
+                smc->Gain;
 
     // 3.积分限幅
     if (smc->run.IntegralFrozen_flag){

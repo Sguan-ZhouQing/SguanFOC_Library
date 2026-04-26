@@ -2,7 +2,7 @@
 #define __SGUAN_SMC_H
 
 /* SguanFOC配置文件声明 */
-#include "stdint.h"
+#include "Sguan_Config.h"
 
 typedef struct{
     float I_i;              // (数据)积分项历史输入

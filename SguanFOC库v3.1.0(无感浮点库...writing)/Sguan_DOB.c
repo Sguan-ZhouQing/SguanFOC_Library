@@ -34,6 +34,8 @@ void DOB_Init(DOB_STRUCT *dob){
 
 /**
  * @description: 超螺旋滑模DOB的离散运行函数
+ * @reminder: https://github.com/Sguan-ZhouQing/SguanFOC_Library/blob/main/%E6%9C%80%E6%96%B0example%E5%8F%8A%E8%B5%84%E6%96%99%5BSTM32G4%2C%E4%B8%8B%E6%A1%A5%E8%87%82%E5%8F%8C%E7%94%B5%E9%98%BB%5D/%E3%80%90Simulink%E3%80%91Sguan%E5%AD%90%E6%A8%A1%E5%9D%97%E5%8E%9F%E7%90%86%E5%9B%BE/Sguan_DOB.png
+ * @reminder: (上方链接是此Sguan_DOB模块Simulink原理仿真图)
  * @param {DOB_STRUCT} *dob
  * @return {*}
  */
@@ -44,12 +46,7 @@ void DOB_Loop(DOB_STRUCT *dob){
 
     // 2.计算扰动力矩(part1)
     error_wm = dob->smdo.Output_Wm - dob->smdo.Input_Wm;
-    if (error_wm > 0){
-        sign = 1.0f;
-    }
-    else{
-        sign = -1.0f;
-    }
+    sign = Value_Sign(error_wm);
     temp_fd = sign*dob->K2;
     dob->smdo.Output_Fd += dob->smdo.I_num*(temp_fd + dob->smdo.Fd_i);
     dob->smdo.Output_Fd = Value_Limit(dob->smdo.Output_Fd,

@@ -82,6 +82,14 @@
 #define Open_FW_Calculate 0
 
 /**
+ * @description: 宏定义0或1决定“DeadZone死区补偿”是否开启(默认关闭)
+ * @reminder: 0->不开启MOS或者IGBT的死区补偿
+ * @reminder: 1->开启DeadZone死区补偿算法(电流方向的前馈补偿)
+ * @return {*}
+ */
+#define Open_DeadZone_Calculate 0
+
+/**
  * @description: 宏定义决定UART或者CAN发送数据的模式
  * @reminder: (Open_Printf_Debug)0->发送正常数据
  * @reminder: 1->仅发送Debug数据，不发送正常数据

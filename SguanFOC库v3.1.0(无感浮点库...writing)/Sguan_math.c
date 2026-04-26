@@ -106,6 +106,16 @@ int8_t Value_set(int8_t val, int8_t max, int8_t min){
     return val;
 }
 
+// 数值计算的Sign符号函数
+float Value_Sign(float value){
+    if (value > 0){
+        return 1.0f;
+    }
+    else{
+        return -1.0f;
+    }
+}
+
 // 电机角度积分函数
 float Value_Rad_Loop(float Rad_s, float T){
     static float angle = 0.0f;  // 静态变量保存角度值

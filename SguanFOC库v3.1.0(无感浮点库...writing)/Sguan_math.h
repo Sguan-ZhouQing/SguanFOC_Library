@@ -25,6 +25,7 @@ float Value_sqrtf(float x);
 float Value_Limit(float val, float max, float min);
 float Value_normalize(float angle);
 int8_t Value_set(int8_t val, int8_t max, int8_t min);
+float Value_Sign(float value);
 
 // 电机角度生成器
 float Value_Rad_Loop(float Rad_s, float T);
