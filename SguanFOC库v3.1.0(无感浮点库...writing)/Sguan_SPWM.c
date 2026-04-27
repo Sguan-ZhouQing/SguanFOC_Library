@@ -23,23 +23,23 @@ void SPWM(float u_alpha, float u_beta,
           float *d_u, float *d_v, float *d_w) {
     
     // SPWM+三次谐波注入需要幅值缩放才能等效SVPWM
-    // 1. 等幅值逆变换 → 三相电压(范围 -0.577 到 0.577)
+    // 1.等幅值逆变换 → 三相电压(范围 -0.577 到 0.577)
     float u_a = u_alpha * Value_INV_SQRT3;
     float u_b = (-0.5f*u_alpha + Value_SQRT3_2*u_beta)*Value_INV_SQRT3;
     float u_c = (-0.5f*u_alpha - Value_SQRT3_2*u_beta)*Value_INV_SQRT3;
     
-    // 2. 注入零序分量(三次谐波)，等效 SVPWM
+    // 2.注入零序分量(三次谐波)，等效 SVPWM
     float u_max = Value_maxf(u_a, Value_maxf(u_b, u_c));
     float u_min = Value_minf(u_a, Value_minf(u_b, u_c));
     float u_zero = -(u_max + u_min) * 0.5f;  // 零序分量
     
-    // 3. 加零序，马鞍波范围再偏移到 [0, 1] 区间
-    //    经过零序注入后，电压范围从 [-0.577,0.577] 扩展到 [-0.5,0.5]
+    // 3.加零序，马鞍波范围再偏移到 [0, 1] 区间
+    //   经过零序注入后，电压范围从 [-0.577,0.577] 扩展到 [-0.5,0.5]
     float v_a = u_a + u_zero + 0.5f;
     float v_b = u_b + u_zero + 0.5f;
     float v_c = u_c + u_zero + 0.5f;
     
-    // 4. 限幅输出
+    // 4.限幅输出
     *d_u = Value_Limit(v_a, 1.0f, 0.0f);
     *d_v = Value_Limit(v_b, 1.0f, 0.0f);
     *d_w = Value_Limit(v_c, 1.0f, 0.0f);
