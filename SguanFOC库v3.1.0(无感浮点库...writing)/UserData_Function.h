@@ -59,11 +59,27 @@ static inline float User_Encoder_ReadRad(void){
     return Rad_num;
 }
 
-static inline float User_Encoder_ReadHall(){
-    float Rad_num = 0.0f;
+static inline uint8_t User_Encoder_ReadHall(uint8_t CH){
+    uint8_t Signal = 0;
     /* Your code for encoder UVW Signal if you use Hall SensorFOC */
-    Rad_num = SS_Encoder_GetRad();
-    return Rad_num;
+    switch (CH){
+    case 0:
+        /* Your code for Hall CH0 raw */
+        // like：Signal = HAL_GPIO_ReadPin(GPIOA,GPIO_PIN_0);
+        break;
+    case 1:
+        /* Your code for Hall CH1 raw */
+        // like：Signal = HAL_GPIO_ReadPin(GPIOA,GPIO_PIN_1);
+        break;
+    case 2:
+        /* Your code for Hall CH2 raw */
+        // like：Signal = HAL_GPIO_ReadPin(GPIOA,GPIO_PIN_2);
+        break;
+    
+    default:
+        break;
+    }
+    return Signal;
 }
 
 static inline void User_PwmDuty_Set(uint32_t Duty_u,
@@ -80,16 +96,16 @@ static inline float User_VBUS_DataGet(void){
     // float VBUS_num = 0.0f;
     /* Your code for motor VBUS_Voltage Data return if you use it */
     
-    // 如果不使用电压功能，返回-9999.0f（正常电压不会是负数）
-    return -9999.0f;
+    // 如果不使用电压功能，返回0xFF800000（正常数值不会是负无穷）
+    return 0xFF800000;
 }
 
 static inline float User_Temperature_DataGet(void){
     // float Temp_num = 0.0f;
     /* Your code for motor Temperature Data return if you use it */
     
-    // 如果不使用温度功能，返回-9999.0f（正常温度不会是这么大的负数）
-    return -9999.0f;
+    // 如果不使用温度功能，返回0xFF800000（正常数值不会是负无穷）
+    return 0xFF800000;
 }
 
 /* ================= 驱动代码(驱动层) ================= */

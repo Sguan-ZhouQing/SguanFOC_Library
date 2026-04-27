@@ -4,28 +4,28 @@
 /* 电机控制User用户设置·BPF和PID和PLL运行参数 */
 
 static inline void User_ParameterSet(void){
-    // 1.bpf低通滤波器设计
-    Sguan.transfer.LPF_D.Wc = 31415.96f;         // 电机D轴电流滤波->截止频率(默认参数)
-    Sguan.transfer.LPF_Q.Wc = 31415.96f;         // 电机Q轴电流滤波->截止频率(默认参数)
-    Sguan.transfer.LPF_encoder.Wc = 300.0f;             // 速度信号滤波->截止频率(默认参数)
-    // 2.pid闭环控制系统设计
-    Sguan.transfer.Current_D.Wc = 100.0f;           // PID电流环D轴参数->截止频率(默认参数)
-    Sguan.transfer.Current_D.Kp = 0.3425f;          // PID电流环D轴参数->Kp(核心参数)
-    Sguan.transfer.Current_D.Ki = 1257.27f;         // PID电流环D轴参数->Ki(核心参数)
-    Sguan.transfer.Current_D.Kd = 0.0f;             // PID电流环D轴参数->Kd(参数)
-    Sguan.transfer.Current_D.OutMax = 12.0f;        // PID电流环D轴参数->最大限幅(默认参数)
-    Sguan.transfer.Current_D.OutMin = -12.0f;       // PID电流环D轴参数->最小限幅(默认参数)
-    Sguan.transfer.Current_D.IntMax = 50.0f;        // PID电流环D轴参数->积分项上限(默认参数)
-    Sguan.transfer.Current_D.IntMin = -50.0f;       // PID电流环D轴参数->积分项下限(默认参数)
-    /* ============================== 分割线 ============================ */
-    Sguan.transfer.Current_Q.Wc = 100.0f;           // PID电流环Q轴参数->截止频率(默认参数)
-    Sguan.transfer.Current_Q.Kp = 0.3425f;          // PID电流环Q轴参数->Kp(核心参数)
-    Sguan.transfer.Current_Q.Ki = 1257.27f;         // PID电流环Q轴参数->Ki(核心参数)
-    Sguan.transfer.Current_Q.Kd = 0.0f;             // PID电流环Q轴参数->Kd(参数)
-    Sguan.transfer.Current_Q.OutMax = 12.0f;        // PID电流环Q轴参数->最大限幅(默认参数)
-    Sguan.transfer.Current_Q.OutMin = -12.0f;       // PID电流环Q轴参数->最小限幅(默认参数)
-    Sguan.transfer.Current_Q.IntMax = 50.0f;        // PID电流环Q轴参数->积分项上限(默认参数)
-    Sguan.transfer.Current_Q.IntMin = -50.0f;       // PID电流环Q轴参数->积分项下限(默认参数)
+    // 1.LPF低通滤波器设计
+    Sguan.transfer.LPF_D.Wc = 31415.96f;            // 电机D轴电流滤波->截止频率
+    Sguan.transfer.LPF_Q.Wc = 31415.96f;            // 电机Q轴电流滤波->截止频率
+    Sguan.transfer.LPF_encoder.Wc = 300.0f;         // 速度信号滤波->截止频率
+    // 2.闭环控制系统设计
+    Sguan.transfer.Current_D.Wc = 100.0f;           // PID电流环D轴参数->微分滤波
+    Sguan.transfer.Current_D.Kp = 0.3425f;          // PID电流环D轴参数->Kp
+    Sguan.transfer.Current_D.Ki = 1257.27f;         // PID电流环D轴参数->Ki
+    Sguan.transfer.Current_D.Kd = 0.0f;             // PID电流环D轴参数->Kd
+    Sguan.transfer.Current_D.OutMax = 12.0f;        // PID电流环D轴参数->最大限幅
+    Sguan.transfer.Current_D.OutMin = -12.0f;       // PID电流环D轴参数->最小限幅
+    Sguan.transfer.Current_D.IntMax = 50.0f;        // PID电流环D轴参数->积分项上限
+    Sguan.transfer.Current_D.IntMin = -50.0f;       // PID电流环D轴参数->积分项下限
+    /* =================================== 分割线 ================================= */
+    Sguan.transfer.Current_Q.Wc = 100.0f;           // PID电流环Q轴参数->微分滤波
+    Sguan.transfer.Current_Q.Kp = 0.3425f;          // PID电流环Q轴参数->Kp
+    Sguan.transfer.Current_Q.Ki = 1257.27f;         // PID电流环Q轴参数->Ki
+    Sguan.transfer.Current_Q.Kd = 0.0f;             // PID电流环Q轴参数->Kd
+    Sguan.transfer.Current_Q.OutMax = 12.0f;        // PID电流环Q轴参数->最大限幅
+    Sguan.transfer.Current_Q.OutMin = -12.0f;       // PID电流环Q轴参数->最小限幅
+    Sguan.transfer.Current_Q.IntMax = 50.0f;        // PID电流环Q轴参数->积分项上限
+    Sguan.transfer.Current_Q.IntMin = -50.0f;       // PID电流环Q轴参数->积分项下限
 
     #if Switch_Control_Velocity==1
     Sguan.transfer.Velocity.r = 50.0f;              // 双环速度外环speed的LADRC->速度因子
@@ -50,14 +50,14 @@ static inline void User_ParameterSet(void){
     Sguan.transfer.Velocity.IntMax = 50.0f;         // 双环速度外环speed的STA->积分限幅
     Sguan.transfer.Velocity.IntMin = -50.0f;        // 双环速度外环speed的STA->积分限幅
     #else // Switch_Control_Velocity
-    Sguan.transfer.Velocity.Wc = 100.0f;            // 双环速度外环speed的PID
-    Sguan.transfer.Velocity.Kp = 0.06f;             // 双环速度外环speed的PID
-    Sguan.transfer.Velocity.Ki = 0.4f;              // 双环速度外环speed的PID
-    Sguan.transfer.Velocity.Kd = 0.0f;              // 双环速度外环speed的PID
-    Sguan.transfer.Velocity.OutMax = 10.5f;         // 双环速度外环speed的PID
-    Sguan.transfer.Velocity.OutMin = -10.5f;        // 双环速度外环speed的PID
-    Sguan.transfer.Velocity.IntMax = 15000.0f;      // 双环速度外环speed的PID
-    Sguan.transfer.Velocity.IntMin = -15000.0f;     // 双环速度外环speed的PID
+    Sguan.transfer.Velocity.Wc = 100.0f;            // 双环速度外环speed的PID->微分滤波
+    Sguan.transfer.Velocity.Kp = 0.06f;             // 双环速度外环speed的PID->Kp
+    Sguan.transfer.Velocity.Ki = 0.4f;              // 双环速度外环speed的PID->Ki
+    Sguan.transfer.Velocity.Kd = 0.0f;              // 双环速度外环speed的PID->Kd
+    Sguan.transfer.Velocity.OutMax = 10.5f;         // 双环速度外环speed的PID->最大限幅
+    Sguan.transfer.Velocity.OutMin = -10.5f;        // 双环速度外环speed的PID->最小限幅
+    Sguan.transfer.Velocity.IntMax = 15000.0f;      // 双环速度外环speed的PID->积分项上限
+    Sguan.transfer.Velocity.IntMin = -15000.0f;     // 双环速度外环speed的PID->积分项下限
     #endif // Switch_Control_Velocity
 
     #if Switch_Control_Position==1
@@ -83,25 +83,31 @@ static inline void User_ParameterSet(void){
     Sguan.transfer.Velocity.IntMax = 50.0f;         // 高性能伺服三环pos的STA->积分限幅
     Sguan.transfer.Velocity.IntMin = -50.0f;        // 高性能伺服三环pos的STA->积分限幅
     #else // Switch_Control_Position
-    Sguan.transfer.Position.Wc = 100.0f;            // 高性能伺服三环pos的PID
-    Sguan.transfer.Position.Kp = 7.0f;              // 高性能伺服三环pos的PID
-    Sguan.transfer.Position.Ki = 0.0f;              // 高性能伺服三环pos的PID
-    Sguan.transfer.Position.Kd = 0.0f;              // 高性能伺服三环pos的PID
-    Sguan.transfer.Position.OutMax = 230.0f;        // 高性能伺服三环pos的PID
-    Sguan.transfer.Position.OutMin = -230.0f;       // 高性能伺服三环pos的PID
-    Sguan.transfer.Position.IntMax = 150.0f;        // 高性能伺服三环pos的PID
-    Sguan.transfer.Position.IntMin = -150.0f;       // 高性能伺服三环pos的PID
+    Sguan.transfer.Position.Wc = 100.0f;            // 高性能伺服三环pos的PID->截止频率
+    Sguan.transfer.Position.Kp = 7.0f;              // 高性能伺服三环pos的PID->Kp
+    Sguan.transfer.Position.Ki = 0.0f;              // 高性能伺服三环pos的PID->Ki
+    Sguan.transfer.Position.Kd = 0.0f;              // 高性能伺服三环pos的PID->Kd
+    Sguan.transfer.Position.OutMax = 230.0f;        // 高性能伺服三环pos的PID->最大限幅
+    Sguan.transfer.Position.OutMin = -230.0f;       // 高性能伺服三环pos的PID->最小限幅
+    Sguan.transfer.Position.IntMax = 150.0f;        // 高性能伺服三环pos的PID->积分项上限
+    Sguan.transfer.Position.IntMin = -150.0f;       // 高性能伺服三环pos的PID->积分项下限
     #endif // Switch_Control_Position
 
     Sguan.transfer.Response = 5;                    // (uint8_t)响应带宽倍数(核心参数)
-    // 3.pll锁相环跟踪系统
-    Sguan.transfer.PLL.Kp = 650.0f;                 // 锁相环比例项增益(核心参数)
-    Sguan.transfer.PLL.Ki = 210000.0f;              // 锁相环积分项增益(核心参数)
-    // 4.DOB
-    Sguan.transfer.DOB.K1 = 2.0f;                   // 扰动观测器
-    Sguan.transfer.DOB.K2 = 3.0f;                   // 扰动观测器
-    Sguan.transfer.DOB.OutMax = 10.5f;              // 扰动观测器
-    Sguan.transfer.DOB.OutMin = -10.5f;             // 扰动观测器
+    // 3.Hall三霍尔信号处理
+    Sguan.transfer.Hall.Wc = 100.0f;                // 霍尔信号处理->滤波截止频率
+    Sguan.transfer.Hall.Hall_High = 0.6f;           // 霍尔信号处理->信号上边界
+    Sguan.transfer.Hall.Hall_Low = 0.4f;            // 霍尔信号处理->信号下边界
+    // 4.PLL锁相环跟踪系统
+    Sguan.transfer.PLL.Kp = 650.0f;                 // 锁相环->比例项增益
+    Sguan.transfer.PLL.Ki = 210000.0f;              // 锁相环->积分项增益
+    // 5.DOB扰动观测器设计
+    Sguan.transfer.DOB.K1 = 2.0f;                   // 扰动观测器->比例项增益
+    Sguan.transfer.DOB.K2 = 3.0f;                   // 扰动观测器->积分项增益
+    Sguan.transfer.DOB.OutMax_Fd = 10.5f;           // 扰动观测器->输出限幅
+    Sguan.transfer.DOB.OutMin_Fd = -10.5f;          // 扰动观测器->输出限幅
+    Sguan.transfer.DOB.OutMax_Wm = 10.5f;           // 扰动观测器->输出限幅
+    Sguan.transfer.DOB.OutMin_Wm = -10.5f;          // 扰动观测器->输出限幅
 }
 
 

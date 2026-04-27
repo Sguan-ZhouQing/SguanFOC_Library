@@ -12,6 +12,7 @@
 #define Value_INV_SQRT3     0.5773502691896257f     // 根号三分之壹
 #define Value_SQRT3_2       0.8660254037844386f     // 二分之根号三
 #define Value_2_SQRT2       2.8284271247461903f     // 根号二分之二
+#define Value_N_INF         0xFF800000              // (负无穷数)
 
 // 重写C标准库Value...f
 float Value_maxf(float a, float b);

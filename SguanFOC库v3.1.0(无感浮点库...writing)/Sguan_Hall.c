@@ -28,7 +28,7 @@ void Hall_Init(HALL_STRUCT *hall){
     hall->rad.Input_Gb = 0;
     hall->rad.Input_Gc = 0;
     hall->rad.Output_Rad = 0.0f;
-    
+
     hall->rad.Hall_A = 0.0f;
     hall->rad.Hall_B = 0.0f;
     hall->rad.Hall_C = 0.0f;
@@ -66,7 +66,7 @@ void Hall_Loop(HALL_STRUCT *hall){
 
     // 4.霍尔数据处理并输出角度值
     Sector = (Signal_a << 2) | (Signal_b << 1) | (Signal_c);
-    hall->rad.Output_Rad = (v[Sector]*Value_2PI)/6.0f;
+    hall->rad.Output_Rad = (v[Sector - 1]*Value_2PI)/6.0f;
 }
 
 

@@ -5,7 +5,7 @@
  * @LastEditors: 星必尘Sguan|3464647102@qq.com
  * @LastEditTime: 2026-04-22 15:25:03
  * @FilePath: \SguanFOC_Debug\SguanFOC\Sguan_Ladrc.c
- * @Description: SguanFOC库的“典型二阶线性自抗扰控制(LADRC)算法”实现
+ * @Description: SguanFOC库的“二阶线性自适应抗干扰控制(LADRC)算法”实现
  * 
  * Copyright (c) 2026 by 星必尘Sguan, All Rights Reserved. 
  */
@@ -37,10 +37,10 @@ static void Ladrc_LESO(LADRC_STRUCT *ladrc){
      * z2 += (z3 - beta02*e + b0*u_sat) * h
      * z3 += (-beta03*e) * h
      */
-    ladrc->run.z1 += (ladrc->run.z2 - ladrc->data.beta01*ladrc->run.e)*ladrc->T;
-    ladrc->run.z2 += (ladrc->run.z3 - ladrc->data.beta02*ladrc->run.e 
+    ladrc->run.z1 += (ladrc->run.z2 - ladrc->data.beta1*ladrc->run.e)*ladrc->T;
+    ladrc->run.z2 += (ladrc->run.z3 - ladrc->data.beta2*ladrc->run.e 
                      + ladrc->b0*ladrc->run.Output)*ladrc->T;
-    ladrc->run.z3 += (-ladrc->data.beta03*ladrc->run.e)*ladrc->T;
+    ladrc->run.z3 += (-ladrc->data.beta3*ladrc->run.e)*ladrc->T;
 }
 
 // 线性控制率(LSEF/LF) - 计算控制量
@@ -72,9 +72,9 @@ void Ladrc_Init(LADRC_STRUCT *ladrc){
     ladrc->data.w0 = 4.0f*ladrc->wc;     // 观测器带宽
     
     // 计算观测器系数
-    ladrc->data.beta01 = 3.0f*ladrc->data.w0;
-    ladrc->data.beta02 = 3.0f*ladrc->data.w0*ladrc->data.w0;
-    ladrc->data.beta03 = ladrc->data.w0*ladrc->data.w0*ladrc->data.w0;
+    ladrc->data.beta1 = 3.0f*ladrc->data.w0;
+    ladrc->data.beta2 = 3.0f*ladrc->data.w0*ladrc->data.w0;
+    ladrc->data.beta3 = ladrc->data.w0*ladrc->data.w0*ladrc->data.w0;
     
     // 计算控制器系数
     ladrc->data.Kp = ladrc->wc*ladrc->wc;

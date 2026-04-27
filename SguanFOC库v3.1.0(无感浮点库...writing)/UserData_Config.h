@@ -32,7 +32,7 @@
 
 /**
  * @description: 宏定义0或1决定“电机参数辨识”额外数据的测量(默认关闭，首次上电需要1)
- * @reminder: 0->不开启电机的参数辨识，针对B和J
+ * @reminder: 0->不开启电机的参数辨识
  * @reminder: 1->开启辨识，只执行基础的Rs、Ld、Lq和Sguan.identify.Encoder_Dir
  * @reminder: 2->开启辨识，执行所有辨识，包括额外的B、J和Flux...需调好电机闭环回路才可开启
  * @reminder: （所有任务之前，可提前填入粗略的参数，让电机勉强运行起来）

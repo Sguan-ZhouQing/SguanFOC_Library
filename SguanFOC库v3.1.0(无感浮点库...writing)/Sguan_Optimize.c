@@ -51,7 +51,7 @@ void DeadZone_Loop(float *Ua_error,
     // 1.计算补偿增益的大小
     static float value = 0.0f;
     if (!value){
-        value = VUBS*(Dead_Time/PMSM_RUN_T);
+        value = VUBS*(Dead_Time/((float)PMSM_RUN_T));
     }
     
     // 2.输出三相补偿量

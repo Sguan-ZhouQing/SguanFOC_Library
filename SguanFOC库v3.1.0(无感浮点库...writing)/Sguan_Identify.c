@@ -12,13 +12,18 @@
  */
 #include "Sguan_Identify.h"
 
+
+void Identify_Init(IDENTIFY_STRUCT *identify){
+    
+}
+
 /**
  * @description: 电机参数辨识简易版
  * @param {IDENTIFY_STRUCT} *identify
  * @param {uint32_t} ms
  * @return {*}
  */
-void Identify_Loop(IDENTIFY_STRUCT *identify,uint32_t ms){
+void Identify_Loop(IDENTIFY_STRUCT *identify){
 
 }
 

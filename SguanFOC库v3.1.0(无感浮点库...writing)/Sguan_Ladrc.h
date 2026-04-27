@@ -30,9 +30,9 @@ typedef struct{
 typedef struct{
     float w0;           // (参数数据~)观测器带宽w0 = 4wc
     
-    float beta01;       // (参数数据~)观测器系数1 = 3*w0
-    float beta02;       // (参数数据~)观测器系数2 = 3*w0^2
-    float beta03;       // (参数数据~)观测器系数3 = w0^3
+    float beta1;       // (参数数据~)观测器系数1 = 3*w0
+    float beta2;       // (参数数据~)观测器系数2 = 3*w0^2
+    float beta3;       // (参数数据~)观测器系数3 = w0^3
     
     float Kp;           // (参数数据~)比例系数 = wc^2
     float Kd;           // (参数数据~)微分系数 = 2*wc

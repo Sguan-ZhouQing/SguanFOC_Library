@@ -27,7 +27,7 @@ void LPF_Init(LPF_STRUCT *lpf){
     lpf->filter.num[2] = (float)(temp2/(temp2+temp1+4.0));
     lpf->filter.den[0] = (float)(-8.0+2.0*temp2)/(temp2+temp1+4.0);
     lpf->filter.den[1] = (float)(temp2-temp1+4.0)/(temp2+temp1+4.0);
-    
+
     // 初始化为零
     lpf->filter.i[0] = 0.0f;
     lpf->filter.i[1] = 0.0f;
@@ -52,7 +52,7 @@ void LPF_Loop(LPF_STRUCT *lpf){
                         lpf->filter.den[0] * lpf->filter.o[0] - 
                         lpf->filter.den[1] * lpf->filter.o[1];
 
-    // 1.更新历史输入和输出数值
+    // 2.更新历史输入和输出数值
     lpf->filter.i[1] = lpf->filter.i[0];
     lpf->filter.i[0] = lpf->filter.Input;
     lpf->filter.o[1] = lpf->filter.o[0];

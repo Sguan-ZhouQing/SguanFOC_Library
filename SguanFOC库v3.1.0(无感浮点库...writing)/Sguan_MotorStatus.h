@@ -6,13 +6,13 @@
 #include "Sguan_Config.h"
 
 // ====== 初始化与运行状态(状态) ======
-#define MOTOR_STATUS_STANDBY                0x00    // 待机（未初始化，准备中）
-#define MOTOR_STATUS_UNINITIALIZED          0x01    // 未初始化
-#define MOTOR_STATUS_INITIALIZING           0x02    // 初始化中（参数加载、外设初始化，编码器零位）
-#define MOTOR_STATUS_CALIBRATING            0x03    // 校准（此时SVPWM可用，用于转子校正）
+#define MOTOR_STATUS_STANDBY                0x00    // 待机(未初始化，准备中)
+#define MOTOR_STATUS_UNINITIALIZED          0x01    // 未初始化(若进入此状态，电机开始初始化)
+#define MOTOR_STATUS_INITIALIZING           0x02    // 初始化中(参数加载、外设初始化，编码器零位)
+#define MOTOR_STATUS_CALIBRATING            0x03    // 校准(此时SVPWM可用，用于转子校正)
 
 // ====== 运行状态(当前反馈) ======
-#define MOTOR_STATUS_IDLE                   0x04    // 空闲（已初始化，使能但零指令）
+#define MOTOR_STATUS_IDLE                   0x04    // 空闲(已初始化，使能但零指令)
 
 #define MOTOR_STATUS_TORQUE_INCREASING      0x05    // 力矩增大中~电流模式(下时刻->力矩保持)
 #define MOTOR_STATUS_TORQUE_DECREASING      0x06    // 力矩减小中~电流模式(下时刻->力矩保持)
@@ -38,8 +38,8 @@
 #define MOTOR_STATUS_PWM_CALC_FAULT         0x15    // PWM计算错误(锁定->手动解除进待机)
 
 // ====== 安全状态(状态) ======
-#define MOTOR_STATUS_EMERGENCY_STOP         0x16    // 急停（立即关闭PWM,会立即锁定->手动解除进待机）
-#define MOTOR_STATUS_DISABLED               0x17    // 已失能（软关闭,会缓慢进入待机->自动进待机）
+#define MOTOR_STATUS_EMERGENCY_STOP         0x16    // 急停(立即关闭PWM,会立即锁定->手动解除进待机)
+#define MOTOR_STATUS_DISABLED               0x17    // 已失能(软关闭,会缓慢进入待机->自动进待机)
 
 // 函数定义声明
 void MotorStatus_Loop(uint8_t *status);
