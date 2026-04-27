@@ -13,11 +13,14 @@
 
 /**
  * @description: 传统滑模控制SMC的初始化函数
+ * @reminder: (初始化相关系数float->double->float)
+ * @reminder: (单浮点转double运算，提高系数精度)
  * @param {SMC_STRUCT} *smc
  * @return {*}
  */
 void SMC_Init(SMC_STRUCT *smc){
-    smc->run.I_num = smc->T/2.0f;
+    smc->run.I_num = (float)(((double)smc->T)/2.0);
+
     // 初始化为零
     smc->run.I_i = 0.0f;
     smc->run.D_i = 0.0f;
@@ -31,6 +34,8 @@ void SMC_Init(SMC_STRUCT *smc){
 
 /**
  * @description: 传统滑模控制SMC的离散运行函数
+ * @reminder: https://github.com/Sguan-ZhouQing/SguanFOC_Library/blob/main/%E6%9C%80%E6%96%B0example%E5%8F%8A%E8%B5%84%E6%96%99%5BSTM32G4%2C%E4%B8%8B%E6%A1%A5%E8%87%82%E5%8F%8C%E7%94%B5%E9%98%BB%5D/%E3%80%90Simulink%E3%80%91Sguan%E5%AD%90%E6%A8%A1%E5%9D%97%E5%8E%9F%E7%90%86%E5%9B%BE/Sguan_SMC.png
+ * @reminder: (上方链接是此Sguan_SMC模块Simulink原理仿真图)
  * @param {SMC_STRUCT} *smc
  * @return {*}
  */

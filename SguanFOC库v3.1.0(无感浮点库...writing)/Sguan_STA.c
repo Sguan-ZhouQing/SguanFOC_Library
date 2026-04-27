@@ -28,12 +28,14 @@ static float STA_SignFunction(STA_STRUCT *sta,float s_abs){
 
 /**
  * @description: 二阶滑模控制器(STA)核心参数初始化
- * @param {STA_STRUCT} *sta STA结构体指针
+ * @reminder: (初始化相关系数float->double->float)
+ * @reminder: (单浮点转double运算，提高系数精度)
+ * @param {STA_STRUCT} *sta
  * @return {void}
  */
 void STA_Init(STA_STRUCT *sta){
     // 初始化所有运行变量为零
-    sta->run.I_num = (float)((sta->k2*sta->T)/2.0);
+    sta->run.I_num = (float)((((double)sta->k2)*((double)sta->T))/2.0);
 
     // 初始化为零
     sta->run.s[0] = 0.0f;
@@ -48,20 +50,22 @@ void STA_Init(STA_STRUCT *sta){
 }
 
 /**
- * @description: STA主循环函数(定时器中断中调用)
+ * @description: STA循环运行函数(定时器中断中调用)
+ * @reminder: https://github.com/Sguan-ZhouQing/SguanFOC_Library/blob/main/%E6%9C%80%E6%96%B0example%E5%8F%8A%E8%B5%84%E6%96%99%5BSTM32G4%2C%E4%B8%8B%E6%A1%A5%E8%87%82%E5%8F%8C%E7%94%B5%E9%98%BB%5D/%E3%80%90Simulink%E3%80%91Sguan%E5%AD%90%E6%A8%A1%E5%9D%97%E5%8E%9F%E7%90%86%E5%9B%BE/Sguan_STA.png
+ * @reminder: (上方链接是此Sguan_STA模块Simulink原理仿真图)
  * @param {STA_STRUCT} *sta STA结构体指针
  * @return {void}
  */
 void STA_Loop(STA_STRUCT *sta){
     // 1.计算滑模面(速度误差)
-    sta->run.s[0] = sta->run.Ref - sta->run.Fbk;
+    float s = sta->run.Ref - sta->run.Fbk;
     
     // 2.获取饱和函数值(替代符号函数)
-    float abs = Value_fabsf(sta->run.s[0]);
-    float sign_s = STA_SignFunction(sta,abs);
+    float abs = Value_fabsf(s);
+    sta->run.s[0] = STA_SignFunction(sta,abs);
     
     // 3.计算非线性项 u1 = k1 * |s|^(1/2) * sign(s)
-    float nonlinear = sta->k1 * Value_sqrtf(abs) * sign_s;
+    float nonlinear = sta->k1 * Value_sqrtf(abs) * sta->run.s[0];
     
     // 4.积分项计算 u2 = ∫ k2 * sign(s) dt
     if(sta->k2){
@@ -81,7 +85,7 @@ void STA_Loop(STA_STRUCT *sta){
         }
         else{
             // 正常计算积分
-            sta->run.Io += sta->run.I_num*(sta->run.s[0] + sta->run.s[1]);
+            sta->run.Io = sta->run.I_num*(sta->run.s[0] + sta->run.s[1]) + sta->run.Io;
             
             // 积分限幅检查
             if(sta->run.Io > sta->IntMax){

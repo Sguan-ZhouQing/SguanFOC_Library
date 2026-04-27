@@ -18,9 +18,9 @@ typedef struct{
 typedef struct{
     GO_STRUCT go;           // (结构体)PID运算结构体
 
-    double T;               // (参数设计)T运算离散周期
-    double Kp;              // (参数设计)Kp比例项增益
-    double Ki;              // (参数设计)Ki积分项增益
+    float T;                // (参数设计)T运算离散周期
+    float Kp;               // (参数设计)Kp比例项增益
+    float Ki;               // (参数设计)Ki积分项增益
 
     uint8_t is_position_mode; // (参数设计)位置环模式标志位
 }PLL_STRUCT;

@@ -13,16 +13,19 @@
 
 /**
  * @description: 闭环系统PID核心参数初始化
+ * @reminder: (初始化相关系数float->double->float)
+ * @reminder: (单浮点转double运算，提高系数精度)
  * @param {PID_STRUCT} *pid
  * @return {*}
  */
 void PID_Init(PID_STRUCT *pid){
-    double temp0 = pid->T*pid->Ki/2.0;
-    double temp1 = pid->T*pid->Wc;
-    double temp2 = pid->Kd*pid->Wc;
+    double temp0 = ((double)pid->T)*((double)pid->Ki)/2.0;
+    double temp1 = ((double)pid->T)*((double)pid->Wc);
+    double temp2 = ((double)pid->Kd)*((double)pid->Wc);
     pid->run.I_num = (float)temp0;
-    pid->run.D_num = (float)((2*temp2)/(-2+temp1));
-    pid->run.D_den = (float)((2+temp1)/(-2+temp1));
+    pid->run.D_num = (float)((2.0*temp2)/(-2.0+temp1));
+    pid->run.D_den = (float)((2.0+temp1)/(-2.0+temp1));
+
     // 初始化为零
     pid->run.i[0] = 0.0f;
     pid->run.i[1] = 0.0f;
@@ -30,7 +33,7 @@ void PID_Init(PID_STRUCT *pid){
     pid->run.Ref = 0.0f;
     pid->run.Fbk = 0.0f;
     pid->run.Output = 0.0f;
-    pid->run.IntegralFrozen_flag = 0.0f;
+    pid->run.IntegralFrozen_flag = 0;
 }
 
 /**

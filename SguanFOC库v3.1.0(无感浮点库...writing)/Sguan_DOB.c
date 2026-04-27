@@ -13,19 +13,27 @@
 
 /**
  * @description: 超螺旋滑模DOB的初始化函数
+ * @reminder: (初始化相关系数float->double->float)
+ * @reminder: (单浮点转double运算，提高系数精度)
  * @param {DOB_STRUCT} *dob
  * @return {*}
  */
 void DOB_Init(DOB_STRUCT *dob){
-    dob->smdo.I_num = (float)(dob->T/2.0);
-    dob->smdo.O_num = (float)((dob->J*dob->T)/(2.0*dob->J + dob->B*dob->T));
-    dob->smdo.O_den = (float)((2.0*dob->J - dob->B*dob->T)/
-                                (2.0*dob->J + dob->B*dob->T));
-    dob->smdo.Gain0 = (float)((1.5*dob->Pn*dob->Flux)/dob->J);
-    dob->smdo.Gain1 = (float)(1.0/dob->J);
+    dob->smdo.I_num = (float)(((double)dob->T)/2.0);
+    dob->smdo.O_num = (float)((((double)dob->J)*((double)dob->T))/
+                            (2.0*((double)dob->J) + 
+                            ((double)dob->B)*((double)dob->T)));
+    dob->smdo.O_den = (float)((2.0*((double)dob->J) - 
+                            ((double)dob->B)*((double)dob->T))/
+                            (2.0*((double)dob->J) + 
+                            ((double)dob->B)*((double)dob->T)));
+    dob->smdo.Gain0 = (float)((1.5*((double)dob->Pn)*
+                            ((double)dob->Flux))/
+                            ((double)dob->J));
+    dob->smdo.Gain1 = (float)(1.0/((double)dob->J));
+
     // 初始化为零
     dob->smdo.Output_Wm = 0.0f;
-
     dob->smdo.Input_Iq = 0.0f;
     dob->smdo.Input_Wm = 0.0f;
     dob->smdo.Output_Fd = 0.0f;

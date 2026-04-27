@@ -35,36 +35,6 @@ float Value_fabsf(float x){
   return u.f;
 }
 
-// 数值isinf判断函数
-int Value_isinf(float x){
-    union{
-        float f;
-        uint32_t i;
-    } u = {x};
-    uint32_t exp_mask = 0x7F800000;
-    uint32_t mant_mask = 0x007FFFFF;
-    
-    if ((u.i & exp_mask) == exp_mask && (u.i & mant_mask) == 0){
-        return 1;
-    }
-    return 0;
-}
-
-// 数值isnan判断函数
-int Value_isnan(float x){
-    union{
-        float f;
-        uint32_t i;
-    } u = {x};
-    
-    uint32_t exp_mask = 0x7F800000;
-    uint32_t mant_mask = 0x007FFFFF;
-    if ((u.i & exp_mask) == exp_mask && (u.i & mant_mask) != 0){
-        return 1;
-    }
-    return 0;
-}
-
 // 数值sqrtf开根号函数
 float Value_sqrtf(float x){
     if (x <= 0.0f) return 0.0f;

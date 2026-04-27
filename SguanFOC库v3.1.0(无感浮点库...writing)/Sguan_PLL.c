@@ -13,14 +13,17 @@
 
 /**
  * @description: 锁相环PLL核心参数初始化
+ * @reminder: (初始化相关系数float->double->float)
+ * @reminder: (单浮点转double运算，提高系数精度)
  * @param {PLL_STRUCT} *pll
  * @return {*}
  */
 void PLL_Init(PLL_STRUCT *pll){
-    double temp0 = pll->T*pll->Ki;
-    pll->go.X_num[0] = (float)((2*pll->Kp+temp0)/2.0);
-    pll->go.X_num[1] = (float)((-2*pll->Kp+temp0)/2.0);
-    pll->go.Y_num = (float)(pll->T/2.0);
+    double temp0 = ((double)pll->T)*((double)pll->Ki);
+    pll->go.X_num[0] = (float)((2.0*((double)pll->Kp)+temp0)/2.0);
+    pll->go.X_num[1] = (float)((-2.0*((double)pll->Kp)+temp0)/2.0);
+    pll->go.Y_num = (float)(((double)pll->T)/2.0);
+
     // 初始化为零
     pll->is_position_mode = 0; // 默认非位置环mode
     pll->go.We_i = 0.0f;

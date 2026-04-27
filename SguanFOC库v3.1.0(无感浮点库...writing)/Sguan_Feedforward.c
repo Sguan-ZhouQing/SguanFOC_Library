@@ -18,8 +18,8 @@
  * @param {float} Iq
  * @return {*}
  */
-float Feedforward_CurrentD(float Espeed,float Lq,float Iq){
-    return -(Espeed*Lq*Iq);
+float Feedforward_CurrentD(float We,float Lq,float Iq){
+    return -(We*Lq*Iq);
 }
 
 /**
@@ -30,8 +30,8 @@ float Feedforward_CurrentD(float Espeed,float Lq,float Iq){
  * @param {float} Flux
  * @return {*}
  */
-float Feedforward_CurrentQ(float Espeed,float Ld,float Id,float Flux){
-    return Espeed*(Ld*Id + Flux);
+float Feedforward_CurrentQ(float We,float Ld,float Id,float Flux){
+    return We*(Ld*Id + Flux);
 }
 
 /**

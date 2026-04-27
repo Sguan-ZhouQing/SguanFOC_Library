@@ -17,8 +17,6 @@
 float Value_maxf(float a, float b);
 float Value_minf(float a, float b);
 float Value_fabsf(float x);
-int Value_isinf(float x);
-int Value_isnan(float x);
 float Value_sqrtf(float x);
 
 // 参数限制函数Value...x

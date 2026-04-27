@@ -23,12 +23,12 @@ typedef struct{
 typedef struct{
     RUN_STRUCT run;         // (结构体)PID运算结构体
 
-    double Wc;              // (参数设计)Wc微分环节一阶低通滤波
-    double T;               // (参数设计)T周期
+    float Wc;               // (参数设计)Wc微分环节一阶低通滤波
+    float T;                // (参数设计)T周期
 
     float Kp;               // (参数设计)Kp比例项增益
-    double Ki;              // (参数设计)Ki积分项增益
-    double Kd;              // (参数设计)Kd微分项增益
+    float Ki;               // (参数设计)Ki积分项增益
+    float Kd;               // (参数设计)Kd微分项增益
 
     float OutMax;           // (参数设计)输出上限限幅
     float OutMin;           // (参数设计)输出下限限幅

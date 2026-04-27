@@ -18,8 +18,8 @@ typedef struct{
 typedef struct{
     FILTER_STRUCT filter;   // (结构体)二阶低通结构体
 
-    double Wc;              // (参数设计)Wc巴特沃斯截止频率
-    double T;               // (参数设计)T周期
+    float Wc;               // (参数设计)Wc巴特沃斯截止频率
+    float T;                // (参数设计)T周期
 }LPF_STRUCT;
 
 void LPF_Init(LPF_STRUCT *bpf);

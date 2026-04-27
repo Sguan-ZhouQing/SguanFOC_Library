@@ -20,8 +20,8 @@ typedef struct{
     STA_RUN_STRUCT run;     // (结构体)STA运算结构体
     
     float k1;               // (参数设计)非线性增益
-    double k2;              // (参数设计)积分增益
-    double T;               // (参数设计)积分步长_采样周期
+    float k2;               // (参数设计)积分增益
+    float T;                // (参数设计)积分步长_采样周期
     
     float boundary;         // (参数设计)边界层厚度(用于饱和函数)
     
