@@ -101,9 +101,9 @@ void STA_Loop(STA_STRUCT *sta){
     
     // 5.计算总输出并限幅
     sta->run.Output = nonlinear + sta->run.Io;
-    sta->run.Output = Value_Limit(sta->run.Output, 
-                                sta->OutMax, 
-                                sta->OutMin);
+    Value_Limit(&sta->run.Output, 
+                sta->OutMax, 
+                sta->OutMin);
 
     // 6.刷新历史输入和输出数值
     sta->run.s[1] = sta->run.s[0];

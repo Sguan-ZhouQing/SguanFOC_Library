@@ -9,15 +9,18 @@ void MTPA_Loop(float *Target_id,
             float Ld, 
             float Lq, 
             float iq);
-void FW_Loop(void);
-void DeadZone_Loop(float *Ua_error, 
-                float *Ub_error, 
-                float *Uc_error, 
-                float Ia, 
-                float Ib, 
-                float Ic, 
-                float VUBS,
-                float Dead_Time);
+float FW_Loop(void *fw, 
+            float Ud, 
+            float Uq, 
+            float Percentage, 
+            float Vbus);
+void DeadZone_Loop(float *Ua_duty, 
+            float *Ub_duty, 
+            float *Uc_duty, 
+            float Ia, 
+            float Ib, 
+            float Ic, 
+            float Dead_Time);
 
 
 #endif // SGUAN_OPTIMIZE_H

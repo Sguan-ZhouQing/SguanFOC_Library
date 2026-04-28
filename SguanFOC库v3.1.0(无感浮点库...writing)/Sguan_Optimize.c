@@ -10,6 +10,7 @@
  * Copyright (c) 2026 by $星必尘Sguan, All Rights Reserved. 
  */
 #include "Sguan_Optimize.h"
+#include "Sguan_PID.h"
 
 /**
  * @description: 经典最大转矩电流id计算公式
@@ -24,39 +25,49 @@ void MTPA_Loop(float *Target_id,
             float flux, 
             float Ld, 
             float Lq, 
-            float iq){
-    // 1.运行中间关键变量
-    float num = Ld - Lq;
-    float temp = Value_sqrtf(flux*flux + 
-                8*num*num*iq*iq);
+            float iq) {
+    float delta_L = Lq - Ld;
+    float temp = Value_sqrtf(flux*flux + 4.0f*delta_L*delta_L*iq*iq);
     
-    // 2.输出MTPA的目标D轴电流
-    *Target_id = -((flux + temp)/
-                (num*4));
+    // 计算标准MTPA公式并输出
+    *Target_id = (flux - temp) / (2.0f * delta_L);
+    if (*Target_id > 0) *Target_id = 0;
 }
 
 
-void FW_Loop(void){
-    
+float FW_Loop(void *fw, 
+            float Ud, 
+            float Uq, 
+            float Percentage, 
+            float Vbus){
+    static float fbk = 0.0f;
+    if (!fbk){
+        fbk = Percentage*Vbus*Value_SQRT3_2;
+    }
+
+    PID_STRUCT *p = (PID_STRUCT*)fw;
+    p->run.Ref = Value_sqrtf(Ud*Ud + Uq*Uq);
+    p->run.Fbk = fbk;
+    PID_Loop(p);
+    return -p->run.Output;
 }
 
-void DeadZone_Loop(float *Ua_error, 
-                float *Ub_error, 
-                float *Uc_error, 
-                float Ia, 
-                float Ib, 
-                float Ic, 
-                float VUBS,
-                float Dead_Time){
+void DeadZone_Loop(float *Ua_duty, 
+            float *Ub_duty, 
+            float *Uc_duty, 
+            float Ia, 
+            float Ib, 
+            float Ic, 
+            float Dead_Time){
     // 1.计算补偿增益的大小
     static float value = 0.0f;
     if (!value){
-        value = VUBS*(Dead_Time/((float)PMSM_RUN_T));
+        value = Dead_Time/((float)PMSM_RUN_T);
     }
     
     // 2.输出三相补偿量
-    *Ua_error = Value_Sign(Ia)*value;
-    *Ub_error = Value_Sign(Ib)*value;
-    *Uc_error = Value_Sign(Ic)*value;
+    *Ua_duty += Value_Sign(Ia)*value;
+    *Ub_duty += Value_Sign(Ib)*value;
+    *Uc_duty += Value_Sign(Ic)*value;
 }
 

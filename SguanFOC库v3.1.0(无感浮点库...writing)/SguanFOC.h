@@ -69,7 +69,7 @@ typedef struct{
     PID_STRUCT Position;                    // (高性能伺服三环)Position的PID
     #endif // CONFIG_CtrlPos
 
-    uint8_t Response;                       // (参数设计)响应带宽倍数
+    uint8_t Response;                       // (参数设计)响应带宽倍数->提高响应裕度
 
     // ====================== 2.传递函数“滤波器” ===========================
     LPF_STRUCT LPF_D;                       // (电流数据)电机D轴滤波
@@ -79,9 +79,22 @@ typedef struct{
     // ================= 3.传递函数“电机角度及角速度处理” ====================
     HALL_STRUCT Hall;                       // (霍尔数据处理)三霍尔信号处理
     PLL_STRUCT PLL;                         // (PLL锁相环)角度跟踪锁相环
+
     #if CONFIG_DOB
     DOB_STRUCT DOB;                         // (超螺旋滑模扰动观测器)DOB
     #endif // CONFIG_DOB
+    #if CONFIG_FW
+    PID_STRUCT FW;                          // (弱磁控制)PI控制器输出弱磁一区控制量
+    float BaseSpeed_fw;                     // (弱磁控制)基速设计，使得MTPA过渡弱磁
+    float Percentage_fw;                    // (弱磁控制)弱磁调制线占比,一般设计0.92
+    #endif // CONFIG_FW
+
+    #if CONFIG_VelFF
+    float Beta_ff;                          // (参数设计)转速环角频率->提高转速稳定
+    #endif // CONFIG_VelFF
+    #if CONFIG_DeadZone
+    float DeadTime;                         // (参数设计)三相死区补偿->降低低速抖震
+    #endif // CONFIG_DeadZone
 }MOTOR_TRANSFER_STRUCT;
 
 typedef struct{
@@ -164,7 +177,7 @@ typedef struct{
 
 typedef struct{
     float Real_Speed;                       // (Encoder速度)Real实际机械角速度
-    double Real_Pos;                        // (Encoder多圈角度)Real实际机械角度
+    float Real_Pos;                         // (Encoder多圈角度)Real实际机械角度
     float Real_Rad;                         // (Encoder单圈角度)Real实际机械角度
     float Real_Erad;                        // (Encoder电角度)Real实际电子角度
     float Real_We;                          // (Encoder电速度)Real实际电子角速度

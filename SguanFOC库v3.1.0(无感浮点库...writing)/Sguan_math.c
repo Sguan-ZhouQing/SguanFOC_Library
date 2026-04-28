@@ -50,10 +50,9 @@ float Value_sqrtf(float x){
 }
 
 // 数值限幅float函数
-float Value_Limit(float val, float max, float min){
-    if (val > max) return max;
-    if (val < min) return min;
-    return val;
+void Value_Limit(float *val, float max, float min){
+    if (*val > max) *val = max;
+    if (*val < min) *val = min;
 }
 
 // 参数取模[0, 2π)

@@ -57,16 +57,16 @@ static inline void User_CO_Adjust(float CO){
 static inline void User_UserTX(void){
     /* 仅传入主循环printf发送的数据，如TXdata.fdata[0],默认最多12个 */
     Sguan.txdata.fdata[0] = Sguan.status;
-    // Sguan.TXdata.fdata[1] = Sguan.encoder.Real_Speed_q31;
-    // Sguan.TXdata.fdata[2] = Sguan.foc.Target_Speed;
-    // Sguan.TXdata.fdata[3] = Sguan.current.Real_Id_q31;
-    // Sguan.TXdata.fdata[4] = Sguan.current.Real_Iq_q31;
-    // Sguan.TXdata.fdata[5] = Sguan.foc.Target_Id;
-    // Sguan.TXdata.fdata[6] = Sguan.foc.Target_Iq;
-    // Sguan.TXdata.fdata[7] = Sguan.foc.Uq_in;
-    // Sguan.TXdata.fdata[8] = Sguan.current.Real_Ia_q31;
-    // Sguan.TXdata.fdata[9] = Sguan.current.Real_Ibeta_q31;
-    // Sguan.TXdata.fdata[10] = Sguan.encoder.Real_Pos_q31;
+    Sguan.txdata.fdata[1] = Sguan.encoder.Real_Speed;
+    Sguan.txdata.fdata[2] = Sguan.foc.Target_Speed;
+    Sguan.txdata.fdata[3] = Sguan.current.Real_Id;
+    Sguan.txdata.fdata[4] = Sguan.current.Real_Iq;
+    Sguan.txdata.fdata[5] = Sguan.foc.Target_Id;
+    Sguan.txdata.fdata[6] = Sguan.foc.Target_Iq;
+    Sguan.txdata.fdata[7] = Sguan.foc.Uq_in;
+    Sguan.txdata.fdata[8] = Sguan.current.Real_Ia;
+    Sguan.txdata.fdata[9] = Sguan.current.Real_Ibeta;
+    Sguan.txdata.fdata[10] = Sguan.encoder.Real_Pos;
     Sguan.txdata.fdata[11] = Sguan.mode;
 }
 

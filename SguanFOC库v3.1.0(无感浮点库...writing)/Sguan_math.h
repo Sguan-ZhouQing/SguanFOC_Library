@@ -21,7 +21,7 @@ float Value_fabsf(float x);
 float Value_sqrtf(float x);
 
 // 参数限制函数Value...x
-float Value_Limit(float val, float max, float min);
+void Value_Limit(float *val, float max, float min);
 float Value_normalize(float angle);
 int8_t Value_set(int8_t val, int8_t max, int8_t min);
 float Value_Sign(float value);

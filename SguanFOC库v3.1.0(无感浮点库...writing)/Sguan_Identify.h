@@ -16,7 +16,7 @@
 typedef struct{
     uint8_t Status;         // (状态机)电机参数辨识 
 
-    float temp;
+    float temp;             // (中间量)
 }PMSM_STRUCT;
 
 typedef struct{

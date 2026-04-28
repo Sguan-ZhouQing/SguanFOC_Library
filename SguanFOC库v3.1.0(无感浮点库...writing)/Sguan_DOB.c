@@ -57,9 +57,9 @@ void DOB_Loop(DOB_STRUCT *dob){
     sign = Value_Sign(error_wm);
     temp_fd = sign*dob->K2;
     dob->smdo.Output_Fd += dob->smdo.I_num*(temp_fd + dob->smdo.Fd_i);
-    dob->smdo.Output_Fd = Value_Limit(dob->smdo.Output_Fd,
-                                    dob->OutMax_Fd,
-                                    dob->OutMin_Fd);
+    Value_Limit(&dob->smdo.Output_Fd,
+                dob->OutMax_Fd,
+                dob->OutMin_Fd);
     part1 = dob->smdo.Output_Fd*dob->smdo.Gain1;
     
     // 3.计算不连续量(part3)
@@ -69,9 +69,9 @@ void DOB_Loop(DOB_STRUCT *dob){
     part_main = part0 - part1 - part2;
     dob->smdo.Output_Wm = dob->smdo.O_num*(part_main + dob->smdo.Wm_i) + 
                         dob->smdo.O_den*dob->smdo.Output_Wm;
-    dob->smdo.Output_Wm = Value_Limit(dob->smdo.Output_Wm,
-                                    dob->OutMax_Wm,
-                                    dob->OutMin_Wm);
+    Value_Limit(&dob->smdo.Output_Wm,
+                dob->OutMax_Wm,
+                dob->OutMin_Wm);
 
     // 5.更新历史输入输出值
     dob->smdo.Fd_i = temp_fd;

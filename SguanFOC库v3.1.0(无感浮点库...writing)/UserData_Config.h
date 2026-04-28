@@ -66,6 +66,14 @@
 #define Open_DOB_Calculate 1
 
 /**
+ * @description: 宏定义0或1决定“DeadZone死区补偿”是否开启(开启最优)
+ * @reminder: 0->不开启MOS或者IGBT的死区补偿
+ * @reminder: 1->开启DeadZone死区补偿算法(电流方向的前馈补偿)
+ * @return {*}
+ */
+#define Open_DeadZone_Calculate 1
+
+/**
  * @description: 宏定义0或1决定“MTPA最大转矩控制控制”是否开启(默认关闭)
  * @reminder: 0->不开启IPMSM的MTPA最大转矩控制
  * @reminder: 1->开启最大转矩控制控制(凸极电机需要)
@@ -77,17 +85,11 @@
  * @description: 宏定义0或1决定“FW弱磁控制”是否开启(默认关闭)
  * @reminder: 0->不开启IPMSM的弱磁控制
  * @reminder: 1->开启弱磁控制(凸极电机需要)
+ * @reminder: （弱磁控制想要稳定性高些，请提前开启MTPA控制）
+ * @reminder: （MTPA控制：Open_MTPA_Calculate 1）
  * @return {*}
  */
-#define Open_FW_Calculate 0
-
-/**
- * @description: 宏定义0或1决定“DeadZone死区补偿”是否开启(默认关闭)
- * @reminder: 0->不开启MOS或者IGBT的死区补偿
- * @reminder: 1->开启DeadZone死区补偿算法(电流方向的前馈补偿)
- * @return {*}
- */
-#define Open_DeadZone_Calculate 0
+#define Open_FW_Calculate 1
 
 /**
  * @description: 宏定义决定UART或者CAN发送数据的模式

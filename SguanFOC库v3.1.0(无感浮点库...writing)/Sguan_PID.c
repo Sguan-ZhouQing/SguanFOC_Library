@@ -81,9 +81,9 @@ void PID_Loop(PID_STRUCT *pid){
 
     // 2.运算控制器输出量并输出限幅
     pid->run.Output = pid->run.i[0]*pid->Kp + pid->run.Io + pid->run.Do;
-    pid->run.Output = Value_Limit(pid->run.Output, 
-                                pid->OutMax, 
-                                pid->OutMin);
+    Value_Limit(&pid->run.Output, 
+                pid->OutMax, 
+                pid->OutMin);
     
     // 3.刷新历史输入和输出数值
     pid->run.i[1] = pid->run.i[0];

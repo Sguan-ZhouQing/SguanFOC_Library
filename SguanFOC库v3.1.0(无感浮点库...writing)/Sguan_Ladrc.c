@@ -57,9 +57,9 @@ static void Ladrc_LinearControlRate(LADRC_STRUCT *ladrc){
     ladrc->run.Output = (ladrc->run.u0 - ladrc->run.z3)/ladrc->b0;
     
     // 输出限幅
-    ladrc->run.Output = Value_Limit(ladrc->run.Output, 
-                                    ladrc->OutMax, 
-                                    ladrc->OutMin);
+    Value_Limit(&ladrc->run.Output, 
+                ladrc->OutMax, 
+                ladrc->OutMin);
 }
 
 /**

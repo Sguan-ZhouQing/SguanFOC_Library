@@ -12,11 +12,13 @@
 #define CONFIG_CurFF        Open_Current_Feedforward
 #define CONFIG_VelFF        Open_Velocity_Feedforward
 #define CONFIG_DOB          Open_DOB_Calculate
+#define CONFIG_DeadZone     Open_DeadZone_Calculate
 #define CONFIG_MTPA         Open_MTPA_Calculate
 #define CONFIG_FW           Open_FW_Calculate
-#define CONFIG_DeadZone     Open_DeadZone_Calculate
 #define CONFIG_Debug        Open_Printf_Debug
 
+// ============================ 安全边界 宏定义 ============================
+#define PMSM_MAX_Ctrl       3   // 控制模式PID,LADRC,SMC,STA这4种(0-3)
 
 // ======================== 控制系统离散周期 宏定义 =========================
 // 离散控制周期大小

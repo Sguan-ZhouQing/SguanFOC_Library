@@ -121,10 +121,11 @@ void SVPWM(float u_alpha, float u_beta,
         t_c = 0.5f;
     }
     
-    // 4.输出限幅
-    *d_u = Value_Limit(t_a, 1.0f, 0.0f);
-    *d_v = Value_Limit(t_b, 1.0f, 0.0f);
-    *d_w = Value_Limit(t_c, 1.0f, 0.0f);
+    // 4.这里输出三相归一化后的电压信号
+    // 暂不输出限幅,SguanFOC中会统一限幅
+    *d_u = t_a;
+    *d_v = t_b;
+    *d_w = t_c;
 }
 
 

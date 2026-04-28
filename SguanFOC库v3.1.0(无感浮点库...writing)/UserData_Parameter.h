@@ -34,7 +34,6 @@ static inline void User_ParameterSet(void){
     Sguan.transfer.Velocity.OutMax = 10.5f;         // 双环速度外环speed的LADRC->输出上限
     Sguan.transfer.Velocity.OutMin = -10.5f;        // 双环速度外环speed的LADRC->输出下限
     #elif Switch_Control_Velocity==2
-    Sguan.transfer.Velocity.Wc = 100.0f;            // 双环速度外环speed的SMC->微分环节滤波
     Sguan.transfer.Velocity.miu = 200.0f;           // 双环速度外环speed的SMC->不连续控制增益
     Sguan.transfer.Velocity.q = 30.0f;              // 双环速度外环speed的SMC->切换项增益
     Sguan.transfer.Velocity.C = 2000.0f;            // 双环速度外环speed的SMC->动态响应增益
@@ -67,7 +66,6 @@ static inline void User_ParameterSet(void){
     Sguan.transfer.Velocity.OutMax = 10.5f;         // 高性能伺服三环pos的LADRC->输出上限
     Sguan.transfer.Velocity.OutMin = -10.5f;        // 高性能伺服三环pos的LADRC->输出下限
     #elif Switch_Control_Position==2
-    Sguan.transfer.Velocity.Wc = 100.0f;            // 高性能伺服三环pos的SMC->微分环节滤波
     Sguan.transfer.Velocity.miu = 200.0f;           // 高性能伺服三环pos的SMC->不连续控制增益
     Sguan.transfer.Velocity.q = 30.0f;              // 高性能伺服三环pos的SMC->切换项增益
     Sguan.transfer.Velocity.C = 2000.0f;            // 高性能伺服三环pos的SMC->动态响应增益
@@ -94,13 +92,16 @@ static inline void User_ParameterSet(void){
     #endif // Switch_Control_Position
 
     Sguan.transfer.Response = 5;                    // (uint8_t)响应带宽倍数(核心参数)
+
     // 3.Hall三霍尔信号处理
     Sguan.transfer.Hall.Wc = 100.0f;                // 霍尔信号处理->滤波截止频率
     Sguan.transfer.Hall.Hall_High = 0.6f;           // 霍尔信号处理->信号上边界
     Sguan.transfer.Hall.Hall_Low = 0.4f;            // 霍尔信号处理->信号下边界
+
     // 4.PLL锁相环跟踪系统
     Sguan.transfer.PLL.Kp = 650.0f;                 // 锁相环->比例项增益
     Sguan.transfer.PLL.Ki = 210000.0f;              // 锁相环->积分项增益
+
     // 5.DOB扰动观测器设计
     Sguan.transfer.DOB.K1 = 2.0f;                   // 扰动观测器->比例项增益
     Sguan.transfer.DOB.K2 = 3.0f;                   // 扰动观测器->积分项增益
@@ -108,6 +109,24 @@ static inline void User_ParameterSet(void){
     Sguan.transfer.DOB.OutMin_Fd = -10.5f;          // 扰动观测器->输出限幅
     Sguan.transfer.DOB.OutMax_Wm = 10.5f;           // 扰动观测器->输出限幅
     Sguan.transfer.DOB.OutMin_Wm = -10.5f;          // 扰动观测器->输出限幅
+
+    // 6.弱磁控制参数设计
+    #if Open_FW_Calculate
+    Sguan.transfer.FW.Wc = 100.0f;                  // 弱磁控制的PI控制器->截止频率
+    Sguan.transfer.FW.Kp = 7.0f;                    // 弱磁控制的PI控制器->Kp
+    Sguan.transfer.FW.Ki = 0.0f;                    // 弱磁控制的PI控制器->Ki
+    Sguan.transfer.FW.Kd = 0.0f;                    // 弱磁控制的PI控制器->Kd
+    Sguan.transfer.FW.OutMax = 230.0f;              // 弱磁控制的PI控制器->最大限幅
+    Sguan.transfer.FW.OutMin = -230.0f;             // 弱磁控制的PI控制器->最小限幅
+    Sguan.transfer.FW.IntMax = 150.0f;              // 弱磁控制的PI控制器->积分项上限
+    Sguan.transfer.FW.IntMin = -150.0f;             // 弱磁控制的PI控制器->积分项下限
+
+    Sguan.transfer.BaseSpeed_fw = 300.0f;           // 弱磁基速设计->MTPA转变区
+    Sguan.transfer.Percentage_fw = 0.92f;           // 弱磁调制占比->0.92工程经验
+    #endif // Open_FW_Calculate
+
+    Sguan.transfer.Beta_ff = 62.8f;                 // (float)转速环角频率(前馈补偿参数)
+    Sguan.transfer.DeadTime = 1e-10;                // (float)死区时间填写(死区补偿参数)
 }
 
 
