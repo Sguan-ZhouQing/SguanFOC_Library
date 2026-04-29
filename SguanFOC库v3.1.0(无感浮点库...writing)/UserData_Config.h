@@ -1,6 +1,6 @@
 #ifndef __USERDATA_CONFIG_H
 #define __USERDATA_CONFIG_H
-/* 电机控制User用户设置·数据计算 */
+/* 电机控制User用户设置·数据计算Config */
 
 /**
  * @description: 宏定义0-3决定“电机速度环”的控制方式(默认使用PI控制)
@@ -63,7 +63,7 @@
  * @reminder: 1->开启STA_SMDO
  * @return {*}
  */
-#define Open_DOB_Calculate 1
+#define Open_DOB_Calculate 0
 
 /**
  * @description: 宏定义0或1决定“DeadZone死区补偿”是否开启(开启最优)
@@ -71,7 +71,7 @@
  * @reminder: 1->开启DeadZone死区补偿算法(电流方向的前馈补偿)
  * @return {*}
  */
-#define Open_DeadZone_Calculate 1
+#define Open_DeadZone_Calculate 0
 
 /**
  * @description: 宏定义0或1决定“MTPA最大转矩控制控制”是否开启(默认关闭)
@@ -89,7 +89,17 @@
  * @reminder: （MTPA控制：Open_MTPA_Calculate 1）
  * @return {*}
  */
-#define Open_FW_Calculate 1
+#define Open_FW_Calculate 0
+
+/**
+ * @description: 宏定义0或1决定“抗齿槽算法(离线标定补偿)”是否开启(默认关闭)
+ * @reminder: 0->不开启抗齿槽算法的离线标定补偿
+ * @reminder: 1->开启抗齿槽算法，基于绝对位置下的iq输入
+ * @reminder: （补偿标定需用到调好控制器的位置环）
+ * @reminder: （过程中十分耗时...想要等待一定时间）
+ * @return {*}
+ */
+#define Open_Cogging_Calculate 0
 
 /**
  * @description: 宏定义决定UART或者CAN发送数据的模式

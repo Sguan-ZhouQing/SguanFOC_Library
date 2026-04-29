@@ -20,6 +20,7 @@ void DeadZone_Loop(float *Ua_duty,
             float Ia, 
             float Ib, 
             float Ic, 
+            float Current_Min, 
             float Dead_Time);
 
 

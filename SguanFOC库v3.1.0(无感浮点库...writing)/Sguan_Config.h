@@ -1,6 +1,7 @@
 #ifndef __SGUAN_CONFIG_H
 #define __SGUAN_CONFIG_H
 
+#include "Sguan_IQmath.h"
 #include "Sguan_math.h"
 #include "UserData_Config.h"
 
@@ -15,6 +16,7 @@
 #define CONFIG_DeadZone     Open_DeadZone_Calculate
 #define CONFIG_MTPA         Open_MTPA_Calculate
 #define CONFIG_FW           Open_FW_Calculate
+#define CONFIG_Cogging      Open_Cogging_Calculate
 #define CONFIG_Debug        Open_Printf_Debug
 
 // ============================ 安全边界 宏定义 ============================

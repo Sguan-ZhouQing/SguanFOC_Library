@@ -26,7 +26,10 @@ void MTPA_Loop(float *Target_id,
             float Ld, 
             float Lq, 
             float iq) {
-    float delta_L = Lq - Ld;
+    static float delta_L = 0.0f;
+    if (!delta_L){
+        delta_L = Lq - Ld;
+    }
     float temp = Value_sqrtf(flux*flux + 4.0f*delta_L*delta_L*iq*iq);
     
     // 计算标准MTPA公式并输出
@@ -34,7 +37,15 @@ void MTPA_Loop(float *Target_id,
     if (*Target_id > 0) *Target_id = 0;
 }
 
-
+/**
+ * @description: 弱磁控制的PI控制器运算
+ * @param {void} *fw
+ * @param {float} Ud
+ * @param {float} Uq
+ * @param {float} Percentage
+ * @param {float} Vbus
+ * @return {*}
+ */
 float FW_Loop(void *fw, 
             float Ud, 
             float Uq, 
@@ -52,12 +63,25 @@ float FW_Loop(void *fw,
     return -p->run.Output;
 }
 
+/**
+ * @description: 简化后的死区补偿算法
+ * @param {float} *Ua_duty
+ * @param {float} *Ub_duty
+ * @param {float} *Uc_duty
+ * @param {float} Ia
+ * @param {float} Ib
+ * @param {float} Ic
+ * @param {float} Current_Min
+ * @param {float} Dead_Time
+ * @return {*}
+ */
 void DeadZone_Loop(float *Ua_duty, 
             float *Ub_duty, 
             float *Uc_duty, 
             float Ia, 
             float Ib, 
             float Ic, 
+            float Current_Min, 
             float Dead_Time){
     // 1.计算补偿增益的大小
     static float value = 0.0f;
@@ -65,9 +89,19 @@ void DeadZone_Loop(float *Ua_duty,
         value = Dead_Time/((float)PMSM_RUN_T);
     }
     
-    // 2.输出三相补偿量
-    *Ua_duty += Value_Sign(Ia)*value;
-    *Ub_duty += Value_Sign(Ib)*value;
-    *Uc_duty += Value_Sign(Ic)*value;
+    // 2.输出三相死区补偿量
+    // 过零点附近不补偿，避免误判
+    if ((Ia < -Current_Min) || 
+        (Ia > Current_Min)){
+        *Ua_duty += Value_Sign(Ia)*value;
+    }
+    if ((Ib < -Current_Min) || 
+        (Ib > Current_Min)){
+        *Ub_duty += Value_Sign(Ib)*value;
+    }
+    if ((Ic < -Current_Min) || 
+        (Ic > Current_Min)){
+        *Uc_duty += Value_Sign(Ic)*value;
+    }
 }
 

@@ -3,7 +3,6 @@
 
 /* USER CODE BEGIN Includes */
 // 电机控制核心函数文件声明
-#include "Sguan_Control.h"                  // Control控制器函数管理
 #include "Sguan_DOB.h"                      // DOB超螺旋滑模扰动观测器
 #include "Sguan_Feedforward.h"              // Feedforward前馈环节
 #include "Sguan_Filter.h"                   // Filter巴特沃斯滤波器
@@ -80,6 +79,7 @@ typedef struct{
     HALL_STRUCT Hall;                       // (霍尔数据处理)三霍尔信号处理
     PLL_STRUCT PLL;                         // (PLL锁相环)角度跟踪锁相环
 
+    // ==================== 4.传递函数“电机优化算法” ========================
     #if CONFIG_DOB
     DOB_STRUCT DOB;                         // (超螺旋滑模扰动观测器)DOB
     #endif // CONFIG_DOB
@@ -94,8 +94,56 @@ typedef struct{
     #endif // CONFIG_VelFF
     #if CONFIG_DeadZone
     float DeadTime;                         // (参数设计)三相死区补偿->降低低速抖震
+    float Dead_CurMin;                      // (参数设计)死区低电流处理量，低于则不补偿
     #endif // CONFIG_DeadZone
 }MOTOR_TRANSFER_STRUCT;
+
+typedef struct{
+    float Real_Speed;                       // (Encoder速度)Real实际机械角速度
+    float Real_Pos;                         // (Encoder多圈角度)Real实际机械角度
+    float Real_Rad;                         // (Encoder单圈角度)Real实际机械角度
+    float Real_Erad;                        // (Encoder电角度)Real实际电子角度
+    float Real_We;                          // (Encoder电速度)Real实际电子角速度
+
+    float Pos_offset;                       // (Encoder角度偏置)offset偏置位
+}MOTOR_ENCODER_STRUCT;
+
+typedef struct{
+    float Real_Id;                          // (Current电流)Real实际D轴电流
+    float Real_Iq;                          // (Current电流)Real实际Q轴电流
+
+    float Real_Ia;                          // (Current相电流)A相电流
+    float Real_Ib;                          // (Current相电流)B相电流
+    float Real_Ic;                          // (Current相电流)C相电流
+
+    float Real_Ialpha;                      // (Current中间量电流)alpha轴电流
+    float Real_Ibeta;                       // (Current中间量电流)beta轴电流
+
+    float Final_Gain;                       // (ADC增益)最终的ADC电流采样增益
+    int32_t Current_offset0;                // (Current电流偏置)offset偏置位
+    int32_t Current_offset1;                // (Current电流偏置)offset偏置位
+}MOTOR_CURRENT_STRUCT;
+
+typedef struct{
+    float Target_Speed;                     // (期望速度)Target期望机械角速度
+    float Target_Pos;                       // (期望角度)Target期望机械角度
+    float Target_Id;                        // (期望电流)期望D轴电流
+    float Target_Iq;                        // (期望电流)期望Q轴电流
+
+    float Ud_in;                            // (输入值)D轴电压输入
+    float Uq_in;                            // (输入值)Q轴电压输入
+
+    // ================= 修改线(上面可修改，下面为自动计算量) =================
+    float Du;                               // (数据)U相占空比输入0~1
+    float Dv;                               // (数据)V相占空比输入0~1
+    float Dw;                               // (数据)W相占空比输入0~1
+
+    float sine;                             // (数据)sine临时保存的正弦值
+    float cosine;                           // (数据)cosine临时保存的余弦值
+
+    float Real_VBUS;                        // (数据)Real实际的电机母线电压
+    float Real_Temp;                        // (数据)Temp实际的驱动器物理温度
+}MOTOR_FOC_STRUCT;
 
 typedef struct{
     IDENTIFY_STRUCT identify;               // (参数辨识)电机的核心实体参数
@@ -152,70 +200,18 @@ typedef struct{
 }MOTOR_FLAG_STRUCT;
 
 typedef struct{
-    float Target_Speed;                     // (期望速度)Target期望机械角速度
-    float Target_Pos;                       // (期望角度)Target期望机械角度
-    float Target_Id;                        // (期望电流)期望D轴电流
-    float Target_Iq;                        // (期望电流)期望Q轴电流
-
-    float Ud_in;                            // (输入值)D轴电压输入
-    float Uq_in;                            // (输入值)Q轴电压输入
-
-    uint32_t Duty_u;                        // (输入值)U相占空比输入0~pwmMAX
-    uint32_t Duty_v;                        // (输入值)V相占空比输入0~pwmMAX
-    uint32_t Duty_w;                        // (输入值)W相占空比输入0~pwmMAX
-
-    float Du;                               // (数据)U相占空比输入0~1
-    float Dv;                               // (数据)V相占空比输入0~1
-    float Dw;                               // (数据)W相占空比输入0~1
-
-    float sine;                             // (数据)sine临时保存的正弦值
-    float cosine;                           // (数据)cosine临时保存的余弦值
-
-    float Real_VBUS;                        // (数据)Real实际的电机母线电压
-    float Real_Temp;                        // (数据)Temp实际的驱动器物理温度
-}MOTOR_FOC_STRUCT;
-
-typedef struct{
-    float Real_Speed;                       // (Encoder速度)Real实际机械角速度
-    float Real_Pos;                         // (Encoder多圈角度)Real实际机械角度
-    float Real_Rad;                         // (Encoder单圈角度)Real实际机械角度
-    float Real_Erad;                        // (Encoder电角度)Real实际电子角度
-    float Real_We;                          // (Encoder电速度)Real实际电子角速度
-
-    float Pos_offset;                       // (Encoder角度偏置)offset偏置位
-}MOTOR_ENCODER_STRUCT;
-
-typedef struct{
-    float Real_Id;                          // (Current电流)Real实际D轴电流
-    float Real_Iq;                          // (Current电流)Real实际Q轴电流
-
-    float Real_Ia;                          // (Current相电流)A相电流
-    float Real_Ib;                          // (Current相电流)B相电流
-    float Real_Ic;                          // (Current相电流)C相电流
-
-    float Real_Ialpha;                      // (Current中间量电流)alpha轴电流
-    float Real_Ibeta;                       // (Current中间量电流)beta轴电流
-
-    float Final_Gain;                       // (ADC增益)最终的ADC电流采样增益
-    int32_t Current_offset0;                // (Current电流偏置)offset偏置位
-    int32_t Current_offset1;                // (Current电流偏置)offset偏置位
-}MOTOR_CURRENT_STRUCT;
-
-typedef struct{
     // ============================= ①电机标识位 ==================================
     uint8_t status;                         // 【数据】status存储电机运行状态
     uint8_t mode;                           // 【有参数设计】mode选择电机的运行模式
     
     // ============================= ②嵌套结构体 ==================================
     MOTOR_TRANSFER_STRUCT transfer;         // 【有参数设计】Transfer传递函数
-    
+    MOTOR_ENCODER_STRUCT encoder;           // 【数据】encoder电机角速度和角度信息
+    MOTOR_CURRENT_STRUCT current;           // 【数据】current电机电流采样信息缓存
+    MOTOR_FOC_STRUCT foc;                   // 【有参数设计】foc控制的参数
     MOTOR_QUANTIZE_STRUCT motor;            // 【有参数设计】motor电机参数量化
     MOTOR_SAFE_STRUCT safe;                 // 【有参数设计】safe电机安全设置
     MOTOR_FLAG_STRUCT flag;                 // 【有参数设计】flag电机运行标志位
-    
-    MOTOR_FOC_STRUCT foc;                   // 【有参数设计】foc控制的参数
-    MOTOR_ENCODER_STRUCT encoder;           // 【数据】encoder电机角速度和角度信息
-    MOTOR_CURRENT_STRUCT current;           // 【数据】current电机电流采样信息缓存
     PRINTF_STRUCT txdata;                   // 【数据】data串口或CAN发送的信息
 
     // =========================== ③简易控制函数 ==================================

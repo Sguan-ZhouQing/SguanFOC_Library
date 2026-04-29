@@ -3,7 +3,7 @@
  * @GitHub: https://github.com/Sguan-ZhouQing
  * @Date: 2026-02-26 22:37:35
  * @LastEditors: 星必尘Sguan|3464647102@qq.com
- * @LastEditTime: 2026-04-19 01:00:28
+ * @LastEditTime: 2026-04-30 01:37:26
  * @FilePath: \SguanFOC_Debug\SguanFOC\Sguan_math.c
  * @Description: SguanFOC库的“math库”实现
  * 
@@ -113,7 +113,7 @@ void ipark(float *u_alpha,float *u_beta,float u_d,float u_q,float sine,float cos
 }
 
 // 查表法求得float的角度正余弦值
-const float sin_tab[512] = {
+static const float sin_tab[512] = {
     0.0000000000f, 0.0122715384f, 0.0245412290f, 0.0368072242f, 0.0490676761f, 0.0613207407f,
     0.0735645667f, 0.0857973173f, 0.0980171412f, 0.1102222055f, 0.1224106774f, 0.1345807165f,
     0.1467304677f, 0.1588581502f, 0.1709619015f, 0.1830398887f, 0.1950903237f, 0.2071113884f,

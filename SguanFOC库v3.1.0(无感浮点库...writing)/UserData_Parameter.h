@@ -1,7 +1,7 @@
 #ifndef __USERDATA_PARAMETER_H
 #define __USERDATA_PARAMETER_H
 #include "SguanFOC.h"
-/* 电机控制User用户设置·BPF和PID和PLL运行参数 */
+/* 电机控制User用户设置·BPF和PID和PLL等运行参数 */
 
 static inline void User_ParameterSet(void){
     // 1.LPF低通滤波器设计
@@ -60,26 +60,26 @@ static inline void User_ParameterSet(void){
     #endif // Switch_Control_Velocity
 
     #if Switch_Control_Position==1
-    Sguan.transfer.Velocity.r = 50.0f;              // 高性能伺服三环pos的LADRC->速度因子
-    Sguan.transfer.Velocity.b0 = 1.2e6;             // 高性能伺服三环pos的LADRC->控制量增益
-    Sguan.transfer.Velocity.wc = 200.0f;            // 高性能伺服三环pos的LADRC->控制器带宽
-    Sguan.transfer.Velocity.OutMax = 10.5f;         // 高性能伺服三环pos的LADRC->输出上限
-    Sguan.transfer.Velocity.OutMin = -10.5f;        // 高性能伺服三环pos的LADRC->输出下限
+    Sguan.transfer.Position.r = 50.0f;              // 高性能伺服三环pos的LADRC->速度因子
+    Sguan.transfer.Position.b0 = 1.2e6;             // 高性能伺服三环pos的LADRC->控制量增益
+    Sguan.transfer.Position.wc = 200.0f;            // 高性能伺服三环pos的LADRC->控制器带宽
+    Sguan.transfer.Position.OutMax = 10.5f;         // 高性能伺服三环pos的LADRC->输出上限
+    Sguan.transfer.Position.OutMin = -10.5f;        // 高性能伺服三环pos的LADRC->输出下限
     #elif Switch_Control_Position==2
-    Sguan.transfer.Velocity.miu = 200.0f;           // 高性能伺服三环pos的SMC->不连续控制增益
-    Sguan.transfer.Velocity.q = 30.0f;              // 高性能伺服三环pos的SMC->切换项增益
-    Sguan.transfer.Velocity.C = 2000.0f;            // 高性能伺服三环pos的SMC->动态响应增益
-    Sguan.transfer.Velocity.Gain = 30.0f;           // 高性能伺服三环pos的SMC->电机输入增益
-    Sguan.transfer.Velocity.IntMax = 10.5;          // 高性能伺服三环pos的SMC->积分上限
-    Sguan.transfer.Velocity.IntMin = -10.5f;        // 高性能伺服三环pos的SMC->积分下限
+    Sguan.transfer.Position.miu = 200.0f;           // 高性能伺服三环pos的SMC->不连续控制增益
+    Sguan.transfer.Position.q = 30.0f;              // 高性能伺服三环pos的SMC->切换项增益
+    Sguan.transfer.Position.C = 2000.0f;            // 高性能伺服三环pos的SMC->动态响应增益
+    Sguan.transfer.Position.Gain = 30.0f;           // 高性能伺服三环pos的SMC->电机输入增益
+    Sguan.transfer.Position.IntMax = 10.5;          // 高性能伺服三环pos的SMC->积分上限
+    Sguan.transfer.Position.IntMin = -10.5f;        // 高性能伺服三环pos的SMC->积分下限
     #elif Switch_Control_Position==3
-    Sguan.transfer.Velocity.boundary = 12.0f;       // 高性能伺服三环pos的STA->边界厚度
-    Sguan.transfer.Velocity.k1 = 0.36f;             // 高性能伺服三环pos的STA->比例项增益
-    Sguan.transfer.Velocity.k2 = 52.0f;             // 高性能伺服三环pos的STA->积分项增益
-    Sguan.transfer.Velocity.OutMax = 10.5f;         // 高性能伺服三环pos的STA->输出限幅
-    Sguan.transfer.Velocity.OutMin = -10.5f;        // 高性能伺服三环pos的STA->输出限幅
-    Sguan.transfer.Velocity.IntMax = 50.0f;         // 高性能伺服三环pos的STA->积分限幅
-    Sguan.transfer.Velocity.IntMin = -50.0f;        // 高性能伺服三环pos的STA->积分限幅
+    Sguan.transfer.Position.boundary = 12.0f;       // 高性能伺服三环pos的STA->边界厚度
+    Sguan.transfer.Position.k1 = 0.36f;             // 高性能伺服三环pos的STA->比例项增益
+    Sguan.transfer.Position.k2 = 52.0f;             // 高性能伺服三环pos的STA->积分项增益
+    Sguan.transfer.Position.OutMax = 10.5f;         // 高性能伺服三环pos的STA->输出限幅
+    Sguan.transfer.Position.OutMin = -10.5f;        // 高性能伺服三环pos的STA->输出限幅
+    Sguan.transfer.Position.IntMax = 50.0f;         // 高性能伺服三环pos的STA->积分限幅
+    Sguan.transfer.Position.IntMin = -50.0f;        // 高性能伺服三环pos的STA->积分限幅
     #else // Switch_Control_Position
     Sguan.transfer.Position.Wc = 100.0f;            // 高性能伺服三环pos的PID->截止频率
     Sguan.transfer.Position.Kp = 7.0f;              // 高性能伺服三环pos的PID->Kp
@@ -103,12 +103,14 @@ static inline void User_ParameterSet(void){
     Sguan.transfer.PLL.Ki = 210000.0f;              // 锁相环->积分项增益
 
     // 5.DOB扰动观测器设计
+    #if Open_DOB_Calculate
     Sguan.transfer.DOB.K1 = 2.0f;                   // 扰动观测器->比例项增益
     Sguan.transfer.DOB.K2 = 3.0f;                   // 扰动观测器->积分项增益
     Sguan.transfer.DOB.OutMax_Fd = 10.5f;           // 扰动观测器->输出限幅
     Sguan.transfer.DOB.OutMin_Fd = -10.5f;          // 扰动观测器->输出限幅
     Sguan.transfer.DOB.OutMax_Wm = 10.5f;           // 扰动观测器->输出限幅
     Sguan.transfer.DOB.OutMin_Wm = -10.5f;          // 扰动观测器->输出限幅
+    #endif // Open_DOB_Calculate
 
     // 6.弱磁控制参数设计
     #if Open_FW_Calculate
@@ -125,8 +127,16 @@ static inline void User_ParameterSet(void){
     Sguan.transfer.Percentage_fw = 0.92f;           // 弱磁调制占比->0.92工程经验
     #endif // Open_FW_Calculate
 
+    // 7.速度前馈参数填写
+    #if Open_Velocity_Feedforward
     Sguan.transfer.Beta_ff = 62.8f;                 // (float)转速环角频率(前馈补偿参数)
-    Sguan.transfer.DeadTime = 1e-10;                // (float)死区时间填写(死区补偿参数)
+    #endif // Open_Velocity_Feedforward
+
+    // 8.死区补偿的死区时间设置
+    #if Open_DeadZone_Calculate
+    Sguan.transfer.DeadTime = 1e-10f;               // (float)死区时间填写(死区补偿参数)
+    Sguan.transfer.Dead_CurMin = 0.1f;              // (float)补偿最小相电流(死区补偿参数)
+    #endif // Open_DeadZone_Calculate
 }
 
 

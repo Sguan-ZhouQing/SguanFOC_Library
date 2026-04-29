@@ -3,7 +3,7 @@
  * @GitHub: https://github.com/Sguan-ZhouQing
  * @Date: 2026-01-26 22:38:34
  * @LastEditors: 星必尘Sguan|3464647102@qq.com
- * @LastEditTime: 2026-04-19 01:03:24
+ * @LastEditTime: 2026-04-30 01:28:46
  * @FilePath: \SguanFOC_Debug\SguanFOC\SguanFOC.c
  * @Description: SguanFOC库的“核心代码”实现
  * 
@@ -19,13 +19,44 @@
 #include "UserData_UserControl.h"
 /* USER CODE END Includes */
 
-// 电机控制核心结构体设计
-SguanFOC_System_STRUCT Sguan = {0};
-
-
-// =============================== float 版本代码(仅声明) =============================
 /**
- * @description: 1.Transfer传递函数的离散化运算，采用双线性变换
+ * @description: 1.电机控制函数实现(Sguan.*使用)
+ * @reminder: Sguan控制函数接口的使用方法，如下：
+ * @reminder: 启动电机  Sguan.Func_Start()
+ * @reminder: 停止电机  Sguan.Func_Stop()
+ * @reminder: 设置模式  Sguan.Func_Set_Mode(VF_OPENLOOP_MODE)
+ * @reminder: 设计电压  Sguan.Func_Set_Uq(1.68f)
+ * @reminder: 设计电流  Sguan.Func_Set_Iq(2.68f)
+ * @reminder: 设计转速  Sguan.Func_Set_Velocity(16.8f)
+ * @reminder: 设计位置  Sguan.Func_Set_Position(26.8f)
+ * @reminder: 数据打印  Sguan.Func_Set_TXdata(0,Sguan.status)
+ * @param {void} *ctrl
+ * @return {*}
+ */
+static void Function_Start(void);
+static void Function_Stop(void);
+static void Function_SetMode(uint8_t mode);
+static void Function_SetUq(float uq);
+static void Function_SetIq(float iq);
+static void Function_SetVelocity(float speed);
+static void Function_SetPosition(float pos);
+static void Function_SetTXdata(uint8_t ch,float data);
+
+// 电机控制核心结构体设计
+SguanFOC_System_STRUCT Sguan = {
+    .Func_Start = Function_Start,
+    .Func_Stop = Function_Stop,
+    .Func_Set_Mode = Function_SetMode,
+    .Func_Set_Uq = Function_SetUq,
+    .Func_Set_Iq = Function_SetIq,
+    .Func_Set_Velocity = Function_SetVelocity,
+    .Func_Set_Position = Function_SetPosition,
+    .Func_Set_TXdata = Function_SetTXdata
+};
+
+// ============================= SguanFOC版本代码(仅声明) ============================
+/**
+ * @description: 2.Transfer传递函数的离散化运算，采用双线性变换
  * @param {PID_STRUCT} *pid (控制)PID闭环控制系统运算
  * @param {LADRC_STRUCT} *ladrc (控制)LADRC线自抗扰运算
  * @param {SMC_STRUCT} *smc (控制)SMC传统滑模控制运算
@@ -56,27 +87,27 @@ static void Transfer_PLL_Loop(PLL_STRUCT *pll,uint8_t mode,float input_Rad);
 static void Transfer_DOB_Loop(DOB_STRUCT *dob,float Iq,float Wm);
 #endif // CONFIG_DOB
 /**
- * @description: 2.Transfer传递函数的初始化
+ * @description: 3.Transfer传递函数的初始化
  * @param {SguanFOC_System_STRUCT} *sguan
  * @return {*}
  */
 static void Transfer_Init(SguanFOC_System_STRUCT *sguan);
 static void Transfer_Null(SguanFOC_System_STRUCT *sguan);
 /**
- * @description: 3.Offset内部静态函数声明
+ * @description: 4.Offset内部静态函数声明
  * @param {SguanFOC_System_STRUCT} *sguan
  * @return {*}
  */
 static void Offset_EncoderRead(SguanFOC_System_STRUCT *sguan);
 static void Offset_CurrentRead(SguanFOC_System_STRUCT *sguan);
 /**
- * @description: 4.Current内部静态函数声明
+ * @description: 5.Current内部静态函数声明
  * @param {SguanFOC_System_STRUCT} *sguan
  * @return {*}
  */
 static void Current_ReadIabc(SguanFOC_System_STRUCT *sguan);
 /**
- * @description: 5.Sguan_Calculate_Loop内部静态函数声明
+ * @description: 6.Sguan_Calculate_Loop内部静态函数声明
  * @param {SguanFOC_System_STRUCT} *sguan
  * @return {*}
  */
@@ -87,8 +118,8 @@ static void Sensorless_SMO_Calculate(SguanFOC_System_STRUCT *sguan);
 static void Sensorless_HS_Calculate(SguanFOC_System_STRUCT *sguan);
 static void (*const Encoder_Tick[])(SguanFOC_System_STRUCT*)={
     /*这里注意“枚举变量”的边界, Encoder_Tick[sguan->mode](sguan)使用*/
-    Transfer_Null,                  // VF_OPENLOOP_MODE    = 0
-    Transfer_Null,                  // IF_OPENLOOP_MODE    = 1
+    Sensor_Encoder_Calculate,       // VF_OPENLOOP_MODE    = 0
+    Sensor_Encoder_Calculate,       // IF_OPENLOOP_MODE    = 1
     Sensor_Encoder_Calculate,       // Voltag_OPEN_MODE    = 2
     Sensor_Encoder_Calculate,       // Current_SINGLE_MODE = 3
     Sensor_Encoder_Calculate,       // VelCur_DOUBLE_MODE  = 4
@@ -99,7 +130,7 @@ static void (*const Encoder_Tick[])(SguanFOC_System_STRUCT*)={
     Sensorless_HS_Calculate         // Sensorless_HS_MODE  = 9
 };
 /**
- * @description: 6.Control运算及其模式切换
+ * @description: 7.Control运算及其模式切换
  * @param {SguanFOC_System_STRUCT} *sguan
  * @return {*}
  */
@@ -109,7 +140,7 @@ static void Control_PosVelCur_THREE(SguanFOC_System_STRUCT *sguan);
 static void (*const Control_Tick[])(SguanFOC_System_STRUCT*)={
     /*这里注意“枚举变量”的边界, Control_Tick[sguan->mode](sguan)使用*/
     Transfer_Null,                  // VF_OPENLOOP_MODE    = 0
-    Transfer_Null,                  // IF_OPENLOOP_MODE    = 1
+    Control_Current_SINGLE,         // IF_OPENLOOP_MODE    = 1
     Transfer_Null,                  // Voltag_OPEN_MODE    = 2
     Control_Current_SINGLE,         // Current_SINGLE_MODE = 3
     Control_VelCur_DOUBLE,          // VelCur_DOUBLE_MODE  = 4
@@ -120,7 +151,7 @@ static void (*const Control_Tick[])(SguanFOC_System_STRUCT*)={
     Control_VelCur_DOUBLE           // Sensorless_HS_MODE  = 9
 };
 /**
- * @description: 7.SVPWM电机驱动的马鞍波生成
+ * @description: 8.SVPWM电机驱动的马鞍波生成
  * @param {SguanFOC_System_STRUCT} *sguan
  * @param {float} d
  * @param {float} q
@@ -132,13 +163,13 @@ static void PWM_Tick(SguanFOC_System_STRUCT *sguan,
                     float d_duty,
                     float q_duty);
 /**
- * @description: 8.Data母线电压和驱动器物理温度数据更新
+ * @description: 9.Data母线电压和驱动器物理温度数据更新
  * @param {SguanFOC_System_STRUCT} *sguan
  * @return {*}
  */
 static void Data_Protection_Loop(SguanFOC_System_STRUCT *sguan);
 /**
- * @description: 9.Status判断并切换状态机
+ * @description: 10.Status判断并切换状态机
  * @param {SguanFOC_System_STRUCT} *sguan
  * @param {uint32_t} *count
  * @return {*}
@@ -153,7 +184,7 @@ static void Status_Current_OVERCURRENT(SguanFOC_System_STRUCT *sguan,uint32_t *c
 static void Status_Switch_Loop(SguanFOC_System_STRUCT *sguan);
 static void Status_RUN_Loop(SguanFOC_System_STRUCT *sguan);
 /**
- * @description: 10.Printf数据发送Debug和正常模式
+ * @description: 11.Printf数据发送Debug和正常模式
  * @param {SguanFOC_System_STRUCT} *sguan
  * @return {*}
  */
@@ -163,13 +194,13 @@ static void Printf_Debug_Loop(SguanFOC_System_STRUCT *sguan);
 static void Printf_Normal_Loop(SguanFOC_System_STRUCT *sguan);
 #endif // CONFIG_Debug
 /**
- * @description: 11.Set各种控制电机回零的设置
+ * @description: 12.Set各种控制电机回零的设置
  * @param {SguanFOC_System_STRUCT} *sguan
  * @return {*}
  */
 static void Positioning_Set(SguanFOC_System_STRUCT *sguan,float Ud,float Uq);
 /**
- * @description: 12.Sguan...Loop电机总初始化与校准
+ * @description: 13.Sguan...Loop电机总初始化与校准
  * @param {SguanFOC_System_STRUCT} *sguan
  * @return {*}
  */
@@ -178,7 +209,48 @@ static void Sguan_GeneratePWM_Loop(SguanFOC_System_STRUCT *sguan);
 static void Sguan_ReInit_Loop(SguanFOC_System_STRUCT *sguan);
 
 
-// =============================== SguanFOC运算(代码实现) =============================
+// =============================== 电机控制函数(接口) =============================
+// Function控制接口->启动电机
+static void Function_Start(void){
+    Sguan.status = MOTOR_STATUS_UNINITIALIZED;
+}
+
+// Function控制接口->停止电机
+static void Function_Stop(void){
+    Sguan.status = MOTOR_STATUS_STANDBY;
+}
+
+// Function控制接口->设置模式
+static void Function_SetMode(uint8_t mode){
+    Sguan.mode = mode;
+}
+
+// Function控制接口->设计目标电压
+static void Function_SetUq(float uq){
+    Sguan.foc.Uq_in = uq;
+}
+
+// Function控制接口->设计目标电流
+static void Function_SetIq(float iq){
+    Sguan.foc.Target_Iq = iq;
+}
+
+// Function控制接口->设计目标转速
+static void Function_SetVelocity(float speed){
+    Sguan.foc.Target_Speed = speed;
+}
+
+// Function控制接口->设计目标位置
+static void Function_SetPosition(float pos){
+    Sguan.foc.Target_Pos = pos;
+}
+
+// Function控制接口->数据打印
+static void Function_SetTXdata(uint8_t ch,float data){
+    Sguan.txdata.fdata[ch] = data;
+}
+
+// ============================= SguanFOC版本代码(仅实现) ============================
 // Transfer运算_PID运算
 static void Transfer_PID_Loop(void *pid,float Ref,float Fbk){
     PID_STRUCT *p = (PID_STRUCT*)pid;
@@ -263,6 +335,7 @@ static void Transfer_PLL_Loop(PLL_STRUCT *pll,uint8_t mode,float input_Rad){
     // 输出pll->go.OutRe;
 }
 
+// Transfer运算_超螺旋滑模扰动观测器
 #if CONFIG_DOB
 static void Transfer_DOB_Loop(DOB_STRUCT *dob,float Iq,float Wm){
     dob->smdo.Input_Iq = Iq;
@@ -273,6 +346,7 @@ static void Transfer_DOB_Loop(DOB_STRUCT *dob,float Iq,float Wm){
 }
 #endif // CONFIG_DOB
 
+// Transfer传递函数初始化
 static void Transfer_Init(SguanFOC_System_STRUCT *sguan){
     // 1.初始化系统离散运行时间
     sguan->transfer.Current_D.T = PMSM_RUN_T;
@@ -295,8 +369,18 @@ static void Transfer_Init(SguanFOC_System_STRUCT *sguan){
     // 2.电机默认参数自动填写
     #if CONFIG_CtrlVel==2
     sguan->transfer.Velocity.Gain = sguan->motor.identify.J/
-        (1.5*sguan->motor.Poles*sguan->motor.identify.Flux);
+        (1.5f*sguan->motor.Poles*sguan->motor.identify.Flux);
     #endif // CONFIG_Control
+    #if CONFIG_CtrlPos==2
+    sguan->transfer.Position.Gain = 1.0f;
+    #endif // CONFIG_Control
+
+    #if CONFIG_DOB
+    sguan->transfer.DOB.Pn = sguan->motor.Poles;
+    sguan->transfer.DOB.Flux = sguan->motor.identify.Flux;
+    sguan->transfer.DOB.B = sguan->motor.identify.B;
+    sguan->transfer.DOB.J = sguan->motor.identify.J;
+    #endif // CONFIG_DOB
 
     // 3.函数调用初始化
     PID_Init(&sguan->transfer.Current_D);
@@ -328,6 +412,7 @@ static void Transfer_Init(SguanFOC_System_STRUCT *sguan){
 
     Hall_Init(&sguan->transfer.Hall);
     PLL_Init(&sguan->transfer.PLL);
+
     #if CONFIG_DOB
     DOB_Init(&sguan->transfer.DOB);
     #endif // CONFIG_DOB
@@ -336,6 +421,7 @@ static void Transfer_Init(SguanFOC_System_STRUCT *sguan){
     #endif // CONFIG_FW
 }
 
+// Transfer空传递函数
 static void Transfer_Null(SguanFOC_System_STRUCT *sguan){
     // 空函数，不执行具体数据
 }
@@ -384,6 +470,7 @@ static void Current_ReadIabc(SguanFOC_System_STRUCT *sguan){
     }
 }
 
+// 处理机械角度，计算编码数值Encoder
 static void Sensor_Encoder_Calculate(SguanFOC_System_STRUCT *sguan){
     sguan->encoder.Real_Rad = User_Encoder_ReadRad();
     Transfer_PLL_Loop(&sguan->transfer.PLL,
@@ -394,19 +481,21 @@ static void Sensor_Encoder_Calculate(SguanFOC_System_STRUCT *sguan){
                     sguan->transfer.PLL.go.OutWe);
     sguan->encoder.Real_Speed = sguan->transfer.LPF_encoder.filter.Output;
     sguan->encoder.Real_Pos = sguan->transfer.PLL.go.OutRe;
-    if (sguan->mode >= Current_SINGLE_MODE){
-        sguan->encoder.Real_Erad = Value_normalize(
-                                sguan->transfer.PLL.go.OutRe*
-                                sguan->motor.Poles);
+    sguan->encoder.Real_Erad = Value_normalize(
+                            sguan->transfer.PLL.go.OutRe*
+                            sguan->motor.Poles);
+    if (sguan->mode >= Voltag_OPEN_MODE){
         sguan->encoder.Real_We = sguan->encoder.Real_Speed*sguan->motor.Poles;
         fast_sin_cos(sguan->encoder.Real_Erad,&sguan->foc.sine,&sguan->foc.cosine);
     }
     else{
+        sguan->encoder.Real_We = sguan->foc.Target_Speed*sguan->motor.Poles;
         float angle = Value_Rad_Loop(sguan->foc.Target_Speed*sguan->motor.Poles,PMSM_RUN_T);
         fast_sin_cos(angle,&sguan->foc.sine,&sguan->foc.cosine);
     }
 }
 
+// 处理电角度，计算编码器数值HALL
 static void Sensor_HALL_Calculate(SguanFOC_System_STRUCT *sguan){
     Transfer_Hall_Loop(&sguan->transfer.Hall,
                     User_Encoder_ReadHall(0), 
@@ -421,7 +510,7 @@ static void Sensor_HALL_Calculate(SguanFOC_System_STRUCT *sguan){
                     sguan->transfer.PLL.go.OutWe);
     sguan->encoder.Real_Speed = sguan->transfer.LPF_encoder.filter.Output;
     sguan->encoder.Real_Pos = sguan->transfer.PLL.go.OutRe;
-    if (sguan->mode >= Current_SINGLE_MODE){
+    if (sguan->mode >= Voltag_OPEN_MODE){
         sguan->encoder.Real_Erad = Value_normalize(
                                 sguan->transfer.PLL.go.OutRe*
                                 sguan->motor.Poles);
@@ -429,35 +518,37 @@ static void Sensor_HALL_Calculate(SguanFOC_System_STRUCT *sguan){
         fast_sin_cos(sguan->encoder.Real_Erad,&sguan->foc.sine,&sguan->foc.cosine);
     }
     else{
-        float angle = Value_Rad_Loop(sguan->foc.Target_Speed*sguan->motor.Poles,PMSM_RUN_T);
+        float angle = Value_Rad_Loop(
+                    sguan->foc.Target_Speed*sguan->motor.Poles,
+                    PMSM_RUN_T);
         fast_sin_cos(angle,&sguan->foc.sine,&sguan->foc.cosine);
     }
 }
 
+// 处理电角度，计算编码器数值HFI
 static void Sensorless_HFI_Calculate(SguanFOC_System_STRUCT *sguan){
 
 }
 
+// 处理电角度，计算编码器数值SMO
 static void Sensorless_SMO_Calculate(SguanFOC_System_STRUCT *sguan){
 
 }
 
+// 处理电角度，计算编码器数值HS
 static void Sensorless_HS_Calculate(SguanFOC_System_STRUCT *sguan){
 
 }
 
-
-
-
 // Control电流单环(单闭环)
 static void Control_Current_SINGLE(SguanFOC_System_STRUCT *sguan){
     // 0.(控制器数据赋值)如果不在工作状态，赋值为零
-    if (sguan->status < 4){
-        sguan->foc.Target_Id = 0.0f;
-        sguan->foc.Target_Iq = 0.0f;
-        sguan->current.Real_Id = 0.0f;
-        sguan->current.Real_Iq = 0.0f;
-    }
+    // if (sguan->status < MOTOR_STATUS_IDLE){
+    //     sguan->foc.Target_Id = 0.0f;
+    //     sguan->foc.Target_Iq = 0.0f;
+    //     sguan->current.Real_Id = 0.0f;
+    //     sguan->current.Real_Iq = 0.0f;
+    // }
 
     // 1.电流环PI控制器计算
     Transfer_PID_Loop(&sguan->transfer.Current_D,
@@ -486,10 +577,10 @@ static void Control_VelCur_DOUBLE(SguanFOC_System_STRUCT *sguan){
     static uint8_t Control_Count = 0;
     Control_Count++;
     // 0.(控制器数据赋值)如果不在工作状态，赋值为零
-    if (sguan->status < 4){
-        sguan->foc.Target_Speed = 0.0f;
-        sguan->encoder.Real_Speed = 0.0f;
-    }
+    // if (sguan->status < MOTOR_STATUS_IDLE){
+    //     sguan->foc.Target_Speed = 0.0f;
+    //     sguan->encoder.Real_Speed = 0.0f;
+    // }
 
     // 1.转速环PI控制器计算
     if (Control_Count >= sguan->transfer.Response){
@@ -501,16 +592,16 @@ static void Control_VelCur_DOUBLE(SguanFOC_System_STRUCT *sguan){
         Control_Count = 0;
     }
 
-    // 3.MTPA控制
+    // 2.MTPA控制
     #if CONFIG_MTPA
     MTPA_Loop(&sguan->foc.Target_Id,
-                sguan->identify.Flux,
-                sguan->identify.Ld,
+                sguan->motor.identify.Flux,
+                sguan->motor.identify.Ld,
                 sguan->current.Real_Iq,
                 sguan->current.Real_Iq);
     #endif // CONFIG_MTPA
 
-    // 4.FW弱磁控制
+    // 3.FW弱磁控制
     #if CONFIG_FW
     sguan->foc.Target_Id += FW_Loop(
                 &sguan->transfer.FW, 
@@ -520,21 +611,23 @@ static void Control_VelCur_DOUBLE(SguanFOC_System_STRUCT *sguan){
                 sguan->foc.Real_VBUS);
     #endif // CONFIG_FW
 
-    // 5.计算速度环输出补偿(速度前馈量叠加)
+    // 4.计算速度环输出补偿(速度前馈量叠加)
     #if CONFIG_VelFF
     sguan->foc.Target_Iq += Feedforward_Velocity(sguan->encoder.Real_Speed,
                                                 sguan->transfer.Beta_ff);
     #endif // CONFIG_VelFF
 
-    // 6.补偿Q轴电流(扰动前馈量叠加)
+    // 5.补偿Q轴电流(扰动前馈量叠加)
+    #if CONFIG_DOB
     Transfer_DOB_Loop(&sguan->transfer.DOB,
         sguan->current.Real_Iq,
         sguan->encoder.Real_Speed);
     sguan->foc.Target_Iq += Feedforward_DOB(sguan->transfer.DOB.smdo.Output_Fd,
                                                 sguan->motor.Poles,
                                                 sguan->motor.identify.Flux);
+    #endif // CONFIG_DOB
 
-    // 7.电流环PI控制器计算
+    // 6.电流环PI控制器计算
     Transfer_PID_Loop(&sguan->transfer.Current_D,
         sguan->foc.Target_Id,       // 默认D轴励磁Id为0
         sguan->current.Real_Id);
@@ -544,7 +637,7 @@ static void Control_VelCur_DOUBLE(SguanFOC_System_STRUCT *sguan){
     sguan->foc.Ud_in = sguan->transfer.Current_D.run.Output;
     sguan->foc.Uq_in = sguan->transfer.Current_Q.run.Output;
 
-    // 8.结果输出到Ud和Uq给定(带前馈计算)
+    // 7.结果输出到Ud和Uq给定(带前馈计算)
     #if CONFIG_CurFF
     sguan->foc.Ud_in += Feedforward_CurrentD(sguan->encoder.Real_We,
                                     sguan->motor.identify.Lq,
@@ -561,10 +654,10 @@ static void Control_PosVelCur_THREE(SguanFOC_System_STRUCT *sguan){
     static uint8_t Control_Count = 0;
     Control_Count++;
     // 0.(控制器数据赋值)如果不在工作状态，赋值为零
-    if (sguan->status < 4){
-        sguan->foc.Target_Pos = 0.0f;
-        sguan->encoder.Real_Pos = 0.0f;
-    }
+    // if (sguan->status < MOTOR_STATUS_IDLE){
+    //     sguan->foc.Target_Pos = 0.0f;
+    //     sguan->encoder.Real_Pos = 0.0f;
+    // }
 
     // 1.位置环PD控制器计算
     if (Control_Count >= 
@@ -588,8 +681,8 @@ static void Control_PosVelCur_THREE(SguanFOC_System_STRUCT *sguan){
     // 3.MTPA控制
     #if CONFIG_MTPA
     MTPA_Loop(&sguan->foc.Target_Id,
-                sguan->identify.Flux,
-                sguan->identify.Ld,
+                sguan->motor.identify.Flux,
+                sguan->motor.identify.Ld,
                 sguan->current.Real_Iq,
                 sguan->current.Real_Iq);
     #endif // CONFIG_MTPA
@@ -611,12 +704,14 @@ static void Control_PosVelCur_THREE(SguanFOC_System_STRUCT *sguan){
     #endif // CONFIG_VelFF
 
     // 6.补偿Q轴电流(扰动前馈量叠加)
+    #if CONFIG_DOB
     Transfer_DOB_Loop(&sguan->transfer.DOB,
         sguan->current.Real_Iq,
         sguan->encoder.Real_Speed);
     sguan->foc.Target_Iq += Feedforward_DOB(sguan->transfer.DOB.smdo.Output_Fd,
                                                 sguan->motor.Poles,
                                                 sguan->motor.identify.Flux);
+    #endif // CONFIG_DOB
 
     // 7.电流环PI控制器计算
     Transfer_PID_Loop(&sguan->transfer.Current_D,
@@ -671,6 +766,7 @@ static void PWM_Tick(SguanFOC_System_STRUCT *sguan,
         sguan->current.Real_Ia,
         sguan->current.Real_Ib,
         sguan->current.Real_Ic,
+        sguan->transfer.Dead_CurMin,
         sguan->transfer.DeadTime);
     #endif // CONFIG_DeadZone
 
@@ -680,22 +776,23 @@ static void PWM_Tick(SguanFOC_System_STRUCT *sguan,
     Value_Limit(&sguan->foc.Dw,1.0f,0.0f);
 
     // 5.电机占空比输出
+    uint32_t Duty_u,Duty_v,Duty_w;
     if (sguan->motor.PWM_Dir == 1){
-        sguan->foc.Duty_u = (uint32_t)(sguan->foc.Du*sguan->motor.Duty);
-        sguan->foc.Duty_v = (uint32_t)(sguan->foc.Dv*sguan->motor.Duty);
-        sguan->foc.Duty_w = (uint32_t)(sguan->foc.Dw*sguan->motor.Duty);
+        Duty_u = (uint32_t)(sguan->foc.Du*sguan->motor.Duty);
+        Duty_v = (uint32_t)(sguan->foc.Dv*sguan->motor.Duty);
+        Duty_w = (uint32_t)(sguan->foc.Dw*sguan->motor.Duty);
     }
     else if (sguan->motor.PWM_Dir == -1){
-        sguan->foc.Duty_u = (uint32_t)((1.0f - sguan->foc.Du)*sguan->motor.Duty);
-        sguan->foc.Duty_v = (uint32_t)((1.0f - sguan->foc.Dv)*sguan->motor.Duty);
-        sguan->foc.Duty_w = (uint32_t)((1.0f - sguan->foc.Dw)*sguan->motor.Duty);
+        Duty_u = (uint32_t)((1.0f - sguan->foc.Du)*sguan->motor.Duty);
+        Duty_v = (uint32_t)((1.0f - sguan->foc.Dv)*sguan->motor.Duty);
+        Duty_w = (uint32_t)((1.0f - sguan->foc.Dw)*sguan->motor.Duty);
     }
     if (sguan->motor.Motor_Dir == -1){ // 判断电机方向并修改(原理是AB相序交换)
-        uint32_t duty_temp = sguan->foc.Duty_u;
-        sguan->foc.Duty_u = sguan->foc.Duty_v;
-        sguan->foc.Duty_v = duty_temp;
+        uint32_t duty_temp = Duty_u;
+        Duty_u = Duty_v;
+        Duty_v = duty_temp;
     }
-    User_PwmDuty_Set(sguan->foc.Duty_u,sguan->foc.Duty_v,sguan->foc.Duty_w);
+    User_PwmDuty_Set(Duty_u, Duty_v, Duty_w);
 }
 
 
@@ -766,6 +863,10 @@ static void Status_Current_OVERCURRENT(SguanFOC_System_STRUCT *sguan,uint32_t *c
 
 // Status判断并切换状态机
 static void Status_Switch_Loop(SguanFOC_System_STRUCT *sguan){
+    if (sguan->status < MOTOR_STATUS_IDLE){
+        return;
+    }
+    
     // ====== 安全状态(状态) ======
     if ((sguan->status != MOTOR_STATUS_EMERGENCY_STOP) && 
         EMERGENCY_STOP_Signal()){
@@ -852,18 +953,30 @@ static void Status_Switch_Loop(SguanFOC_System_STRUCT *sguan){
         sguan->status = MOTOR_STATUS_TORQUE_DECREASING;
     }
     // 2.速度模式检测
-    if ((sguan->mode == VelCur_DOUBLE_MODE) && 
+    if (((sguan->mode == VelCur_DOUBLE_MODE) || 
+        (sguan->mode == Sensor_Hall_MODE) || 
+        (sguan->mode == Sensorless_HFI_MODE) || 
+        (sguan->mode == Sensorless_SMO_MODE) || 
+        (sguan->mode == Sensorless_HS_MODE)) && 
         (sguan->status != MOTOR_STATUS_CONST_SPEED) && 
         (sguan->encoder.Real_Speed > sguan->foc.Target_Speed - sguan->safe.Speed_limit) && 
         (sguan->encoder.Real_Speed < sguan->foc.Target_Speed + sguan->safe.Speed_limit)){
         sguan->status = MOTOR_STATUS_CONST_SPEED;
     }
-    if ((sguan->mode == VelCur_DOUBLE_MODE) && 
+    if (((sguan->mode == VelCur_DOUBLE_MODE) || 
+        (sguan->mode == Sensor_Hall_MODE) || 
+        (sguan->mode == Sensorless_HFI_MODE) || 
+        (sguan->mode == Sensorless_SMO_MODE) || 
+        (sguan->mode == Sensorless_HS_MODE)) && 
         (sguan->status != MOTOR_STATUS_ACCELERATING) && 
         (sguan->encoder.Real_Speed < sguan->foc.Target_Speed + sguan->safe.Speed_limit)){
         sguan->status = MOTOR_STATUS_ACCELERATING;
     }
-    if ((sguan->mode == VelCur_DOUBLE_MODE) && 
+    if (((sguan->mode == VelCur_DOUBLE_MODE) || 
+        (sguan->mode == Sensor_Hall_MODE) || 
+        (sguan->mode == Sensorless_HFI_MODE) || 
+        (sguan->mode == Sensorless_SMO_MODE) || 
+        (sguan->mode == Sensorless_HS_MODE)) && 
         (sguan->status != MOTOR_STATUS_DECELERATING) && 
         (sguan->encoder.Real_Speed > sguan->foc.Target_Speed - sguan->safe.Speed_limit)){
         sguan->status = MOTOR_STATUS_DECELERATING;
@@ -1015,11 +1128,11 @@ static void Positioning_Set(SguanFOC_System_STRUCT *sguan,float Ud,float Uq){
         duty_q);
 }
 
-// Calculate有传感器角度和电流
+// Sguan_Calculate_Loop有传感器角度和电流
 static void Sguan_Calculate_Loop(SguanFOC_System_STRUCT *sguan){
     // 1.有传感器电机角度和角速度计算
     Encoder_Tick[Value_set(sguan->mode,
-        PosVelCur_THREE_MODE,0)](sguan);
+        Sensorless_HS_MODE,0)](sguan);
     
     // 2.电机相线和各轴电流计算
     Current_ReadIabc(sguan);
@@ -1045,7 +1158,7 @@ static void Sguan_Calculate_Loop(SguanFOC_System_STRUCT *sguan){
 static void Sguan_GeneratePWM_Loop(SguanFOC_System_STRUCT *sguan){
     // 运算控制器输出
     Control_Tick[Value_set(sguan->mode,
-        PosVelCur_THREE_MODE,0)](sguan);
+        Sensorless_HS_MODE,0)](sguan);
     
     // 计算PWM调制量并执行
     PWM_Tick(sguan,
@@ -1055,33 +1168,39 @@ static void Sguan_GeneratePWM_Loop(SguanFOC_System_STRUCT *sguan){
         (sguan->foc.Uq_in/sguan->foc.Real_VBUS));
 }
 
-// Sguan...Tick系统开始的核心文件，主任务初始化函数
+// Sguan系统开始的核心文件，主任务初始化函数
 static void Sguan_ReInit_Loop(SguanFOC_System_STRUCT *sguan){
-    if (Sguan.status == MOTOR_STATUS_UNINITIALIZED){
+    if (sguan->status == MOTOR_STATUS_UNINITIALIZED){
         // 用户自定义的电机参数和控制系统参数
         User_InitialInit();
         User_MotorSet();
         User_ParameterSet();
         // 各种控制系统的初始化
         sguan->status = MOTOR_STATUS_INITIALIZING;
-        Control_Init(sguan);
         Transfer_Init(sguan);
+        Identify_Init(&sguan->motor.identify);
         Printf_TX_Init(&sguan->txdata);
         // 读取电流偏置
-        sguan->status = MOTOR_STATUS_CALIBRATING;
         Offset_CurrentRead(sguan);
-        //电机回零操作
-        Positioning_Set(sguan,0.3f*sguan->foc.Real_VBUS,0.0f);
-        User_Delay(1200);
-        // 读取角度偏置
-        Offset_EncoderRead(sguan);
-        // 电机失能并进入正常工作状态
-        Positioning_Set(sguan,0.0f,0.0f);
-        User_Delay(800);
-        // 判断电机的极性,如果是SPMSM,D轴给定,可能停在0或者180度位置
-        // 暂时还未书写
-        //正常工作中(状态机运行)
-        sguan->status = MOTOR_STATUS_IDLE;
+        // if ((sguan->mode >= Voltag_OPEN_MODE) && (sguan->mode <= Sensor_Hall_MODE)){            
+            //电机回零操作
+            Positioning_Set(sguan,0.3f*sguan->foc.Real_VBUS,0.0f);
+            User_Delay(1200);
+            // 读取角度偏置
+            Offset_EncoderRead(sguan);
+            // 电机失能并进入正常工作状态
+            Positioning_Set(sguan,0.0f,0.0f);
+            User_Delay(800);
+        // }
+    }
+    if ((sguan->status == MOTOR_STATUS_INITIALIZING) || 
+        (sguan->status == MOTOR_STATUS_CALIBRATING)){
+        sguan->status = MOTOR_STATUS_CALIBRATING;
+        // 电机校准，参数辨识，暂时还未书写
+        // if (Identify_Loop(&sguan->motor.identify)){
+            //正常工作中(状态机运行)
+            sguan->status = MOTOR_STATUS_IDLE;
+        // }
     }
 }
 
@@ -1099,13 +1218,15 @@ void SguanFOC_High_Loop(void){
 
         // (如果计算超时，会更新错误状态并停用此线程)
         // 如果在初始化完成，进入函数
-        if (Sguan.status > 3 && Sguan.status < 19){          
+        if ((Sguan.status >= MOTOR_STATUS_CALIBRATING) && 
+            (Sguan.status < MOTOR_STATUS_ENCODER_ERROR)){          
             // 计算编码器和电流
             Sguan_Calculate_Loop(&Sguan);
             // 运算PID并执行SVPWM
             Sguan_GeneratePWM_Loop(&Sguan);
         }
-        if (Sguan.status >= 19 || Sguan.status == 0){
+        if ((Sguan.status >= MOTOR_STATUS_ENCODER_ERROR) || 
+            (Sguan.status == 18)){
             static uint8_t status = 0xFF;
             if (status != Sguan.status){
                 // 电压给定归零
@@ -1184,7 +1305,10 @@ void SguanFOC_Printf_Loop(uint8_t *data, uint16_t length){
 void SguanFOC_main_Loop(void){
     Sguan_ReInit_Loop(&Sguan);
     #if !CONFIG_Debug
-    Printf_Normal_Loop(&Sguan);
+    if ((Sguan.status >= MOTOR_STATUS_IDLE) && 
+        (Sguan.status < MOTOR_STATUS_ENCODER_ERROR)){
+        Printf_Normal_Loop(&Sguan);
+    }
     #endif // CONFIG_Debug
 }
 
