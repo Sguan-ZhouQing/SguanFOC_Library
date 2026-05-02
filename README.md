@@ -5,7 +5,7 @@
 ![Language](https://img.shields.io/badge/Language-C-00599C)
  <img src="https://img.shields.io/badge/🔄_完整FOC-开箱即用-red">
 ![Platform](https://img.shields.io/badge/Platform-ARM%20%7C%20DSP%20%7C%20任何C语言MCU-orange)
-[**English**](https://github.com/Sguan-ZhouQing/SguanFOC_Library/blob/main/%E9%85%8D%E5%A5%97SguanFOC%E5%BA%93%E4%BD%BF%E7%94%A8%E8%AF%B4%E6%98%8E%E4%B9%A6%E2%91%A0%5BPDF%5D/README_EN.md) | [**中文**]([README.md](https://github.com/Sguan-ZhouQing/SguanFOC_Library/blob/main/README.md)
+[**English**](https://github.com/Sguan-ZhouQing/SguanFOC_Library/blob/main/%E9%85%8D%E5%A5%97SguanFOC%E5%BA%93%E4%BD%BF%E7%94%A8%E8%AF%B4%E6%98%8E%E4%B9%A6%E2%91%A0%5BPDF%5D/README_EN.md) | [**中文**](https://github.com/Sguan-ZhouQing/SguanFOC_Library/blob/main/README.md)
 
 ---
 
