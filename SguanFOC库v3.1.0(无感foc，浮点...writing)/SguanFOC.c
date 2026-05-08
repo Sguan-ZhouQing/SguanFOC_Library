@@ -366,7 +366,7 @@ static void Transfer_DOB_Loop(DOB_STRUCT *dob,float Iq,float Wm){
 static void Transfer_Init(SguanFOC_System_STRUCT *sguan){
     // 0.用户自定义控制器参数
     User_Initial_Init();
-    User_Motor_Init();
+    User_Motor_Init(sguan);
     User_Parameter_Init(sguan);
     sguan->foc.sine = 0.0f;
     sguan->foc.cosine = 1.0f;
@@ -509,6 +509,8 @@ static void Offset_Hall_Read(SguanFOC_System_STRUCT *sguan){
                                 (((double)sguan->transfer.Hall.T)*
                                 ((double)sguan->transfer.Hall.Wc)));
     #endif // MODE_Sensor_Hall
+    // 消除未使用Hall函数的编译警告
+    (void)Transfer_Hall_Loop;
 }
 
 static void Offset_HFI_Read(SguanFOC_System_STRUCT *sguan){

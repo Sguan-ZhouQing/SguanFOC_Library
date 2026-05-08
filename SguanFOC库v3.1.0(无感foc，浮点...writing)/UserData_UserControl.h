@@ -32,29 +32,17 @@ static inline void User_AO_Adjust(float AO){
 static inline void User_BO_Adjust(float BO){
     /* Your code for Parameter set */
     // 接收到串口或者CAN的数据是BO=xx?
-    // if ((0.0f < BO) && (BO < 1.0f)){
-    //     Sguan.mode = 0x02;
-    // }
-    // else if ((1.0f <= BO) && (BO < 2.0f)){
-    //     Sguan.mode = 0x03;
-    // }
-    // else if ((2.0f <= BO) && (BO < 3.0f)){
-    //     Sguan.mode = 0x04;
-    // }
-    // else if ((3.0f <= BO) && (BO < 10.0f)){
-    //     Sguan.mode = 0x05;
-    // }
-}
-
-static inline void User_CO_Adjust(float CO){
-    /* Your code for Parameter set */
-    // 接收到串口或者CAN的数据是CO=xx?
-    if (CO < 0.5f){
+    if (BO < 0.5f){
         Sguan.status = 0x16;
     }
     else{
         Sguan.status = 0x01;
     }
+}
+
+static inline void User_CO_Adjust(float CO){
+    /* Your code for Parameter set */
+    // 接收到串口或者CAN的数据是CO=xx?
 }
 
 static inline void User_UserTX(void){
