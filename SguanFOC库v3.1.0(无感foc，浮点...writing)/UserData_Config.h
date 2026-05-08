@@ -3,6 +3,22 @@
 /* 电机控制User用户设置·数据计算Config */
 
 /**
+ * @description: 宏定义0-9决定“电机的控制模式”(默认使用“速度-电流”模式)
+ * @reminder: 0->VF_OPENLOOP_MODE       VF压频比开环
+ * @reminder: 1->IF_OPENLOOP_MODE       IF流频比开环
+ * @reminder: 2->Voltag_OPEN_MODE       电压开环
+ * @reminder: 3->Current_SINGLE_MODE    电流单闭环
+ * @reminder: 4->VelCur_DOUBLE_MODE     速度-电流串级闭环
+ * @reminder: 5->PosVelCur_THREE_MODE   位置-速度-电流三环
+ * @reminder: 6->Sensor_Hall_MODE       有感霍尔_转速环
+ * @reminder: 7->Sensorless_HFI_MODE    高频注入_转速环
+ * @reminder: 8->Sensorless_SMO_MODE    滑模观测_转速环
+ * @reminder: 9->Sensorless_HS_MODE     前两结合_转速环
+ * @return {*}
+ */
+#define Define_Run_Mode 8
+
+/**
  * @description: 宏定义0-3决定“电机速度环”的控制方式(默认使用PI控制)
  * @reminder: 0->电流环“PI控制”，转速环“PI控制”
  * @reminder: 1->电流环“PI控制”，转速环“Ladrc线性自抗扰控制”
@@ -102,6 +118,14 @@
 #define Open_Cogging_Calculate 0
 
 /**
+ * @description: 宏定义数值决定“抗齿槽标定的16位Q15定点的标幺化基值”(默认8安培)
+ * @reminder: （标定1800个点位，使用float转16位的Q15存储，占用3.6kb内存）
+ * @reminder: （采用位置环定位，采集不同位置下的速度环输出Target_iq的数值）
+ * @return {*}
+ */
+#define BASE_Cogging_Num 8.0f
+
+/**
  * @description: 宏定义决定UART或者CAN发送数据的模式
  * @reminder: (Open_Printf_Debug)0->发送正常数据
  * @reminder: 1->仅发送Debug数据，不发送正常数据
@@ -111,7 +135,7 @@
 
 
 // 定时器中断参数设计
-#define TIM_T 1e-4                          // 最大频率的控制周期
+#define TIM_T 5e-5                          // 最大频率的控制周期
 
 
 #endif // USERDATA_CONFIG_H

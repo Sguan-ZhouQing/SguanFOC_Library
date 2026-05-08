@@ -5,7 +5,7 @@
  * @LastEditors: 星必尘Sguan|3464647102@qq.com
  * @LastEditTime: 2026-04-30 01:24:27
  * @FilePath: \SguanFOC_Debug\SguanFOC\Sguan_PID.c
- * @Description: SguanFOC库的“开环PID算法”实现
+ * @Description: SguanFOC库的“闭环PID算法”实现
  * 
  * Copyright (c) 2026 by $星必尘Sguan, All Rights Reserved. 
  */
@@ -38,7 +38,7 @@ void PID_Init(PID_STRUCT *pid){
 
 /**
  * @description: 闭环控制运算的离散服务函数
- * @reminder: https://github.com/Sguan-ZhouQing/SguanFOC_Library/blob/main/%E6%9C%80%E6%96%B0example%E5%8F%8A%E8%B5%84%E6%96%99%5BSTM32G4%2C%E4%B8%8B%E6%A1%A5%E8%87%82%E5%8F%8C%E7%94%B5%E9%98%BB%5D/%E3%80%90Simulink%E3%80%91Sguan%E5%AD%90%E6%A8%A1%E5%9D%97%E5%8E%9F%E7%90%86%E5%9B%BE/Sguan_PID.png
+ * @reminder: https://github.com/Sguan-ZhouQing/SguanFOC_Library/blob/main/%E9%85%8D%E5%A5%97Simulink%E6%A8%A1%E5%9E%8B%E5%BC%80%E6%BA%90%E2%91%A1%5B%E7%AE%97%E6%B3%95%E5%8E%9F%E7%90%86%E5%9B%BE%5D/Sguan_PID.png
  * @reminder: (上方链接是此Sguan_PID模块Simulink原理仿真图)
  * @param {PID_STRUCT} *pid
  * @return {*}
@@ -59,7 +59,7 @@ void PID_Loop(PID_STRUCT *pid){
                 (pid->run.Io > pid->IntMin))){
                 pid->run.IntegralFrozen_flag = 0;
             }
-        } else {
+        } else{
             // 正常计算积分
             pid->run.Io += pid->run.I_num*(pid->run.i[0] + pid->run.i[1]);
             

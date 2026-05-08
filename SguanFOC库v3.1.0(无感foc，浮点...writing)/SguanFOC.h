@@ -7,6 +7,7 @@
 #include "Sguan_Feedforward.h"              // Feedforward前馈环节
 #include "Sguan_Filter.h"                   // Filter巴特沃斯滤波器
 #include "Sguan_Hall.h"                     // Hall三霍尔信号处理
+#include "Sguan_HFI.h"                      // HFI(无感)高频方波注入
 #include "Sguan_Identify.h"                 // Identify电机参数辨识
 #include "Sguan_Ladrc.h"                    // Ladrc线自抗扰控制
 #include "Sguan_MotorStatus.h"              // MotorStatus电机状态机
@@ -15,6 +16,7 @@
 #include "Sguan_PLL.h"                      // PLL角度跟踪“锁相环”
 #include "Sguan_printf.h"                   // printf通信调试
 #include "Sguan_SMC.h"                      // SMC传统滑模控制
+#include "Sguan_SMO.h"                      // SMO(无感)静止坐标系下的滑模观测器
 #include "Sguan_SPWM.h"                     // SPWM零序分量注入法的PWM调制
 #include "Sguan_STA.h"                      // STA超螺旋简化滑模控制
 #include "Sguan_SVPWM.h"                    // SVPWM七段式空间矢量PWM调制
@@ -23,46 +25,55 @@
 // ╔═══════════════════════════════════════════════════════╗
 // ║                       开环控制模式                     ║
 // ╚═══════════════════════════════════════════════════════╝
-#define VF_OPENLOOP_MODE        0x00        // VF压频比开环(Sguan.foc.Target_Speed,Sguan.foc.Uq_in)
-#define IF_OPENLOOP_MODE        0x01        // IF流频比开环(Sguan.foc.Target_Speed,Sguan.foc.Target_Iq)
+#define MODE_VF_OPENLOOP        0x00        // VF压频比开环(Sguan.foc.Target_Speed,Sguan.foc.Uq_in)
+#define MODE_IF_OPENLOOP        0x01        // IF流频比开环(Sguan.foc.Target_Speed,Sguan.foc.Target_Iq)
 // ╔═══════════════════════════════════════════════════════╗
 // ║                   闭环控制模式（有传感器）              ║
 // ╚═══════════════════════════════════════════════════════╝
-#define Voltag_OPEN_MODE        0x02        // 电压开环(Sguan.foc.Uq_in)
-#define Current_SINGLE_MODE     0x03        // 电流单闭环(Sguan.foc.Target_Iq)
-#define VelCur_DOUBLE_MODE      0x04        // 速度-电流串级闭环(Sguan.foc.Target_Speed)
-#define PosVelCur_THREE_MODE    0x05        // 位置-速度-电流三环(Sguan.foc.Target_Pos)
+#define MODE_Voltag_OPEN        0x02        // 电压开环(Sguan.foc.Uq_in)
+#define MODE_Current_SINGLE     0x03        // 电流单闭环(Sguan.foc.Target_Iq)
+#define MODE_VelCur_DOUBLE      0x04        // 速度-电流串级闭环(Sguan.foc.Target_Speed)
+#define MODE_PosVelCur_THREE    0x05        // 位置-速度-电流三环(Sguan.foc.Target_Pos)
 // ╔═══════════════════════════════════════════════════════╗
 // ║                   霍尔控制模式（有传感器）              ║
 // ╚═══════════════════════════════════════════════════════╝
-#define Sensor_Hall_MODE        0x06        // 有感霍尔_转速环(Sguan.foc.Target_Speed)
+#define MODE_Sensor_Hall        0x06        // 有感霍尔_转速环(Sguan.foc.Target_Speed)
 // ╔═══════════════════════════════════════════════════════╗
 // ║                   无感控制模式（无传感器）              ║
 // ╚═══════════════════════════════════════════════════════╝
-#define Sensorless_HFI_MODE     0x07        // 高频注入_转速环(Sguan.foc.Target_Speed)
-#define Sensorless_SMO_MODE     0x08        // 滑模观测_转速环(Sguan.foc.Target_Speed)
-#define Sensorless_HS_MODE      0x09        // 前两结合_转速环(Sguan.foc.Target_Speed)
+#define MODE_Sensorless_HFI     0x07        // 高频注入_转速环(Sguan.foc.Target_Speed)
+#define MODE_Sensorless_SMO     0x08        // 滑模观测_转速环(Sguan.foc.Target_Speed)
+#define MODE_Sensorless_HS      0x09        // 前两结合_转速环(Sguan.foc.Target_Speed)
+
+
+// ╔═══════════════════════════════════════════════════════╗
+// ║                      核心控制器宏定义                  ║
+// ╚═══════════════════════════════════════════════════════╝
+#define Control_PID             0x00        // PID闭环控制Sguan_PID
+#define Control_LADRC           0x01        // LADRC线自抗扰Sguan_LADRC
+#define Control_SMC             0x02        // SMC传统滑模Sguan_SMC
+#define Control_STA             0x03        // STA简易超螺旋Sguan_STA
 
 typedef struct{
-    // ====================== 1.传递函数“控制器” ===========================
+    // ======================== 1.传递函数“控制器” =============================
     PID_STRUCT Current_D;                   // (电流单环)PID电流环D轴参数
     PID_STRUCT Current_Q;                   // (电流单环)PID电流环Q轴参数
 
-    #if CONFIG_CtrlVel==1
+    #if CONFIG_CtrlVel==Control_LADRC
     LADRC_STRUCT Velocity;                  // (速度-电流双环)LADRC速度外环参数
-    #elif CONFIG_CtrlVel==2
+    #elif CONFIG_CtrlVel==Control_SMC
     SMC_STRUCT Velocity;                    // (速度-电流双环)SMC速度外环参数
-    #elif CONFIG_CtrlVel==3
+    #elif CONFIG_CtrlVel==Control_STA
     STA_STRUCT Velocity;                    // (速度-电流双环)STA速度外环参数
     #else  // CONFIG_CtrlVel
     PID_STRUCT Velocity;                    // (速度-电流双环)双PID速度外环参数
     #endif // CONFIG_CtrlVel
 
-    #if CONFIG_CtrlPos==1
+    #if CONFIG_CtrlPos==Control_LADRC
     LADRC_STRUCT Position;                  // (高性能伺服三环)Position的LADRC
-    #elif CONFIG_CtrlPos==2
+    #elif CONFIG_CtrlPos==Control_SMC
     SMC_STRUCT Position;                    // (高性能伺服三环)Position的SMC
-    #elif CONFIG_CtrlPos==3
+    #elif CONFIG_CtrlPos==Control_STA
     STA_STRUCT Position;                    // (高性能伺服三环)Position的STA
     #else  // CONFIG_CtrlPos
     PID_STRUCT Position;                    // (高性能伺服三环)Position的PID
@@ -70,16 +81,18 @@ typedef struct{
 
     uint8_t Response;                       // (参数设计)响应带宽倍数->提高响应裕度
 
-    // ====================== 2.传递函数“滤波器” ===========================
+    // ======================== 2.传递函数“滤波器” =============================
     LPF_STRUCT LPF_D;                       // (电流数据)电机D轴滤波
     LPF_STRUCT LPF_Q;                       // (电流数据)电机Q轴滤波
     LPF_STRUCT LPF_encoder;                 // (速度数据)速度信号滤波
 
-    // ================= 3.传递函数“电机角度及角速度处理” ====================
+    // =================== 3.传递函数“电机角度及角速度处理” ======================
+    #if CONFIG_MODE==MODE_Sensor_Hall
     HALL_STRUCT Hall;                       // (霍尔数据处理)三霍尔信号处理
-    PLL_STRUCT PLL;                         // (PLL锁相环)角度跟踪锁相环
+    #endif // CONFIG_MODE
+    PLL_STRUCT PLL_encoder;                 // (PLL锁相环)角度跟踪锁相环
 
-    // ==================== 4.传递函数“电机优化算法” ========================
+    // ====================== 4.传递函数“电机优化算法” ==========================
     #if CONFIG_DOB
     DOB_STRUCT DOB;                         // (超螺旋滑模扰动观测器)DOB
     #endif // CONFIG_DOB
@@ -96,14 +109,30 @@ typedef struct{
     float DeadTime;                         // (参数设计)三相死区补偿->降低低速抖震
     float Dead_CurMin;                      // (参数设计)死区低电流处理量，低于则不补偿
     #endif // CONFIG_DeadZone
+
+    // ===================== 5.传递函数“无感控制算法” =========================
+    #if CONFIG_MODE==MODE_Sensorless_HFI
+    HFI_STRUCT HFI;                         // (无感算法)HFI高频方波注入算法
+    float Speed_AbsMax;                     // (参数设计)角度解耦低速、高速域分界线上限
+    float Speed_AbsMin;                     // (参数设计)角度解耦低速、高速域分界线下限
+    #elif CONFIG_MODE==MODE_Sensorless_SMO
+    SMO_STRUCT SMO;                         // (无感算法)SMO静止坐标系下的滑模观测器
+    float Speed_AbsMax;                     // (参数设计)角度解耦低速、高速域分界线上限
+    float Speed_AbsMin;                     // (参数设计)角度解耦低速、高速域分界线下限
+    #elif CONFIG_MODE==MODE_Sensorless_HS
+    HFI_STRUCT HFI;                         // (无感算法)HFI高频方波注入算法
+    SMO_STRUCT SMO;                         // (无感算法)SMO静止坐标系下的滑模观测器
+    PLL_STRUCT PLL_another;                 // (PLL锁相环)角度跟踪锁相环
+    float Speed_AbsMax;                     // (参数设计)角度解耦低速、高速域分界线上限
+    float Speed_AbsMin;                     // (参数设计)角度解耦低速、高速域分界线下限
+    #endif // CONFIG_MODE
 }MOTOR_TRANSFER_STRUCT;
 
 typedef struct{
-    float Real_Speed;                       // (Encoder速度)Real实际机械角速度
-    float Real_Pos;                         // (Encoder多圈角度)Real实际机械角度
-    float Real_Rad;                         // (Encoder单圈角度)Real实际机械角度
-    float Real_Erad;                        // (Encoder电角度)Real实际电子角度
+    float Real_Speed;                       // (Encoder机械速度)Real实际机械角速度
+    float Real_Pos;                         // (Encoder机械角度)Real实际机械角度
     float Real_We;                          // (Encoder电速度)Real实际电子角速度
+    float Real_Re;                          // (Encoder电角度)Real实际电子角度
 
     float Pos_offset;                       // (Encoder角度偏置)offset偏置位
 }MOTOR_ENCODER_STRUCT;
@@ -130,10 +159,16 @@ typedef struct{
     float Target_Id;                        // (期望电流)期望D轴电流
     float Target_Iq;                        // (期望电流)期望Q轴电流
 
+    float Target_VF_Uq;                     // (VF控制)固定Q轴电压值
+    float Target_IF_Iq;                     // (IF控制)固定Q轴电流值
+
     float Ud_in;                            // (输入值)D轴电压输入
     float Uq_in;                            // (输入值)Q轴电压输入
 
     // ================= 修改线(上面可修改，下面为自动计算量) =================
+    float Ualpha;                           // (中间量)alpha轴电压
+    float Ubeta;                            // (中间量)beta轴电压
+
     float Du;                               // (数据)U相占空比输入0~1
     float Dv;                               // (数据)V相占空比输入0~1
     float Dw;                               // (数据)W相占空比输入0~1
@@ -202,7 +237,6 @@ typedef struct{
 typedef struct{
     // ============================= ①电机标识位 ==================================
     uint8_t status;                         // 【数据】status存储电机运行状态
-    uint8_t mode;                           // 【有参数设计】mode选择电机的运行模式
     
     // ============================= ②嵌套结构体 ==================================
     MOTOR_TRANSFER_STRUCT transfer;         // 【有参数设计】Transfer传递函数
@@ -217,7 +251,6 @@ typedef struct{
     // =========================== ③简易控制函数 ==================================
     void (*Func_Start)(void);               // 【函数】control控制接口->启动电机
     void (*Func_Stop)(void);                // 【函数】control控制接口->停止电机
-    void (*Func_Set_Mode)(uint8_t);         // 【函数】control控制接口->设置模式
     void (*Func_Set_Uq)(float);             // 【函数】control控制接口->设计目标电压
     void (*Func_Set_Iq)(float);             // 【函数】control控制接口->设计目标电流
     void (*Func_Set_Velocity)(float);       // 【函数】control控制接口->设计目标转速

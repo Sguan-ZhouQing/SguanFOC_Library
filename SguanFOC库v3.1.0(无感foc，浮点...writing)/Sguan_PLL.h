@@ -13,12 +13,13 @@ typedef struct{
     float Error;            // (输入数据)Error真实反馈数据
     float OutWe;            // (输出数据)OutWe电角速度输出
     float OutRe;            // (输出数据)OutRe电角度输出
-}GO_STRUCT;
+}PLL_GO_STRUCT;
 
 typedef struct{
-    GO_STRUCT go;           // (结构体)PID运算结构体
+    PLL_GO_STRUCT go;           // (结构体)PID运算结构体
 
-    float T;                // (参数设计)T运算离散周期
+    float T;                // (系统时钟)T运算离散周期
+    
     float Kp;               // (参数设计)Kp比例项增益
     float Ki;               // (参数设计)Ki积分项增益
 

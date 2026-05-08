@@ -4,7 +4,7 @@
 /* 电机控制User用户设置·电机参数(SguanFOC用户核心代码) */
 
 // 电机实体参数设置(根据实际需要填写)
-static inline void User_MotorSet(void){
+static inline void User_Motor_Init(void){
     // 1.mode选择电机的运行模式
     // Sguan.mode = Current_SINGLE_MODE;
     // 如果你要在电机启动后主动切换模式，这个地方请不要使用

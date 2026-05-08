@@ -5,6 +5,8 @@
 /* 用户自己的CODE BEGIN Includes */
 #include "main.h"
 
+#include "Soft_UART.h"
+
 extern TIM_HandleTypeDef htim1;
 extern TIM_HandleTypeDef htim2;
 extern TIM_HandleTypeDef htim3;
@@ -12,7 +14,7 @@ extern UART_HandleTypeDef huart1;
 extern volatile uint32_t ADC_InjectedValues[4];
 /* 用户自己的CODE END Includes */
 
-static inline void User_InitialInit(void){
+static inline void User_Initial_Init(void){
     /* Your code for initing TIM and gate driver and encoder and ADC here */
     // 开启SD使能栅极驱动器
     HAL_GPIO_WritePin(SD1_GPIO_Port,SD1_Pin,GPIO_PIN_SET);
@@ -111,7 +113,8 @@ static inline float User_Temperature_DataGet(void){
 /* ================= 驱动代码(驱动层) ================= */
 static inline void User_CorrespondSet(unsigned char *ch, unsigned short int size){
     /* Your code for UART or CAN Signal Transmit Driver */
-    HAL_UART_Transmit(&huart1, ch, size, 0xFFFF);
+    // HAL_UART_Transmit(&huart1, ch, size, 0xFFFF);
+    Soft_UART_Transmit_IT(ch,size);
 }
 
 

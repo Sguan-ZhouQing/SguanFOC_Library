@@ -17,12 +17,12 @@ typedef struct{
     float Output;           // (输出数据)Output输出
 
     uint8_t IntegralFrozen_flag; // (中间量)积分抗饱和
-}TRADITION_STRUCT;
+}SMC_RUN_STRUCT;
 
 typedef struct{
-    TRADITION_STRUCT run;   // (结构体)传统滑模控制
+    SMC_RUN_STRUCT run;   // (结构体)传统滑模控制
     
-    float T;                // (参数设计)离散周期
+    float T;                // (系统时钟)离散周期
     
     float miu;              // (参数设计)不连续控制增益
     float q;                // (参数设计)切换项增益

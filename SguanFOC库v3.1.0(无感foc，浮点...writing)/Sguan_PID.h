@@ -18,14 +18,14 @@ typedef struct{
     float D_den;            // (中间量)微分传递函数分母系数
 
     uint8_t IntegralFrozen_flag; // (中间量)积分抗饱和
-}RUN_STRUCT;
+}PID_RUN_STRUCT;
 
 typedef struct{
-    RUN_STRUCT run;         // (结构体)PID运算结构体
+    PID_RUN_STRUCT run;     // (结构体)PID运算结构体
+
+    float T;                // (系统时钟)T离散周期
 
     float Wc;               // (参数设计)Wc微分环节一阶低通滤波
-    float T;                // (参数设计)T周期
-
     float Kp;               // (参数设计)Kp比例项增益
     float Ki;               // (参数设计)Ki积分项增益
     float Kd;               // (参数设计)Kd微分项增益

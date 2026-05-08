@@ -14,11 +14,11 @@
 
 /**
  * @description: 经典最大转矩电流id计算公式
- * @param {float} *Target_id
- * @param {float} flux
- * @param {float} Ld
- * @param {float} Lq
- * @param {float} iq
+ * @param {float} *Target_id 期望的D轴电流值
+ * @param {float} flux  电机磁链
+ * @param {float} Ld    D轴电感
+ * @param {float} Lq    Q轴电感
+ * @param {float} iq    Q轴电流值
  * @return {*}
  */
 void MTPA_Loop(float *Target_id, 
@@ -39,11 +39,11 @@ void MTPA_Loop(float *Target_id,
 
 /**
  * @description: 弱磁控制的PI控制器运算
- * @param {void} *fw
- * @param {float} Ud
- * @param {float} Uq
- * @param {float} Percentage
- * @param {float} Vbus
+ * @param {void} *fw    弱磁结构体
+ * @param {float} Ud    D轴电压
+ * @param {float} Uq    Q轴电压
+ * @param {float} Percentage 弱磁调制线范围
+ * @param {float} Vbus  母线电压值
  * @return {*}
  */
 float FW_Loop(void *fw, 
@@ -53,26 +53,26 @@ float FW_Loop(void *fw,
             float Vbus){
     static float fbk = 0.0f;
     if (!fbk){
-        fbk = Percentage*Vbus*Value_SQRT3_2;
+        fbk = Percentage*Value_SQRT3_2;
     }
 
     PID_STRUCT *p = (PID_STRUCT*)fw;
     p->run.Ref = Value_sqrtf(Ud*Ud + Uq*Uq);
-    p->run.Fbk = fbk;
+    p->run.Fbk = fbk*Vbus;
     PID_Loop(p);
     return -p->run.Output;
 }
 
 /**
  * @description: 简化后的死区补偿算法
- * @param {float} *Ua_duty
- * @param {float} *Ub_duty
- * @param {float} *Uc_duty
- * @param {float} Ia
- * @param {float} Ib
- * @param {float} Ic
- * @param {float} Current_Min
- * @param {float} Dead_Time
+ * @param {float} *Ua_duty 补偿后的U项电压值
+ * @param {float} *Ub_duty 补偿后的V项电压值
+ * @param {float} *Uc_duty 补偿后的W项电压值
+ * @param {float} Ia    U项电流值
+ * @param {float} Ib    V项电流值
+ * @param {float} Ic    W项电流值
+ * @param {float} Current_Min 死区补偿电流限制
+ * @param {float} Dead_Time 死区时间设置
  * @return {*}
  */
 void DeadZone_Loop(float *Ua_duty, 

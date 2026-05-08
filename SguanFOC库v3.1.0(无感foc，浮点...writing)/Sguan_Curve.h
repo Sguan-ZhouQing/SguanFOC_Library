@@ -7,21 +7,22 @@
 typedef struct{
     float Last_in;
     float Gain;
-    float Multiple;
+    float K;
 
     float Input;
     float Output;
-}SET_STRUCT;
+}CURVE_GO_STRUCT;
 
 typedef struct{
-    SET_STRUCT set;
+    CURVE_GO_STRUCT go;
 
     float T;
+    float Cycle;
     float K_max;
-    float K_min;
 }CURVE_STRUCT;
 
-void CURVE_Loop(CURVE_STRUCT *curve);
+void Curve_Init(CURVE_STRUCT *curve);
+void Curve_Loop(CURVE_STRUCT *curve);
 
 
 #endif // SGUAN_CURVE_H

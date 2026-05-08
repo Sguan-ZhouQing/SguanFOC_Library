@@ -24,12 +24,13 @@ typedef struct{
 typedef struct{
     SMDO_STRUCT smdo;       // (结构体)超螺旋滑模DOB
     
-    uint8_t Pn;             // (电机数据)极对数
-    float Flux;             // (电机数据)磁链
-    float B;                // (电机数据)粘性阻尼
-    float J;                // (电机数据)转动惯量
+    float T;                // (系统时钟)离散周期
     
-    float T;                // (参数设计)离散周期
+    uint8_t Pn;             // (电机参数)极对数
+    float Flux;             // (电机参数)磁链
+    float B;                // (电机参数)粘性阻尼
+    float J;                // (电机参数)转动惯量
+    
     float K1;               // (参数设计)比例项增益
     float K2;               // (参数设计)积分项增益
 

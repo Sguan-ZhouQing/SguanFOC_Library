@@ -19,24 +19,27 @@
  * @return {*}
  */
 void Hall_Init(HALL_STRUCT *hall){
-    hall->rad.Gain = (float)(((double)hall->T)*((double)hall->Wc));
-    hall->rad.Normalized_Gain = (float)(1.0 - 
-                            (((double)hall->T)*((double)hall->Wc)));
+    // 在SguanFOC读取偏置后，再激活
+    // hall->go.Gain = (float)(((double)hall->T)*((double)hall->Wc));
+    // hall->go.Normalized_Gain = (float)(1.0 - 
+    //                         (((double)hall->T)*((double)hall->Wc)));
+    hall->go.Gain = 1.0f;
+    hall->go.Normalized_Gain = 0.0f;
 
     // 初始化为零
-    hall->rad.Input_Ga = 0;
-    hall->rad.Input_Gb = 0;
-    hall->rad.Input_Gc = 0;
-    hall->rad.Output_Rad = 0.0f;
+    hall->go.Input_Ga = 0;
+    hall->go.Input_Gb = 0;
+    hall->go.Input_Gc = 0;
+    hall->go.Output_Rad = 0.0f;
 
-    hall->rad.Hall_A = 0.0f;
-    hall->rad.Hall_B = 0.0f;
-    hall->rad.Hall_C = 0.0f;
+    hall->go.Hall_A = 0.0f;
+    hall->go.Hall_B = 0.0f;
+    hall->go.Hall_C = 0.0f;
 }
 
 /**
  * @description: 霍尔信号处理的运行函数
- * @reminder: https://github.com/Sguan-ZhouQing/SguanFOC_Library/blob/main/%E6%9C%80%E6%96%B0example%E5%8F%8A%E8%B5%84%E6%96%99%5BSTM32G4%2C%E4%B8%8B%E6%A1%A5%E8%87%82%E5%8F%8C%E7%94%B5%E9%98%BB%5D/%E3%80%90Simulink%E3%80%91Sguan%E5%AD%90%E6%A8%A1%E5%9D%97%E5%8E%9F%E7%90%86%E5%9B%BE/Sguan_Hall.png
+ * @reminder: https://github.com/Sguan-ZhouQing/SguanFOC_Library/blob/main/%E9%85%8D%E5%A5%97Simulink%E6%A8%A1%E5%9E%8B%E5%BC%80%E6%BA%90%E2%91%A1%5B%E7%AE%97%E6%B3%95%E5%8E%9F%E7%90%86%E5%9B%BE%5D/Sguan_Hall.png
  * @reminder: (上方链接是此Sguan_Hall模块Simulink原理仿真图)
  * @param {HALL_STRUCT} *hall
  * @return {*}
@@ -47,26 +50,26 @@ void Hall_Loop(HALL_STRUCT *hall){
     uint8_t Signal_a,Signal_b,Signal_c,Sector;
 
     // 2.三相输入信号的低通滤波
-    hall->rad.Hall_A = hall->rad.Gain*((float)hall->rad.Input_Ga) + 
-                    hall->rad.Normalized_Gain*hall->rad.Hall_A;
-    hall->rad.Hall_B = hall->rad.Gain*((float)hall->rad.Input_Gb) + 
-                    hall->rad.Normalized_Gain*hall->rad.Hall_B;
-    hall->rad.Hall_C = hall->rad.Gain*((float)hall->rad.Input_Gc) + 
-                    hall->rad.Normalized_Gain*hall->rad.Hall_C;
+    hall->go.Hall_A = hall->go.Gain*((float)hall->go.Input_Ga) + 
+                    hall->go.Normalized_Gain*hall->go.Hall_A;
+    hall->go.Hall_B = hall->go.Gain*((float)hall->go.Input_Gb) + 
+                    hall->go.Normalized_Gain*hall->go.Hall_B;
+    hall->go.Hall_C = hall->go.Gain*((float)hall->go.Input_Gc) + 
+                    hall->go.Normalized_Gain*hall->go.Hall_C;
     
     // 3.信号边界判断(防抖动)
-    if (hall->rad.Hall_A >= hall->Hall_High) Signal_a = 1;
-    else if (hall->rad.Hall_A <= hall->Hall_Low) Signal_a = 0;
+    if (hall->go.Hall_A >= hall->Hall_High) Signal_a = 1;
+    else if (hall->go.Hall_A <= hall->Hall_Low) Signal_a = 0;
     
-    if (hall->rad.Hall_B >= hall->Hall_High) Signal_b = 1;
-    else if (hall->rad.Hall_B <= hall->Hall_Low) Signal_b = 0;
+    if (hall->go.Hall_B >= hall->Hall_High) Signal_b = 1;
+    else if (hall->go.Hall_B <= hall->Hall_Low) Signal_b = 0;
 
-    if (hall->rad.Hall_C >= hall->Hall_High) Signal_c = 1;
-    else if (hall->rad.Hall_C <= hall->Hall_Low) Signal_c = 0;
+    if (hall->go.Hall_C >= hall->Hall_High) Signal_c = 1;
+    else if (hall->go.Hall_C <= hall->Hall_Low) Signal_c = 0;
 
     // 4.霍尔数据处理并输出角度值
     Sector = (Signal_a << 2) | (Signal_b << 1) | (Signal_c);
-    hall->rad.Output_Rad = (v[Sector - 1]*Value_2PI)/6.0f;
+    hall->go.Output_Rad = (v[Sector - 1]*Value_2PI)/6.0f;
 }
 
 

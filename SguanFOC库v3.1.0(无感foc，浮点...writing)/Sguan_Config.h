@@ -6,6 +6,7 @@
 #include "UserData_Config.h"
 
 // ============================ 系统配置 宏定义 ============================
+#define CONFIG_MODE         Define_Run_Mode
 #define CONFIG_CtrlVel      Switch_Control_Velocity
 #define CONFIG_CtrlPos      Switch_Control_Position
 #define CONFIG_PWM          Switch_PWM_Calculate
@@ -17,6 +18,7 @@
 #define CONFIG_MTPA         Open_MTPA_Calculate
 #define CONFIG_FW           Open_FW_Calculate
 #define CONFIG_Cogging      Open_Cogging_Calculate
+#define CONFIG_BASE         BASE_Cogging_Num
 #define CONFIG_Debug        Open_Printf_Debug
 
 // ============================ 安全边界 宏定义 ============================

@@ -5,26 +5,26 @@
  * @LastEditors: 星必尘Sguan|3464647102@qq.com
  * @LastEditTime: 2026-04-29 16:34:59
  * @FilePath: \SguanFOC_Debug\SguanFOC\Sguan_Curve.c
- * @Description: 
+ * @Description: SguanFOC库的“双曲线(先增后减的加减速算法)”实现
  * 
  * Copyright (c) 2026 by $星必尘Sguan, All Rights Reserved. 
  */
 #include "Sguan_Curve.h"
 
 static float Curve_Gain_Tick(CURVE_STRUCT *curve){
-    if (curve->set.Output <= (curve->set.Input/2.0f)){
-        curve->set.Gain += curve->set.Multiple;
+    if (curve->go.Output <= (curve->go.Input/2.0f)){
+        curve->go.Gain += curve->go.K*curve->T;
     }
     else{
-        curve->set.Gain -= curve->set.Multiple;   
+        curve->go.Gain -= curve->go.K*curve->T;   
     }
-    return curve->set.Gain*curve->T;
+    return curve->go.Gain;
 }
 
 
 void Curve_Init(CURVE_STRUCT *curve){
-    curve->set.Gain = curve->K_min;
-    curve->set.Multiple = (curve->K_max - curve->K_min)*2.0f*curve->T;
+    curve->go.Gain = 0.0f;
+    curve->go.K = curve->K_max*2.0f/curve->Cycle;
 }
 
 /**
@@ -33,27 +33,33 @@ void Curve_Init(CURVE_STRUCT *curve){
  * @return {*}
  */
 void Curve_Loop(CURVE_STRUCT *curve){
-    if ((curve->set.Input >= curve->set.Last_in) && (curve->set.Output < curve->set.Input)){        
-        if (curve->set.Output <= (curve->set.Input/2.0f)){
-            curve->set.Gain += curve->set.Multiple*curve->T;
-        }
-        else{
-            curve->set.Gain -= curve->set.Multiple*curve->T;
-            
-        }
-        curve->set.Output += curve->set.Gain*curve->T;
+    if (curve->go.Input == curve->go.Last_in){
+        curve->go.Output = curve->go.Input;
+        return;
     }
-    else if ((curve->set.Input <= curve->set.Last_in) && (curve->set.Output > curve->set.Input)){
-        if (curve->set.Output <= (curve->set.Input/2.0f)){
-            curve->set.Gain += curve->set.Multiple*curve->T;
+    
+
+    if ((curve->go.Input >= curve->go.Last_in) && (curve->go.Output < curve->go.Input)){        
+        if (curve->go.Output <= (curve->go.Input/2.0f)){
+            curve->go.Gain += curve->go.K*curve->T;
         }
         else{
-            curve->set.Gain -= curve->set.Multiple*curve->T;
+            curve->go.Gain -= curve->go.K*curve->T;
             
         }
-        curve->set.Output -= curve->set.Gain*curve->T;
+        curve->go.Output += curve->go.Gain*curve->T;
+    }
+    else if ((curve->go.Input <= curve->go.Last_in) && (curve->go.Output > curve->go.Input)){
+        if (curve->go.Output <= (curve->go.Input/2.0f)){
+            curve->go.Gain += curve->go.K*curve->T;
+        }
+        else{
+            curve->go.Gain -= curve->go.K*curve->T;
+            
+        }
+        curve->go.Output -= curve->go.Gain*curve->T;
     }
 
-    // curve->set.Output += Gain*curve->T;
+    // curve->go.Output += Gain*curve->T;
     
 }

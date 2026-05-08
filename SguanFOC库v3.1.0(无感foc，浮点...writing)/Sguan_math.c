@@ -57,7 +57,7 @@ void Value_Limit(float *val, float max, float min){
 
 // 参数取模[0, 2π)
 float Value_normalize(float angle){
-    while (1) {
+    while (1){
         if (angle > Value_2PI)
             angle -= Value_2PI;
         else if (angle < 0)

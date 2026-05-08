@@ -16,15 +16,16 @@
 #define READING_Rs  0x00
 #define READING_Encoder_Dir  0x00
 
-
-
-
 typedef struct{
     uint8_t Status;         // (状态机)电机参数辨识 
 
 
     float temp;             // (中间量)
 }PMSM_STRUCT;
+
+typedef struct{
+    float Speed;
+}READ_FLUX_STRUCT;
 
 typedef struct{
     PMSM_STRUCT pmsm;       // (结构体)永磁同步电机运算数据

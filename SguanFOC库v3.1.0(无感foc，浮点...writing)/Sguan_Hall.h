@@ -16,14 +16,14 @@ typedef struct{
 
     float Gain;             // (中间量)低通滤波输入项系数
     float Normalized_Gain;  // (中间量)低通滤波输出项系数
-}RAD_STRUCT;
+}HALL_GO_STRUCT;
 
 typedef struct{
-    RAD_STRUCT rad;         // (结构体)霍尔传感器运算数据
+    HALL_GO_STRUCT go;      // (结构体)霍尔传感器运算数据
+
+    float T;                // (系统时钟)T离散运行周期
 
     float Wc;               // (参数设计)Wc微分环节一阶低通滤波
-    float T;                // (参数设计)T离散运行周期
-
     float Hall_High;        // (参数设计)霍尔信号上边界
     float Hall_Low;         // (参数设计)霍尔信号下边界
 }HALL_STRUCT;
