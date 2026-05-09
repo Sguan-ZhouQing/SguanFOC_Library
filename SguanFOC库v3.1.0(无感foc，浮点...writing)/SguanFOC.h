@@ -3,6 +3,7 @@
 
 /* USER CODE BEGIN Includes */
 // 电机控制核心函数文件声明
+#include "Sguan_Cogging.h"                  // Cogging离线标定抗齿槽算法
 #include "Sguan_DOB.h"                      // DOB超螺旋滑模扰动观测器
 #include "Sguan_Feedforward.h"              // Feedforward前馈环节
 #include "Sguan_Filter.h"                   // Filter巴特沃斯滤波器
@@ -251,7 +252,9 @@ typedef struct{
     // =========================== ③简易控制函数 ==================================
     void (*Func_Start)(void);               // 【函数】control控制接口->启动电机
     void (*Func_Stop)(void);                // 【函数】control控制接口->停止电机
+    void (*Func_Set_Ud)(float);             // 【函数】control控制接口->设计目标电压
     void (*Func_Set_Uq)(float);             // 【函数】control控制接口->设计目标电压
+    void (*Func_Set_Id)(float);             // 【函数】control控制接口->设计目标电流
     void (*Func_Set_Iq)(float);             // 【函数】control控制接口->设计目标电流
     void (*Func_Set_Velocity)(float);       // 【函数】control控制接口->设计目标转速
     void (*Func_Set_Position)(float);       // 【函数】control控制接口->设计目标位置

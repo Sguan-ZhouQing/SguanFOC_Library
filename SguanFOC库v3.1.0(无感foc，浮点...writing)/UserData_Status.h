@@ -7,7 +7,7 @@
 /* 用户自己的CODE END Includes */
 
 
-/* ================= 状态机任务信号(输入) ================= */
+/* =================== 状态机任务信号(输入) ================== */
 static inline uint8_t STANDBY_Signal(void){
     uint8_t STANDBY_num = 0;
     // 解除锁定信号(Emergency stop signal)
@@ -51,7 +51,7 @@ static inline uint8_t DISABLED_Signal(void){
 }
 
 
-/* ================= 状态机任务处理(执行) ================= */
+/* =================== 状态机任务处理(执行) ================== */
 static inline void STANDBY_Loop(void){
     // Your code for 待机(未初始化，准备中) here
 }

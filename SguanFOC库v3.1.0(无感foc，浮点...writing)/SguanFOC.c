@@ -34,7 +34,9 @@
  */
 static void Function_Start(void);
 static void Function_Stop(void);
+static void Function_SetUd(float ud);
 static void Function_SetUq(float uq);
+static void Function_SetId(float id);
 static void Function_SetIq(float iq);
 static void Function_SetVelocity(float speed);
 static void Function_SetPosition(float pos);
@@ -44,7 +46,9 @@ static void Function_SetTXdata(uint8_t ch,float data);
 SguanFOC_System_STRUCT Sguan = {
     .Func_Start = Function_Start,
     .Func_Stop = Function_Stop,
+    .Func_Set_Ud = Function_SetUd,
     .Func_Set_Uq = Function_SetUq,
+    .Func_Set_Id = Function_SetId,
     .Func_Set_Iq = Function_SetIq,
     .Func_Set_Velocity = Function_SetVelocity,
     .Func_Set_Position = Function_SetPosition,
@@ -239,8 +243,18 @@ static void Function_Stop(void){
 }
 
 // Function控制接口->设计目标电压
+static void Function_SetUd(float ud){
+    Sguan.foc.Ud_in = ud;
+}
+
+// Function控制接口->设计目标电流
 static void Function_SetUq(float uq){
     Sguan.foc.Uq_in = uq;
+}
+
+// Function控制接口->设计目标电压
+static void Function_SetId(float id){
+    Sguan.foc.Target_Id = id;
 }
 
 // Function控制接口->设计目标电流
@@ -365,7 +379,7 @@ static void Transfer_DOB_Loop(DOB_STRUCT *dob,float Iq,float Wm){
 // Transfer传递函数初始化
 static void Transfer_Init(SguanFOC_System_STRUCT *sguan){
     // 0.用户自定义控制器参数
-    User_Initial_Init();
+    User_StartMotor_Init();
     User_Motor_Init(sguan);
     User_Parameter_Init(sguan);
     sguan->foc.sine = 0.0f;
@@ -1500,7 +1514,6 @@ static void Sguan_ReInit_Loop(SguanFOC_System_STRUCT *sguan){
         sguan->status = MOTOR_STATUS_INITIALIZING;
         Transfer_Init(sguan);
         Identify_Init(&sguan->motor.identify);
-        Printf_TX_Init(&sguan->txdata);
         // 读取电流偏置
         Offset_Current_Tick(sguan);
         // if ((CONFIG_MODE >= Voltag_OPEN_MODE) && (CONFIG_MODE <= Sensor_Hall_MODE)){            
@@ -1629,7 +1642,18 @@ void SguanFOC_Printf_Loop(uint8_t *data, uint16_t length){
  * @return {*}
  */
 void SguanFOC_main_Loop(void){
+    // 1.上电即初始化
+    static uint8_t count = 0;
+    if (!count){
+        Printf_TX_Init(&Sguan.txdata);
+        Printf_RX_Init();
+        User_Initial_Init();
+    }
+
+    // 2.接收到开启电机才初始化
     Sguan_ReInit_Loop(&Sguan);
+
+    // 3.正常运行时串口打印数据
     #if !CONFIG_Debug
     if ((Sguan.status >= MOTOR_STATUS_IDLE) && 
         (Sguan.status < MOTOR_STATUS_ENCODER_ERROR)){
