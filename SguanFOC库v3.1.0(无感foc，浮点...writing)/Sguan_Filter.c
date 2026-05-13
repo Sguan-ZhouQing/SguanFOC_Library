@@ -12,6 +12,32 @@
 #include "Sguan_Filter.h"
 
 /**
+ * @description: 二阶低通滤波LTD效果仿制的初始化
+ * @reminder: (初始化相关系数float->double->float)
+ * @reminder: (单浮点转double运算，提高系数精度)
+ * @param {LPF_STRUCT} *lpf
+ * @return {*}
+ */
+void LTD_Init(LPF_STRUCT *lpf){
+    double temp1 = ((double)lpf->T)*((double)lpf->Wc);
+    double temp2 = ((double)lpf->T)*((double)lpf->T)*
+                    ((double)lpf->Wc)*((double)lpf->Wc);
+    lpf->filter.num[0] = (float)(temp2/(temp2+temp1+4.0));
+    lpf->filter.num[1] = (float)((2.0*temp2)/(temp2+temp1+4.0));
+    lpf->filter.num[2] = (float)(temp2/(temp2+temp1+4.0));
+    lpf->filter.den[0] = (float)(-8.0+2.0*temp2)/(temp2+temp1+4.0);
+    lpf->filter.den[1] = (float)(temp2-temp1+4.0)/(temp2+temp1+4.0);
+
+    // 初始化为零
+    lpf->filter.i[0] = 0.0f;
+    lpf->filter.i[1] = 0.0f;
+    lpf->filter.o[0] = 0.0f;
+    lpf->filter.o[1] = 0.0f;
+    lpf->filter.Input = 0.0f;
+    lpf->filter.Output = 0.0f;
+}
+
+/**
  * @description: 二阶低通滤波器参数初始化
  * @reminder: (初始化相关系数float->double->float)
  * @reminder: (单浮点转double运算，提高系数精度)

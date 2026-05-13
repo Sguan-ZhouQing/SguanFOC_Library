@@ -457,9 +457,14 @@ static void Transfer_Init(SguanFOC_System_STRUCT *sguan){
     // 10.速度前馈的参数
     // 11.死区补偿参数
     // 12.无感控制算法参数
-    #if CONFIG_MODE==MODE_Sensorless_HFI
+    #if CONFIG_MODE==MODE_VF_OPENLOOP || CONFIG_MODE==MODE_IF_OPENLOOP
+    sguan->transfer.LTD.T = PMSM_RUN_T;
+    LTD_Init(&sguan->transfer.LTD);
+    #elif CONFIG_MODE==MODE_Sensorless_HFI
     HFI_Init(&sguan->transfer.HFI);
     #elif CONFIG_MODE==MODE_Sensorless_SMO
+    sguan->transfer.LTD.T = PMSM_RUN_T;
+    LTD_Init(&sguan->transfer.LTD);
     sguan->transfer.SMO.T = PMSM_RUN_T;
     sguan->transfer.SMO.Rs = sguan->motor.identify.Rs;
     sguan->transfer.SMO.Ld = sguan->motor.identify.Ld;
@@ -1467,13 +1472,9 @@ static void Positioning_Set(SguanFOC_System_STRUCT *sguan,float Ud,float Uq){
         duty_q);
 }
 
-// Sguan_Calculate_Loop有传感器角度和电流
+// Sguan_Calculate_Loop电流和角度相关数据
 static void Sguan_Calculate_Loop(SguanFOC_System_STRUCT *sguan){
-    // 1.有传感器电机角度和角速度计算
-    Encoder_Tick[Value_set(CONFIG_MODE,
-        MODE_Sensorless_HS,0)](sguan);
-    
-    // 2.电机相线和各轴电流计算
+    // 1.电机相线和各轴电流计算
     Current_ReadIabc(sguan);
     clarke(&sguan->current.Real_Ialpha,
         &sguan->current.Real_Ibeta,
@@ -1491,6 +1492,10 @@ static void Sguan_Calculate_Loop(SguanFOC_System_STRUCT *sguan){
                     sguan->current.Real_Iq);
     sguan->current.Real_Id = sguan->transfer.LPF_D.filter.Output;
     sguan->current.Real_Iq = sguan->transfer.LPF_Q.filter.Output;
+
+    // 2.电机角度和角速度计算
+    Encoder_Tick[Value_set(CONFIG_MODE,
+        MODE_Sensorless_HS,0)](sguan);
 }
 
 // Sguan_GeneratePWM_Loop计算控制量并执行电机控制

@@ -16,7 +16,7 @@
  * @reminder: 9->Sensorless_HS_MODE     前两结合_转速环
  * @return {*}
  */
-#define Define_Run_Mode 2
+#define Define_Run_Mode 0
 
 /**
  * @description: 宏定义0-3决定“电机速度环”的控制方式(默认使用PI控制)

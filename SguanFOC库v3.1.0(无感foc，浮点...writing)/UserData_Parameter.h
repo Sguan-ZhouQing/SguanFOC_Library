@@ -151,12 +151,16 @@ static inline void User_Parameter_Init(SguanFOC_System_STRUCT *user){
     #endif // CONFIG_DeadZone
 
     // 12.无感控制算法参数
-    #if CONFIG_MODE==MODE_Sensorless_HFI
+    #if CONFIG_MODE==MODE_VF_OPENLOOP || CONFIG_MODE==MODE_IF_OPENLOOP
+    user->transfer.LTD.Wc = 2.0f;                   // LTD仿制，二阶巴特沃斯2rad/s合适
+    #elif CONFIG_MODE==MODE_Sensorless_HFI
     user->transfer.HFI.Percentage_hfi = 0.1f;       // 高频注入->电压占比
 
     user->transfer.Speed_AbsMax = 100.0f;           // 界限->“过渡区”到“高速域”
     user->transfer.Speed_AbsMax = 80.0f;            // 界限->“低速域”到“过渡区”
     #elif CONFIG_MODE==MODE_Sensorless_SMO
+    user->transfer.LTD.Wc = 2.0f;                   // LTD仿制，二阶巴特沃斯2rad/s合适
+
     user->transfer.SMO.Wc = 100.0f;                 // 滑模->滤波截止频率
     user->transfer.SMO.h = 50.0f;                   // 滑模->观测器增益
     user->transfer.SMO.IntMax = 5000.0f;            // 滑模->积分项上限

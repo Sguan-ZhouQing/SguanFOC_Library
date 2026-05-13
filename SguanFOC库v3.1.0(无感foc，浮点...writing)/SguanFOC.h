@@ -112,11 +112,14 @@ typedef struct{
     #endif // CONFIG_DeadZone
 
     // ===================== 5.传递函数“无感控制算法” =========================
-    #if CONFIG_MODE==MODE_Sensorless_HFI
+    #if CONFIG_MODE==MODE_VF_OPENLOOP || CONFIG_MODE==MODE_IF_OPENLOOP
+    LPF_STRUCT LTD;                         // (强拖算法)LTD仿制效果，输入速度不突变
+    #elif CONFIG_MODE==MODE_Sensorless_HFI
     HFI_STRUCT HFI;                         // (无感算法)HFI高频方波注入算法
     float Speed_AbsMax;                     // (参数设计)角度解耦低速、高速域分界线上限
     float Speed_AbsMin;                     // (参数设计)角度解耦低速、高速域分界线下限
     #elif CONFIG_MODE==MODE_Sensorless_SMO
+    LPF_STRUCT LTD;                         // (强拖算法)LTD仿制效果，输入速度不突变
     SMO_STRUCT SMO;                         // (无感算法)SMO静止坐标系下的滑模观测器
     float Speed_AbsMax;                     // (参数设计)角度解耦低速、高速域分界线上限
     float Speed_AbsMin;                     // (参数设计)角度解耦低速、高速域分界线下限

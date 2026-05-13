@@ -23,6 +23,7 @@ typedef struct{
     float Wc;               // (参数设计)Wc巴特沃斯截止频率
 }LPF_STRUCT;
 
+void LTD_Init(LPF_STRUCT *lpf);
 void LPF_Init(LPF_STRUCT *bpf);
 void LPF_Loop(LPF_STRUCT *bpf);
 
