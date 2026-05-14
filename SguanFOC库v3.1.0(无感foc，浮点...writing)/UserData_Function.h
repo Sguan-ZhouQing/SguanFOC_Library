@@ -90,7 +90,7 @@ static inline int32_t User_ReadADC_Raw(int32_t Current_CH){
 }
 
 /**
- * @description: 5.用户的绝对编码器函数接口
+ * @description: 5.用户的高精度编码器函数接口
  * @reminder: (此方函数->填入你自己的编码器原始数据函数)
  * @reminder: (原始数据是略微处理后，输出0-2pi的数值)
  * @reminder: (如果你使用的霍尔模式或者无感，就无需填写)
@@ -107,7 +107,7 @@ static inline float User_Encoder_ReadRad(void){
  * @description: 6.用户的三霍尔编码器接口
  * @reminder: (此方函数->填入你自己的霍尔信号读取函数)
  * @reminder: (数据是三个电平的高低)
- * @reminder: (如果你使用的绝对编码器或者无感，就无需填写)
+ * @reminder: (如果你使用的高精度编码器或者无感，就无需填写)
  * @param {uint8_t} CH
  * @return {*}
  */

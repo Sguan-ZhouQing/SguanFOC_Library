@@ -3,48 +3,71 @@
 /* 电机控制User用户设置·数据计算Config */
 
 /**
- * @description: 宏定义0-9决定“电机的控制模式”(默认使用“速度-电流”模式)
- * @reminder: 0->VF_OPENLOOP_MODE       VF压频比开环
- * @reminder: 1->IF_OPENLOOP_MODE       IF流频比开环
- * @reminder: 2->Voltag_OPEN_MODE       电压开环
- * @reminder: 3->Current_SINGLE_MODE    电流单闭环
- * @reminder: 4->VelCur_DOUBLE_MODE     速度-电流串级闭环
- * @reminder: 5->PosVelCur_THREE_MODE   位置-速度-电流三环
- * @reminder: 6->Sensor_Hall_MODE       有感霍尔_转速环
- * @reminder: 7->Sensorless_HFI_MODE    高频注入_转速环
- * @reminder: 8->Sensorless_SMO_MODE    滑模观测_转速环
- * @reminder: 9->Sensorless_HS_MODE     前两结合_转速环
+ * @description: 宏定义0-9决定“电机的控制模式”(默认使用“速度-电流串级闭环控制”模式)
+ * @reminder: 0->MODE_VF_OPENLOOP       VF压频比开环        (开环强拖)
+ * @reminder: 1->MODE_IF_OPENLOOP       IF流频比开环        (开环强拖)
+ * @reminder: 2->MODE_Voltag_OPEN       电压开环            (高精度编码器提供Rad)
+ * @reminder: 3->MODE_Current_SINGLE    电流单闭环          (高精度编码器提供Rad)
+ * @reminder: 4->MODE_VelCur_DOUBLE     速度-电流串级闭环   (高精度编码器提供Rad)
+ * @reminder: 5->MODE_PosVelCur_THREE   位置-速度-电流三环  (高精度编码器提供Rad)
+ * @reminder: 6->MODE_Sensor_Hall       有感霍尔_转速环     (三霍尔编码器提供Rad)
+ * @reminder: 7->MODE_Sensorless_HFI    高频注入_转速环     (低速域，速度有上限)
+ * @reminder: 8->MODE_Sensorless_SMO    滑模观测_转速环     (高速域，IF切SMO)
+ * @reminder: 9->MODE_Sensorless_HS     前两结合_转速环     (全速域，HFI切SMO)
  * @return {*}
  */
 #define Define_Run_Mode 0
 
 /**
+ * @description: 宏定义0-3决定“无感算法的debug模式”是否开启(默认关闭)
+ * @reminder: 0->Debug_NULL             关闭无感算法的dubug跟随，纯有感控制
+ * @reminder: (开启debug...支持有感模式下，旁接无感模块观测调试)
+ * @reminder: 1->Debug_HFI              低速域，纯HFI高频注入算法
+ * @reminder: 2->Debug_SMO              高速域，纯SMO滑模观测器
+ * @reminder: 3->Debug_HS               全速域，“高频注入”切“滑模观测”
+ * @return {*}
+ */
+#define Define_Run_Debug 0
+
+/**
  * @description: 宏定义0-3决定“电机速度环”的控制方式(默认使用PI控制)
- * @reminder: 0->电流环“PI控制”，转速环“PI控制”
- * @reminder: 1->电流环“PI控制”，转速环“Ladrc线性自抗扰控制”
- * @reminder: 2->电流环“PI控制”，转速环“SMC传统滑模控制”
- * @reminder: 3->电流环“PI控制”，转速环“STA超螺旋二阶滑模控制”
+ * @reminder: 0->Control_PID            电流环“PI控制”，转速环“PI控制”
+ * @reminder: 1->Control_LADRC          电流环“PI控制”，转速环“Ladrc线性自抗扰控制”
+ * @reminder: 2->Control_SMC            电流环“PI控制”，转速环“SMC传统滑模控制”
+ * @reminder: 3->Control_STA            电流环“PI控制”，转速环“STA超螺旋滑模控制”
  * @return {*}
  */
 #define Switch_Control_Velocity 0
 
 /**
  * @description: 宏定义0-3决定“电机位置环”的控制方式(默认使用PD控制)
- * @reminder: 0->位置环“PD控制” 
- * @reminder: 1->位置环“Ladrc线性自抗扰控制”
- * @reminder: 2->位置环“SMC传统滑模控制”
- * @reminder: 3->位置环“STA超螺旋二阶滑模控制”
+ * @reminder: 0->Control_PID            位置环采用“PD控制” 
+ * @reminder: 1->Control_LADRC          位置环采用“Ladrc线性自抗扰控制”
+ * @reminder: 2->Control_SMC            位置环采用“SMC传统滑模控制”
+ * @reminder: 3->Control_STA            位置环采用“STA超螺旋滑模控制”
  * @return {*}
  */
 #define Switch_Control_Position 0
 
 /**
- * @description: 宏定义0或1决定“电机矢量控制底层算法”(默认使用SVPWM)
+ * @description: 宏定义0-1决定“电机矢量控制底层算法”(默认使用SVPWM)
  * @reminder: 0->使用七段式的SVPWM空间矢量合成的电机控制技术
  * @reminder: 1->使用带“三次谐波注入”优化后的SPWM脉宽调制技术
  * @return {*}
  */
 #define Switch_PWM_Calculate 0
+
+/**
+ * @description: 宏定义0-5决定“滤波算法使用上的选择”(默认使用二阶巴特沃斯滤波器)
+ * @reminder: 0->Filter_ButterWorth     Butter二阶巴特沃斯滤波器
+ * @reminder: 1->Fitler_Normal          Normal普通一阶低通滤波器
+ * @reminder: 2->Fitler_ChebyShev       ChebyShev二阶切比雪夫I型
+ * @reminder: 3->Fitler_Bessel          Bessel二阶贝塞尔滤波器
+ * @reminder: 4->Fitler_Moving          Moving滑动平均滤波
+ * @reminder: 5->Fitler_Median          Median中值滤波算法
+ * @return {*}
+ */
+#define Switch_Filter_Calculate 0
 
 /**
  * @description: 宏定义0或1决定“电机参数辨识”额外数据的测量(默认关闭，首次上电需要1)
@@ -108,6 +131,14 @@
 #define Open_FW_Calculate 0
 
 /**
+ * @description: 宏定义决定UART或者CAN发送数据的模式
+ * @reminder: (Open_Printf_Debug)0->发送正常数据
+ * @reminder: 1->仅发送Debug数据，不发送正常数据
+ * @return {*}
+ */
+#define Open_Printf_Debug 0
+
+/**
  * @description: 宏定义0或1决定“抗齿槽算法(离线标定补偿)”是否开启(默认关闭)
  * @reminder: 0->不开启抗齿槽算法的离线标定补偿
  * @reminder: 1->开启抗齿槽算法，基于绝对位置下的iq输入
@@ -124,14 +155,6 @@
  * @return {*}
  */
 #define BASE_Cogging_Num 8.0f
-
-/**
- * @description: 宏定义决定UART或者CAN发送数据的模式
- * @reminder: (Open_Printf_Debug)0->发送正常数据
- * @reminder: 1->仅发送Debug数据，不发送正常数据
- * @return {*}
- */
-#define Open_Printf_Debug 0
 
 
 // 定时器中断参数设计

@@ -23,37 +23,55 @@
 #include "Sguan_SVPWM.h"                    // SVPWM七段式空间矢量PWM调制
 /* USER CODE END Includes */
 
-// ╔═══════════════════════════════════════════════════════╗
-// ║                       开环控制模式                     ║
-// ╚═══════════════════════════════════════════════════════╝
+// ╔═════════════════════════════════════════════════════════╗
+// ║                       开环控制模式                       ║
+// ╚═════════════════════════════════════════════════════════╝
 #define MODE_VF_OPENLOOP        0x00        // VF压频比开环(Sguan.foc.Target_Speed,Sguan.foc.Uq_in)
 #define MODE_IF_OPENLOOP        0x01        // IF流频比开环(Sguan.foc.Target_Speed,Sguan.foc.Target_Iq)
-// ╔═══════════════════════════════════════════════════════╗
-// ║                   闭环控制模式（有传感器）              ║
-// ╚═══════════════════════════════════════════════════════╝
+// ╔═════════════════════════════════════════════════════════╗
+// ║                   闭环控制模式（有传感器）                ║
+// ╚═════════════════════════════════════════════════════════╝
 #define MODE_Voltag_OPEN        0x02        // 电压开环(Sguan.foc.Uq_in)
 #define MODE_Current_SINGLE     0x03        // 电流单闭环(Sguan.foc.Target_Iq)
 #define MODE_VelCur_DOUBLE      0x04        // 速度-电流串级闭环(Sguan.foc.Target_Speed)
 #define MODE_PosVelCur_THREE    0x05        // 位置-速度-电流三环(Sguan.foc.Target_Pos)
-// ╔═══════════════════════════════════════════════════════╗
-// ║                   霍尔控制模式（有传感器）              ║
-// ╚═══════════════════════════════════════════════════════╝
+// ╔═════════════════════════════════════════════════════════╗
+// ║                   霍尔控制模式（有传感器）                ║
+// ╚═════════════════════════════════════════════════════════╝
 #define MODE_Sensor_Hall        0x06        // 有感霍尔_转速环(Sguan.foc.Target_Speed)
-// ╔═══════════════════════════════════════════════════════╗
-// ║                   无感控制模式（无传感器）              ║
-// ╚═══════════════════════════════════════════════════════╝
+// ╔═════════════════════════════════════════════════════════╗
+// ║                   无感控制模式（无传感器）                ║
+// ╚═════════════════════════════════════════════════════════╝
 #define MODE_Sensorless_HFI     0x07        // 高频注入_转速环(Sguan.foc.Target_Speed)
 #define MODE_Sensorless_SMO     0x08        // 滑模观测_转速环(Sguan.foc.Target_Speed)
 #define MODE_Sensorless_HS      0x09        // 前两结合_转速环(Sguan.foc.Target_Speed)
 
 
-// ╔═══════════════════════════════════════════════════════╗
-// ║                      核心控制器宏定义                  ║
-// ╚═══════════════════════════════════════════════════════╝
+// +---------------------------------------------------------+
+// |                    无感算法Debug定义                     |
+// +---------------------------------------------------------+
+#define Debug_NULL              0x00        // NULL没有无感算法测试模式
+#define Debug_HFI               0x01        // HFI开启高频注入的测试
+#define Debug_SMO               0x02        // SMO开启滑模观测的测试
+#define Debug_HS                0x03        // HS开启“高频”切“滑模”测试
+
+// +---------------------------------------------------------+
+// |                    控制器Ctrl宏定义                      |
+// +---------------------------------------------------------+
 #define Control_PID             0x00        // PID闭环控制Sguan_PID
 #define Control_LADRC           0x01        // LADRC线自抗扰Sguan_LADRC
 #define Control_SMC             0x02        // SMC传统滑模Sguan_SMC
 #define Control_STA             0x03        // STA简易超螺旋Sguan_STA
+
+// +---------------------------------------------------------+
+// |                    滤波器Filter定义                     |
+// +---------------------------------------------------------+
+#define Filter_ButterWorth      0x00        // Butter二阶巴特沃斯滤波器
+#define Fitler_Normal           0x01        // Normal普通一阶低通滤波器
+#define Fitler_ChebyShev        0x02        // ChebyShev二阶切比雪夫I型
+#define Fitler_Bessel           0x03        // Bessel二阶贝塞尔滤波器
+#define Fitler_Moving           0x04        // Moving滑动平均滤波
+#define Fitler_Median           0x05        // Median中值滤波算法
 
 typedef struct{
     // ======================== 1.传递函数“控制器” =============================
@@ -114,7 +132,7 @@ typedef struct{
     // ===================== 5.传递函数“无感控制算法” =========================
     #if CONFIG_MODE==MODE_VF_OPENLOOP || CONFIG_MODE==MODE_IF_OPENLOOP
     LPF_STRUCT LTD;                         // (强拖算法)LTD仿制效果，输入速度不突变
-    #elif CONFIG_MODE==MODE_Sensorless_HFI
+    #elif CONFIG_MODE==MODE_Sensorless_HFI || (CONFIG_Debug && (CONFIG_MODE>=MODE_Voltag_OPEN) && (CONFIG_MODE>=MODE_Voltag_OPEN) 
     HFI_STRUCT HFI;                         // (无感算法)HFI高频方波注入算法
     float Speed_AbsMax;                     // (参数设计)角度解耦低速、高速域分界线上限
     float Speed_AbsMin;                     // (参数设计)角度解耦低速、高速域分界线下限
@@ -130,7 +148,33 @@ typedef struct{
     float Speed_AbsMax;                     // (参数设计)角度解耦低速、高速域分界线上限
     float Speed_AbsMin;                     // (参数设计)角度解耦低速、高速域分界线下限
     #endif // CONFIG_MODE
+
+    #if CONFIG_Debug==Debug_HFI && (CONFIG_MODE>=MODE_Voltag_OPEN) && (CONFIG_MODE<=MODE_PosVelCur_THREE)
+    HFI_STRUCT HFI;                         // (无感算法)HFI高频方波注入算法
+    PLL_STRUCT PLL_Debug;                   // (PLL锁相环)角度跟踪锁相环
+    #elif CONFIG_Debug==Debug_SMO && (CONFIG_MODE>=MODE_Voltag_OPEN) && (CONFIG_MODE<=MODE_PosVelCur_THREE)
+    SMO_STRUCT SMO;                         // (无感算法)SMO静止坐标系下的滑模观测器
+    PLL_STRUCT PLL_Debug;                   // (PLL锁相环)角度跟踪锁相环
+    #elif CONFIG_Debug==Debug_HS && (CONFIG_MODE>=MODE_Voltag_OPEN) && (CONFIG_MODE<=MODE_PosVelCur_THREE)
+    HFI_STRUCT HFI;                         // (无感算法)HFI高频方波注入算法
+    SMO_STRUCT SMO;                         // (无感算法)SMO静止坐标系下的滑模观测器
+    PLL_STRUCT PLL_Debug;                   // (PLL锁相环)角度跟踪锁相环
+    PLL_STRUCT PLL_another;                 // (PLL锁相环)角度跟踪锁相环
+    float Speed_AbsMax;                     // (参数设计)角度解耦低速、高速域分界线上限
+    float Speed_AbsMin;                     // (参数设计)角度解耦低速、高速域分界线下限
+    #endif // CONFIG_Debug
 }MOTOR_TRANSFER_STRUCT;
+
+#if CONFIG_Debug
+typedef struct{
+    float Sensorless_Speed;                 // (Sensorless机械速度)预测机械角速度
+    float Sensorless_Pos;                   // (Sensorless机械角度)预测机械角度
+    float Sensorless_We;                    // (Sensorless电速度)预测电子角速度
+    float Sensorless_Re;                    // (Sensorless电角度)预测电子角度
+
+    float Pos_offset;                       // (Sensorless角度偏置)offset偏置位
+}MOTOR_DEBUG_STRUCT;
+#endif // CONFIG_Debug
 
 typedef struct{
     float Real_Speed;                       // (Encoder机械速度)Real实际机械角速度
@@ -244,6 +288,11 @@ typedef struct{
     
     // ============================= ②嵌套结构体 ==================================
     MOTOR_TRANSFER_STRUCT transfer;         // 【有参数设计】Transfer传递函数
+
+    #if CONFIG_Debug
+    MOTOR_DEBUG_STRUCT sensorless;          // 【数据】sensorless电机角速度和角度信息
+    #endif // CONFIG_Debug
+
     MOTOR_ENCODER_STRUCT encoder;           // 【数据】encoder电机角速度和角度信息
     MOTOR_CURRENT_STRUCT current;           // 【数据】current电机电流采样信息缓存
     MOTOR_FOC_STRUCT foc;                   // 【有参数设计】foc控制的参数

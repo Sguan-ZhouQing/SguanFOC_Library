@@ -210,11 +210,11 @@ static void Status_RUN_Loop(SguanFOC_System_STRUCT *sguan);
  * @param {SguanFOC_System_STRUCT} *sguan
  * @return {*}
  */
-#if CONFIG_Debug
+#if CONFIG_Printf
 static void Printf_Debug_Loop(SguanFOC_System_STRUCT *sguan);
-#else // CONFIG_Debug
+#else // CONFIG_Printf
 static void Printf_Normal_Loop(SguanFOC_System_STRUCT *sguan);
-#endif // CONFIG_Debug
+#endif // CONFIG_Printf
 /**
  * @description: 12.Set各种控制电机回零的设置
  * @param {SguanFOC_System_STRUCT} *sguan
@@ -472,6 +472,7 @@ static void Transfer_Init(SguanFOC_System_STRUCT *sguan){
     SMO_Init(&sguan->transfer.SMO);
     #elif CONFIG_MODE==MODE_Sensorless_HS
     HFI_Init(&sguan->transfer.HFI);
+    sguan->transfer.SMO.T = PMSM_RUN_T;
     sguan->transfer.SMO.Rs = sguan->motor.identify.Rs;
     sguan->transfer.SMO.Ld = sguan->motor.identify.Ld;
     sguan->transfer.SMO.Lq = sguan->motor.identify.Lq;
@@ -479,6 +480,32 @@ static void Transfer_Init(SguanFOC_System_STRUCT *sguan){
     sguan->transfer.PLL_another.T = PMSM_RUN_T;
     PLL_Init(&sguan->transfer.PLL_another);
     #endif // CONFIG_MODE
+
+    // 13.无感算法Debug调试(带传感器)
+    #if CONFIG_Debug==Debug_HFI && (CONFIG_MODE>=MODE_Voltag_OPEN) && (CONFIG_MODE<=MODE_PosVelCur_THREE)
+    HFI_Init(&sguan->transfer.HFI);
+    sguan->transfer.PLL_Debug.T = PMSM_RUN_T;
+    PLL_Init(&sguan->transfer.PLL_Debug);
+    #elif CONFIG_Debug==Debug_SMO && (CONFIG_MODE>=MODE_Voltag_OPEN) && (CONFIG_MODE<=MODE_PosVelCur_THREE)
+    sguan->transfer.SMO.T = PMSM_RUN_T;
+    sguan->transfer.SMO.Rs = sguan->motor.identify.Rs;
+    sguan->transfer.SMO.Ld = sguan->motor.identify.Ld;
+    sguan->transfer.SMO.Lq = sguan->motor.identify.Lq;
+    SMO_Init(&sguan->transfer.SMO);
+    sguan->transfer.PLL_Debug.T = PMSM_RUN_T;
+    PLL_Init(&sguan->transfer.PLL_Debug);
+    #elif CONFIG_Debug==Debug_HS && (CONFIG_MODE>=MODE_Voltag_OPEN) && (CONFIG_MODE<=MODE_PosVelCur_THREE)
+    HFI_Init(&sguan->transfer.HFI);
+    sguan->transfer.SMO.T = PMSM_RUN_T;
+    sguan->transfer.SMO.Rs = sguan->motor.identify.Rs;
+    sguan->transfer.SMO.Ld = sguan->motor.identify.Ld;
+    sguan->transfer.SMO.Lq = sguan->motor.identify.Lq;
+    SMO_Init(&sguan->transfer.SMO);
+    sguan->transfer.PLL_Debug.T = PMSM_RUN_T;
+    sguan->transfer.PLL_another.T = PMSM_RUN_T;
+    PLL_Init(&sguan->transfer.PLL_Debug);
+    PLL_Init(&sguan->transfer.PLL_another);
+    #endif // CONFIG_Debug
 }
 
 // Transfer空传递函数
@@ -504,12 +531,21 @@ static void Offset_Current_Tick(SguanFOC_System_STRUCT *sguan){
 
 // Offset读取编码器偏置
 static void Offset_Encoder_Read(SguanFOC_System_STRUCT *sguan){
-    // 读取绝对编码器的偏置
+    // 1.电机强拖到D轴零位(如果)
+    Positioning_Set(sguan,0.3f*sguan->foc.Real_VBUS,0.0f);
+    User_Delay(1200);
+
+    // 2.读取高精度编码器的偏置
     for (uint8_t i = 0; i < 10; i++){
         sguan->encoder.Pos_offset += User_Encoder_ReadRad();
         User_Delay(2);
     }
     sguan->encoder.Pos_offset = sguan->encoder.Pos_offset/10.0f;
+
+    Positioning_Set(sguan,0.0f,0.0f);
+    User_Delay(800);
+    Sguan.foc.sine = 0.0f;
+    Sguan.foc.cosine = 1.0f;
 }
 
 static void Offset_Hall_Read(SguanFOC_System_STRUCT *sguan){
@@ -1407,7 +1443,7 @@ static void Status_RUN_Loop(SguanFOC_System_STRUCT *sguan){
 
 
 // Printf电机调试信息发送
-#if CONFIG_Debug
+#if CONFIG_Printf
 static void Printf_Debug_Loop(SguanFOC_System_STRUCT *sguan){
     static uint8_t status = 0xFF;
     static uint32_t count = 0;
@@ -1451,13 +1487,13 @@ static void Printf_Debug_Loop(SguanFOC_System_STRUCT *sguan){
         status = sguan->status;
     }
 }
-#else // CONFIG_Debug
+#else // CONFIG_Printf
 // Printf电机数据正常发送
 static void Printf_Normal_Loop(SguanFOC_System_STRUCT *sguan){
     // 发送数据到上位机
     Printf_TX_Loop(&Sguan.txdata);
 }
-#endif // CONFIG_Debug
+#endif // CONFIG_Printf
 
 
 // Set各种控制电机回零的设置
@@ -1594,9 +1630,9 @@ void SguanFOC_High_Loop(void){
             }
         }
 
-        #if CONFIG_Debug
+        #if CONFIG_Printf
         Printf_Debug_Loop(&Sguan);
-        #endif // CONFIG_Debug
+        #endif // CONFIG_Printf
         Sguan.flag.PWM_Calc = 0;
     }
     else{
@@ -1659,11 +1695,11 @@ void SguanFOC_main_Loop(void){
     Sguan_ReInit_Loop(&Sguan);
 
     // 3.正常运行时串口打印数据
-    #if !CONFIG_Debug
+    #if !CONFIG_Printf
     if ((Sguan.status >= MOTOR_STATUS_IDLE) && 
         (Sguan.status < MOTOR_STATUS_ENCODER_ERROR)){
         Printf_Normal_Loop(&Sguan);
     }
-    #endif // CONFIG_Debug
+    #endif // CONFIG_Printf
 }
 

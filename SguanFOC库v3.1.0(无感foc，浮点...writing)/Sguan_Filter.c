@@ -5,37 +5,11 @@
  * @LastEditors: 星必尘Sguan|3464647102@qq.com
  * @LastEditTime: 2026-04-30 00:22:21
  * @FilePath: \SguanFOC_Debug\SguanFOC\Sguan_Filter.c
- * @Description: SguanFOC库的“二阶巴特沃斯滤低通滤波器”实现
+ * @Description: SguanFOC库的“不同滤波器，达到低通滤波的效果”实现
  * 
  * Copyright (c) 2026 by $星必尘Sguan, All Rights Reserved. 
  */
 #include "Sguan_Filter.h"
-
-/**
- * @description: 二阶低通滤波LTD效果仿制的初始化
- * @reminder: (初始化相关系数float->double->float)
- * @reminder: (单浮点转double运算，提高系数精度)
- * @param {LPF_STRUCT} *lpf
- * @return {*}
- */
-void LTD_Init(LPF_STRUCT *lpf){
-    double temp1 = ((double)lpf->T)*((double)lpf->Wc);
-    double temp2 = ((double)lpf->T)*((double)lpf->T)*
-                    ((double)lpf->Wc)*((double)lpf->Wc);
-    lpf->filter.num[0] = (float)(temp2/(temp2+temp1+4.0));
-    lpf->filter.num[1] = (float)((2.0*temp2)/(temp2+temp1+4.0));
-    lpf->filter.num[2] = (float)(temp2/(temp2+temp1+4.0));
-    lpf->filter.den[0] = (float)(-8.0+2.0*temp2)/(temp2+temp1+4.0);
-    lpf->filter.den[1] = (float)(temp2-temp1+4.0)/(temp2+temp1+4.0);
-
-    // 初始化为零
-    lpf->filter.i[0] = 0.0f;
-    lpf->filter.i[1] = 0.0f;
-    lpf->filter.o[0] = 0.0f;
-    lpf->filter.o[1] = 0.0f;
-    lpf->filter.Input = 0.0f;
-    lpf->filter.Output = 0.0f;
-}
 
 /**
  * @description: 二阶低通滤波器参数初始化
@@ -84,4 +58,5 @@ void LPF_Loop(LPF_STRUCT *lpf){
     lpf->filter.o[1] = lpf->filter.o[0];
     lpf->filter.o[0] = lpf->filter.Output;
 }
+
 

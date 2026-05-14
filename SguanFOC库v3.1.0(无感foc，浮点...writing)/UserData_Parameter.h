@@ -182,6 +182,38 @@ static inline void User_Parameter_Init(SguanFOC_System_STRUCT *user){
     user->transfer.Speed_AbsMax = 100.0f;           // 界限->“过渡区”到“高速域”
     user->transfer.Speed_AbsMax = 80.0f;            // 界限->“低速域”到“过渡区”
     #endif // CONFIG_MODE
+
+    // 13.无感算法Debug调试(带传感器)
+    #if CONFIG_Debug==Debug_HFI && (CONFIG_MODE>=MODE_Voltag_OPEN) && (CONFIG_MODE<=MODE_PosVelCur_THREE)
+    user->transfer.HFI.Percentage_hfi = 0.1f;       // 高频注入->电压占比
+
+    user->transfer.PLL_Debug.Kp = 650.0f;           // 锁相环->比例项增益
+    user->transfer.PLL_Debug.Ki = 210000.0f;        // 锁相环->积分项增益
+    #elif CONFIG_Debug==Debug_SMO && (CONFIG_MODE>=MODE_Voltag_OPEN) && (CONFIG_MODE<=MODE_PosVelCur_THREE)
+    user->transfer.SMO.Wc = 100.0f;                 // 滑模->滤波截止频率
+    user->transfer.SMO.h = 50.0f;                   // 滑模->观测器增益
+    user->transfer.SMO.IntMax = 5000.0f;            // 滑模->积分项上限
+    user->transfer.SMO.IntMin = -5000.0f;           // 滑模->积分项下限
+
+    user->transfer.PLL_Debug.Kp = 650.0f;           // 锁相环->比例项增益
+    user->transfer.PLL_Debug.Ki = 210000.0f;        // 锁相环->积分项增益
+    #elif CONFIG_Debug==Debug_HS && (CONFIG_MODE>=MODE_Voltag_OPEN) && (CONFIG_MODE<=MODE_PosVelCur_THREE)
+    user->transfer.HFI.Percentage_hfi = 0.1f;       // 高频注入->电压占比
+
+    user->transfer.SMO.Wc = 100.0f;                 // 滑模->滤波截止频率
+    user->transfer.SMO.h = 50.0f;                   // 滑模->观测器增益
+    user->transfer.SMO.IntMax = 5000.0f;            // 滑模->积分项上限
+    user->transfer.SMO.IntMin = -5000.0f;           // 滑模->积分项下限
+
+    user->transfer.PLL_Debug.Kp = 650.0f;           // 锁相环->比例项增益
+    user->transfer.PLL_Debug.Ki = 210000.0f;        // 锁相环->积分项增益
+
+    user->transfer.PLL_another.Kp = 650.0f;         // 锁相环->比例项增益
+    user->transfer.PLL_another.Ki = 210000.0f;      // 锁相环->积分项增益
+
+    user->transfer.Speed_AbsMax = 100.0f;           // 界限->“过渡区”到“高速域”
+    user->transfer.Speed_AbsMax = 80.0f;            // 界限->“低速域”到“过渡区”
+    #endif // CONFIG_Debug
 }
 
 
