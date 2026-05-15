@@ -70,7 +70,7 @@
 #define Switch_Filter_Calculate 0
 
 /**
- * @description: 宏定义0或1决定“电机参数辨识”额外数据的测量(默认关闭，首次上电需要1)
+ * @description: 宏定义0-2决定“电机参数辨识”额外数据的测量(默认关闭，首次上电需要1)
  * @reminder: 0->不开启电机的参数辨识
  * @reminder: 1->开启辨识，只执行基础的Rs、Ld、Lq和Sguan.identify.Encoder_Dir
  * @reminder: 2->开启辨识，执行所有辨识，包括额外的B、J和Flux...需调好电机闭环回路才可开启
@@ -79,6 +79,15 @@
  * @return {*}
  */
 #define Switch_MOTOR_Identify 0
+
+/**
+ * @description: 宏定义0-2决定“AngleComp相位延迟补偿”是否开启(默认关闭)
+ * @reminder: 0->不开启系统的相位延迟补偿
+ * @reminder: 1->开启相位延迟补偿，恒定延迟补偿，固定Td补偿算法
+ * @reminder: 1->开启相位延迟补偿，非线性相位补偿，采用全通滤波器补偿
+ * @return {*}
+ */
+#define Switch_AngleComp_Calculate 0
 
 /**
  * @description: 宏定义0或1决定“电流前馈”是否开启(开启最优)
@@ -105,14 +114,6 @@
 #define Open_DOB_Calculate 0
 
 /**
- * @description: 宏定义0或1决定“DeadZone死区补偿”是否开启(开启最优)
- * @reminder: 0->不开启MOS或者IGBT的死区补偿
- * @reminder: 1->开启DeadZone死区补偿算法(电流方向的前馈补偿)
- * @return {*}
- */
-#define Open_DeadZone_Calculate 0
-
-/**
  * @description: 宏定义0或1决定“MTPA最大转矩控制控制”是否开启(默认关闭)
  * @reminder: 0->不开启IPMSM的MTPA最大转矩控制
  * @reminder: 1->开启最大转矩控制控制(凸极电机需要)
@@ -129,6 +130,14 @@
  * @return {*}
  */
 #define Open_FW_Calculate 0
+
+/**
+ * @description: 宏定义0或1决定“DeadZone死区补偿”是否开启(开启最优)
+ * @reminder: 0->不开启MOS或者IGBT的死区补偿
+ * @reminder: 1->开启DeadZone死区补偿算法(电流方向的前馈补偿)
+ * @return {*}
+ */
+#define Open_DeadZone_Calculate 0
 
 /**
  * @description: 宏定义决定UART或者CAN发送数据的模式

@@ -16,7 +16,7 @@
  * @param {float} Espeed
  * @param {float} Lq
  * @param {float} Iq
- * @return {*}
+ * @return {float}
  */
 float Feedforward_CurrentD(float We,float Lq,float Iq){
     return -(We*Lq*Iq);
@@ -28,7 +28,7 @@ float Feedforward_CurrentD(float We,float Lq,float Iq){
  * @param {float} Ld
  * @param {float} Id
  * @param {float} Flux
- * @return {*}
+ * @return {float}
  */
 float Feedforward_CurrentQ(float We,float Ld,float Id,float Flux){
     return We*(Ld*Id + Flux);
@@ -38,7 +38,7 @@ float Feedforward_CurrentQ(float We,float Ld,float Id,float Flux){
  * @description: 转速环速度前馈量
  * @param {float} Speed
  * @param {float} Ba
- * @return {*}
+ * @return {float}
  */
 float Feedforward_Velocity(float Speed,float Ba){
     return -Speed*Ba;
@@ -49,7 +49,7 @@ float Feedforward_Velocity(float Speed,float Ba){
  * @param {float} Fd
  * @param {float} Pn
  * @param {float} Flux
- * @return {*}
+ * @return {float}
  */
 float Feedforward_DOB(float Fd,float Pn,float Flux){
     return Fd/(1.5f*Pn*Flux);

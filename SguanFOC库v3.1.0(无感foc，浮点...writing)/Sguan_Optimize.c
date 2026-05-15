@@ -5,7 +5,7 @@
  * @LastEditors: 星必尘Sguan|3464647102@qq.com
  * @LastEditTime: 2026-04-19 01:00:46
  * @FilePath: \SguanFOC_Debug\SguanFOC\Sguan_Optimize.c
- * @Description: SguanFOC库的“MTPA、FW弱磁和死区补偿的电机优化算法”实现
+ * @Description: SguanFOC库的“MTPA、FW弱磁、死区补偿和相位延迟补偿的电机优化算法”实现
  * 
  * Copyright (c) 2026 by $星必尘Sguan, All Rights Reserved. 
  */
@@ -44,7 +44,7 @@ void MTPA_Loop(float *Target_id,
  * @param {float} Uq    Q轴电压
  * @param {float} Percentage 弱磁调制线范围
  * @param {float} Vbus  母线电压值
- * @return {*}
+ * @return {float}
  */
 float FW_Loop(void *fw, 
             float Ud, 
@@ -103,5 +103,15 @@ void DeadZone_Loop(float *Ua_duty,
         (Ic > Current_Min)){
         *Uc_duty += Value_Sign(Ic)*value;
     }
+}
+
+/**
+ * @description: 角度相位延迟的简易补偿
+ * @param {float} Wm    机械角速度
+ * @param {float} Td    补偿的延迟时间
+ * @return {float}
+ */
+float AngleComp_Loop(float Wm,float Td){
+    return Wm*Td;
 }
 

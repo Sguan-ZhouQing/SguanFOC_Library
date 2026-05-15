@@ -5,14 +5,15 @@
  * @LastEditors: 星必尘Sguan|3464647102@qq.com
  * @LastEditTime: 2026-04-30 00:22:21
  * @FilePath: \SguanFOC_Debug\SguanFOC\Sguan_Filter.c
- * @Description: SguanFOC库的“不同滤波器，达到低通滤波的效果”实现
+ * @Description: SguanFOC库的“不同滤波器算法”实现
  * 
  * Copyright (c) 2026 by $星必尘Sguan, All Rights Reserved. 
  */
 #include "Sguan_Filter.h"
 
+// =============================== LPF低通滤波器 ============================
 /**
- * @description: 二阶低通滤波器参数初始化
+ * @description: 低通滤波器的参数初始化
  * @reminder: (初始化相关系数float->double->float)
  * @reminder: (单浮点转double运算，提高系数精度)
  * @param {LPF_STRUCT} *lpf
@@ -60,3 +61,71 @@ void LPF_Loop(LPF_STRUCT *lpf){
 }
 
 
+
+// =============================== LPF低通滤波器 ============================
+/**
+ * @description: 陷波滤波器的参数初始化
+ * @reminder: (初始化相关系数float->double->float)
+ * @reminder: (单浮点转double运算，提高系数精度)
+ * @param {LPF_STRUCT} *lpf
+ * @return {*}
+ */
+void BSF_Init(BSF_STRUCT *bsf){
+
+}
+
+/**
+ * @description: 滤波器离散服务函数
+ * @reminder: https://github.com/Sguan-ZhouQing/SguanFOC_Library/blob/main/%E9%85%8D%E5%A5%97Simulink%E6%A8%A1%E5%9E%8B%E5%BC%80%E6%BA%90%E2%91%A1%5B%E7%AE%97%E6%B3%95%E5%8E%9F%E7%90%86%E5%9B%BE%5D/Sguan_Filter.png
+ * @reminder: (上方链接是此Sguan_Filter模块Simulink原理仿真图)
+ * @param {LPF_STRUCT} *lpf
+ * @return {*}
+ */
+void BSF_Loop(BSF_STRUCT *bsf){
+
+}
+
+/**
+ * @description: 带通滤波器的参数初始化
+ * @reminder: (初始化相关系数float->double->float)
+ * @reminder: (单浮点转double运算，提高系数精度)
+ * @param {LPF_STRUCT} *lpf
+ * @return {*}
+ */
+void BPF_Init(BPF_STRUCT *bpf){
+
+}
+
+/**
+ * @description: 滤波器离散服务函数
+ * @reminder: https://github.com/Sguan-ZhouQing/SguanFOC_Library/blob/main/%E9%85%8D%E5%A5%97Simulink%E6%A8%A1%E5%9E%8B%E5%BC%80%E6%BA%90%E2%91%A1%5B%E7%AE%97%E6%B3%95%E5%8E%9F%E7%90%86%E5%9B%BE%5D/Sguan_Filter.png
+ * @reminder: (上方链接是此Sguan_Filter模块Simulink原理仿真图)
+ * @param {LPF_STRUCT} *lpf
+ * @return {*}
+ */
+void BPF_Loop(BPF_STRUCT *bpf){
+
+}
+
+
+/**
+ * @description: 全通滤波器的参数初始化
+ * @reminder: (初始化相关系数float->double->float)
+ * @reminder: (单浮点转double运算，提高系数精度)
+ * @param {LPF_STRUCT} *lpf
+ * @return {*}
+ */
+void APF_Init(APF_STRUCT *apf){
+
+}
+
+/**
+ * @description: 滤波器离散服务函数
+ * @reminder: https://github.com/Sguan-ZhouQing/SguanFOC_Library/blob/main/%E9%85%8D%E5%A5%97Simulink%E6%A8%A1%E5%9E%8B%E5%BC%80%E6%BA%90%E2%91%A1%5B%E7%AE%97%E6%B3%95%E5%8E%9F%E7%90%86%E5%9B%BE%5D/Sguan_Filter.png
+ * @reminder: (上方链接是此Sguan_Filter模块Simulink原理仿真图)
+ * @param {LPF_STRUCT} *lpf
+ * @return {*}
+ */
+void APF_Loop(APF_STRUCT *apf){
+
+}

@@ -11,6 +11,7 @@
 #include "Sguan_HFI.h"                      // HFI(无感)高频方波注入
 #include "Sguan_Identify.h"                 // Identify电机参数辨识
 #include "Sguan_Ladrc.h"                    // Ladrc线自抗扰控制
+#include "Sguan_LTD.h"                      // LTD最速控制(平滑阶跃信号)
 #include "Sguan_MotorStatus.h"              // MotorStatus电机状态机
 #include "Sguan_Optimize.h"                 // Optimize电机优化算法
 #include "Sguan_PID.h"                      // PID传统闭环控制
@@ -64,14 +65,11 @@
 #define Control_STA             0x03        // STA简易超螺旋Sguan_STA
 
 // +---------------------------------------------------------+
-// |                    滤波器Filter定义                     |
+// |                    滤波器Filter定义                      |
 // +---------------------------------------------------------+
-#define Filter_ButterWorth      0x00        // Butter二阶巴特沃斯滤波器
-#define Fitler_Normal           0x01        // Normal普通一阶低通滤波器
-#define Fitler_ChebyShev        0x02        // ChebyShev二阶切比雪夫I型
-#define Fitler_Bessel           0x03        // Bessel二阶贝塞尔滤波器
-#define Fitler_Moving           0x04        // Moving滑动平均滤波
-#define Fitler_Median           0x05        // Median中值滤波算法
+#define LPF_ButterWorth      0x00           // Butter二阶巴特沃斯滤波器
+#define LPF_ChebyShev        0x02           // ChebyShev切比雪夫二阶I型
+#define LPF_Bessel           0x03           // Bessel二阶贝塞尔滤波器
 
 typedef struct{
     // ======================== 1.传递函数“控制器” =============================
@@ -131,13 +129,13 @@ typedef struct{
 
     // ===================== 5.传递函数“无感控制算法” =========================
     #if CONFIG_MODE==MODE_VF_OPENLOOP || CONFIG_MODE==MODE_IF_OPENLOOP
-    LPF_STRUCT LTD;                         // (强拖算法)LTD仿制效果，输入速度不突变
+    LTD_STRUCT LTD;                         // (强拖算法)LTD仿制效果，输入速度不突变
     #elif CONFIG_MODE==MODE_Sensorless_HFI || (CONFIG_Debug && (CONFIG_MODE>=MODE_Voltag_OPEN) && (CONFIG_MODE>=MODE_Voltag_OPEN) 
     HFI_STRUCT HFI;                         // (无感算法)HFI高频方波注入算法
     float Speed_AbsMax;                     // (参数设计)角度解耦低速、高速域分界线上限
     float Speed_AbsMin;                     // (参数设计)角度解耦低速、高速域分界线下限
     #elif CONFIG_MODE==MODE_Sensorless_SMO
-    LPF_STRUCT LTD;                         // (强拖算法)LTD仿制效果，输入速度不突变
+    LTD_STRUCT LTD;                         // (强拖算法)LTD仿制效果，输入速度不突变
     SMO_STRUCT SMO;                         // (无感算法)SMO静止坐标系下的滑模观测器
     float Speed_AbsMax;                     // (参数设计)角度解耦低速、高速域分界线上限
     float Speed_AbsMin;                     // (参数设计)角度解耦低速、高速域分界线下限

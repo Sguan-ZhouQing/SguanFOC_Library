@@ -12,8 +12,8 @@ typedef struct{
 typedef struct{
     LTD_GO_STRUCT go;       // (结构体)LTD运输数据
 
-    float T;                // (系统时钟)T离散周期
-    float Wc;               // (参数设计)Wc巴特沃斯截止频率
+    float T;                // (系统时钟)T离散运行的时间周期
+    float r;                // (参数设计)r速度因子_跟踪微分器
 }LTD_STRUCT;
 
 void LTD_Init(LTD_STRUCT *ltd);
