@@ -26,16 +26,16 @@ static inline void User_Motor_Init(SguanFOC_System_STRUCT *user){
     user->motor.identify.Rs = 0.19067f;             // (float)相线电阻_默认参数
     user->motor.identify.Ld = 0.0000519338f;        // (float)D轴电感_默认参数
     user->motor.identify.Lq = 0.0000519338f;        // (float)Q轴电感_默认参数
-    user->motor.identify.Encoder_Dir = -1;          // (int8_t)Q轴电感_默认参数
-
+    
     user->motor.identify.Flux = 0.00028043f;        // (float)电机磁链_默认参数
     user->motor.identify.B = 0.00028043f;           // (float)粘性阻尼_默认参数
     user->motor.identify.J = 0.00028043f;           // (float)转动惯量_默认参数
     /* ====================================== 分割线 ===================================== */
     user->motor.Poles = 7;                          // (uint8_t)电机的极对数
     user->motor.VBUS = 12.0f;                       // (float)标定的母线电压
-
+    
     user->motor.Motor_Dir = 1;                      // (int8_t)电机方向1->正向，负1->负向
+    user->motor.Encoder_Dir = -1;                   // (int8_t)Q轴电感_默认参数
     user->motor.PWM_Dir = -1;                       // (int8_t)PWM占空比电平，1为正向,-1为负向
     user->motor.Duty = 4249;                        // (uint16_t)PWM满占空比数值
 

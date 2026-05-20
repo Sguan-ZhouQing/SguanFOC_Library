@@ -46,6 +46,7 @@
 #define MODE_Sensorless_HFI     0x07        // 高频注入_转速环(Sguan.foc.Target_Speed)
 #define MODE_Sensorless_SMO     0x08        // 滑模观测_转速环(Sguan.foc.Target_Speed)
 #define MODE_Sensorless_HS      0x09        // 前两结合_转速环(Sguan.foc.Target_Speed)
+#define MODE_Sensorless_AS      0x0A        // 霍尔滑模结合_转速环(Sguan.foc.Target_Speed)
 
 
 // +---------------------------------------------------------+
@@ -68,11 +69,11 @@
 // |                    滤波器Filter定义                      |
 // +---------------------------------------------------------+
 #define LPF_ButterWorth      0x00           // Butter二阶巴特沃斯滤波器
-#define LPF_ChebyShev        0x02           // ChebyShev切比雪夫二阶I型
-#define LPF_Bessel           0x03           // Bessel二阶贝塞尔滤波器
+#define LPF_ChebyShev        0x01           // ChebyShev切比雪夫二阶I型
+#define LPF_Bessel           0x02           // Bessel二阶贝塞尔滤波器
 
 typedef struct{
-    // ======================== 1.传递函数“控制器” =============================
+    // ====================== 1.传递函数“电机运行环路” ==========================
     PID_STRUCT Current_D;                   // (电流单环)PID电流环D轴参数
     PID_STRUCT Current_Q;                   // (电流单环)PID电流环Q轴参数
 
@@ -113,6 +114,10 @@ typedef struct{
     #if CONFIG_DOB
     DOB_STRUCT DOB;                         // (超螺旋滑模扰动观测器)DOB
     #endif // CONFIG_DOB
+    #if CONFIG_Inhibit
+    BSF_STRUCT BSF_D;                       // (谐波抑制)电机D轴滤波
+    BSF_STRUCT BSF_Q;                       // (谐波抑制)电机Q轴滤波
+    #endif // CONFIG_Inhibit
     #if CONFIG_FW
     PID_STRUCT FW;                          // (弱磁控制)PI控制器输出弱磁一区控制量
     float BaseSpeed_fw;                     // (弱磁控制)基速设计，使得MTPA过渡弱磁
@@ -130,7 +135,7 @@ typedef struct{
     // ===================== 5.传递函数“无感控制算法” =========================
     #if CONFIG_MODE==MODE_VF_OPENLOOP || CONFIG_MODE==MODE_IF_OPENLOOP
     LTD_STRUCT LTD;                         // (强拖算法)LTD仿制效果，输入速度不突变
-    #elif CONFIG_MODE==MODE_Sensorless_HFI || (CONFIG_Debug && (CONFIG_MODE>=MODE_Voltag_OPEN) && (CONFIG_MODE>=MODE_Voltag_OPEN) 
+    #elif CONFIG_MODE==MODE_Sensorless_HFI
     HFI_STRUCT HFI;                         // (无感算法)HFI高频方波注入算法
     float Speed_AbsMax;                     // (参数设计)角度解耦低速、高速域分界线上限
     float Speed_AbsMin;                     // (参数设计)角度解耦低速、高速域分界线下限
@@ -233,6 +238,7 @@ typedef struct{
     float VBUS;                             // (电机实体参数)母线电压
 
     int8_t Motor_Dir;                       // (参数设计)电机的运行方向设计
+    int8_t Encoder_Dir;                     // (有感实体参数)编码器方向
     int8_t PWM_Dir;                         // (参数设计)PWM占空比高低对应
     uint32_t Duty;                          // (参数设计)PWM满占空比
 

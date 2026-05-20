@@ -19,7 +19,14 @@
  * @return {*}
  */
 void LTD_Init(LTD_STRUCT *ltd){
+    double temp1 = ((double)ltd->T)*((double)ltd->r);
+    ltd->go.num = (float)(temp1/(2.0+temp1));
+    ltd->go.den = (float)((-2.0+temp1)/(2.0+temp1));
 
+    // 初始化为零
+    ltd->go.Input = 0.0f;
+    ltd->go.Output = 0.0f;
+    ltd->go.Last_i = 0.0f;
 }
 
 /**
@@ -30,6 +37,11 @@ void LTD_Init(LTD_STRUCT *ltd){
  * @return {*}
  */
 void LTD_Loop(LTD_STRUCT *ltd){
+    // 1.带入差分方程，计算输出
+    ltd->go.Output = ltd->go.num*(ltd->go.Input + ltd->go.Last_i) - 
+                    ltd->go.den*ltd->go.Output;
 
+    // 2.更新历史输入数值
+    ltd->go.Last_i = ltd->go.Input;
 }
 

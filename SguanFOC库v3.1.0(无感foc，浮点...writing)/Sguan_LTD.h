@@ -5,6 +5,10 @@
 #include "Sguan_Config.h"
 
 typedef struct{
+    float num;              // (中间量)传递函数的分子系数
+    float den;              // (中间量)传递函数的分母系数
+    float Last_i;           // (数据)历史的输入数值
+
     float Input;            // (输入数据)阶跃输入的数值
     float Output;           // (输出数据)输出平滑的数值
 }LTD_GO_STRUCT;

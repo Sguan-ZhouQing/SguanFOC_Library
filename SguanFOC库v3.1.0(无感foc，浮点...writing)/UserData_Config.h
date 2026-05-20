@@ -3,7 +3,7 @@
 /* 电机控制User用户设置·数据计算Config */
 
 /**
- * @description: 宏定义0-9决定“电机的控制模式”(默认使用“速度-电流串级闭环控制”模式)
+ * @description: 宏定义0-10决定“电机的控制模式”(默认使用“速度-电流串级闭环控制”模式)
  * @reminder: 0->MODE_VF_OPENLOOP       VF压频比开环        (开环强拖)
  * @reminder: 1->MODE_IF_OPENLOOP       IF流频比开环        (开环强拖)
  * @reminder: 2->MODE_Voltag_OPEN       电压开环            (高精度编码器提供Rad)
@@ -14,9 +14,10 @@
  * @reminder: 7->MODE_Sensorless_HFI    高频注入_转速环     (低速域，速度有上限)
  * @reminder: 8->MODE_Sensorless_SMO    滑模观测_转速环     (高速域，IF切SMO)
  * @reminder: 9->MODE_Sensorless_HS     前两结合_转速环     (全速域，HFI切SMO)
+ * @reminder: 10->MODE_Sensorless_AS    霍尔滑模结合_转速环  (全速域，霍尔切SMO)
  * @return {*}
  */
-#define Define_Run_Mode 0
+#define Define_Run_Mode 7
 
 /**
  * @description: 宏定义0-3决定“无感算法的debug模式”是否开启(默认关闭)
@@ -37,7 +38,7 @@
  * @reminder: 3->Control_STA            电流环“PI控制”，转速环“STA超螺旋滑模控制”
  * @return {*}
  */
-#define Switch_Control_Velocity 0
+#define Switch_MOTOR_Control_Vel 0
 
 /**
  * @description: 宏定义0-3决定“电机位置环”的控制方式(默认使用PD控制)
@@ -47,7 +48,7 @@
  * @reminder: 3->Control_STA            位置环采用“STA超螺旋滑模控制”
  * @return {*}
  */
-#define Switch_Control_Position 0
+#define Switch_MOTOR_Control_Pos 0
 
 /**
  * @description: 宏定义0-1决定“电机矢量控制底层算法”(默认使用SVPWM)
@@ -55,19 +56,16 @@
  * @reminder: 1->使用带“三次谐波注入”优化后的SPWM脉宽调制技术
  * @return {*}
  */
-#define Switch_PWM_Calculate 0
+#define Switch_MOTOR_PWM 0
 
 /**
- * @description: 宏定义0-5决定“滤波算法使用上的选择”(默认使用二阶巴特沃斯滤波器)
+ * @description: 宏定义0-2决定“滤波算法使用上的选择”(默认使用二阶巴特沃斯滤波器)
  * @reminder: 0->Filter_ButterWorth     Butter二阶巴特沃斯滤波器
- * @reminder: 1->Fitler_Normal          Normal普通一阶低通滤波器
- * @reminder: 2->Fitler_ChebyShev       ChebyShev二阶切比雪夫I型
- * @reminder: 3->Fitler_Bessel          Bessel二阶贝塞尔滤波器
- * @reminder: 4->Fitler_Moving          Moving滑动平均滤波
- * @reminder: 5->Fitler_Median          Median中值滤波算法
+ * @reminder: 1->Fitler_ChebyShev       ChebyShev切比雪夫二阶I型
+ * @reminder: 2->Fitler_Bessel          Bessel二阶贝塞尔滤波器
  * @return {*}
  */
-#define Switch_Filter_Calculate 0
+#define Switch_MOTOR_Filter 0
 
 /**
  * @description: 宏定义0-2决定“电机参数辨识”额外数据的测量(默认关闭，首次上电需要1)
@@ -81,13 +79,21 @@
 #define Switch_MOTOR_Identify 0
 
 /**
- * @description: 宏定义0-2决定“AngleComp相位延迟补偿”是否开启(默认关闭)
- * @reminder: 0->不开启系统的相位延迟补偿
- * @reminder: 1->开启相位延迟补偿，恒定延迟补偿，固定Td补偿算法
- * @reminder: 1->开启相位延迟补偿，非线性相位补偿，采用全通滤波器补偿
+ * @description: 宏定义0-2决定“电机启动定位方式的选择”(默认关闭)
+ * @reminder: 0->不开启电机定位，有感绝对坐标值已经填写好了“定位信息”
+ * @reminder: 1->开启电机定位，强拖D轴定位，电机会动一下
+ * @reminder: 2->开启电机定位，高频注入定位，电机可以免晃动
  * @return {*}
  */
-#define Switch_AngleComp_Calculate 0
+#define Switch_MOTOR_Start 0
+
+/**
+ * @description: 宏定义0或1决定“AngleComp相位延迟补偿”是否开启(默认关闭)
+ * @reminder: 0->不开启系统的相位延迟补偿
+ * @reminder: 1->开启相位延迟补偿，恒定延迟补偿，固定Td补偿算法
+ * @return {*}
+ */
+#define Open_AngleComp_Calculate 0
 
 /**
  * @description: 宏定义0或1决定“电流前馈”是否开启(开启最优)
@@ -112,6 +118,14 @@
  * @return {*}
  */
 #define Open_DOB_Calculate 0
+
+/**
+ * @description: 宏定义0或1决定“谐波抑制算法”是否开启(开启最优)
+ * @reminder: 0->不开启电机谐波抑制
+ * @reminder: 1->开启谐波抑制(陷波滤波器)，滤除电机5、7次主要谐波
+ * @return {*}
+ */
+#define Open_Inhibit_Calculate 1
 
 /**
  * @description: 宏定义0或1决定“MTPA最大转矩控制控制”是否开启(默认关闭)

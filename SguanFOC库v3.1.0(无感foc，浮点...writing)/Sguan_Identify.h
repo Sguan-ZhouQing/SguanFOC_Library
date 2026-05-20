@@ -30,7 +30,6 @@ typedef struct{
 typedef struct{
     PMSM_STRUCT pmsm;       // (结构体)永磁同步电机运算数据
 
-    int8_t Encoder_Dir;     // (有感实体参数)编码器方向
     float Rs;               // (电机实体参数)相线电阻
     float Ld;               // (电机实体参数)D轴电感
     float Lq;               // (电机实体参数)Q轴电感
