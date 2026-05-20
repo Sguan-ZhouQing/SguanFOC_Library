@@ -943,7 +943,6 @@ void SguanFOC_High_Loop(void){
     Sguan.flag.in_PWM_Calc_ISR = 1;
     if (!Sguan.flag.PWM_Calc){
         Sguan.flag.PWM_Calc = 1;
-        PWM_watchdog_counter = 0;
 
         // 如果在初始化完成，进入函数
         if (Sguan.status > 3 && Sguan.status < 19){            
@@ -980,6 +979,7 @@ void SguanFOC_High_Loop(void){
         Printf_Debug_Loop(&Sguan);
         #endif // Printf_Debug
         Sguan.flag.PWM_Calc = 0;
+        PWM_watchdog_counter = 0;
     }
     else{
         PWM_watchdog_counter++;
