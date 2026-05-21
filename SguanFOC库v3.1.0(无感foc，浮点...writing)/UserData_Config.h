@@ -17,7 +17,7 @@
  * @reminder: 10->MODE_Sensorless_AS    霍尔滑模结合_转速环  (全速域，霍尔切SMO)
  * @return {*}
  */
-#define Define_Run_Mode 7
+#define Define_Run_Mode 8
 
 /**
  * @description: 宏定义0-3决定“无感算法的debug模式”是否开启(默认关闭)

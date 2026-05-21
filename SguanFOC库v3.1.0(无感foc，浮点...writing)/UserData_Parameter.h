@@ -124,7 +124,13 @@ static inline void User_Parameter_Init(SguanFOC_System_STRUCT *user){
     user->transfer.DOB.OutMin_Wm = -10.5f;          // 扰动观测器->输出限幅
     #endif // CONFIG_DOB    
 
-    // 9.弱磁控制参数
+    // 9.谐波抑制
+    #if CONFIG_Inhibit
+    user->transfer.BSF_D.zeta = 0.3f;               // 谐波抑制陷波滤波器->阻尼比
+    user->transfer.BSF_Q.zeta = 0.3f;               // 谐波抑制陷波滤波器->阻尼比
+    #endif // CONFIG_Inhibit
+
+    // 10.弱磁控制参数
     #if CONFIG_FW
     user->transfer.FW.Wc = 100.0f;                  // 弱磁控制的PI控制器->截止频率
     user->transfer.FW.Kp = 7.0f;                    // 弱磁控制的PI控制器->Kp
@@ -139,22 +145,22 @@ static inline void User_Parameter_Init(SguanFOC_System_STRUCT *user){
     user->transfer.Percentage_fw = 0.92f;           // 弱磁调制占比->0.92工程经验
     #endif // CONFIG_FW
 
-    // 10.速度前馈的参数
+    // 11.速度前馈的参数
     #if CONFIG_VelFF
     user->transfer.Beta_ff = 62.8f;                 // (float)转速环角频率(前馈补偿参数)
     #endif // CONFIG_VelFF
 
-    // 11.死区补偿参数
+    // 12.死区补偿参数
     #if CONFIG_DeadZone
     user->transfer.DeadTime = 1e-10f;               // (float)死区时间填写(死区补偿参数)
     user->transfer.Dead_CurMin = 0.1f;              // (float)补偿最小相电流(死区补偿参数)
     #endif // CONFIG_DeadZone
 
-    // 12.无感控制算法参数
+    // 13.无感控制算法参数
     #if CONFIG_MODE==MODE_VF_OPENLOOP || CONFIG_MODE==MODE_IF_OPENLOOP
     user->transfer.LTD.r = 2.0f;                    // LTD速度跟踪因子2rad/s合适
     #elif CONFIG_MODE==MODE_Sensorless_HFI
-    user->transfer.HFI.Percentage_hfi = 0.1f;       // 高频注入->电压占比
+    // user->transfer.HFI.Percentage_hfi = 0.1f;       // 高频注入->电压占比
 
     user->transfer.Speed_AbsMax = 100.0f;           // 界限->“过渡区”到“高速域”
     user->transfer.Speed_AbsMax = 80.0f;            // 界限->“低速域”到“过渡区”
@@ -183,7 +189,7 @@ static inline void User_Parameter_Init(SguanFOC_System_STRUCT *user){
     user->transfer.Speed_AbsMax = 80.0f;            // 界限->“低速域”到“过渡区”
     #endif // CONFIG_MODE
 
-    // 13.无感算法Debug调试(带传感器)
+    // 14.无感算法Debug调试(带传感器)
     #if CONFIG_Debug==Debug_HFI && (CONFIG_MODE>=MODE_Voltag_OPEN) && (CONFIG_MODE<=MODE_PosVelCur_THREE)
     user->transfer.HFI.Percentage_hfi = 0.1f;       // 高频注入->电压占比
 

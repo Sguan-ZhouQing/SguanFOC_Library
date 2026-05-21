@@ -33,7 +33,7 @@ static inline void User_UserTX(void){
     Sguan.txdata.fdata[14] = Sguan.current.Real_Ia;     // A相瞬时电流值 (A)
 
     // ========== 组4: 系统配置与辅助信息 (15) ==========
-    Sguan.txdata.fdata[15] = (float)CONFIG_MODE;        // 当前控制模式 (0-9)
+    Sguan.txdata.fdata[15] = (float)CONFIG_MODE;        // 当前控制模式 (0-10)
 }
 
 /**

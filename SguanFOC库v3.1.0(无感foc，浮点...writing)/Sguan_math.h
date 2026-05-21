@@ -29,7 +29,7 @@ int8_t Value_set(int8_t val, int8_t max, int8_t min);
 float Value_Sign(float value);
 
 // 电机角度生成器
-float Value_Rad_Loop(float Rad_s, float T);
+void Value_Rad_Loop(float *angle, float Rad_s, float T);
 
 // MOTOR公式变换
 void clarke(float *i_alpha,float *i_beta,float i_a,float i_b);

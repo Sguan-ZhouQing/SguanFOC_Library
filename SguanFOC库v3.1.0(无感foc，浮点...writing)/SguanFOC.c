@@ -231,11 +231,12 @@ static void Printf_Normal_Loop(SguanFOC_System_STRUCT *sguan);
 static void Positioning_Set(SguanFOC_System_STRUCT *sguan,float Ud,float Uq);
 static void Positioning_Zero(SguanFOC_System_STRUCT *sguan);
 /**
- * @description: 13.Sguan...Loop电机总初始化与校准
+ * @description: 13.Sguan...Loop电机运算汇总
  * @param {SguanFOC_System_STRUCT} *sguan
  * @return {*}
  */
 static void Sguan_Calculate_High_Loop(SguanFOC_System_STRUCT *sguan);
+static void Sguan_Calculate_Low_Loop(SguanFOC_System_STRUCT *sguan);
 static void Sguan_Calculate_main_Loop(SguanFOC_System_STRUCT *sguan);
 
 
@@ -360,22 +361,19 @@ static void Transfer_PLL_Loop(PLL_STRUCT *pll,
                             uint8_t mode,
                             uint8_t Poles,
                             float input_Rad){
+    #if CONFIG_MODE<MODE_Sensorless_HFI
     if (mode == MODE_PosVelCur_THREE){
-        pll->go.Error = input_Rad - Value_normalize(pll->go.OutRe*Poles);
         // 位置环模式：PLL连续积分（可以超过2π）
-        if (!pll->is_position_mode){
-            pll->is_position_mode = 1;
-        }
+        pll->go.Error = input_Rad - Value_normalize(pll->go.OutRe*Poles);
     }
     else{
-        pll->go.Error = input_Rad - pll->go.OutRe;
         // 非位置环模式：PLL输出归一化到[0, 2π)
-        if (pll->is_position_mode){
-            pll->is_position_mode = 0;
-        }
+        pll->go.Error = input_Rad - pll->go.OutRe*Poles;
     }
+    #endif // CONFIG_Debug
 
     // 计算角度误差,始终归一化到[-π, π)范围
+    // (此处为绝对编码器提供角度运算)
     if (pll->go.Error >= Value_PI){
         pll->go.Error -= Value_2PI;
     }
@@ -460,6 +458,9 @@ static void Transfer_Init(SguanFOC_System_STRUCT *sguan){
     // 7.锁相环参数
     sguan->transfer.PLL_encoder.T = PMSM_RUN_T;
     PLL_Init(&sguan->transfer.PLL_encoder);
+    if (CONFIG_MODE == MODE_PosVelCur_THREE){
+        sguan->transfer.PLL_encoder.is_position_mode = 1;
+    }
 
     // 8.扰动观测器参数
     #if CONFIG_DOB
@@ -471,15 +472,23 @@ static void Transfer_Init(SguanFOC_System_STRUCT *sguan){
     DOB_Init(&sguan->transfer.DOB);
     #endif // CONFIG_DOB    
 
-    // 9.弱磁控制参数
+    // 9.谐波抑制
+    #if CONFIG_Inhibit
+    sguan->transfer.BSF_D.T = PMSM_RUN_T;
+    sguan->transfer.BSF_Q.T = PMSM_RUN_T;
+    BSF_Init(&sguan->transfer.BSF_D);
+    BSF_Init(&sguan->transfer.BSF_Q);
+    #endif // CONFIG_Inhibit
+
+    // 10.弱磁控制参数
     #if CONFIG_FW
     sguan->transfer.FW.T = PMSM_RUN_T;
     PID_Init(&sguan->transfer.FW);
     #endif // CONFIG_FW
 
-    // 10.速度前馈的参数
-    // 11.死区补偿参数
-    // 12.无感控制算法参数
+    // 11.速度前馈的参数
+    // 12.死区补偿参数
+    // 13.无感控制算法参数
     #if CONFIG_MODE==MODE_VF_OPENLOOP || CONFIG_MODE==MODE_IF_OPENLOOP
     sguan->transfer.LTD.T = PMSM_RUN_T;
     LTD_Init(&sguan->transfer.LTD);
@@ -504,7 +513,7 @@ static void Transfer_Init(SguanFOC_System_STRUCT *sguan){
     PLL_Init(&sguan->transfer.PLL_another);
     #endif // CONFIG_MODE
 
-    // 13.无感算法Debug调试(带传感器)
+    // 14.无感算法Debug调试(带传感器)
     #if CONFIG_Debug==Debug_HFI && (CONFIG_MODE>=MODE_Voltag_OPEN) && (CONFIG_MODE<=MODE_PosVelCur_THREE)
     HFI_Init(&sguan->transfer.HFI);
     sguan->transfer.PLL_Debug.T = PMSM_RUN_T;
@@ -530,7 +539,7 @@ static void Transfer_Init(SguanFOC_System_STRUCT *sguan){
     PLL_Init(&sguan->transfer.PLL_another);
     #endif // CONFIG_Debug
 
-    // 消除未使用Hall函数的编译警告
+    // 15.消除未使用Hall函数的编译警告
     (void)Transfer_BPF_Loop;
     (void)Transfer_BSF_Loop;
     (void)Transfer_Hall_Loop;
@@ -565,10 +574,10 @@ static void Offset_Encoder_Read(SguanFOC_System_STRUCT *sguan){
 
     // 2.读取高精度编码器的偏置
     for (uint8_t i = 0; i < 10; i++){
-        sguan->encoder.Pos_offset += User_Encoder_ReadRad();
+        sguan->encoder.Real_offset += User_Encoder_ReadRad();
         User_Delay(2);
     }
-    sguan->encoder.Pos_offset = sguan->encoder.Pos_offset/10.0f;
+    sguan->encoder.Real_offset = sguan->encoder.Real_offset/10.0f;
 
     Positioning_Set(sguan,0.0f,0.0f);
     User_Delay(800);
@@ -583,7 +592,7 @@ static void Offset_Hall_Read(SguanFOC_System_STRUCT *sguan){
                     User_Encoder_ReadHall(0), 
                     User_Encoder_ReadHall(0), 
                     User_Encoder_ReadHall(0));
-    sguan->encoder.Pos_offset = sguan->transfer.Hall.go.Output_Rad;
+    sguan->encoder.Real_offset = sguan->transfer.Hall.go.Output_Rad;
 
     // 计算霍尔传感器最后增益
     sguan->transfer.Hall.go.Gain = (float)(((double)sguan->transfer.Hall.T)*
@@ -622,7 +631,10 @@ static void Current_ReadIabc(SguanFOC_System_STRUCT *sguan){
 }
 
 static void Current_Tick(SguanFOC_System_STRUCT *sguan){
+    // 1.读取三相原始电流量
     Current_ReadIabc(sguan);
+    
+    // 2.坐标变换到DQ轴电流
     clarke(&sguan->current.Real_Ialpha,
         &sguan->current.Real_Ibeta,
         sguan->current.Real_Ia,
@@ -633,14 +645,21 @@ static void Current_Tick(SguanFOC_System_STRUCT *sguan){
         sguan->current.Real_Ibeta,
         sguan->foc.sine,
         sguan->foc.cosine);
+
+    // 3.DQ轴电流低通滤波
     Transfer_LPF_Loop(&sguan->transfer.LPF_D,
                     sguan->current.Real_Id);
     Transfer_LPF_Loop(&sguan->transfer.LPF_Q,
                     sguan->current.Real_Iq);
+
+    // 4.DQ轴电流谐波抑制(抑制电机5、7次主要谐波)
     #if !CONFIG_Inhibit
     sguan->current.Real_Id = sguan->transfer.LPF_D.filter.Output;
     sguan->current.Real_Iq = sguan->transfer.LPF_Q.filter.Output;
     #else // CONFIG_Inhibit
+    float We_6th = 6.0f*sguan->encoder.Real_We;
+    sguan->transfer.BSF_D.Wo = We_6th;
+    sguan->transfer.BSF_Q.Wo = We_6th;
     Transfer_BSF_Loop(&sguan->transfer.BSF_D, 
                     sguan->transfer.LPF_D.filter.Output);
     Transfer_BSF_Loop(&sguan->transfer.BSF_Q, 
@@ -650,46 +669,55 @@ static void Current_Tick(SguanFOC_System_STRUCT *sguan){
     #endif // CONFIG_Inhibit
 }
 
-// 处理虚拟角度，计算虚拟生成数值
+// Calculate处理虚拟角度，计算虚拟生成数值
 static void Calculate_Virtual_Angle(SguanFOC_System_STRUCT *sguan){
+    // 1.设计局部角度变量
+    static float angle = 0.0f;
+
+    // 2.计算虚拟角度
     sguan->encoder.Real_We = sguan->foc.Target_Speed*
                             sguan->motor.Poles;
-    float angle = Value_Rad_Loop(sguan->encoder.Real_We,
-                                PMSM_RUN_T);
+    Value_Rad_Loop(&angle, 
+                sguan->encoder.Real_We,
+                PMSM_RUN_T);
 
-    // 虚拟角度计算sine和cosine
+    // 3.虚拟角度计算sine和cosine
     fast_sin_cos(angle,
                 &sguan->foc.sine,
                 &sguan->foc.cosine);
 }
 
-// 处理机械角度，计算编码数值Encoder
+// Calculate处理机械角度，计算编码数值Encoder
 static void Calculate_Sensor_Encoder(SguanFOC_System_STRUCT *sguan){
-    // Encoder锁相环和滤波
+    // 1.锁相环运算机械角度
     float Rad = User_Encoder_ReadRad();
     Transfer_PLL_Loop(&sguan->transfer.PLL_encoder,
                     CONFIG_MODE, 1,
-                    (Rad - sguan->encoder.Pos_offset)*
+                    (Rad - sguan->encoder.Real_offset)*
                     sguan->motor.Encoder_Dir);
+
+    // 2.低通滤波
     Transfer_LPF_Loop(&sguan->transfer.LPF_encoder,
                     sguan->transfer.PLL_encoder.go.OutWe);
     
-    // 公有数值计算
+    // 3.电机角度相关数值更新
     sguan->encoder.Real_Re = Value_normalize(
                             sguan->transfer.PLL_encoder.go.OutRe*
                             sguan->motor.Poles);
     sguan->encoder.Real_Speed = sguan->transfer.LPF_encoder.filter.Output;
     sguan->encoder.Real_Pos = sguan->transfer.PLL_encoder.go.OutRe;
     sguan->encoder.Real_We = sguan->encoder.Real_Speed*sguan->motor.Poles;
+
+    // 4.电子角度计算sine和cosine
     fast_sin_cos(sguan->encoder.Real_Re,
                 &sguan->foc.sine,
                 &sguan->foc.cosine);
 }
 
-// 处理电角度，计算编码器数值HALL
+// Calculate处理电角度，计算编码器数值HALL
 static void Calculate_Sensor_HALL(SguanFOC_System_STRUCT *sguan){
     #if CONFIG_MODE==MODE_Sensor_Hall
-    // 霍尔锁相环和滤波
+    // 1.霍尔锁相环运算电子角度
     Transfer_Hall_Loop(&sguan->transfer.Hall,
                     User_Encoder_ReadHall(0), 
                     User_Encoder_ReadHall(0), 
@@ -698,28 +726,32 @@ static void Calculate_Sensor_HALL(SguanFOC_System_STRUCT *sguan){
     Transfer_PLL_Loop(&sguan->transfer.PLL_encoder, 
                     CONFIG_MODE, 
                     sguan->motor.Poles, 
-                    (sguan->encoder.Real_Re - sguan->encoder.Pos_offset));
+                    (sguan->encoder.Real_Re - sguan->encoder.Real_offset));
+
+    // 2.低通滤波
     Transfer_LPF_Loop(&sguan->transfer.LPF_encoder, 
                     sguan->transfer.PLL_encoder.go.OutWe);
 
-    // 公有数值计算
+    // 3.电机角度相关数值更新
     sguan->encoder.Real_Speed = sguan->transfer.LPF_encoder.filter.Output;
     sguan->encoder.Real_Pos = sguan->transfer.PLL_encoder.go.OutRe;
     sguan->encoder.Real_We = sguan->encoder.Real_Speed*sguan->motor.Poles;
+
+    // 4.电子角度计算sine和cosine
     fast_sin_cos(sguan->encoder.Real_Re,
                 &sguan->foc.sine,
                 &sguan->foc.cosine);
     #endif // CONFIG_MODE
 }
 
-// 处理电角度，计算编码器数值HFI
+// Calculate处理电角度，计算编码器数值HFI
 static void Calculate_Sensorless_HFI(SguanFOC_System_STRUCT *sguan){
     #if CONFIG_MODE==MODE_Sensorless_HFI
     // 运行高频注入算法
-    sguan->transfer.HFI.data.Input_VBUS = sguan->foc.Real_VBUS;
-    sguan->transfer.HFI.data.Input_Ud = sguan->foc.Ud_in;
-    sguan->transfer.HFI.Ialpha_h.Input = sguan->current.Real_Ialpha;
-    sguan->transfer.HFI.Ibeta_h.Input = sguan->current.Real_Ibeta;
+    // sguan->transfer.HFI.data.Input_VBUS = sguan->foc.Real_VBUS;
+    // sguan->transfer.HFI.data.Input_Ud = sguan->foc.Ud_in;
+    // sguan->transfer.HFI.Ialpha_h.Input = sguan->current.Real_Ialpha;
+    // sguan->transfer.HFI.Ibeta_h.Input = sguan->current.Real_Ibeta;
     // HFI_ReadRad_Loop(&sguan->transfer.HFI);
     // float error = sguan->transfer.HFI.data.Output_Iah*sguan->foc.sine - 
     //             sguan->transfer.HFI.data.Output_Ibh*sguan->foc.cosine;
@@ -733,9 +765,9 @@ static void Calculate_Sensorless_HFI(SguanFOC_System_STRUCT *sguan){
     // 公有数值计算
     sguan->encoder.Real_Re = Value_normalize(
                             sguan->transfer.PLL_encoder.go.OutRe*
-                            sguan->motor.Poles) - sguan->encoder.Pos_offset;
+                            sguan->motor.Poles) - sguan->encoder.Real_offset;
     sguan->encoder.Real_Speed = sguan->transfer.LPF_encoder.filter.Output;
-    sguan->encoder.Real_Pos = sguan->transfer.PLL_encoder.go.OutRe - sguan->encoder.Pos_offset;
+    sguan->encoder.Real_Pos = sguan->transfer.PLL_encoder.go.OutRe - sguan->encoder.Real_offset;
     sguan->encoder.Real_We = sguan->encoder.Real_Speed*sguan->motor.Poles;
     fast_sin_cos(sguan->encoder.Real_Re,
                 &sguan->foc.sine,
@@ -748,16 +780,19 @@ static void Calculate_Sensorless_HFI(SguanFOC_System_STRUCT *sguan){
     #endif // CONFIG_MODE
 }
 
-// 处理电角度，计算编码器数值SMO
+// Calculate处理电角度，计算编码器数值SMO
 static void Calculate_Sensorless_SMO(SguanFOC_System_STRUCT *sguan){
     #if CONFIG_MODE==MODE_Sensorless_SMO
+
     float Speed_Abs = Value_fabsf(sguan->encoder.Real_Speed);
     if (Speed_Abs <= sguan->transfer.Speed_AbsMax){
+        static float angle = 0.0f;
         // 1.IF强拖处理无感低速域
         sguan->encoder.Real_We = sguan->foc.Target_Speed*
                                 sguan->motor.Poles;
-        float angle = Value_Rad_Loop(sguan->encoder.Real_We,
-                                    PMSM_RUN_T);
+        Value_Rad_Loop(&angle, 
+                    sguan->encoder.Real_We,
+                    PMSM_RUN_T);
 
         fast_sin_cos(angle,
                     &sguan->foc.sine,
@@ -766,10 +801,13 @@ static void Calculate_Sensorless_SMO(SguanFOC_System_STRUCT *sguan){
     else if ((Speed_Abs <= sguan->transfer.Speed_AbsMax) && 
         (Speed_Abs > sguan->transfer.Speed_AbsMax)){
         // 2.IF强拖过渡阶段
+        static float angle0 = 0.0f;
+
         sguan->encoder.Real_We = sguan->foc.Target_Speed*
                                 sguan->motor.Poles;
-        float angle0 = Value_Rad_Loop(sguan->encoder.Real_We,
-                                    PMSM_RUN_T);
+        Value_Rad_Loop(&angle0, 
+                        sguan->encoder.Real_We,
+                        PMSM_RUN_T);
 
         // 3.SMO解析角度信息
         sguan->transfer.SMO.data.Input_We = sguan->encoder.Real_Re;
@@ -778,12 +816,21 @@ static void Calculate_Sensorless_SMO(SguanFOC_System_STRUCT *sguan){
         sguan->transfer.SMO.beta.Input_Ix = sguan->current.Real_Ibeta;
         sguan->transfer.SMO.beta.Input_Ux = sguan->foc.Ubeta;
         SMO_Loop(&sguan->transfer.SMO);
-        float error = - (sguan->transfer.SMO.alpha.Output_Ex*sguan->foc.cosine + 
-            sguan->transfer.SMO.beta.Output_Ex*sguan->foc.sine);
+
+
+        float sine,cosine;
+        fast_sin_cos(sguan->transfer.PLL_encoder.go.OutRe*
+                    sguan->motor.Poles,
+                    &sine,
+                    &cosine);
+        float error = - (sguan->transfer.SMO.alpha.Output_Ex*cosine + 
+            sguan->transfer.SMO.beta.Output_Ex*sine);
+        sguan->transfer.PLL_encoder.go.Error = error;
         Transfer_PLL_Loop(&sguan->transfer.PLL_encoder, 
                         CONFIG_MODE, 
-                        sguan->motor.Poles, 
-                        error);
+                        sguan->motor.Poles, // (此处PLL输入无实际意义)
+                        error);             // (此处PLL输入无实际意义)
+                        
         Transfer_LPF_Loop(&sguan->transfer.LPF_encoder, 
                         sguan->transfer.PLL_encoder.go.OutWe);
 
@@ -793,7 +840,7 @@ static void Calculate_Sensorless_SMO(SguanFOC_System_STRUCT *sguan){
         sguan->encoder.Real_Speed = sguan->transfer.LPF_encoder.filter.Output;
         sguan->encoder.Real_Pos = sguan->transfer.PLL_encoder.go.OutRe;
         sguan->encoder.Real_We = sguan->encoder.Real_Speed*sguan->motor.Poles;
-        float angle1 = sguan->encoder.Real_Re - sguan->encoder.Pos_offset;
+        float angle1 = sguan->encoder.Real_Re;
 
         // 4.过渡区角度融合
         float Gain_Low = (sguan->transfer.Speed_AbsMax - Speed_Abs)/
@@ -812,12 +859,20 @@ static void Calculate_Sensorless_SMO(SguanFOC_System_STRUCT *sguan){
         sguan->transfer.SMO.beta.Input_Ix = sguan->current.Real_Ibeta;
         sguan->transfer.SMO.beta.Input_Ux = sguan->foc.Ubeta;
         SMO_Loop(&sguan->transfer.SMO);
-        float error = - (sguan->transfer.SMO.alpha.Output_Ex*sguan->foc.cosine + 
-            sguan->transfer.SMO.beta.Output_Ex*sguan->foc.sine);
+
+        float sine,cosine;
+        fast_sin_cos(sguan->transfer.PLL_encoder.go.OutRe*
+                    sguan->motor.Poles,
+                    &sine,
+                    &cosine);
+        float error = - (sguan->transfer.SMO.alpha.Output_Ex*cosine + 
+            sguan->transfer.SMO.beta.Output_Ex*sine);
+        sguan->transfer.PLL_encoder.go.Error = error;
         Transfer_PLL_Loop(&sguan->transfer.PLL_encoder, 
                         CONFIG_MODE, 
-                        sguan->motor.Poles, 
-                        error);
+                        sguan->motor.Poles, // (此处PLL输入无实际意义)
+                        error);             // (此处PLL输入无实际意义)
+
         Transfer_LPF_Loop(&sguan->transfer.LPF_encoder, 
                         sguan->transfer.PLL_encoder.go.OutWe);
 
@@ -826,7 +881,7 @@ static void Calculate_Sensorless_SMO(SguanFOC_System_STRUCT *sguan){
                             sguan->transfer.PLL_encoder.go.OutRe*
                             sguan->motor.Poles);
         sguan->encoder.Real_Speed = sguan->transfer.LPF_encoder.filter.Output;
-        sguan->encoder.Real_Pos = sguan->transfer.PLL_encoder.go.OutRe - sguan->encoder.Pos_offset;
+        sguan->encoder.Real_Pos = sguan->transfer.PLL_encoder.go.OutRe - sguan->encoder.Real_offset;
         sguan->encoder.Real_We = sguan->encoder.Real_Speed*sguan->motor.Poles;
         fast_sin_cos(sguan->encoder.Real_Re,
                     &sguan->foc.sine,
@@ -835,7 +890,7 @@ static void Calculate_Sensorless_SMO(SguanFOC_System_STRUCT *sguan){
     #endif // MODE_Sensorless_SMO
 }
 
-// 处理电角度，计算编码器数值HS
+// Calculate处理电角度，计算编码器数值HS
 static void Calculate_Sensorless_HS(SguanFOC_System_STRUCT *sguan){
     #if CONFIG_MODE==MODE_Sensorless_HS
     float Speed_Abs = Value_fabsf(sguan->encoder.Real_Speed);
@@ -858,9 +913,9 @@ static void Calculate_Sensorless_HS(SguanFOC_System_STRUCT *sguan){
         sguan->encoder.Real_Re = Value_normalize(
                             sguan->transfer.PLL_encoder.go.OutRe*
                             sguan->motor.Poles - 
-                            sguan->encoder.Pos_offset);
+                            sguan->encoder.Real_offset);
         sguan->encoder.Real_Speed = sguan->transfer.LPF_encoder.filter.Output;
-        sguan->encoder.Real_Pos = sguan->transfer.PLL_encoder.go.OutRe - sguan->encoder.Pos_offset;
+        sguan->encoder.Real_Pos = sguan->transfer.PLL_encoder.go.OutRe - sguan->encoder.Real_offset;
         sguan->encoder.Real_We = sguan->encoder.Real_Speed*sguan->motor.Poles;
         fast_sin_cos(sguan->encoder.Real_Re,
                     &sguan->foc.sine,
@@ -886,9 +941,9 @@ static void Calculate_Sensorless_HS(SguanFOC_System_STRUCT *sguan){
         float angle0 = Value_normalize(
                     sguan->transfer.PLL_encoder.go.OutRe*
                     sguan->motor.Poles - 
-                    sguan->encoder.Pos_offset);
+                    sguan->encoder.Real_offset);
         sguan->encoder.Real_Speed = sguan->transfer.LPF_encoder.filter.Output;
-        sguan->encoder.Real_Pos = sguan->transfer.PLL_encoder.go.OutRe - sguan->encoder.Pos_offset;
+        sguan->encoder.Real_Pos = sguan->transfer.PLL_encoder.go.OutRe - sguan->encoder.Real_offset;
         sguan->encoder.Real_We = sguan->encoder.Real_Speed*sguan->motor.Poles;
         fast_sin_cos(sguan->encoder.Real_Re,
                     &sguan->foc.sine,
@@ -917,7 +972,7 @@ static void Calculate_Sensorless_HS(SguanFOC_System_STRUCT *sguan){
         sguan->encoder.Real_Speed = sguan->transfer.LPF_encoder.filter.Output;
         sguan->encoder.Real_Pos = sguan->transfer.PLL_encoder.go.OutRe;
         sguan->encoder.Real_We = sguan->encoder.Real_Speed*sguan->motor.Poles;
-        float angle1 = sguan->encoder.Real_Re - sguan->encoder.Pos_offset;
+        float angle1 = sguan->encoder.Real_Re - sguan->encoder.Real_offset;
 
         // 过渡区角度融合
         float Gain_Low = (sguan->transfer.Speed_AbsMax - Speed_Abs)/
@@ -949,7 +1004,7 @@ static void Calculate_Sensorless_HS(SguanFOC_System_STRUCT *sguan){
                             sguan->transfer.PLL_encoder.go.OutRe*
                             sguan->motor.Poles);
         sguan->encoder.Real_Speed = sguan->transfer.LPF_encoder.filter.Output;
-        sguan->encoder.Real_Pos = sguan->transfer.PLL_encoder.go.OutRe - sguan->encoder.Pos_offset;
+        sguan->encoder.Real_Pos = sguan->transfer.PLL_encoder.go.OutRe - sguan->encoder.Real_offset;
         sguan->encoder.Real_We = sguan->encoder.Real_Speed*sguan->motor.Poles;
         fast_sin_cos(sguan->encoder.Real_Re,
                     &sguan->foc.sine,
@@ -958,7 +1013,7 @@ static void Calculate_Sensorless_HS(SguanFOC_System_STRUCT *sguan){
     #endif // CONFIG_MODE
 }
 
-// 处理电角度，计算编码器数值AS
+// Calculate处理电角度，计算编码器数值AS
 static void Calculate_Sensorless_AS(SguanFOC_System_STRUCT *sguan){
 
 }
@@ -1582,7 +1637,7 @@ static void Positioning_Zero(SguanFOC_System_STRUCT *sguan){
         sguan->foc.Uq_in = 0.0f;
 
         // 2.偏置数值归零
-        sguan->encoder.Pos_offset = 0.0f;
+        sguan->encoder.Real_offset = 0.0f;
         sguan->current.Current_offset0 = 0.0f;
         sguan->current.Current_offset1 = 0.0f;
 
@@ -1606,7 +1661,7 @@ static void Positioning_Zero(SguanFOC_System_STRUCT *sguan){
     }
 }
 
-// Sguan_Calculate_Loop电流和角度相关数据
+// Sguan计算电流和角度相关数据并运算控制器
 static void Sguan_Calculate_High_Loop(SguanFOC_System_STRUCT *sguan){
     // 1.电机相线和各轴电流计算
     Current_Tick(sguan);
@@ -1627,6 +1682,16 @@ static void Sguan_Calculate_High_Loop(SguanFOC_System_STRUCT *sguan){
         (sguan->foc.Uq_in/sguan->foc.Real_VBUS));
 }
 
+// Sguan计算电机状态机切换时机
+static void Sguan_Calculate_Low_Loop(SguanFOC_System_STRUCT *sguan){
+    // 1.读取母线电压VBUS和温度数据Temp
+    Data_Protection_Loop(sguan);
+    // 2.根据环境切换电机状态机
+    Status_Switch_Loop(sguan);
+    // 3.根据电机状态机,运行不同任务
+    Status_RUN_Loop(sguan);
+}
+
 // Sguan系统开始的核心文件，主任务初始化函数
 static void Sguan_Calculate_main_Loop(SguanFOC_System_STRUCT *sguan){
     if (sguan->status == MOTOR_STATUS_UNINITIALIZED){
@@ -1636,18 +1701,7 @@ static void Sguan_Calculate_main_Loop(SguanFOC_System_STRUCT *sguan){
         Identify_Init(&sguan->motor.identify);
         // 读取电流偏置
         Offset_Current_Tick(sguan);
-        // if ((CONFIG_MODE >= Voltag_OPEN_MODE) && (CONFIG_MODE <= Sensor_Hall_MODE)){            
-            //电机回零操作
-            Positioning_Set(sguan,0.3f*sguan->foc.Real_VBUS,0.0f);
-            User_Delay(1200);
-            // 读取角度偏置
-            Offset_Rad_Tick[CONFIG_MODE](sguan);
-            // 电机失能并进入正常工作状态
-            Positioning_Set(sguan,0.0f,0.0f);
-            User_Delay(800);
-            Sguan.foc.sine = 0.0f;
-            Sguan.foc.cosine = 1.0f;
-        // }
+        Offset_Rad_Tick[CONFIG_MODE](sguan);
     }
     if ((sguan->status == MOTOR_STATUS_INITIALIZING) || 
         (sguan->status == MOTOR_STATUS_CALIBRATING)){
@@ -1730,12 +1784,8 @@ void SguanFOC_Low_Loop(void){
         return;
     }
     
-    // 1.读取母线电压VBUS和温度数据Temp
-    Data_Protection_Loop(&Sguan);
-    // 2.根据环境切换电机状态机
-    Status_Switch_Loop(&Sguan);
-    // 3.根据电机状态机,运行不同任务
-    Status_RUN_Loop(&Sguan);
+    // 执行电机状态机切换函数和任务
+    Sguan_Calculate_Low_Loop(&Sguan);
 }
 
 /**

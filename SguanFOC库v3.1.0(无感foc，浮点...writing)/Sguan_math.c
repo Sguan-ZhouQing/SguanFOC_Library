@@ -86,12 +86,9 @@ float Value_Sign(float value){
 }
 
 // 电机角度积分函数
-float Value_Rad_Loop(float Rad_s, float T){
-    static float angle = 0.0f;  // 静态变量保存角度值
-
-    angle = angle + Rad_s * T;
-    angle = Value_normalize(angle);
-    return angle;
+void Value_Rad_Loop(float *angle, float Rad_s, float T){
+    *angle = *angle + Rad_s*T;
+    *angle = Value_normalize(*angle);
 }
 
 // 克拉克变换

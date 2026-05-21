@@ -9,8 +9,8 @@ typedef struct{
     float i[2];             // (数据)历史输入值
     float o[2];             // (数据)历史输出值
 
-    float Input;            // (数据)Input输入
-    float Output;           // (数据)Output输出
+    float Input;            // (输入数据)Input输入
+    float Output;           // (输出数据)Output输出
 
     float num[2];           // (中间量)传递函数分子系数
     float den[2];           // (中间量)传递函数分母系数
@@ -32,11 +32,11 @@ typedef struct{
     float i[2];             // (数据)历史输入值
     float o[2];             // (数据)历史输出值
 
-    float Input;            // (数据)Input输入
-    float Output;           // (数据)Output输出
+    float Input;            // (输入数据)Input输入
+    float Output;           // (输出数据)Output输出
 
-    float Gain0;
-    float Gain1;
+    float Gain0;            // (中间量)增益
+    float Gain1;            // (中间量)增益
 }BSF_GO_STRUCT;
 
 typedef struct{
@@ -60,7 +60,7 @@ typedef struct{
     float Input;            // (数据)Input输入
     float Output;           // (数据)Output输出
 
-    float num;           // (中间量)传递函数分子系数
+    float num;              // (中间量)传递函数分子系数
     float den[2];           // (中间量)传递函数分母系数
 }BPF_GO_STRUCT;
 

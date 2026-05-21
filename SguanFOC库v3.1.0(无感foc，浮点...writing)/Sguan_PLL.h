@@ -16,7 +16,7 @@ typedef struct{
 }PLL_GO_STRUCT;
 
 typedef struct{
-    PLL_GO_STRUCT go;           // (结构体)PID运算结构体
+    PLL_GO_STRUCT go;       // (结构体)PID运算结构体
 
     float T;                // (系统时钟)T运算离散周期
     

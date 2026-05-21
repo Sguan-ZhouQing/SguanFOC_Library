@@ -163,21 +163,10 @@ typedef struct{
     SMO_STRUCT SMO;                         // (无感算法)SMO静止坐标系下的滑模观测器
     PLL_STRUCT PLL_Debug;                   // (PLL锁相环)角度跟踪锁相环
     PLL_STRUCT PLL_another;                 // (PLL锁相环)角度跟踪锁相环
-    float Speed_AbsMax;                     // (参数设计)角度解耦低速、高速域分界线上限
+    float Speed_AbsMax;                     // (参数设计)角度解耦低速、高速域分界线 上限
     float Speed_AbsMin;                     // (参数设计)角度解耦低速、高速域分界线下限
     #endif // CONFIG_Debug
 }MOTOR_TRANSFER_STRUCT;
-
-#if CONFIG_Debug
-typedef struct{
-    float Sensorless_Speed;                 // (Sensorless机械速度)预测机械角速度
-    float Sensorless_Pos;                   // (Sensorless机械角度)预测机械角度
-    float Sensorless_We;                    // (Sensorless电速度)预测电子角速度
-    float Sensorless_Re;                    // (Sensorless电角度)预测电子角度
-
-    float Pos_offset;                       // (Sensorless角度偏置)offset偏置位
-}MOTOR_DEBUG_STRUCT;
-#endif // CONFIG_Debug
 
 typedef struct{
     float Real_Speed;                       // (Encoder机械速度)Real实际机械角速度
@@ -185,7 +174,16 @@ typedef struct{
     float Real_We;                          // (Encoder电速度)Real实际电子角速度
     float Real_Re;                          // (Encoder电角度)Real实际电子角度
 
-    float Pos_offset;                       // (Encoder角度偏置)offset偏置位
+    float Real_offset;                       // (Encoder角度偏置)offset偏置位
+
+    #if CONFIG_Debug
+    float Sensorless_Speed;                 // (Sensorless机械速度)预测机械角速度
+    float Sensorless_Pos;                   // (Sensorless机械角度)预测机械角度
+    float Sensorless_We;                    // (Sensorless电速度)预测电子角速度
+    float Sensorless_Re;                    // (Sensorless电角度)预测电子角度
+
+    float Sensorless_offset;                // (Sensorless角度偏置)offset偏置位
+    #endif // CONFIG_Debug
 }MOTOR_ENCODER_STRUCT;
 
 typedef struct{
@@ -292,10 +290,6 @@ typedef struct{
     
     // ============================= ②嵌套结构体 ==================================
     MOTOR_TRANSFER_STRUCT transfer;         // 【有参数设计】Transfer传递函数
-
-    #if CONFIG_Debug
-    MOTOR_DEBUG_STRUCT sensorless;          // 【数据】sensorless电机角速度和角度信息
-    #endif // CONFIG_Debug
 
     MOTOR_ENCODER_STRUCT encoder;           // 【数据】encoder电机角速度和角度信息
     MOTOR_CURRENT_STRUCT current;           // 【数据】current电机电流采样信息缓存
