@@ -19,14 +19,12 @@
  * @return {*}
  */
 void DOB_Init(DOB_STRUCT *dob){
+    double den = 2.0*((double)dob->J) + ((double)dob->B)*((double)dob->T);
+
     dob->smdo.I_num = (float)(((double)dob->T)/2.0);
-    dob->smdo.O_num = (float)((((double)dob->J)*((double)dob->T))/
-                            (2.0*((double)dob->J) + 
-                            ((double)dob->B)*((double)dob->T)));
+    dob->smdo.O_num = (float)((((double)dob->J)*((double)dob->T))/den);
     dob->smdo.O_den = (float)((2.0*((double)dob->J) - 
-                            ((double)dob->B)*((double)dob->T))/
-                            (2.0*((double)dob->J) + 
-                            ((double)dob->B)*((double)dob->T)));
+                            ((double)dob->B)*((double)dob->T))/den);
     dob->smdo.Gain0 = (float)((1.5*((double)dob->Pn)*
                             ((double)dob->Flux))/
                             ((double)dob->J));
@@ -65,7 +63,7 @@ void DOB_Loop(DOB_STRUCT *dob){
     // 3.计算不连续量(part3)
     part2 = Value_sqrtf(Value_fabsf(error_wm))*sign*dob->K1;
 
-    // 4.总积分项
+    // 4.总积分项运算
     part_main = part0 - part1 - part2;
     dob->smdo.Output_Wm = dob->smdo.O_num*(part_main + dob->smdo.Wm_i) + 
                         dob->smdo.O_den*dob->smdo.Output_Wm;

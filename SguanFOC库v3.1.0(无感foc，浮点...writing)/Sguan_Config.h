@@ -7,7 +7,6 @@
 
 // ============================ 系统配置 宏定义 ==============================
 #define CONFIG_MODE         Define_Run_Mode             // (定义)电机运行模式
-#define CONFIG_Debug        Define_Run_Debug            // (定义)无感算法调试
 #define CONFIG_CtrlVel      Switch_MOTOR_Control_Vel    // (选择)转速环控制器
 #define CONFIG_CtrlPos      Switch_MOTOR_Control_Pos    // (选择)位置环控制器
 #define CONFIG_PWM          Switch_MOTOR_PWM            // (选择)PWM调制技术

@@ -22,9 +22,11 @@ void PID_Init(PID_STRUCT *pid){
     double temp0 = ((double)pid->T)*((double)pid->Ki)/2.0;
     double temp1 = ((double)pid->T)*((double)pid->Wc);
     double temp2 = ((double)pid->Kd)*((double)pid->Wc);
+    double den = -2.0+temp1;
+
     pid->run.I_num = (float)temp0;
-    pid->run.D_num = (float)((2.0*temp2)/(-2.0+temp1));
-    pid->run.D_den = (float)((2.0+temp1)/(-2.0+temp1));
+    pid->run.D_num = (float)((2.0*temp2)/den);
+    pid->run.D_den = (float)((2.0+temp1)/den);
 
     // 初始化为零
     pid->run.i[0] = 0.0f;

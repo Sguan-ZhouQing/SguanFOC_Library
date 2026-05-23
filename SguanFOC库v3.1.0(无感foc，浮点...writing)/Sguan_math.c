@@ -43,8 +43,8 @@ float Value_sqrtf(float x){
     i = 0x5f3759df - (i >> 1);
     y = *(float*)&i;
     
-    y = y * (1.5f - 0.5f * x * y * y);
-    y = y * (1.5f - 0.5f * x * y * y);
+    y = y * (1.5f - 0.5f*x*y*y);
+    y = y * (1.5f - 0.5f*x*y*y);
     
     return y * x;  // (1/sqrt(x)) * x = sqrt(x)
 }

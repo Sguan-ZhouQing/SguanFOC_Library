@@ -126,8 +126,10 @@ static inline void User_Parameter_Init(SguanFOC_System_STRUCT *user){
 
     // 9.谐波抑制
     #if CONFIG_Inhibit
-    user->transfer.BSF_D.zeta = 0.3f;               // 谐波抑制陷波滤波器->阻尼比
-    user->transfer.BSF_Q.zeta = 0.3f;               // 谐波抑制陷波滤波器->阻尼比
+    user->transfer.TPNF_D.K1 = 0.3f;                // 谐波抑制陷波滤波器->阻尼比
+    user->transfer.TPNF_Q.K1 = 0.3f;                // 谐波抑制陷波滤波器->阻尼比
+    user->transfer.TPNF_D.K2 = 0.1f;                // 谐波抑制陷波滤波器->阻尼比
+    user->transfer.TPNF_Q.K2 = 0.1f;                // 谐波抑制陷波滤波器->阻尼比
     #endif // CONFIG_Inhibit
 
     // 10.弱磁控制参数
@@ -145,10 +147,10 @@ static inline void User_Parameter_Init(SguanFOC_System_STRUCT *user){
     user->transfer.Percentage_fw = 0.92f;           // 弱磁调制占比->0.92工程经验
     #endif // CONFIG_FW
 
-    // 11.速度前馈的参数
-    #if CONFIG_VelFF
-    user->transfer.Beta_ff = 62.8f;                 // (float)转速环角频率(前馈补偿参数)
-    #endif // CONFIG_VelFF
+    // // 11.速度前馈的参数
+    // #if CONFIG_VelFF
+    // user->transfer.Beta_ff = 62.8f;                 // (float)转速环角频率(前馈补偿参数)
+    // #endif // CONFIG_VelFF
 
     // 12.死区补偿参数
     #if CONFIG_DeadZone

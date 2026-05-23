@@ -5,7 +5,7 @@
  * @LastEditors: 星必尘Sguan|3464647102@qq.com
  * @LastEditTime: 2026-04-30 01:57:22
  * @FilePath: \SguanFOC_Debug\SguanFOC\Sguan_HFI.c
- * @Description: SguanFOC库的“HFI无感高频注入算法”实现
+ * @Description: SguanFOC库的“HFI无感高频注入算法(高频脉振正弦波)”实现
  * 
  * Copyright (c) 2026 by $星必尘Sguan, All Rights Reserved. 
  */
@@ -18,21 +18,38 @@
  */
 void HFI_Init(HFI_STRUCT *hfi){
     // 1.陷波传递函数中间参数的初始化设置
-    double s_temp1 = ((double)hfi->T)*((double)hfi->Wo)*(((double)hfi->zeta0)*4.0);
-    double s_temp2 = ((double)hfi->T)*((double)hfi->Wo)*
-                    ((double)hfi->T)*((double)hfi->Wo);
-    hfi->go.s_num[0] = (float)((s_temp2+4.0)/(s_temp2+s_temp1+4.0));
-    hfi->go.s_num[1] = (float)((-8.0+2.0*s_temp2)/(s_temp2+s_temp1+4.0));
-    hfi->go.s_den[0] = (float)(-8.0+2.0*s_temp2)/(s_temp2+s_temp1+4.0);
-    hfi->go.s_den[1] = (float)(s_temp2-s_temp1+4.0)/(s_temp2+s_temp1+4.0);
+    double temp0 = ((double)hfi->T)*((double)hfi->Wo)*((double)hfi->K1);
+    double temp1 = ((double)hfi->T)*((double)hfi->Wo)*((double)hfi->K2);
+    double temp2 = ((double)hfi->T)*((double)hfi->Wo)*
+                ((double)hfi->T)*((double)hfi->Wo);
+    double den1 = 4.0+4.0*temp0+temp2;
+    double den2 = 4.0+8.0*temp0+4.0*temp2;
+
+    hfi->go.s1_num[0] = (float)((4.0+4.0*temp1+temp2)/den1);
+    hfi->go.s1_num[1] = (float)((-8.0+2.0*temp2+4.0)/den1);
+    hfi->go.s1_num[2] = (float)((4.0-4.0*temp1+temp2)/den1);
+    hfi->go.s1_den = (float)((4.0-4.0*temp0+temp2)/den1);
+
+    hfi->go.s2_num[0] = (float)((4.0+8.0*temp1+4.0*temp2)/den2);
+    hfi->go.s2_num[1] = (float)((-8.0+8.0*temp2+4.0)/den2);
+    hfi->go.s2_num[2] = (float)((4.0-8.0*temp1+4.0*temp2)/den2);
+    hfi->go.s2_den = (float)((4.0-8.0*temp0+4.0*temp2)/den2);
 
     // 2.初始化陷波历史数值
-    hfi->data0.s_i[0] = 0.0f;
-    hfi->data0.s_i[1] = 0.0f;
-    hfi->data0.s_o = 0.0f;
-    hfi->data1.s_i[0] = 0.0f;
-    hfi->data1.s_i[1] = 0.0f;
-    hfi->data1.s_o = 0.0f;
+    hfi->data0.x_i[0] = 0.0f;
+    hfi->data0.x_i[1] = 0.0f;
+    hfi->data0.x_o[0] = 0.0f;
+    hfi->data0.x_o[1] = 0.0f;
+
+    hfi->data0.y_i[0] = 0.0f;
+    hfi->data0.y_i[1] = 0.0f;
+    hfi->data0.y_o[0] = 0.0f;
+    hfi->data0.y_o[1] = 0.0f;
+
+    hfi->data1.y_i[0] = 0.0f;
+    hfi->data1.y_i[1] = 0.0f;
+    hfi->data1.y_o[0] = 0.0f;
+    hfi->data1.y_o[1] = 0.0f;
 
     // 3.初始化陷波输入输出
     hfi->go.Input_Id = 0.0f;
@@ -41,33 +58,30 @@ void HFI_Init(HFI_STRUCT *hfi){
     hfi->go.Output_Iq = 0.0f;
 
     // 4.带通传递函数中间参数的初始化设置
-    double p_temp1 = ((double)hfi->T)*((double)hfi->Wo)*(((double)hfi->zeta1)*4.0);
+    double p_temp1 = ((double)hfi->T)*((double)hfi->Wo)*(((double)hfi->zeta)*4.0);
     double p_temp2 = ((double)hfi->T)*((double)hfi->Wo)*
                     ((double)hfi->T)*((double)hfi->Wo);
-    hfi->go.p_num = (float)(p_temp1/(p_temp2+p_temp1+4.0));
-    hfi->go.p_den[0] = (float)(-8.0+2.0*p_temp2)/(p_temp2+p_temp1+4.0);
-    hfi->go.p_den[1] = (float)(p_temp2-p_temp1+4.0)/(p_temp2+p_temp1+4.0);
+
+    double den = p_temp2+p_temp1+4.0;
+
+    hfi->go.p_num = (float)(p_temp1/den);
+    hfi->go.p_den[0] = (float)((-8.0+2.0*p_temp2)/den);
+    hfi->go.p_den[1] = (float)((p_temp2-p_temp1+4.0)/den);
 
     // 5.初始化带通历史数值
-    hfi->data0.p_i[0] = 0.0f;
-    hfi->data0.p_i[1] = 0.0f;
-    hfi->data0.p_o[0] = 0.0f;
-    hfi->data0.p_o[1] = 0.0f;
-    hfi->data1.p_i[0] = 0.0f;
-    hfi->data1.p_i[1] = 0.0f;
-    hfi->data1.p_o[0] = 0.0f;
-    hfi->data1.p_o[1] = 0.0f;
+    hfi->data0.x_i[0] = 0.0f;
+    hfi->data0.x_i[1] = 0.0f;
+    hfi->data0.x_o[0] = 0.0f;
+    hfi->data0.x_o[1] = 0.0f;
+
     
     // 6.初始化带通输入输出
-    hfi->go.Input_Ialpha = 0.0f;
-    hfi->go.Input_Ibeta = 0.0f;
-    hfi->go.Output_Ialpha = 0.0f;
-    hfi->go.Output_Ibeta = 0.0f;
+    hfi->go.Input_Q = 0.0f;
+    hfi->go.Output_Q = 0.0f;
 
     // 7.初始化注入电压值及其余
     hfi->go.Output_Uin = 0.0f;
     hfi->go.Angle = 0.0f;
-    hfi->go.Sine = 0.0f;
 }
 
 /**
@@ -80,24 +94,26 @@ void HFI_Init(HFI_STRUCT *hfi){
  */
 void HFI_Current_Loop(HFI_STRUCT *hfi){
     // 1.带入差分方程，计算输出
-    hfi->go.Output_Id = hfi->go.s_num[0]*(hfi->go.Input_Id+hfi->data0.s_i[1]) + 
-                        hfi->go.s_num[1]*hfi->data0.s_i[0] - 
-                        hfi->go.s_den[0]*hfi->go.Output_Id - 
-                        hfi->go.s_den[1]*hfi->data0.s_o;
+    hfi->go.Output_Id = hfi->go.s1_num[0]*hfi->go.Input_Id + 
+                        hfi->go.s1_num[1]*(hfi->data0.x_i[0]-hfi->data0.x_o[0]) + 
+                        hfi->go.s1_num[2]*hfi->data0.x_i[1] - 
+                        hfi->go.s1_den*hfi->data0.x_o[1];
 
-    hfi->go.Output_Iq = hfi->go.s_num[0]*(hfi->go.Input_Iq+hfi->data1.s_i[1]) + 
-                        hfi->go.s_num[1]*hfi->data1.s_i[0] - 
-                        hfi->go.s_den[0]*hfi->go.Output_Iq - 
-                        hfi->go.s_den[1]*hfi->data1.s_o;
+    hfi->go.Output_Iq = hfi->go.s1_num[0]*hfi->go.Input_Iq + 
+                        hfi->go.s1_num[1]*(hfi->data0.y_i[0]-hfi->data0.y_o[0]) + 
+                        hfi->go.s1_num[2]*hfi->data0.y_i[1] - 
+                        hfi->go.s1_den*hfi->data0.y_o[1];
 
     // 2.更新历史输入和输出数值
-    hfi->data0.s_i[1] = hfi->data0.s_i[0];
-    hfi->data0.s_i[0] = hfi->go.Input_Id;
-    hfi->data0.s_o = hfi->go.Output_Id;
+    hfi->data0.x_i[1] = hfi->data0.x_i[0];
+    hfi->data0.x_i[0] = hfi->go.Input_Id;
+    hfi->data0.x_o[1] = hfi->data0.x_o[0];
+    hfi->data0.x_o[0] = hfi->go.Output_Id;
 
-    hfi->data1.s_i[1] = hfi->data1.s_i[0];
-    hfi->data1.s_i[0] = hfi->go.Input_Iq;
-    hfi->data1.s_o = hfi->go.Output_Iq;
+    hfi->data0.y_i[1] = hfi->data0.y_i[0];
+    hfi->data0.y_i[0] = hfi->go.Input_Iq;
+    hfi->data0.y_o[1] = hfi->data0.y_o[0];
+    hfi->data0.y_o[0] = hfi->go.Output_Iq;
 }
 
 /**
@@ -109,32 +125,35 @@ void HFI_Current_Loop(HFI_STRUCT *hfi){
  * @return {*}
  */
 void HFI_ReadRad_Loop(HFI_STRUCT *hfi){
-    // 1.带入差分方程，计算输出
-    float Ialpha = hfi->go.p_num*(hfi->go.Input_Ialpha - hfi->data0.p_i[1]) - 
-                        hfi->go.p_den[0]*hfi->data0.p_o[0] - 
-                        hfi->go.p_den[1]*hfi->data0.p_o[1];
-
-    float Ibeta = hfi->go.p_num*(hfi->go.Input_Ibeta - hfi->data1.p_i[1]) - 
-                        hfi->go.p_den[0]*hfi->data1.p_o[0] - 
-                        hfi->go.p_den[1]*hfi->data1.p_o[1];
+    // 1.带通滤波，得到高频电流分量
+    hfi->go.High = hfi->go.p_num*(hfi->go.Input_Q - hfi->data1.x_i[1]) - 
+                        hfi->go.p_den[0]*hfi->data1.x_o[0] - 
+                        hfi->go.p_den[1]*hfi->data1.x_o[1];
 
     // 2.更新历史输入和输出数值
-    hfi->data0.p_i[1] = hfi->data0.p_i[0];
-    hfi->data0.p_i[0] = hfi->go.Input_Ialpha;
-    hfi->data0.p_o[1] = hfi->data0.p_o[0];
-    hfi->data0.p_o[0] = hfi->go.Output_Ialpha;
+    hfi->data1.x_i[1] = hfi->data1.x_i[0];
+    hfi->data1.x_i[0] = hfi->go.Input_Q;
+    hfi->data1.x_o[1] = hfi->data1.x_o[0];
+    hfi->data1.x_o[0] = hfi->go.High;
 
-    hfi->data1.p_i[1] = hfi->data1.p_i[0];
-    hfi->data1.p_i[0] = hfi->go.Input_Ibeta;
-    hfi->data1.p_o[1] = hfi->data1.p_o[0];
-    hfi->data1.p_o[0] = hfi->go.Output_Ibeta;
+    // 3.同频相乘，得到待解调的高频量
+    float TPNF_in = hfi->go.High*hfi->h*hfi->go.Sine;
 
-    // 3.输出待解调的高频量
-    hfi->go.Output_Ialpha = Ialpha*hfi->go.Sine;
-    hfi->go.Output_Ibeta = Ibeta*hfi->go.Sine;
+    // 4.陷波滤波，滤除二倍高频分量
+    hfi->go.Output_Q = hfi->go.s2_num[0]*TPNF_in + 
+                        hfi->go.s2_num[1]*(hfi->data1.y_i[0]-hfi->data1.y_o[0]) + 
+                        hfi->go.s2_num[2]*hfi->data1.y_i[1] - 
+                        hfi->go.s2_den*hfi->data1.y_o[1];
 
-    // 4.更新注入信号
+    // 5.更新历史输入和输出数值
+    hfi->data1.y_i[1] = hfi->data1.y_i[0];
+    hfi->data1.y_i[0] = TPNF_in;
+    hfi->data1.y_o[1] = hfi->data1.y_o[0];
+    hfi->data1.y_o[0] = hfi->go.Output_Q;
+
+    // 6.刷新注入信号
     Value_Rad_Loop(&hfi->go.Angle, hfi->Wo, hfi->T);
-    hfi->go.Sine = fast_sin(hfi->go.Angle);
-    hfi->go.Output_Uin = hfi->go.Sine*hfi->Uh;
+    float Cosine;
+    fast_sin_cos(hfi->go.Angle, &hfi->go.Sine, &Cosine);
+    hfi->go.Output_Uin = Cosine*hfi->Uh;
 }

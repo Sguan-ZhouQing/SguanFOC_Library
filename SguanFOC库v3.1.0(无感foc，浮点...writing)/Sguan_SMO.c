@@ -71,9 +71,11 @@ static void SMO_RUN(SMO_STRUCT *smo,SMO_GO_STRUCT *run){
  */
 void SMO_Init(SMO_STRUCT *smo){
     double temp0 = ((double)(smo->T))*((double)(smo->Wc));
+    double den = 2.0+temp0;
+
     smo->data.I_num = (float)(((double)(smo->T))/2.0);
-    smo->data.F_num = (float)(temp0/(2.0+temp0));
-    smo->data.F_den = (float)(-2.0+temp0/2.0+temp0);
+    smo->data.F_num = (float)(temp0/den);
+    smo->data.F_den = (float)(-2.0+temp0/den);
 
     smo->data.Gain0 = (float)(1.0/((double)(smo->Ld)));
     smo->data.Gain1 = (float)(((double)(smo->Rs))/((double)(smo->Ld)));

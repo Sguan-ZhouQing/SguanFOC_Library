@@ -8,27 +8,25 @@
  * @reminder: 1->MODE_IF_OPENLOOP       IF流频比开环        (开环强拖)
  * @reminder: 2->MODE_Voltag_OPEN       电压开环            (高精度编码器提供Rad)
  * @reminder: 3->MODE_Current_SINGLE    电流单闭环          (高精度编码器提供Rad)
- * @reminder: 4->MODE_VelCur_DOUBLE     速度-电流串级闭环   (高精度编码器提供Rad)
- * @reminder: 5->MODE_PosVelCur_THREE   位置-速度-电流三环  (高精度编码器提供Rad)
- * @reminder: 6->MODE_Sensor_Hall       有感霍尔_转速环     (三霍尔编码器提供Rad)
- * @reminder: 7->MODE_Sensorless_HFI    高频注入_转速环     (低速域，速度有上限)
- * @reminder: 8->MODE_Sensorless_SMO    滑模观测_转速环     (高速域，IF切SMO)
- * @reminder: 9->MODE_Sensorless_HS     前两结合_转速环     (全速域，HFI切SMO)
- * @reminder: 10->MODE_Sensorless_AS    霍尔滑模结合_转速环  (全速域，霍尔切SMO)
+ * @reminder: 4->MODE_VelCur_DOUBLE     速度-电流串级闭环    (高精度编码器提供Rad)
+ * @reminder: 5->MODE_PosVelCur_THREE   位置-速度-电流三环   (高精度编码器提供Rad)
+ * @reminder: 6->MODE_Sensor_Hall       有感霍尔_转速环      (三霍尔编码器提供Rad)
+ * @reminder: 7->MODE_Sensorless_HFI    高频注入_转速环      (低速域，速度有上限)
+ * @reminder: 8->MODE_Sensorless_SMO    滑模观测_转速环      (高速域，IF切SMO)
+ * @reminder: 9->MODE_Sensorless_NLFO   非线性磁链_转速环    (高速域，IF切NLFO)
+ * @reminder: 10->MODE_Sensorless_HS    高频滑模结合_转速环  (全速域，HFI切SMO)
+ * @reminder: 11->MODE_Sensorless_HN    高频磁链结合_转速环  (全速域，HFI切NLFO)
+ * @reminder: 12->MODE_Sensorless_AS    霍尔滑模结合_转速环  (全速域，霍尔切SMO)
+ * @reminder: 13->MODE_Sensorless_AN    霍尔磁链结合_转速环  (全速域，霍尔切NLFO)
+ * @word: (在此以上是电机正常运行模式，在此以下是有感速度环，外载“无感观测器”测试的模式)
+ * @reminder: 14->MODE_Debug_HFI        HFI测试_转速环      (高精度编码器提供Rad)
+ * @reminder: 15->MODE_Debug_SMO        SMO测试_转速环      (高精度编码器提供Rad)
+ * @reminder: 16->MODE_Debug_NLFO       NLFO测试_转速环     (高精度编码器提供Rad)
+ * @reminder: 17->MODE_Debug_HS         HFI切SMO_转速环     (高精度编码器提供Rad)
+ * @reminder: 18->MODE_Debug_HN         HFI切NLFO_转速环    (高精度编码器提供Rad)
  * @return {*}
  */
 #define Define_Run_Mode 8
-
-/**
- * @description: 宏定义0-3决定“无感算法的debug模式”是否开启(默认关闭)
- * @reminder: 0->Debug_NULL             关闭无感算法的dubug跟随，纯有感控制
- * @reminder: (开启debug...支持有感模式下，旁接无感模块观测调试)
- * @reminder: 1->Debug_HFI              低速域，纯HFI高频注入算法
- * @reminder: 2->Debug_SMO              高速域，纯SMO滑模观测器
- * @reminder: 3->Debug_HS               全速域，“高频注入”切“滑模观测”
- * @return {*}
- */
-#define Define_Run_Debug 0
 
 /**
  * @description: 宏定义0-3决定“电机速度环”的控制方式(默认使用PI控制)
@@ -90,7 +88,7 @@
 /**
  * @description: 宏定义0或1决定“AngleComp相位延迟补偿”是否开启(默认关闭)
  * @reminder: 0->不开启系统的相位延迟补偿
- * @reminder: 1->开启相位延迟补偿，恒定延迟补偿，固定Td补偿算法
+ * @reminder: 1->开启相位延迟补偿，恒定延迟补偿，固定Td和Offset补偿算法
  * @return {*}
  */
 #define Open_AngleComp_Calculate 0

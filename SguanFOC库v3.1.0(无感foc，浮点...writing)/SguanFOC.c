@@ -79,8 +79,7 @@ static void (*const CtrlFunc_Tick[])(void *, float, float)={
     Transfer_STA_Loop               // STA
 };
 static void Transfer_LPF_Loop(LPF_STRUCT *lpf,float input);
-static void Transfer_BSF_Loop(BSF_STRUCT *bsf,float input);
-static void Transfer_BPF_Loop(BPF_STRUCT *bpf,float input);
+static void Transfer_TPNF_Loop(TPNF_STRUCT *tpnf,float input);
 static void Transfer_Hall_Loop(HALL_STRUCT *hal,
                             float Raw_A,
                             float Raw_B,
@@ -331,17 +330,10 @@ static void Transfer_LPF_Loop(LPF_STRUCT *lpf,float input){
 }
 
 // Transfer运算_陷波滤波器
-static void Transfer_BSF_Loop(BSF_STRUCT *bsf,float input){
-    bsf->filter.Input = input;
-    BSF_Loop(bsf);
+static void Transfer_TPNF_Loop(TPNF_STRUCT *tpnf,float input){
+    tpnf->filter.Input = input;
+    TPNF_Loop(tpnf);
     // 输出bsf->filter.Output;
-}
-
-// Transfer运算_带通滤波器
-static void Transfer_BPF_Loop(BPF_STRUCT *bpf,float input){
-    bpf->filter.Input = input;
-    BPF_Loop(bpf);
-    // 输出bpf->filter.Output;
 }
 
 // Transfer运算_三霍尔信号处理
@@ -474,10 +466,10 @@ static void Transfer_Init(SguanFOC_System_STRUCT *sguan){
 
     // 9.谐波抑制
     #if CONFIG_Inhibit
-    sguan->transfer.BSF_D.T = PMSM_RUN_T;
-    sguan->transfer.BSF_Q.T = PMSM_RUN_T;
-    BSF_Init(&sguan->transfer.BSF_D);
-    BSF_Init(&sguan->transfer.BSF_Q);
+    sguan->transfer.TPNF_D.T = PMSM_RUN_T;
+    sguan->transfer.TPNF_Q.T = PMSM_RUN_T;
+    TPNF_Init(&sguan->transfer.TPNF_D);
+    TPNF_Init(&sguan->transfer.TPNF_Q);
     #endif // CONFIG_Inhibit
 
     // 10.弱磁控制参数
@@ -540,8 +532,7 @@ static void Transfer_Init(SguanFOC_System_STRUCT *sguan){
     #endif // CONFIG_Debug
 
     // 15.消除未使用Hall函数的编译警告
-    (void)Transfer_BPF_Loop;
-    (void)Transfer_BSF_Loop;
+    (void)Transfer_TPNF_Loop;
     (void)Transfer_Hall_Loop;
 }
 
@@ -658,14 +649,14 @@ static void Current_Tick(SguanFOC_System_STRUCT *sguan){
     sguan->current.Real_Iq = sguan->transfer.LPF_Q.filter.Output;
     #else // CONFIG_Inhibit
     float We_6th = 6.0f*sguan->encoder.Real_We;
-    sguan->transfer.BSF_D.Wo = We_6th;
-    sguan->transfer.BSF_Q.Wo = We_6th;
-    Transfer_BSF_Loop(&sguan->transfer.BSF_D, 
+    sguan->transfer.TPNF_D.Wo = We_6th;
+    sguan->transfer.TPNF_Q.Wo = We_6th;
+    Transfer_TPNF_Loop(&sguan->transfer.TPNF_D, 
                     sguan->transfer.LPF_D.filter.Output);
-    Transfer_BSF_Loop(&sguan->transfer.BSF_Q, 
+    Transfer_TPNF_Loop(&sguan->transfer.TPNF_Q, 
                     sguan->transfer.LPF_Q.filter.Output);
-    sguan->current.Real_Id = sguan->transfer.BSF_D.filter.Output;
-    sguan->current.Real_Iq = sguan->transfer.BSF_Q.filter.Output;
+    sguan->current.Real_Id = sguan->transfer.TPNF_D.filter.Output;
+    sguan->current.Real_Iq = sguan->transfer.TPNF_Q.filter.Output;
     #endif // CONFIG_Inhibit
 }
 

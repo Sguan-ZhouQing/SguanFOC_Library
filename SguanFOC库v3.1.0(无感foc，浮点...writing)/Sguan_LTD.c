@@ -20,8 +20,10 @@
  */
 void LTD_Init(LTD_STRUCT *ltd){
     double temp1 = ((double)ltd->T)*((double)ltd->r);
-    ltd->go.num = (float)(temp1/(2.0+temp1));
-    ltd->go.den = (float)((-2.0+temp1)/(2.0+temp1));
+    double den = 2.0+temp1;
+
+    ltd->go.num = (float)(temp1/den);
+    ltd->go.den = (float)((-2.0+temp1)/den);
 
     // 初始化为零
     ltd->go.Input = 0.0f;
