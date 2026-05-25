@@ -5,6 +5,14 @@
 #include "Sguan_Config.h"
 
 typedef struct{
+    float I_num;            // (中间量)积分项传递函数分子系数
+
+    float v1_i;             // (中间量)积分历史输入值
+    float v2_i;             // (中间量)积分历史输入值
+    float z1_i;             // (中间量)积分历史输入值
+    float z2_i;             // (中间量)积分历史输入值
+    float z3_i;             // (中间量)积分历史输入值
+
     float v1;               // (数据)跟踪微分器输出v1(跟踪信号)
     float v2;               // (数据)跟踪微分器输出v2(微分信号)
     
@@ -24,14 +32,14 @@ typedef struct{
 }LADRC_RUN_STRUCT;
 
 typedef struct{
-    float w0;               // (参数数据~)观测器带宽w0 = 4wc
+    float w0;               // (参数数据~)观测器带宽w0 = 4Wc
     
     float beta1;            // (参数数据~)观测器系数1 = 3*w0
     float beta2;            // (参数数据~)观测器系数2 = 3*w0^2
     float beta3;            // (参数数据~)观测器系数3 = w0^3
     
-    float Kp;               // (参数数据~)比例系数 = wc^2
-    float Kd;               // (参数数据~)微分系数 = 2*wc
+    float Kp;               // (参数数据~)比例系数 = Wc^2
+    float Kd;               // (参数数据~)微分系数 = 2*Wc
 }LADRC_DATA_STRUCT;
 
 typedef struct{
@@ -42,7 +50,7 @@ typedef struct{
     
     float r;                // (参数设计)速度因子_跟踪微分器
     float b0;               // (参数设计)系统参数_控制量增益
-    float wc;               // (参数设计)控制器带宽常设计为wc = 10/T
+    float Wc;               // (参数设计)控制器带宽常设计为Wc = 10/T
     
     float OutMax;           // (参数设计)输出上限
     float OutMin;           // (参数设计)输出下限

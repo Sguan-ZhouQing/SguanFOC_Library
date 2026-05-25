@@ -22,7 +22,7 @@ void DeadZone_Loop(float *Ua_duty,
             float Ic, 
             float Current_Min, 
             float Dead_Time);
-float AngleComp_Loop(float Wm,float Td);
+float AngleComp_Loop(float We,float Td,float Offset);
 
 
 #endif // SGUAN_OPTIMIZE_H

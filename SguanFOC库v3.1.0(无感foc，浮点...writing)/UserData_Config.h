@@ -26,7 +26,7 @@
  * @reminder: 18->MODE_Debug_HN         HFI切NLFO_转速环    (高精度编码器提供Rad)
  * @return {*}
  */
-#define Define_Run_Mode 8
+#define Define_Run_Mode 0
 
 /**
  * @description: 宏定义0-3决定“电机速度环”的控制方式(默认使用PI控制)
@@ -80,7 +80,9 @@
  * @description: 宏定义0-2决定“电机启动定位方式的选择”(默认关闭)
  * @reminder: 0->不开启电机定位，有感绝对坐标值已经填写好了“定位信息”
  * @reminder: 1->开启电机定位，强拖D轴定位，电机会动一下
- * @reminder: 2->开启电机定位，高频注入定位，电机可以免晃动
+ * @reminder: （这个是有感模式的启动方式...无感默认对应的启动方式）
+ * @reminder: （有感包含正常的闭环模式和三霍尔信号的有感控制）
+ * @reminder: （比如SMO是IF启动，含高频注入HFI则是注入辨识启动）
  * @return {*}
  */
 #define Switch_MOTOR_Start 0
@@ -115,7 +117,7 @@
  * @reminder: 1->开启STA_SMDO
  * @return {*}
  */
-#define Open_DOB_Calculate 0
+#define Open_DOB_Calculate 1
 
 /**
  * @description: 宏定义0或1决定“谐波抑制算法”是否开启(开启最优)
@@ -131,7 +133,7 @@
  * @reminder: 1->开启最大转矩控制控制(凸极电机需要)
  * @return {*}
  */
-#define Open_MTPA_Calculate 0
+#define Open_MTPA_Calculate 1
 
 /**
  * @description: 宏定义0或1决定“FW弱磁控制”是否开启(默认关闭)
@@ -141,7 +143,7 @@
  * @reminder: （MTPA控制：Open_MTPA_Calculate 1）
  * @return {*}
  */
-#define Open_FW_Calculate 0
+#define Open_FW_Calculate 1
 
 /**
  * @description: 宏定义0或1决定“DeadZone死区补偿”是否开启(开启最优)
@@ -149,7 +151,7 @@
  * @reminder: 1->开启DeadZone死区补偿算法(电流方向的前馈补偿)
  * @return {*}
  */
-#define Open_DeadZone_Calculate 0
+#define Open_DeadZone_Calculate 1
 
 /**
  * @description: 宏定义决定UART或者CAN发送数据的模式

@@ -9,7 +9,10 @@
  * @param {SguanFOC_System_STRUCT} *user
  * @return {*}
  */
-static inline void User_Parameter_Init(SguanFOC_System_STRUCT *user){    
+static inline void User_Parameter_Init(SguanFOC_System_STRUCT *user){
+    // +---------------------------------------------------------+
+    // |                    滤波器Filter定义                      |
+    // +---------------------------------------------------------+
     // 1.电流环参数
     user->transfer.Current_D.Wc = 100.0f;           // PID电流环D轴参数->微分滤波
     user->transfer.Current_D.Kp = 0.3425f;          // PID电流环D轴参数->Kp
@@ -33,7 +36,7 @@ static inline void User_Parameter_Init(SguanFOC_System_STRUCT *user){
     #if CONFIG_CtrlVel==Control_LADRC
     user->transfer.Velocity.r = 50.0f;              // 双环速度外环speed的LADRC->速度因子
     user->transfer.Velocity.b0 = 12e5;              // 双环速度外环speed的LADRC->控制量增益
-    user->transfer.Velocity.wc = 200.0f;            // 双环速度外环speed的LADRC->控制器带宽
+    user->transfer.Velocity.Wc = 200.0f;            // 双环速度外环speed的LADRC->控制器带宽
     user->transfer.Velocity.OutMax = 10.5f;         // 双环速度外环speed的LADRC->输出上限
     user->transfer.Velocity.OutMin = -10.5f;        // 双环速度外环speed的LADRC->输出下限
     #elif CONFIG_CtrlVel==Control_SMC
@@ -66,7 +69,7 @@ static inline void User_Parameter_Init(SguanFOC_System_STRUCT *user){
     #if CONFIG_CtrlPos==Control_LADRC
     user->transfer.Position.r = 50.0f;              // 高性能伺服三环pos的LADRC->速度因子
     user->transfer.Position.b0 = 1.2e6;             // 高性能伺服三环pos的LADRC->控制量增益
-    user->transfer.Position.wc = 200.0f;            // 高性能伺服三环pos的LADRC->控制器带宽
+    user->transfer.Position.Wc = 200.0f;            // 高性能伺服三环pos的LADRC->控制器带宽
     user->transfer.Position.OutMax = 10.5f;         // 高性能伺服三环pos的LADRC->输出上限
     user->transfer.Position.OutMin = -10.5f;        // 高性能伺服三环pos的LADRC->输出下限
     #elif CONFIG_CtrlPos==Control_SMC
@@ -96,7 +99,7 @@ static inline void User_Parameter_Init(SguanFOC_System_STRUCT *user){
     #endif // CONFIG_CtrlPos
 
     // 4.响应倍数参数
-    user->transfer.Response = 5;                    // (uint8_t)响应带宽倍数(核心参数)
+    // user->transfer.Response = 5;                    // (uint8_t)响应带宽倍数(核心参数)
 
     // 5.滤波器参数
     user->transfer.LPF_D.Wc = 31415.96f;            // 电机D轴电流滤波->截止频率
@@ -143,8 +146,8 @@ static inline void User_Parameter_Init(SguanFOC_System_STRUCT *user){
     user->transfer.FW.IntMax = 150.0f;              // 弱磁控制的PI控制器->积分项上限
     user->transfer.FW.IntMin = -150.0f;             // 弱磁控制的PI控制器->积分项下限
 
-    user->transfer.BaseSpeed_fw = 300.0f;           // 弱磁基速设计->MTPA转变区
-    user->transfer.Percentage_fw = 0.92f;           // 弱磁调制占比->0.92工程经验
+    // user->transfer.BaseSpeed_fw = 300.0f;           // 弱磁基速设计->MTPA转变区
+    // user->transfer.Percentage_fw = 0.92f;           // 弱磁调制占比->0.92工程经验
     #endif // CONFIG_FW
 
     // // 11.速度前馈的参数
@@ -154,8 +157,8 @@ static inline void User_Parameter_Init(SguanFOC_System_STRUCT *user){
 
     // 12.死区补偿参数
     #if CONFIG_DeadZone
-    user->transfer.DeadTime = 1e-10f;               // (float)死区时间填写(死区补偿参数)
-    user->transfer.Dead_CurMin = 0.1f;              // (float)补偿最小相电流(死区补偿参数)
+    // user->transfer.DeadTime = 1e-10f;               // (float)死区时间填写(死区补偿参数)
+    // user->transfer.Dead_CurMin = 0.1f;              // (float)补偿最小相电流(死区补偿参数)
     #endif // CONFIG_DeadZone
 
     // 13.无感控制算法参数
@@ -222,6 +225,12 @@ static inline void User_Parameter_Init(SguanFOC_System_STRUCT *user){
     user->transfer.Speed_AbsMax = 100.0f;           // 界限->“过渡区”到“高速域”
     user->transfer.Speed_AbsMax = 80.0f;            // 界限->“低速域”到“过渡区”
     #endif // CONFIG_Debug
+
+
+    // +---------------------------------------------------------+
+    // |                    滤波器Filter定义                      |
+    // +---------------------------------------------------------+
+    user->value.Response = 5;
 }
 
 

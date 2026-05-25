@@ -6,7 +6,7 @@
 
 typedef struct{
     float Angle;            // (数据)注入的角度数值变化
-    float Sine;             // (数据)历史注入的正弦值
+    float Sine[2];             // (数据)历史注入的正弦值
     float High;             // (数据)仅经BPF滤波后的高频信号
 
     float Input_Id;         // (输入数据)原始D轴电流信号

@@ -36,7 +36,6 @@ typedef struct{
     float Gain;             // (参数设计)观测器增益
 }NLFO_STRUCT;
 
-
 void NLFO_Init(NLFO_STRUCT *nlfo);
 void NLFO_Loop(NLFO_STRUCT *nlfo);
 
