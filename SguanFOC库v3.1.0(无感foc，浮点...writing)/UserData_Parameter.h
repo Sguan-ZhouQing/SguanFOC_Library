@@ -4,14 +4,14 @@
 /* 电机控制User用户设置，Sguan.transfer数据 */
 
 /**
- * @description: 电机控制器参数设计
+ * @description: 控制器参数设计的初始化代码
  * @reminder: (此方函数->填写你设定好的控制器参数)
  * @param {SguanFOC_System_STRUCT} *user
  * @return {*}
  */
 static inline void User_Parameter_Init(SguanFOC_System_STRUCT *user){
     // +---------------------------------------------------------+
-    // |                    滤波器Filter定义                      |
+    // |                控制器参数Parameter设计                   |
     // +---------------------------------------------------------+
     // 1.电流环参数
     user->transfer.Current_D.Wc = 100.0f;           // PID电流环D轴参数->微分滤波
@@ -99,25 +99,26 @@ static inline void User_Parameter_Init(SguanFOC_System_STRUCT *user){
     #endif // CONFIG_CtrlPos
 
     // 4.响应倍数参数
-    // user->transfer.Response = 5;                    // (uint8_t)响应带宽倍数(核心参数)
+    user->value.Response = 5;                       // (uint8_t)响应带宽倍数(核心参数)
 
     // 5.滤波器参数
     user->transfer.LPF_D.Wc = 31415.96f;            // 电机D轴电流滤波->截止频率
     user->transfer.LPF_Q.Wc = 31415.96f;            // 电机Q轴电流滤波->截止频率
     user->transfer.LPF_encoder.Wc = 300.0f;         // 速度信号滤波->截止频率
 
-    // 6.霍尔模式参数
-    #if CONFIG_MODE==MODE_Sensor_Hall
-    user->transfer.Hall.Wc = 100.0f;                // 霍尔信号处理->滤波截止频率
-    user->transfer.Hall.Hall_High = 0.6f;           // 霍尔信号处理->信号上边界
-    user->transfer.Hall.Hall_Low = 0.4f;            // 霍尔信号处理->信号下边界
-    #endif // CONFIG_MODE
-
-    // 7.锁相环参数
+    // 6.锁相环参数
     user->transfer.PLL_encoder.Kp = 650.0f;         // 锁相环->比例项增益
     user->transfer.PLL_encoder.Ki = 210000.0f;      // 锁相环->积分项增益
+    #if IS_COM_MODE
+    user->transfer.PLL_another.Kp = 650.0f;         // 锁相环->比例项增益
+    user->transfer.PLL_another.Ki = 210000.0f;      // 锁相环->积分项增益
+    #endif // IS_COM_MODE
+    #if IS_DEBUG_MODE
+    user->transfer.PLL_Debug.Kp = 650.0f;           // 锁相环->比例项增益
+    user->transfer.PLL_Debug.Ki = 210000.0f;        // 锁相环->积分项增益
+    #endif // IS_DEBUG_MODE
 
-    // 8.扰动观测器参数
+    // 7.扰动观测器参数
     #if CONFIG_DOB
     user->transfer.DOB.K1 = 2.0f;                   // 扰动观测器->比例项增益
     user->transfer.DOB.K2 = 3.0f;                   // 扰动观测器->积分项增益
@@ -127,15 +128,16 @@ static inline void User_Parameter_Init(SguanFOC_System_STRUCT *user){
     user->transfer.DOB.OutMin_Wm = -10.5f;          // 扰动观测器->输出限幅
     #endif // CONFIG_DOB    
 
-    // 9.谐波抑制
+    // 8.谐波抑制
     #if CONFIG_Inhibit
     user->transfer.TPNF_D.K1 = 0.3f;                // 谐波抑制陷波滤波器->阻尼比
-    user->transfer.TPNF_Q.K1 = 0.3f;                // 谐波抑制陷波滤波器->阻尼比
     user->transfer.TPNF_D.K2 = 0.1f;                // 谐波抑制陷波滤波器->阻尼比
+
+    user->transfer.TPNF_Q.K1 = 0.3f;                // 谐波抑制陷波滤波器->阻尼比
     user->transfer.TPNF_Q.K2 = 0.1f;                // 谐波抑制陷波滤波器->阻尼比
     #endif // CONFIG_Inhibit
 
-    // 10.弱磁控制参数
+    // 9.弱磁控制参数
     #if CONFIG_FW
     user->transfer.FW.Wc = 100.0f;                  // 弱磁控制的PI控制器->截止频率
     user->transfer.FW.Kp = 7.0f;                    // 弱磁控制的PI控制器->Kp
@@ -146,91 +148,63 @@ static inline void User_Parameter_Init(SguanFOC_System_STRUCT *user){
     user->transfer.FW.IntMax = 150.0f;              // 弱磁控制的PI控制器->积分项上限
     user->transfer.FW.IntMin = -150.0f;             // 弱磁控制的PI控制器->积分项下限
 
-    // user->transfer.BaseSpeed_fw = 300.0f;           // 弱磁基速设计->MTPA转变区
-    // user->transfer.Percentage_fw = 0.92f;           // 弱磁调制占比->0.92工程经验
+    user->value.BaseSpeed_fw = 300.0f;              // 弱磁基速设计->MTPA转变区
+    user->value.Percentage_fw = 0.92f;              // 弱磁调制占比->0.92工程经验
     #endif // CONFIG_FW
 
-    // // 11.速度前馈的参数
-    // #if CONFIG_VelFF
-    // user->transfer.Beta_ff = 62.8f;                 // (float)转速环角频率(前馈补偿参数)
-    // #endif // CONFIG_VelFF
+    // 10.速度前馈的参数
+    #if CONFIG_VelFF
+    user->value.Beta_ff = 62.8f;                    // (float)转速环角频率(前馈补偿参数)
+    #endif // CONFIG_VelFF
 
-    // 12.死区补偿参数
+    // 11.死区补偿参数
     #if CONFIG_DeadZone
-    // user->transfer.DeadTime = 1e-10f;               // (float)死区时间填写(死区补偿参数)
-    // user->transfer.Dead_CurMin = 0.1f;              // (float)补偿最小相电流(死区补偿参数)
+    user->value.DeadTime = 1e-10f;                  // (float)死区时间填写(死区补偿参数)
+    user->value.Dead_CurMin = 0.1f;                 // (float)补偿最小相电流(死区补偿参数)
     #endif // CONFIG_DeadZone
 
-    // 13.无感控制算法参数
-    #if CONFIG_MODE==MODE_VF_OPENLOOP || CONFIG_MODE==MODE_IF_OPENLOOP
-    user->transfer.LTD.r = 2.0f;                    // LTD速度跟踪因子2rad/s合适
-    #elif CONFIG_MODE==MODE_Sensorless_HFI
-    // user->transfer.HFI.Percentage_hfi = 0.1f;       // 高频注入->电压占比
+    // 12.最速控制结构体
+    #if IS_LTD_MODE
+    user->transfer.LTD.r = 2.0f;                    // LTD最速控制->跟踪因子2rad/s合适
+    #endif // IS_LTD_MODE
+    
+    // 13.霍尔有感结构体
+    #if IS_HALL_MODE
+    user->transfer.Hall.Wc = 100.0f;                // 霍尔信号处理->滤波截止频率
+    user->transfer.Hall.Hall_High = 0.6f;           // 霍尔信号处理->信号上边界
+    user->transfer.Hall.Hall_Low = 0.4f;            // 霍尔信号处理->信号下边界
+    #endif // IS_HALL_MODE
 
-    user->transfer.Speed_AbsMax = 100.0f;           // 界限->“过渡区”到“高速域”
-    user->transfer.Speed_AbsMax = 80.0f;            // 界限->“低速域”到“过渡区”
-    #elif CONFIG_MODE==MODE_Sensorless_SMO
-    user->transfer.LTD.r = 2.0f;                    // LTD速度跟踪因子2rad/s合适
+    // 14.高频正弦波注入
+    #if IS_HFI_MODE
+    user->transfer.HFI.Wo = 3455.8f;                // 高频正弦波->注入电压角频率
+    user->transfer.HFI.h = 2.0f;                    // 高频正弦波->高频解调增益
+    user->transfer.HFI.Uh = 2.4f;                   // 高频正弦波->注入电压幅值
+    user->transfer.HFI.K1 = 0.3f;                   // 高频正弦波->陷波分母系数
+    user->transfer.HFI.K2 = 0.1f;                   // 高频正弦波->陷波分子系数
+    user->transfer.HFI.zeta = 0.2f;                 // 高频正弦波->带通滤波阻尼比
+    #endif // IS_HFI_MODE
 
-    user->transfer.SMO.Wc = 100.0f;                 // 滑模->滤波截止频率
-    user->transfer.SMO.h = 50.0f;                   // 滑模->观测器增益
-    user->transfer.SMO.IntMax = 5000.0f;            // 滑模->积分项上限
-    user->transfer.SMO.IntMin = -5000.0f;           // 滑模->积分项下限
+    // 15.滑模观测器
+    #if IS_SMO_MODE
+    user->transfer.SMO.Wc = 10000.0f;               // 滑模观测器->反电动势低通滤波
+    user->transfer.SMO.h = 3.5f;                    // 滑模观测器->滑模解调增益
+    user->transfer.SMO.IntMax = 2000.0f;            // 滑模观测器->观测器积分限幅
+    user->transfer.SMO.IntMin = -2000.0f;           // 滑模观测器->观测器积分限幅
+    #endif // IS_SMO_MODE
 
-    user->transfer.Speed_AbsMax = 100.0f;           // 界限->“过渡区”到“高速域”
-    user->transfer.Speed_AbsMax = 80.0f;            // 界限->“低速域”到“过渡区”
-    #elif CONFIG_MODE==MODE_Sensorless_HS
-    user->transfer.HFI.Percentage_hfi = 0.1f;       // 高频注入->电压占比
+    // 16.非线性磁链观测器
+    #if IS_NLFO_MODE
+    user->transfer.NLFO.Gain = 15000000;            // 非线性磁链->磁链观测解调增益
+    #endif // IS_NLFO_MODE
 
-    user->transfer.SMO.Wc = 100.0f;                 // 滑模->滤波截止频率
-    user->transfer.SMO.h = 50.0f;                   // 滑模->观测器增益
-    user->transfer.SMO.IntMax = 5000.0f;            // 滑模->积分项上限
-    user->transfer.SMO.IntMin = -5000.0f;           // 滑模->积分项下限
+    // 17.无感参数数据
+    user->value.Speed_Stop = 130.0f;                // 分界限->低速域观测器关闭
+    user->value.Speed_AbsMax = 100.0f;              // 分界限->“过渡区”到“高速域”
+    user->value.Speed_AbsMin = 80.0f;               // 分界限->“低速域”到“过渡区”
+    user->value.Speed_Open = 50.0f;                 // 分界限->高速域观测器开启
 
-    user->transfer.PLL_another.Kp = 650.0f;         // 锁相环->比例项增益
-    user->transfer.PLL_another.Ki = 210000.0f;      // 锁相环->积分项增益
-
-    user->transfer.Speed_AbsMax = 100.0f;           // 界限->“过渡区”到“高速域”
-    user->transfer.Speed_AbsMax = 80.0f;            // 界限->“低速域”到“过渡区”
-    #endif // CONFIG_MODE
-
-    // 14.无感算法Debug调试(带传感器)
-    #if CONFIG_Debug==Debug_HFI && (CONFIG_MODE>=MODE_Voltag_OPEN) && (CONFIG_MODE<=MODE_PosVelCur_THREE)
-    user->transfer.HFI.Percentage_hfi = 0.1f;       // 高频注入->电压占比
-
-    user->transfer.PLL_Debug.Kp = 650.0f;           // 锁相环->比例项增益
-    user->transfer.PLL_Debug.Ki = 210000.0f;        // 锁相环->积分项增益
-    #elif CONFIG_Debug==Debug_SMO && (CONFIG_MODE>=MODE_Voltag_OPEN) && (CONFIG_MODE<=MODE_PosVelCur_THREE)
-    user->transfer.SMO.Wc = 100.0f;                 // 滑模->滤波截止频率
-    user->transfer.SMO.h = 50.0f;                   // 滑模->观测器增益
-    user->transfer.SMO.IntMax = 5000.0f;            // 滑模->积分项上限
-    user->transfer.SMO.IntMin = -5000.0f;           // 滑模->积分项下限
-
-    user->transfer.PLL_Debug.Kp = 650.0f;           // 锁相环->比例项增益
-    user->transfer.PLL_Debug.Ki = 210000.0f;        // 锁相环->积分项增益
-    #elif CONFIG_Debug==Debug_HS && (CONFIG_MODE>=MODE_Voltag_OPEN) && (CONFIG_MODE<=MODE_PosVelCur_THREE)
-    user->transfer.HFI.Percentage_hfi = 0.1f;       // 高频注入->电压占比
-
-    user->transfer.SMO.Wc = 100.0f;                 // 滑模->滤波截止频率
-    user->transfer.SMO.h = 50.0f;                   // 滑模->观测器增益
-    user->transfer.SMO.IntMax = 5000.0f;            // 滑模->积分项上限
-    user->transfer.SMO.IntMin = -5000.0f;           // 滑模->积分项下限
-
-    user->transfer.PLL_Debug.Kp = 650.0f;           // 锁相环->比例项增益
-    user->transfer.PLL_Debug.Ki = 210000.0f;        // 锁相环->积分项增益
-
-    user->transfer.PLL_another.Kp = 650.0f;         // 锁相环->比例项增益
-    user->transfer.PLL_another.Ki = 210000.0f;      // 锁相环->积分项增益
-
-    user->transfer.Speed_AbsMax = 100.0f;           // 界限->“过渡区”到“高速域”
-    user->transfer.Speed_AbsMax = 80.0f;            // 界限->“低速域”到“过渡区”
-    #endif // CONFIG_Debug
-
-
-    // +---------------------------------------------------------+
-    // |                    滤波器Filter定义                      |
-    // +---------------------------------------------------------+
-    user->value.Response = 5;
+    user->value.Speed_Limit = 5.0f;                 // 分界线->开启关闭缓冲带
 }
 
 

@@ -43,7 +43,7 @@ typedef struct{
     float T;                // (系统时钟)T离散周期
 
     float Wo;               // (参赛设计)注入正弦波频率
-    float h;                // (参赛设计)高频正弦波注入增益
+    float h;                // (参赛设计)高频解调增益
     float Uh;               // (参数设计)注入电压幅值
 
     float K1;               // (参数设计)三参数陷波滤波器->K1分母阻尼比

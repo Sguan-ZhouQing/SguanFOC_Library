@@ -74,6 +74,13 @@
 #define LPF_ButterWorth         0x00        // Butter二阶巴特沃斯滤波器
 #define LPF_ChebyShev           0x01        // ChebyShev切比雪夫二阶I型
 #define LPF_Bessel              0x02        // Bessel二阶贝塞尔滤波器
+// +---------------------------------------------------------+
+// |                     观测器Tag定义                        |
+// +---------------------------------------------------------+
+#define Tag_None                0x00        // 电机未就位，观测器都关闭
+#define Tag_LowOnly             0x01        // 仅低速域观测器运行
+#define Tag_Both                0x02        // 低速、高速域观测器都运行
+#define Tag_HighOnly            0x03        // 仅高速域观测器运行
 
 
 #define IS_LTD_MODE    (CONFIG_MODE == MODE_VF_OPENLOOP    ||\
@@ -276,8 +283,9 @@ typedef struct{
     float Speed_AbsMax;                     // (参数设计)角度解耦过渡区_高速域分界线
     float Speed_AbsMin;                     // (参数设计)角度解耦低速域_过渡区分界线
     float Speed_Open;                       // (参数设计)无感高速域观测器开始运行界限
-
+    
     float Speed_Limit;                      // (参数设计)正负Limit->观测器“启停”缓冲带
+    uint8_t Speed_Tag;                      // (标志位)电机观测器启停标志位0-3
     #endif // CONFIG_MODE
 }MOTOR_VALUE_STRUCT;
 

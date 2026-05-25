@@ -28,8 +28,10 @@ float Value_normalize(float angle);
 int8_t Value_set(int8_t val, int8_t max, int8_t min);
 float Value_Sign(float value);
 
-// 电机角度生成器
+// 电机角度生成器和单位转换函数
 void Value_Rad_Loop(float *angle, float Rad_s, float T);
+float Value_Rad_from_Hz(float hz);
+float Value_Rad_to_Hz(float rad_s);
 
 // MOTOR公式变换
 void clarke(float *i_alpha,float *i_beta,float i_a,float i_b);

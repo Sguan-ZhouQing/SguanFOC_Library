@@ -4,12 +4,15 @@
 /* 电机控制User用户设置·电机参数(SguanFOC用户核心代码) */
 
 /**
- * @description: 电机实体参数填写函数
+ * @description: 实体参数填写函数的初始化代码
  * @reminder: (此方函数->填写电机实际物理参数)
  * @param {SguanFOC_System_STRUCT} *user
  * @return {*}
  */
 static inline void User_Motor_Init(SguanFOC_System_STRUCT *user){
+    // +---------------------------------------------------------+
+    // |                  电机实体参数Motor填写                   |
+    // +---------------------------------------------------------+
     // 1.Sguan.foc参数设计(最初始的Target数值)
     user->foc.Target_Speed = 0.0f;                  // (float)期望的机械角速度
     user->foc.Target_Pos = 0.0f;                    // (float)期望的机械角度值
@@ -30,7 +33,7 @@ static inline void User_Motor_Init(SguanFOC_System_STRUCT *user){
     user->motor.identify.Flux = 0.00028043f;        // (float)电机磁链_默认参数
     user->motor.identify.B = 0.00028043f;           // (float)粘性阻尼_默认参数
     user->motor.identify.J = 0.00028043f;           // (float)转动惯量_默认参数
-    /* ====================================== 分割线 ===================================== */
+    /* ====================================== 分割线 =================================== */
     user->motor.Poles = 7;                          // (uint8_t)电机的极对数
     user->motor.VBUS = 12.0f;                       // (float)标定的母线电压
     

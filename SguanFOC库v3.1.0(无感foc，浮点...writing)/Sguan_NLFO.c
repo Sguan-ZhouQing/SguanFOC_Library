@@ -85,3 +85,4 @@ void NLFO_Loop(NLFO_STRUCT *nlfo){
     nlfo->go.Output_Cosine = (Out0 - num0)*nlfo->go.Flux_inv;
     nlfo->go.Output_Sine = (Out1 - num1)*nlfo->go.Flux_inv;
 }
+

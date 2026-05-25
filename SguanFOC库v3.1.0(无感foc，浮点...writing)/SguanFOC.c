@@ -488,6 +488,8 @@ static void Transfer_Init(SguanFOC_System_STRUCT *sguan){
     #endif // CONFIG_CtrlPos
 
     // 4.响应倍数参数
+    // （此处暂无数据）
+
     // 5.滤波器参数
     sguan->transfer.LPF_D.T = PMSM_RUN_T;
     sguan->transfer.LPF_Q.T = PMSM_RUN_T;
@@ -496,20 +498,22 @@ static void Transfer_Init(SguanFOC_System_STRUCT *sguan){
     LPF_Init(&sguan->transfer.LPF_Q);
     LPF_Init(&sguan->transfer.LPF_encoder);
 
-    // 6.霍尔模式参数
-    #if CONFIG_MODE==MODE_Sensor_Hall
-    sguan->transfer.Hall.T = PMSM_RUN_T;
-    Hall_Init(&sguan->transfer.Hall);
-    #endif // CONFIG_MODE
-
-    // 7.锁相环参数
+    // 6.锁相环参数
     sguan->transfer.PLL_encoder.T = PMSM_RUN_T;
     PLL_Init(&sguan->transfer.PLL_encoder);
     if (CONFIG_MODE == MODE_PosVelCur_THREE){
         sguan->transfer.PLL_encoder.is_position_mode = 1;
     }
+    #if IS_COM_MODE
+    sguan->transfer.PLL_another.T = PMSM_RUN_T;
+    PLL_Init(&sguan->transfer.PLL_another);
+    #endif // IS_COM_MODE
+    #if IS_DEBUG_MODE
+    sguan->transfer.PLL_Debug.T = PMSM_RUN_T;
+    PLL_Init(&sguan->transfer.PLL_Debug);
+    #endif // IS_DEBUG_MODE
 
-    // 8.扰动观测器参数
+    // 7.扰动观测器参数
     #if CONFIG_DOB
     sguan->transfer.DOB.T = PMSM_RUN_T;
     sguan->transfer.DOB.Pn = sguan->motor.Poles;
@@ -519,7 +523,7 @@ static void Transfer_Init(SguanFOC_System_STRUCT *sguan){
     DOB_Init(&sguan->transfer.DOB);
     #endif // CONFIG_DOB    
 
-    // 9.谐波抑制
+    // 8.谐波抑制
     #if CONFIG_Inhibit
     sguan->transfer.TPNF_D.T = PMSM_RUN_T;
     sguan->transfer.TPNF_Q.T = PMSM_RUN_T;
@@ -527,66 +531,55 @@ static void Transfer_Init(SguanFOC_System_STRUCT *sguan){
     TPNF_Init(&sguan->transfer.TPNF_Q);
     #endif // CONFIG_Inhibit
 
-    // 10.弱磁控制参数
+    // 9.弱磁控制参数
     #if CONFIG_FW
     sguan->transfer.FW.T = PMSM_RUN_T;
     PID_Init(&sguan->transfer.FW);
     #endif // CONFIG_FW
 
-    // 11.速度前馈的参数
-    // 12.死区补偿参数
-    // 13.无感控制算法参数
-    #if CONFIG_MODE==MODE_VF_OPENLOOP || CONFIG_MODE==MODE_IF_OPENLOOP
+    // 10.速度前馈的参数
+    // 11.死区补偿参数
+    // （此处暂无数据）
+
+    // 12.最速控制结构体
+    #if IS_LTD_MODE
     sguan->transfer.LTD.T = PMSM_RUN_T;
     LTD_Init(&sguan->transfer.LTD);
-    #elif CONFIG_MODE==MODE_Sensorless_HFI
-    HFI_Init(&sguan->transfer.HFI);
-    #elif CONFIG_MODE==MODE_Sensorless_SMO
-    sguan->transfer.LTD.T = PMSM_RUN_T;
-    LTD_Init(&sguan->transfer.LTD);
-    sguan->transfer.SMO.T = PMSM_RUN_T;
-    sguan->transfer.SMO.Rs = sguan->motor.identify.Rs;
-    sguan->transfer.SMO.Ld = sguan->motor.identify.Ld;
-    sguan->transfer.SMO.Lq = sguan->motor.identify.Lq;
-    SMO_Init(&sguan->transfer.SMO);
-    #elif CONFIG_MODE==MODE_Sensorless_HS
-    HFI_Init(&sguan->transfer.HFI);
-    sguan->transfer.SMO.T = PMSM_RUN_T;
-    sguan->transfer.SMO.Rs = sguan->motor.identify.Rs;
-    sguan->transfer.SMO.Ld = sguan->motor.identify.Ld;
-    sguan->transfer.SMO.Lq = sguan->motor.identify.Lq;
-    SMO_Init(&sguan->transfer.SMO);
-    sguan->transfer.PLL_another.T = PMSM_RUN_T;
-    PLL_Init(&sguan->transfer.PLL_another);
-    #endif // CONFIG_MODE
+    #endif // IS_LTD_MODE
 
-    // 14.无感算法Debug调试(带传感器)
-    #if CONFIG_Debug==Debug_HFI && (CONFIG_MODE>=MODE_Voltag_OPEN) && (CONFIG_MODE<=MODE_PosVelCur_THREE)
-    HFI_Init(&sguan->transfer.HFI);
-    sguan->transfer.PLL_Debug.T = PMSM_RUN_T;
-    PLL_Init(&sguan->transfer.PLL_Debug);
-    #elif CONFIG_Debug==Debug_SMO && (CONFIG_MODE>=MODE_Voltag_OPEN) && (CONFIG_MODE<=MODE_PosVelCur_THREE)
-    sguan->transfer.SMO.T = PMSM_RUN_T;
-    sguan->transfer.SMO.Rs = sguan->motor.identify.Rs;
-    sguan->transfer.SMO.Ld = sguan->motor.identify.Ld;
-    sguan->transfer.SMO.Lq = sguan->motor.identify.Lq;
-    SMO_Init(&sguan->transfer.SMO);
-    sguan->transfer.PLL_Debug.T = PMSM_RUN_T;
-    PLL_Init(&sguan->transfer.PLL_Debug);
-    #elif CONFIG_Debug==Debug_HS && (CONFIG_MODE>=MODE_Voltag_OPEN) && (CONFIG_MODE<=MODE_PosVelCur_THREE)
-    HFI_Init(&sguan->transfer.HFI);
-    sguan->transfer.SMO.T = PMSM_RUN_T;
-    sguan->transfer.SMO.Rs = sguan->motor.identify.Rs;
-    sguan->transfer.SMO.Ld = sguan->motor.identify.Ld;
-    sguan->transfer.SMO.Lq = sguan->motor.identify.Lq;
-    SMO_Init(&sguan->transfer.SMO);
-    sguan->transfer.PLL_Debug.T = PMSM_RUN_T;
-    sguan->transfer.PLL_another.T = PMSM_RUN_T;
-    PLL_Init(&sguan->transfer.PLL_Debug);
-    PLL_Init(&sguan->transfer.PLL_another);
-    #endif // CONFIG_Debug
+    // 13.霍尔有感结构体
+    #if IS_HALL_MODE
+    sguan->transfer.Hall.T = PMSM_RUN_T;
+    Hall_Init(&sguan->transfer.Hall);
+    #endif // IS_HALL_MODE
 
-    // 15.消除未使用Hall函数的编译警告
+    // 14.高频正弦波注入
+    #if IS_HFI_MODE
+    sguan->transfer.HFI.T = PMSM_RUN_T;
+    HFI_Init(&sguan->transfer.HFI);
+    #endif // IS_HFI_MODE
+
+    // 15.滑模观测器
+    #if IS_SMO_MODE
+    sguan->transfer.SMO.T = PMSM_RUN_T;
+    sguan->transfer.SMO.Rs = sguan->motor.identify.Rs;
+    sguan->transfer.SMO.Ld = sguan->motor.identify.Ld;
+    sguan->transfer.SMO.Lq = sguan->motor.identify.Lq;
+    SMO_Init(&sguan->transfer.SMO);
+    #endif // IS_SMO_MODE
+
+    // 16.非线性磁链观测器
+    #if IS_NLFO_MODE
+    sguan->transfer.NLFO.T = PMSM_RUN_T;
+    sguan->transfer.NLFO.Flux = sguan->motor.identify.Flux;
+    sguan->transfer.NLFO.Rs = sguan->motor.identify.Rs;
+    sguan->transfer.NLFO.Ld = sguan->motor.identify.Ld;
+    sguan->transfer.NLFO.Lq = sguan->motor.identify.Lq;
+    NLFO_Init(&sguan->transfer.NLFO);
+    #endif // IS_NLFO_MODE
+
+    // 17.无感参数数据
+    // （此处暂无数据）
     (void)Transfer_TPNF_Loop;
     (void)Transfer_Hall_Loop;
 }
@@ -766,8 +759,8 @@ static void Encoder_Sensor_Hall(SguanFOC_System_STRUCT *sguan){
     // 1.霍尔锁相环运算电子角度
     Transfer_Hall_Loop(&sguan->transfer.Hall,
                     User_Encoder_ReadHall(0), 
-                    User_Encoder_ReadHall(0), 
-                    User_Encoder_ReadHall(0));
+                    User_Encoder_ReadHall(1), 
+                    User_Encoder_ReadHall(2));
     sguan->encoder.Real_Re = sguan->transfer.Hall.go.Output_Rad;
     Transfer_PLL_Loop(&sguan->transfer.PLL_encoder, 
                     CONFIG_MODE, 

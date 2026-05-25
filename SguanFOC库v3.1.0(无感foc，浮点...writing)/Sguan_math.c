@@ -91,6 +91,16 @@ void Value_Rad_Loop(float *angle, float Rad_s, float T){
     *angle = Value_normalize(*angle);
 }
 
+// 数值Hz->Rad/s或者n->Rad
+float Value_Rad_from_Hz(float hz){
+    return hz * Value_2PI;
+}
+
+// 数值Rad/s->Hz或者Rad->n
+float Value_Rad_to_Hz(float rad_s){
+    return rad_s / Value_2PI;
+}
+
 // 克拉克变换
 void clarke(float *i_alpha,float *i_beta,float i_a,float i_b) {
   *i_alpha = i_a;

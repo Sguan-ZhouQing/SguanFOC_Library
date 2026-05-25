@@ -42,7 +42,7 @@ typedef struct{
     float Lq;               // (电机参数)电机Q轴电感
     
     float Wc;               // (参数设计)低通滤波截止频率
-    float h;                // (参数设计)滑模观测器增益
+    float h;                // (参数设计)滑模解调增益
 
     float IntMax;           // (参数设计)共用的积分项限幅
     float IntMin;           // (参数设计)共用的积分项限幅

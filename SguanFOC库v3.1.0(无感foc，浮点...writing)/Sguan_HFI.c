@@ -13,7 +13,9 @@
 
 /**
  * @description: 无感高频方波注入的初始化函数
- * @param {SMO_STRUCT} *smo
+ * @reminder: (初始化相关系数float->double->float)
+ * @reminder: (单浮点转double运算，提高系数精度)
+ * @param {HFI_STRUCT} *hfi
  * @return {*}
  */
 void HFI_Init(HFI_STRUCT *hfi){

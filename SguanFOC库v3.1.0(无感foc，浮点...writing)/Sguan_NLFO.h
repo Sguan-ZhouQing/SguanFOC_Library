@@ -33,7 +33,7 @@ typedef struct{
     float Ld;               // (电机参数)电机D轴电感
     float Lq;               // (电机参数)电机Q轴电感
 
-    float Gain;             // (参数设计)观测器增益
+    float Gain;             // (参数设计)磁链观测解调增益
 }NLFO_STRUCT;
 
 void NLFO_Init(NLFO_STRUCT *nlfo);
