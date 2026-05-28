@@ -74,13 +74,6 @@
 #define LPF_ButterWorth         0x00        // Butter二阶巴特沃斯滤波器
 #define LPF_ChebyShev           0x01        // ChebyShev切比雪夫二阶I型
 #define LPF_Bessel              0x02        // Bessel二阶贝塞尔滤波器
-// +---------------------------------------------------------+
-// |                     观测器Tag定义                        |
-// +---------------------------------------------------------+
-#define Tag_None                0x00        // 电机未就位，观测器都关闭
-#define Tag_LowOnly             0x01        // 仅低速域观测器运行
-#define Tag_Both                0x02        // 低速、高速域观测器都运行
-#define Tag_HighOnly            0x03        // 仅高速域观测器运行
 
 
 #define IS_LTD_MODE    (CONFIG_MODE == MODE_VF_OPENLOOP    ||\
@@ -98,6 +91,9 @@
                         CONFIG_MODE == MODE_Debug_NLFO     ||\
                         CONFIG_MODE == MODE_Debug_HS       ||\
                         CONFIG_MODE == MODE_Debug_HN)
+
+#define IS_IF_MODE     (CONFIG_MODE == MODE_Sensorless_SMO ||\
+                        CONFIG_MODE == MODE_Sensorless_NLFO)
 
 #define IS_HALL_MODE   (CONFIG_MODE == MODE_Sensor_Hall    ||\
                         CONFIG_MODE == MODE_Sensorless_AS  ||\
@@ -134,9 +130,8 @@
                         CONFIG_MODE == MODE_Debug_HN)
 
 /**
- * @description: 宏定义0-1决定“电机矢量控制底层算法”(默认使用SVPWM)
- * @reminder: 0->使用七段式的SVPWM空间矢量合成的电机控制技术
- * @reminder: 1->使用带“三次谐波注入”优化后的SPWM脉宽调制技术
+ * @description: 传递函数指针数组定义
+ * @reminder: （Sguan.transfer成员）
  * @struct {MOTOR_TRANSFER_STRUCT}
  */
 typedef struct{
@@ -201,41 +196,46 @@ typedef struct{
 
     // 10.速度前馈的参数
     // 11.死区补偿参数
+    // 12.角度补偿参数
     // （此处暂无数据）
     
-    // 12.最速控制结构体
+    // 13.最速控制结构体
     #if IS_LTD_MODE
     LTD_STRUCT LTD;                         // (最速控制)LTD仿制效果，输入速度不突变
     #endif // IS_LTD_MODE
 
-    // 13.霍尔有感结构体
+    // 14.霍尔有感结构体
     #if IS_HALL_MODE
     HALL_STRUCT Hall;                       // (霍尔数据处理)三霍尔信号处理
     #endif // IS_HALL_MODE
 
-    // 14.高频正弦波注入
+    // 15.高频正弦波注入
     #if IS_HFI_MODE
     HFI_STRUCT HFI;                         // (无感算法)HFI高频正弦波注入算法
     #endif // IS_HFI_MODE
 
-    // 15.滑模观测器
+    // 16.滑模观测器
     #if IS_SMO_MODE
     SMO_STRUCT SMO;                         // (无感算法)SMO静止坐标系下的滑模观测器
     #endif // IS_SMO_MODE
 
-    // 16.非线性磁链观测器
+    // 17.非线性磁链观测器
     #if IS_NLFO_MODE
     NLFO_STRUCT NLFO;                       // (无感算法)NLFO非线性磁链观测器
     #endif // IS_NLFO_MODE
 
-    // 17.无感参数数据
+    // 18.IF启动下的无感模式
+    #if IS_IF_MODE
+    PID_STRUCT PID;                         // (IF启动)此模式需要额外PI电流环控制器
+    #endif // IS_IF_MODE
+
+    // 19.无感参数数据
     // （此处暂无数据）
 }MOTOR_TRANSFER_STRUCT;
 
 /**
- * @description: 宏定义0-1决定“电机矢量控制底层算法”(默认使用SVPWM)
- * @reminder: 0->使用七段式的SVPWM空间矢量合成的电机控制技术
- * @reminder: 1->使用带“三次谐波注入”优化后的SPWM脉宽调制技术
+ * @description: 传递函数数值数组定义
+ * @reminder: （Sguan.value成员）
  * @struct {MOTOR_VALUE_STRUCT}
  */
 typedef struct{
@@ -270,29 +270,32 @@ typedef struct{
     float Dead_CurMin;                      // (参数设计)死区低电流处理量，低于则不补偿
     #endif // CONFIG_DeadZone
 
-    // 12.最速控制结构体
-    // 13.霍尔有感结构体
-    // 14.高频正弦波注入
-    // 15.滑模观测器
-    // 16.非线性磁链观测器
+    // 12.角度补偿参数
+    #if CONFIG_AngleComp
+    float Td;                               // (参数设计)随电角速度的相位延迟时间
+    float Offset;                           // (参数设计)随速度方向变化的固定相位偏置
+    #endif // CONFIG_AngleComp
+
+    // 13.最速控制结构体
+    // 14.霍尔有感结构体
+    // 15.高频正弦波注入
+    // 16.滑模观测器
+    // 17.非线性磁链观测器
+    // 18.IF启动下的无感模式
     // （此处暂无数据）
 
-    // 17.无感参数数据
+    // 19.无感参数数据
     #if CONFIG_MODE>=MODE_Sensorless_HFI
     float Speed_Stop;                       // (参数设计)无感低速域观测器停止运行界限
+    float Speed_Open;                       // (参数设计)无感低速域观测器开始运行界限
     float Speed_AbsMax;                     // (参数设计)角度解耦过渡区_高速域分界线
     float Speed_AbsMin;                     // (参数设计)角度解耦低速域_过渡区分界线
-    float Speed_Open;                       // (参数设计)无感高速域观测器开始运行界限
-    
-    float Speed_Limit;                      // (参数设计)正负Limit->观测器“启停”缓冲带
-    uint8_t Speed_Tag;                      // (标志位)电机观测器启停标志位0-3
     #endif // CONFIG_MODE
 }MOTOR_VALUE_STRUCT;
 
 /**
- * @description: 宏定义0-1决定“电机矢量控制底层算法”(默认使用SVPWM)
- * @reminder: 0->使用七段式的SVPWM空间矢量合成的电机控制技术
- * @reminder: 1->使用带“三次谐波注入”优化后的SPWM脉宽调制技术
+ * @description: 编码器数据结构体定义
+ * @reminder: （Sguan.encoder成员）
  * @struct {MOTOR_ENCODER_STRUCT}
  */
 typedef struct{
@@ -314,9 +317,8 @@ typedef struct{
 }MOTOR_ENCODER_STRUCT;
 
 /**
- * @description: 宏定义0-1决定“电机矢量控制底层算法”(默认使用SVPWM)
- * @reminder: 0->使用七段式的SVPWM空间矢量合成的电机控制技术
- * @reminder: 1->使用带“三次谐波注入”优化后的SPWM脉宽调制技术
+ * @description: 电流数据结构体定义
+ * @reminder: （Sguan.current成员）
  * @struct {MOTOR_CURRENT_STRUCT}
  */
 typedef struct{
@@ -336,9 +338,8 @@ typedef struct{
 }MOTOR_CURRENT_STRUCT;
 
 /**
- * @description: 宏定义0-1决定“电机矢量控制底层算法”(默认使用SVPWM)
- * @reminder: 0->使用七段式的SVPWM空间矢量合成的电机控制技术
- * @reminder: 1->使用带“三次谐波注入”优化后的SPWM脉宽调制技术
+ * @description: foc数据结构体定义
+ * @reminder: （Sguan.foc成员）
  * @struct {MOTOR_FOC_STRUCT}
  */
 typedef struct{
@@ -347,10 +348,11 @@ typedef struct{
     float Target_Id;                        // (期望电流)期望D轴电流
     float Target_Iq;                        // (期望电流)期望Q轴电流
 
-    float Target_VF_Uq;                     // (VF控制)固定Q轴电压值
-    float Target_IF_Iq;                     // (IF控制)固定Q轴电流值
+    float Target_VF_Uq;                     // (期望电压)固定Q轴电压值
+    float Target_IF_Iq;                     // (期望电流)固定Q轴电流值
 
-    float Ud_in;                            // (输入值)D轴电压输入
+    float Speed_in;                         // (输入量)速度环输入值
+    float Ud_in;                            // (输入量)D轴电压输入
     float Uq_in;                            // (输入值)Q轴电压输入
 
     // ================= 修改线(上面可修改，下面为自动计算量) =================
@@ -369,9 +371,8 @@ typedef struct{
 }MOTOR_FOC_STRUCT;
 
 /**
- * @description: 宏定义0-1决定“电机矢量控制底层算法”(默认使用SVPWM)
- * @reminder: 0->使用七段式的SVPWM空间矢量合成的电机控制技术
- * @reminder: 1->使用带“三次谐波注入”优化后的SPWM脉宽调制技术
+ * @description: 电机参数结构体定义
+ * @reminder: （Sguan.motor成员）
  * @struct {MOTOR_QUANTIZE_STRUCT}
  */
 typedef struct{
@@ -395,9 +396,8 @@ typedef struct{
 }MOTOR_QUANTIZE_STRUCT;
 
 /**
- * @description: 宏定义0-1决定“电机矢量控制底层算法”(默认使用SVPWM)
- * @reminder: 0->使用七段式的SVPWM空间矢量合成的电机控制技术
- * @reminder: 1->使用带“三次谐波注入”优化后的SPWM脉宽调制技术
+ * @description: 安全设置结构体定义
+ * @reminder: （Sguan.safe成员）
  * @struct {MOTOR_SAFE_STRUCT}
  */
 typedef struct{    
@@ -430,9 +430,8 @@ typedef struct{
 }MOTOR_SAFE_STRUCT;
 
 /**
- * @description: 宏定义0-1决定“电机矢量控制底层算法”(默认使用SVPWM)
- * @reminder: 0->使用七段式的SVPWM空间矢量合成的电机控制技术
- * @reminder: 1->使用带“三次谐波注入”优化后的SPWM脉宽调制技术
+ * @description: 标志位结构体定义
+ * @reminder: （Sguan.flag成员）
  * @struct {MOTOR_FLAG_STRUCT}
  */
 typedef struct{
@@ -442,9 +441,8 @@ typedef struct{
 }MOTOR_FLAG_STRUCT;
 
 /**
- * @description: 宏定义0-1决定“电机矢量控制底层算法”(默认使用SVPWM)
- * @reminder: 0->使用七段式的SVPWM空间矢量合成的电机控制技术
- * @reminder: 1->使用带“三次谐波注入”优化后的SPWM脉宽调制技术
+ * @description: SguanFOC系统核心结构体定义
+ * @reminder: （Sguan总结构体成员）
  * @struct {SguanFOC_System_STRUCT}
  */
 typedef struct{

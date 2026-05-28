@@ -68,6 +68,16 @@ float Value_normalize(float angle){
     return angle;
 }
 
+// 数值角度越位处理函数
+void Value_Correct(float *angle, float error){
+    if (error >= Value_PI){
+        *angle -= Value_2PI;
+    }
+    if (error <= -Value_PI){
+        *angle += Value_2PI;
+    }
+}
+
 // 数值限定set函数
 int8_t Value_set(int8_t val, int8_t max, int8_t min){
     if (val > max) return 0;

@@ -109,9 +109,10 @@ void DeadZone_Loop(float *Ua_duty,
  * @description: 角度相位延迟的简易补偿
  * @param {float} We    电机电子角速度
  * @param {float} Td    补偿的延迟时间
+ * @param {float} Td    补偿的固定角度
  * @return {float}
  */
 float AngleComp_Loop(float We,float Td,float Offset){
-    return We*Td + Offset;
+    return We*Td + Value_Sign(We)*Offset;
 }
 

@@ -15,7 +15,7 @@
 static void (*const status_handlers[])(void) = {
     // 初始化与运行状态
     STANDBY_Loop,
-    UNINITIALIZED_Loop,
+    START_Loop,
     INITIALIZING_Loop,
     CALIBRATING_Loop,
     

@@ -5,7 +5,7 @@
  * @LastEditors: 星必尘Sguan|3464647102@qq.com
  * @LastEditTime: 2026-05-14 22:18:29
  * @FilePath: \SguanFOC_Debug\SguanFOC\Sguan_LTD.c
- * @Description: SguanFOC库的“LTD最速控制函数”实现
+ * @Description: SguanFOC库的“LTD最速控制函数(仿效果)”实现
  * 
  * Copyright (c) 2026 by $星必尘Sguan, All Rights Reserved. 
  */

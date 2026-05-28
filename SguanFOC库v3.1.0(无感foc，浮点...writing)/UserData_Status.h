@@ -10,28 +10,28 @@
 /* =================== 状态机任务信号(输入) ================== */
 static inline uint8_t STANDBY_Signal(void){
     uint8_t STANDBY_num = 0;
-    // 解除锁定信号(Emergency stop signal)
+    // 解除锁定信号(Unlock Signal)
     // 输出0->不执行 输出1->解除锁定(进入待机状态)
     return STANDBY_num;
 }
 
-static inline uint8_t UNINITIALIZED_Signal(void){
-    uint8_t UNINITIALIZED_num = 0;
-    // 准备开始初始化信号(Emergency stop signal)
+static inline uint8_t START_Signal(void){
+    uint8_t START_num = 0;
+    // 准备开始初始化信号(Preparing to start initializing the signal)
     // 输出0->待机 输出1->准备开始初始化
-    return UNINITIALIZED_num;
+    return START_num;
 }
 
 static inline uint8_t ENCODER_ERROR_Signal(void){
     uint8_t ENCODER_num = 0;
-    // 编码器错误信号(Emergency stop signal)
+    // 编码器错误信号(Encoder error signal)
     // 输出0->正常运行 输出1->编码器错误(锁定)
     return ENCODER_num;
 }
 
 static inline uint8_t SENSOR_ERROR_Signal(void){
     uint8_t SENSOR_num = 0;
-    // 传感器错误信号(Emergency stop signal)
+    // 传感器错误信号(Sensor error signal)
     // 输出0->正常运行 输出1->传感器错误(锁定)
     return SENSOR_num;
 }
@@ -56,8 +56,8 @@ static inline void STANDBY_Loop(void){
     // Your code for 待机(未初始化，准备中) here
 }
 
-static inline void UNINITIALIZED_Loop(void){
-    // Your code for 未初始化 here
+static inline void START_Loop(void){
+    // Your code for 开始初始化 here
 }
 
 static inline void INITIALIZING_Loop(void){

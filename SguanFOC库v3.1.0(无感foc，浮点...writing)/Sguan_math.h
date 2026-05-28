@@ -25,6 +25,7 @@ float Value_sqrtf(float x);
 // 参数限制函数Value...x
 void Value_Limit(float *val, float max, float min);
 float Value_normalize(float angle);
+void Value_Correct(float *angle, float error);
 int8_t Value_set(int8_t val, int8_t max, int8_t min);
 float Value_Sign(float value);
 
