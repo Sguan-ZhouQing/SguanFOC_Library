@@ -26,7 +26,7 @@
  * @reminder: 18->MODE_Debug_HN         HFI切NLFO_转速环    (高精度编码器提供Rad)
  * @return {*}
  */
-#define Define_Run_Mode 8
+#define Define_Run_Mode 17
 
 /**
  * @description: 宏定义0-3决定“电机速度环”的控制方式(默认使用PI控制)

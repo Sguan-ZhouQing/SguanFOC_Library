@@ -55,6 +55,25 @@ void Value_Limit(float *val, float max, float min){
     if (*val < min) *val = min;
 }
 
+// 数值区间权重获取函数
+float Value_Gain_Get(float *gain, 
+                float real_speed,
+                float abs_max,
+                float abs_min){
+    float abs_real = Value_fabsf(real_speed);
+
+    if (abs_real <= abs_min){
+        *gain = 0.0f;
+    }
+    else if (abs_real >= abs_max){
+        *gain = 1.0f;
+    }
+    else{
+        *gain = (abs_real - abs_min)/(abs_max - abs_min);
+    }
+    return abs_real;
+}
+
 // 参数取模[0, 2π)
 float Value_normalize(float angle){
     while (1){
@@ -96,9 +115,12 @@ float Value_Sign(float value){
 }
 
 // 电机角度积分函数
-void Value_Rad_Loop(float *angle, float Rad_s, float T){
-    *angle = *angle + Rad_s*T;
-    *angle = Value_normalize(*angle);
+void Value_Rad_Loop(float *Output, 
+                float Input, 
+                float Last_in, 
+                float T){
+    *Output += (Input + Last_in)*(T/2.0f);
+    *Output = Value_normalize(*Output);
 }
 
 // 数值Hz->Rad/s或者n->Rad
@@ -112,21 +134,34 @@ float Value_Rad_to_Hz(float rad_s){
 }
 
 // 克拉克变换
-void clarke(float *i_alpha,float *i_beta,float i_a,float i_b) {
+void clarke(float *i_alpha, 
+        float *i_beta, 
+        float i_a, 
+        float i_b){
   *i_alpha = i_a;
-  *i_beta = (i_a + 2 * i_b) * Value_INV_SQRT3;
+  *i_beta = (i_a + 2*i_b)*Value_INV_SQRT3;
 }
 
 // 帕克变换
-void park(float *i_d,float *i_q,float i_alpha,float i_beta,float sine,float cosine) {
-  *i_d = i_alpha * cosine + i_beta * sine;
-  *i_q = i_beta * cosine - i_alpha * sine;
+void park(float *i_d, 
+        float *i_q, 
+        float i_alpha, 
+        float i_beta, 
+        float sine, 
+        float cosine){
+  *i_d = i_alpha*cosine + i_beta*sine;
+  *i_q = i_beta*cosine - i_alpha*sine;
 }
 
 // 帕克逆变换
-void ipark(float *u_alpha,float *u_beta,float u_d,float u_q,float sine,float cosine) {
-  *u_alpha = u_d * cosine - u_q * sine;
-  *u_beta = u_q * cosine + u_d * sine;
+void ipark(float *u_alpha, 
+        float *u_beta, 
+        float u_d, 
+        float u_q, 
+        float sine, 
+        float cosine){
+  *u_alpha = u_d*cosine - u_q*sine;
+  *u_beta = u_q*cosine + u_d*sine;
 }
 
 // 查表法求得float的角度正余弦值

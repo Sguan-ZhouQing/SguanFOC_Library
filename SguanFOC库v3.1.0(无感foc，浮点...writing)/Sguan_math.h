@@ -24,20 +24,40 @@ float Value_sqrtf(float x);
 
 // 参数限制函数Value...x
 void Value_Limit(float *val, float max, float min);
+float Value_Gain_Get(float *gain, 
+                float real_speed,
+                float abs_max,
+                float abs_min);
 float Value_normalize(float angle);
 void Value_Correct(float *angle, float error);
 int8_t Value_set(int8_t val, int8_t max, int8_t min);
 float Value_Sign(float value);
 
 // 电机角度生成器和单位转换函数
-void Value_Rad_Loop(float *angle, float Rad_s, float T);
+void Value_Rad_Loop(float *Output, 
+                float Input, 
+                float Last_in, 
+                float T);
 float Value_Rad_from_Hz(float hz);
 float Value_Rad_to_Hz(float rad_s);
 
 // MOTOR公式变换
-void clarke(float *i_alpha,float *i_beta,float i_a,float i_b);
-void park(float *i_d,float *i_q,float i_alpha,float i_beta,float sine,float cosine);
-void ipark(float *u_alpha,float *u_beta,float u_d,float u_q,float sine,float cosine);
+void clarke(float *i_alpha, 
+        float *i_beta, 
+        float i_a, 
+        float i_b);
+void park(float *i_d, 
+        float *i_q, 
+        float i_alpha, 
+        float i_beta, 
+        float sine, 
+        float cosine);
+void ipark(float *u_alpha, 
+        float *u_beta, 
+        float u_d, 
+        float u_q, 
+        float sine, 
+        float cosine);
 
 // 快速正余弦求解float版本
 #define fast_cos(x) fast_sin(Value_PI_2 - x);

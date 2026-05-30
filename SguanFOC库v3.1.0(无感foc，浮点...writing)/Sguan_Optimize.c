@@ -49,6 +49,8 @@ void MTPA_Loop(float *Target_id,
 float FW_Loop(void *fw, 
             float Ud, 
             float Uq, 
+            float Real_Speed, 
+            float Base_Speed, 
             float Percentage, 
             float Vbus){
     static float fbk = 0.0f;
@@ -56,11 +58,17 @@ float FW_Loop(void *fw,
         fbk = Percentage*Value_SQRT3_2;
     }
 
-    PID_STRUCT *p = (PID_STRUCT*)fw;
-    p->run.Ref = Value_sqrtf(Ud*Ud + Uq*Uq);
-    p->run.Fbk = fbk*Vbus;
-    PID_Loop(p);
-    return -p->run.Output;
+    if ((Real_Speed >= Base_Speed) || 
+        (Real_Speed <= -Base_Speed)){
+        PID_STRUCT *p = (PID_STRUCT*)fw;
+        p->run.Ref = Value_sqrtf(Ud*Ud + Uq*Uq);
+        p->run.Fbk = fbk*Vbus;
+        PID_Loop(p);
+        return -p->run.Output;   
+    }
+    else{
+        return 0.0f;
+    }
 }
 
 /**

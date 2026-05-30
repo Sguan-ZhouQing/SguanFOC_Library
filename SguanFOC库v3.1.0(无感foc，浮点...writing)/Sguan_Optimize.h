@@ -12,6 +12,8 @@ void MTPA_Loop(float *Target_id,
 float FW_Loop(void *fw, 
             float Ud, 
             float Uq, 
+            float Real_Speed, 
+            float Base_Speed, 
             float Percentage, 
             float Vbus);
 void DeadZone_Loop(float *Ua_duty, 

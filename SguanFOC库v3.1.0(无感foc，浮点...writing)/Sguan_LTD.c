@@ -33,7 +33,7 @@ void LTD_Init(LTD_STRUCT *ltd){
 
 /**
  * @description: 最速控制LTD的运行函数
- * @reminder: https://github.com/Sguan-ZhouQing/SguanFOC_Library/blob/main/%E9%85%8D%E5%A5%97Simulink%E6%A8%A1%E5%9E%8B%E5%BC%80%E6%BA%90%E2%91%A1%5B%E7%AE%97%E6%B3%95%E5%8E%9F%E7%90%86%E5%9B%BE%5D/Sguan_Hall.png
+ * @reminder: https://github.com/Sguan-ZhouQing/SguanFOC_Library/blob/main/%E9%85%8D%E5%A5%97Simulink%E6%A8%A1%E5%9E%8B%E5%BC%80%E6%BA%90%E2%91%A1%5B%E7%AE%97%E6%B3%95%E5%8E%9F%E7%90%86%E5%9B%BE%5D/Sguan_LTD.png
  * @reminder: (上方链接是此Sguan_LTD模块Simulink原理仿真图)
  * @param {LTD_STRUCT} *ltd
  * @return {*}

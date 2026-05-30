@@ -121,7 +121,9 @@
 #define IS_COM_MODE    (CONFIG_MODE == MODE_Sensorless_HS  ||\
                         CONFIG_MODE == MODE_Sensorless_HN  ||\
                         CONFIG_MODE == MODE_Sensorless_AS  ||\
-                        CONFIG_MODE == MODE_Sensorless_AN)
+                        CONFIG_MODE == MODE_Sensorless_AN  ||\
+                        CONFIG_MODE == MODE_Debug_HS       ||\
+                        CONFIG_MODE == MODE_Debug_HN)
 
 #define IS_DEBUG_MODE  (CONFIG_MODE == MODE_Debug_HFI      ||\
                         CONFIG_MODE == MODE_Debug_SMO      ||\
@@ -174,60 +176,58 @@ typedef struct{
     #if IS_COM_MODE
     PLL_STRUCT PLL_another;                 // (PLL锁相环)角度跟踪锁相环
     #endif // IS_COM_MODE
+
+    // 7.Debug模式参数
     #if IS_DEBUG_MODE
     PLL_STRUCT PLL_Debug;                   // (PLL锁相环)角度跟踪锁相环
+    LPF_STRUCT LPF_Debug;                   // (速度数据)速度信号滤波
     #endif // IS_DEBUG_MODE
 
-    // 7.扰动观测器参数
+    // 8.扰动观测器参数
     #if CONFIG_DOB
     DOB_STRUCT DOB;                         // (超螺旋滑模扰动观测器)DOB
     #endif // CONFIG_DOB
 
-    // 8.谐波抑制
+    // 9.谐波抑制
     #if CONFIG_Inhibit
     TPNF_STRUCT TPNF_D;                     // (谐波抑制)电机D轴滤波
     TPNF_STRUCT TPNF_Q;                     // (谐波抑制)电机Q轴滤波
     #endif // CONFIG_Inhibit
 
-    // 9.弱磁控制参数
+    // 10.弱磁控制参数
     #if CONFIG_FW
     PID_STRUCT FW;                          // (弱磁控制)PI控制器输出弱磁一区控制量
     #endif // CONFIG_FW
 
-    // 10.速度前馈的参数
-    // 11.死区补偿参数
-    // 12.角度补偿参数
+    // 11.速度前馈的参数
+    // 12.死区补偿参数
+    // 13.角度补偿参数
     // （此处暂无数据）
     
-    // 13.最速控制结构体
+    // 14.最速控制结构体
     #if IS_LTD_MODE
     LTD_STRUCT LTD;                         // (最速控制)LTD仿制效果，输入速度不突变
     #endif // IS_LTD_MODE
 
-    // 14.霍尔有感结构体
+    // 15.霍尔有感结构体
     #if IS_HALL_MODE
     HALL_STRUCT Hall;                       // (霍尔数据处理)三霍尔信号处理
     #endif // IS_HALL_MODE
 
-    // 15.高频正弦波注入
+    // 16.高频正弦波注入
     #if IS_HFI_MODE
     HFI_STRUCT HFI;                         // (无感算法)HFI高频正弦波注入算法
     #endif // IS_HFI_MODE
 
-    // 16.滑模观测器
+    // 17.滑模观测器
     #if IS_SMO_MODE
     SMO_STRUCT SMO;                         // (无感算法)SMO静止坐标系下的滑模观测器
     #endif // IS_SMO_MODE
 
-    // 17.非线性磁链观测器
+    // 18.非线性磁链观测器
     #if IS_NLFO_MODE
     NLFO_STRUCT NLFO;                       // (无感算法)NLFO非线性磁链观测器
     #endif // IS_NLFO_MODE
-
-    // 18.IF启动下的无感模式
-    #if IS_IF_MODE
-    PID_STRUCT PID;                         // (IF启动)此模式需要额外PI电流环控制器
-    #endif // IS_IF_MODE
 
     // 19.无感参数数据
     // （此处暂无数据）
@@ -249,47 +249,57 @@ typedef struct{
 
     // 5.滤波器参数
     // 6.锁相环参数
-    // 7.扰动观测器参数
-    // 8.谐波抑制
+    // 7.Debug模式参数
+    // 8.扰动观测器参数
+    // 9.谐波抑制
     // （此处暂无数据）
 
-    // 9.弱磁控制参数
+    // 10.弱磁控制参数
     #if CONFIG_FW
-    float BaseSpeed_fw;                     // (弱磁控制)基速设计，使得MTPA过渡弱磁
-    float Percentage_fw;                    // (弱磁控制)弱磁调制线占比,一般设计0.92
+    float FW_BaseSpeed;                     // (弱磁控制)基速设计，使得MTPA过渡弱磁
+    float FW_Percentage;                    // (弱磁控制)弱磁调制线占比,一般设计0.92
     #endif // CONFIG_FW
 
-    // 10.速度前馈的参数
+    // 11.速度前馈的参数
     #if CONFIG_VelFF
-    float Beta_ff;                          // (参数设计)转速环角频率->提高转速稳定
+    float VelFF_Beta;                       // (参数设计)转速环角频率->提高转速稳定
     #endif // CONFIG_VelFF
 
-    // 11.死区补偿参数
+    // 12.死区补偿参数
     #if CONFIG_DeadZone
-    float DeadTime;                         // (参数设计)三相死区补偿->降低低速抖震
-    float Dead_CurMin;                      // (参数设计)死区低电流处理量，低于则不补偿
+    float DeadZone_Time;                    // (参数设计)三相死区补偿->降低低速抖震
+    float DeadZone_CurMin;                  // (参数设计)死区低电流处理量，低于则不补偿
     #endif // CONFIG_DeadZone
 
-    // 12.角度补偿参数
+    // 13.角度补偿参数
     #if CONFIG_AngleComp
-    float Td;                               // (参数设计)随电角速度的相位延迟时间
-    float Offset;                           // (参数设计)随速度方向变化的固定相位偏置
+    float AngleComp_Re;                     // (数据)补偿后的电机电子角度值
+
+    float AngleComp_Td;                     // (参数设计)随电角速度的相位延迟时间
+    float AngleComp_Offset;                 // (参数设计)随速度方向变化的固定相位偏置
     #endif // CONFIG_AngleComp
 
-    // 13.最速控制结构体
-    // 14.霍尔有感结构体
-    // 15.高频正弦波注入
-    // 16.滑模观测器
-    // 17.非线性磁链观测器
-    // 18.IF启动下的无感模式
+    // 14.最速控制结构体
+    // 15.霍尔有感结构体
+    // 16.高频正弦波注入
+    // 17.滑模观测器
+    // 18.非线性磁链观测器
     // （此处暂无数据）
 
     // 19.无感参数数据
     #if CONFIG_MODE>=MODE_Sensorless_HFI
-    float Speed_Stop;                       // (参数设计)无感低速域观测器停止运行界限
-    float Speed_Open;                       // (参数设计)无感低速域观测器开始运行界限
-    float Speed_AbsMax;                     // (参数设计)角度解耦过渡区_高速域分界线
-    float Speed_AbsMin;                     // (参数设计)角度解耦低速域_过渡区分界线
+    float Low_angle;                        // (中间量)低速域电机的机械角度
+    float High_angle;                       // (中间量)高速域电机的机械角度
+    float Low_Wm;                           // (中间量)低速域电机的机械角速度
+    float High_Wm;                          // (中间量)高速域电机的机械角速度
+
+    float Sensorless_Gain;                  // (中间量)观测器切换权重增益
+    uint8_t Sensorless_Flag;                // (中间量)高频注入信号开关标志位
+
+    float Sensorless_Stop;                  // (参数设计)无感低速域观测器停止运行界限
+    float Sensorless_Open;                  // (参数设计)无感低速域观测器开始运行界限
+    float Sensorless_AbsMax;                // (参数设计)角度解耦过渡区_高速域分界线
+    float Sensorless_AbsMin;                // (参数设计)角度解耦低速域_过渡区分界线
     #endif // CONFIG_MODE
 }MOTOR_VALUE_STRUCT;
 
@@ -306,14 +316,14 @@ typedef struct{
 
     float Real_offset;                       // (Encoder角度偏置)offset偏置位
 
-    #if CONFIG_Debug
+    #if IS_DEBUG_MODE
     float Sensorless_Speed;                 // (Sensorless机械速度)预测机械角速度
     float Sensorless_Pos;                   // (Sensorless机械角度)预测机械角度
     float Sensorless_We;                    // (Sensorless电速度)预测电子角速度
     float Sensorless_Re;                    // (Sensorless电角度)预测电子角度
 
     float Sensorless_offset;                // (Sensorless角度偏置)offset偏置位
-    #endif // CONFIG_Debug
+    #endif // IS_DEBUG_MODE
 }MOTOR_ENCODER_STRUCT;
 
 /**

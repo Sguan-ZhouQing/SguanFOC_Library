@@ -155,7 +155,8 @@ void HFI_ReadRad_Loop(HFI_STRUCT *hfi){
     hfi->go.Sine[1] = hfi->go.Sine[0];
 
     // 6.刷新注入信号
-    Value_Rad_Loop(&hfi->go.Angle, hfi->Wo, hfi->T);
+    hfi->go.Angle += hfi->Wo*hfi->T;
+    hfi->go.Angle = Value_normalize(hfi->go.Angle);
     float Cosine;
     fast_sin_cos(hfi->go.Angle, &hfi->go.Sine[0], &Cosine);
     hfi->go.Output_Uin = Cosine*hfi->Uh;
