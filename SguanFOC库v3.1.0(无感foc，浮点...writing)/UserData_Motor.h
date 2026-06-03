@@ -1,7 +1,7 @@
 #ifndef __USERDATA_MOTOR_H
 #define __USERDATA_MOTOR_H
 #include "SguanFOC.h"
-/* 电机控制User用户设置·电机参数(SguanFOC用户核心代码) */
+/* 电机控制User用户设置·电机参数(SguanFOC) */
 
 /**
  * @description: 实体参数填写函数的初始化代码
@@ -14,7 +14,7 @@ static inline void User_Motor_Init(SguanFOC_System_STRUCT *user){
     // |                  电机实体参数Motor填写                   |
     // +---------------------------------------------------------+
     // 1.Sguan.foc参数设计(最初始的Target数值)
-    user->foc.Target_Speed = 0.0f;                  // (float)期望的机械角速度
+    user->foc.Target_Speed = 230.0f;                  // (float)期望的机械角速度
     user->foc.Target_Pos = 0.0f;                    // (float)期望的机械角度值
     user->foc.Target_Id = 0.0f;                     // (float)期望的D轴电流
     user->foc.Target_Iq = 0.0f;                     // (float)期望的Q轴电流
@@ -23,7 +23,7 @@ static inline void User_Motor_Init(SguanFOC_System_STRUCT *user){
     user->foc.Target_IF_Iq = 0.0f;                  // (float)设置的Iq大小
 
     user->foc.Ud_in = 0.0f;                         // (float)实际输入的D轴电压
-    user->foc.Uq_in = 2.0f;                         // (float)实际输入的Q轴电压
+    user->foc.Uq_in = 0.0f;                         // (float)实际输入的Q轴电压
 
     // 2.Sguan.motor参数设计(电机个性化配置)
     user->motor.identify.Rs = 0.19067f;             // (float)相线电阻_默认参数

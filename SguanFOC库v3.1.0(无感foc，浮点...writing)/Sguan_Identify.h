@@ -4,31 +4,27 @@
 /* SguanFOC配置文件声明 */
 #include "Sguan_Config.h"
 
-#define IDENTIFY_STANDBY          0x00    // 电机参数待辨识(初始化会进入辨识)
-#define IDENTIFY_ENCODER_READING  0x01    // 读取编码器方向(定位0和90度实现)
-#define IDENTIFY_RS_READING       0x02    // 读取电机相电阻(Rs = ΔU / ΔI)
-#define IDENTIFY_LS_READING       0x03    // 读取电机相电感(L = R * t / ln(20))
-#define IDENTIFY_FLUX_READING     0x04    // 读取电机磁链(空载测E0/We,E0=Uq-Iq*Rs)
-#define IDENTIFY_B_READING        0x05    // 读取粘性阻尼(空载“电流-转速”斜率法)
-#define IDENTIFY_J_READING        0x06    // 读取转动惯量(自由减速法,求J/B,忽略库伦摩擦)
-#define IDENTIFY_FINISHED         0x07    // 参数辨识完毕(辨识结束，电机正常运行)
+typedef struct{
+    float Input_Id;         // (输入数据)D轴电流数值
+    float Input_Iq;         // (输入数据)Q轴电流数值
+    float Input_We;         // (输入数据)电机电子角速度
+    float Output_Ud;        // (输出数据)D轴电压给定
+    float Output_Uq;        // (输出数据)Q轴电压给定
+    float Output_Rad;        // (输出数据)电机电子角度
 
-#define READING_Rs  0x00
-#define READING_Encoder_Dir  0x00
+    float Set_Uh;           // (参数设计)轴向电压幅值->电阻电感测量
+    float Set_Us;           // (参数设计)Q轴电压的幅值->仅磁链测量
+    float Set_Delay;        // (参数设计)延时函数的时间周期
+
+    float Current_h;        // (数据)单位幅值下记录的电流
+    uint32_t Time;          // (中间量)电流上升时间
+    uint8_t Step;           // (数据)电机参数辨识的标志位
+    // (Step为012则开始Rs、Ls(Ld,Lq)和Flux的辨识)
+    // (当电机参数辨识的标志位为3以后，结束电机辨识)
+}IDENTIFY_GO_STRUCT;
 
 typedef struct{
-    uint8_t Status;         // (状态机)电机参数辨识 
-
-
-    float temp;             // (中间量)
-}PMSM_STRUCT;
-
-typedef struct{
-    float Speed;
-}READ_FLUX_STRUCT;
-
-typedef struct{
-    PMSM_STRUCT pmsm;       // (结构体)永磁同步电机运算数据
+    IDENTIFY_GO_STRUCT go;  // (结构体)永磁同步电机运算数据
 
     float Rs;               // (电机实体参数)相线电阻
     float Ld;               // (电机实体参数)D轴电感

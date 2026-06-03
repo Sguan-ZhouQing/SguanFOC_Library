@@ -11,27 +11,47 @@
  */
 #include "Sguan_Cogging.h"
 
-// 离线标定一圈耗时90秒，总计标定10圈
-// 设计1800点位，每点位置给50ms响应时间
-#define Cogging_Count   1800
-#define Cogging_Cycle   900
-static int16_t iq_tab[Cogging_Count] = {0};
+/* UserData配置文件声明 */
+#include "UserData_Function.h"
 
+// 离线标定的1800点位抗齿槽电流表
+#define Cogging_N   1800
+static int16_t iq_tab[Cogging_N] = {0};
+// static const int16_t iq_tab[Cogging_N] = {0};
 
-void Cogging_Loop(float *Target_Pos,float Uq){
-    static uint32_t count = 0;
-    static uint32_t time_count = 0;
-    static float Add_Pos = 0.0f;
-    if (!time_count){
-        time_count = (uint32_t)(Cogging_Cycle/(PMSM_RUN_T*Cogging_Count*10.0f));
+/**
+ * @description: 抗齿槽离线标定的初始化函数
+ * @param {COGGING_STRUCT} *cogging
+ * @return {*}
+ */
+void Cogging_SetIq_Init(COGGING_STRUCT *cogging){
+    for (int j = 0; j < (cogging->Count); j++){
+        for (int i = 0 ; i < Cogging_N; i++){
+            iq_tab[i] += IQmath_Q15_from_float(
+                cogging->go.Input_Init_Iq/CONFIG_BASE);
+            cogging->go.Output_Init_Rad += 
+                (((float)Value_2PI)*i)/((float)Cogging_N);
+            User_Delay((uint32_t)(cogging->Cycle/((float)Cogging_N)));
+        }
     }
-    if (!Add_Pos){
-        Add_Pos = Value_2PI/((float)Cogging_Count);
-    }
-
-    count++;
-    if (count % time_count == 0){
-        float num = Uq;
-        *Target_Pos += Add_Pos;
+    for (int k = 0; k < Cogging_N; k++){
+        iq_tab[k] /= cogging->Count;
     }
 }
+
+/**
+ * @description: 超螺旋滑模DOB的离散运行函数
+ * @reminder: (离线标定法是通过预先测量和记录电机在不同位置的齿槽效应数据)
+ * @reminder: (在运行时，根据当前电机位置从查找表中读取对应的补偿电流值)
+ * @param {COGGING_STRUCT} *cogging
+ * @return {*}
+ */
+void Cogging_ReadIq_Loop(COGGING_STRUCT *cogging){
+    uint16_t K = cogging->go.Input_Loop_Rad*
+                ((float)Cogging_N)/((float)Value_2PI);
+
+    cogging->go.Output_Loop_Iq = 
+                IQmath_Q15_to_float(iq_tab[K])*CONFIG_BASE;
+}
+
+

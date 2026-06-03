@@ -11,6 +11,22 @@
  */
 #include "Sguan_HFI.h"
 
+static void HFI_NsdRead_Loop(HFI_STRUCT *hfi);
+
+static void HFI_NsdRead_Loop(HFI_STRUCT *hfi){
+    // 1.带通滤波，得到高频电流分量
+    hfi->go.High = hfi->go.p_num*(hfi->go.Input_Q - hfi->data1.x_i[1]) - 
+                        hfi->go.p_den[0]*hfi->data1.x_o[0] - 
+                        hfi->go.p_den[1]*hfi->data1.x_o[1];
+
+    // 2.更新历史输入和输出数值
+    hfi->data1.x_i[1] = hfi->data1.x_i[0];
+    hfi->data1.x_i[0] = hfi->go.Input_Q;
+    hfi->data1.x_o[1] = hfi->data1.x_o[0];
+    hfi->data1.x_o[0] = hfi->go.High;
+}
+
+
 /**
  * @description: 无感高频方波注入的初始化函数
  * @reminder: (初始化相关系数float->double->float)
@@ -120,7 +136,7 @@ void HFI_Current_Loop(HFI_STRUCT *hfi){
 
 /**
  * @description: 无感高频方波注入的离散运行函数
- * @reminder: (处理静止坐标系下的高频信号)
+ * @reminder: (处理Q轴坐标系下的高频信号)
  * @reminder: https://github.com/Sguan-ZhouQing/SguanFOC_Library/blob/main/%E9%85%8D%E5%A5%97Simulink%E6%A8%A1%E5%9E%8B%E5%BC%80%E6%BA%90%E2%91%A1%5B%E7%AE%97%E6%B3%95%E5%8E%9F%E7%90%86%E5%9B%BE%5D/Sguan_HFI.png
  * @reminder: (上方链接是此Sguan_HFI模块Simulink原理仿真图)
  * @param {HFI_STRUCT} *hfi

@@ -4,7 +4,7 @@
 /* 电机控制User用户设置·功能接口 */
 /* 用户自己的CODE BEGIN Includes */
 #include "main.h"
-
+#include "SguanFOC.h"
 
 extern TIM_HandleTypeDef htim1;
 extern TIM_HandleTypeDef htim2;
@@ -99,7 +99,7 @@ static inline int32_t User_ReadADC_Raw(int32_t Current_CH){
 static inline float User_Encoder_ReadRad(void){
     float Rad_num = 0.0f;
     /* Your code for encoder radian position (0-2pi) if you use Absolute SensorFOC */
-    Rad_num = SS_Encoder_GetRad();
+    Rad_num = SguanDemo_Encoder_GetRad();
     return Rad_num;
 }
 
@@ -158,6 +158,7 @@ static inline float User_VBUS_DataGet(void){
     /* Your code for motor VBUS_Voltage Data return if you use it */
     
     // 如果不使用电压功能，返回0xFF800000（正常数值不会是负无穷）
+    // return ADC_InjectedValues[0]*0.01795;
     return 0xFF800000;
 }
 

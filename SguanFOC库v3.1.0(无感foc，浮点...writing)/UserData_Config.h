@@ -26,7 +26,7 @@
  * @reminder: 18->MODE_Debug_HN         HFI切NLFO_转速环    (高精度编码器提供Rad)
  * @return {*}
  */
-#define Define_Run_Mode 17
+#define Define_Run_Mode 2
 
 /**
  * @description: 宏定义0-3决定“电机速度环”的控制方式(默认使用PI控制)
@@ -36,7 +36,7 @@
  * @reminder: 3->Control_STA            电流环“PI控制”，转速环“STA超螺旋滑模控制”
  * @return {*}
  */
-#define Switch_MOTOR_Control_Vel 0
+#define Switch_MOTOR_Control_Vel 1
 
 /**
  * @description: 宏定义0-3决定“电机位置环”的控制方式(默认使用PD控制)
@@ -68,10 +68,12 @@
 /**
  * @description: 宏定义0-2决定“电机参数辨识”额外数据的测量(默认关闭，首次上电需要1)
  * @reminder: 0->不开启电机的参数辨识
- * @reminder: 1->开启辨识，只执行基础的Rs、Ld、Lq和Sguan.identify.Encoder_Dir
- * @reminder: 2->开启辨识，执行所有辨识，包括额外的B、J和Flux...需调好电机闭环回路才可开启
+ * @reminder: 1->开启辨识，只执行基础的Rs、Ls（适用于SPMSM表贴电机，实际测Ld）
+ * @reminder: 2->开启辨识，只执行基础的Rs、Ld、Lq（需要电机与定位0度后，锁定电机测电感）
+ * @reminder: 3->开启辨识，除了上述参数，还包括额外的Flux。J和B暂时还无法实现...
+ * @reminder: （打开3号宏定义也需要“需要电机与定位0度后，锁定电机测电感”）
  * @reminder: （所有任务之前，可提前填入粗略的参数，让电机勉强运行起来）
- * @reminder: （选择2号宏定义，需调好电机闭环回路才可开启...会占用电机运行时间）
+ * @reminder: （选择3号宏定义，需调好速度闭环回路才可开启...会占用电机运行时间）
  * @return {*}
  */
 #define Switch_MOTOR_Identify 0
@@ -88,12 +90,37 @@
 #define Switch_MOTOR_Start 0
 
 /**
+ * @description: 宏定义0-2决定UART或者CAN发送数据的模式
+ * @reminder: 0->发送正常数据(数据格式是JustFloat)
+ * @reminder: 1->仅发送Status数据，电机状态变换会记录下来
+ * @reminder: 2->仅发送Cogging的离线标定抗齿槽数据
+ * @reminder: （宏定义2号这样做，可以把数据记录下来）
+ * @reminder: （平常抗齿槽的iq_tab是放置在单片机的RAW中的...）
+ * @reminder: （把记录下的数据自己填入，并在iq_tab前加入const）
+ * @reminder: （那么iq_tab则会存入Flash，RAW的内存占用就少了）
+ * @return {*}
+ */
+#define Switch_Printf_Debug 0
+
+/**
+ * @description: 宏定义0或1决定“抗齿槽算法(离线标定补偿)”是否开启(默认关闭)
+ * @reminder: 0->不开启抗齿槽算法的离线标定补偿
+ * @reminder: 1->开启抗齿槽算法的离线标定补偿->仅开启使用
+ * @reminder: 2->开启抗齿槽算法的离线标定补偿->测量并使用
+ * @reminder: （基于绝对位置下的iq输入）
+ * @reminder: （补偿标定需用到调好控制器的位置环）
+ * @reminder: （过程中十分耗时...想要等待一定时间）
+ * @return {*}
+ */
+#define Switch_Cogging_Calculate 0
+
+/**
  * @description: 宏定义0或1决定“AngleComp相位延迟补偿”是否开启(默认关闭)
  * @reminder: 0->不开启系统的相位延迟补偿
  * @reminder: 1->开启相位延迟补偿，恒定延迟补偿，固定Td和Offset补偿算法
  * @return {*}
  */
-#define Open_AngleComp_Calculate 1
+#define Open_AngleComp_Calculate 0
 
 /**
  * @description: 宏定义0或1决定“电流前馈”是否开启(开启最优)
@@ -109,7 +136,7 @@
  * @reminder: 1->开启速度的有功阻尼“速度解耦”
  * @return {*}
  */
-#define Open_Velocity_Feedforward 1
+#define Open_Velocity_Feedforward 0
 
 /**
  * @description: 宏定义0或1决定“超螺旋滑模扰动观测器”是否开启(开启最优)
@@ -117,7 +144,7 @@
  * @reminder: 1->开启STA_SMDO
  * @return {*}
  */
-#define Open_DOB_Calculate 1
+#define Open_DOB_Calculate 0
 
 /**
  * @description: 宏定义0或1决定“谐波抑制算法”是否开启(开启最优)
@@ -125,7 +152,7 @@
  * @reminder: 1->开启谐波抑制(陷波滤波器)，滤除电机5、7次主要谐波
  * @return {*}
  */
-#define Open_Inhibit_Calculate 1
+#define Open_Inhibit_Calculate 0
 
 /**
  * @description: 宏定义0或1决定“MTPA最大转矩控制控制”是否开启(默认关闭)
@@ -133,7 +160,7 @@
  * @reminder: 1->开启最大转矩控制控制(凸极电机需要)
  * @return {*}
  */
-#define Open_MTPA_Calculate 1
+#define Open_MTPA_Calculate 0
 
 /**
  * @description: 宏定义0或1决定“FW弱磁控制”是否开启(默认关闭)
@@ -143,7 +170,7 @@
  * @reminder: （MTPA控制：Open_MTPA_Calculate 1）
  * @return {*}
  */
-#define Open_FW_Calculate 1
+#define Open_FW_Calculate 0
 
 /**
  * @description: 宏定义0或1决定“DeadZone死区补偿”是否开启(开启最优)
@@ -151,25 +178,7 @@
  * @reminder: 1->开启DeadZone死区补偿算法(电流方向的前馈补偿)
  * @return {*}
  */
-#define Open_DeadZone_Calculate 1
-
-/**
- * @description: 宏定义决定UART或者CAN发送数据的模式
- * @reminder: (Open_Printf_Debug)0->发送正常数据
- * @reminder: 1->仅发送Debug数据，不发送正常数据
- * @return {*}
- */
-#define Open_Printf_Debug 0
-
-/**
- * @description: 宏定义0或1决定“抗齿槽算法(离线标定补偿)”是否开启(默认关闭)
- * @reminder: 0->不开启抗齿槽算法的离线标定补偿
- * @reminder: 1->开启抗齿槽算法，基于绝对位置下的iq输入
- * @reminder: （补偿标定需用到调好控制器的位置环）
- * @reminder: （过程中十分耗时...想要等待一定时间）
- * @return {*}
- */
-#define Open_Cogging_Calculate 0
+#define Open_DeadZone_Calculate 0
 
 /**
  * @description: 宏定义数值决定“抗齿槽标定的16位Q15定点的标幺化基值”(默认8安培)

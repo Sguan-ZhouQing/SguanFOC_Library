@@ -14,6 +14,7 @@
 #include "Sguan_LTD.h"                      // LTD最速控制(平滑阶跃信号)
 #include "Sguan_MotorStatus.h"              // MotorStatus电机状态机
 #include "Sguan_NLFO.h"                     // NLFO(无感)非线性磁链观测
+#include "Sguan_NSD.h"                      // NSD电机极性辨识算法
 #include "Sguan_Optimize.h"                 // Optimize电机优化算法
 #include "Sguan_PID.h"                      // PID传统闭环控制
 #include "Sguan_PLL.h"                      // PLL角度跟踪“锁相环”
@@ -75,6 +76,21 @@
 #define LPF_ChebyShev           0x01        // ChebyShev切比雪夫二阶I型
 #define LPF_Bessel              0x02        // Bessel二阶贝塞尔滤波器
 
+
+#define IS_Vel_MODE    (CONFIG_MODE == MODE_Voltag_OPEN    ||\
+                        CONFIG_MODE == MODE_Sensor_Hall    ||\
+                        CONFIG_MODE == MODE_Sensorless_HFI ||\
+                        CONFIG_MODE == MODE_Sensorless_SMO ||\
+                        CONFIG_MODE == MODE_Sensorless_NLFO||\
+                        CONFIG_MODE == MODE_Sensorless_HS  ||\
+                        CONFIG_MODE == MODE_Sensorless_HN  ||\
+                        CONFIG_MODE == MODE_Sensorless_AS  ||\
+                        CONFIG_MODE == MODE_Sensorless_AN  ||\
+                        CONFIG_MODE == MODE_Debug_HFI      ||\
+                        CONFIG_MODE == MODE_Debug_SMO      ||\
+                        CONFIG_MODE == MODE_Debug_NLFO     ||\
+                        CONFIG_MODE == MODE_Debug_HS       ||\
+                        CONFIG_MODE == MODE_Debug_HN)
 
 #define IS_LTD_MODE    (CONFIG_MODE == MODE_VF_OPENLOOP    ||\
                         CONFIG_MODE == MODE_IF_OPENLOOP    ||\
@@ -170,6 +186,8 @@ typedef struct{
     LPF_STRUCT LPF_D;                       // (电流数据)电机D轴滤波
     LPF_STRUCT LPF_Q;                       // (电流数据)电机Q轴滤波
     LPF_STRUCT LPF_encoder;                 // (速度数据)速度信号滤波
+    LPF_STRUCT LPF_alpha;                 // (速度数据)速度信号滤波
+    LPF_STRUCT LPF_beta;                 // (速度数据)速度信号滤波
 
     // 6.锁相环参数
     PLL_STRUCT PLL_encoder;                 // (PLL锁相环)角度跟踪锁相环
@@ -203,33 +221,38 @@ typedef struct{
     // 12.死区补偿参数
     // 13.角度补偿参数
     // （此处暂无数据）
+
+    // 14.抗齿槽离线标定
+    #if CONFIG_Cogging
+    COGGING_STRUCT Cogging;                 // (抗齿槽算法)离线标定抗齿槽算法
+    #endif // CONFIG_Cogging
     
-    // 14.最速控制结构体
+    // 15.最速控制结构体
     #if IS_LTD_MODE
     LTD_STRUCT LTD;                         // (最速控制)LTD仿制效果，输入速度不突变
     #endif // IS_LTD_MODE
 
-    // 15.霍尔有感结构体
+    // 16.霍尔有感结构体
     #if IS_HALL_MODE
     HALL_STRUCT Hall;                       // (霍尔数据处理)三霍尔信号处理
     #endif // IS_HALL_MODE
 
-    // 16.高频正弦波注入
+    // 17.高频正弦波注入
     #if IS_HFI_MODE
     HFI_STRUCT HFI;                         // (无感算法)HFI高频正弦波注入算法
     #endif // IS_HFI_MODE
 
-    // 17.滑模观测器
+    // 18.滑模观测器
     #if IS_SMO_MODE
     SMO_STRUCT SMO;                         // (无感算法)SMO静止坐标系下的滑模观测器
     #endif // IS_SMO_MODE
 
-    // 18.非线性磁链观测器
+    // 19.非线性磁链观测器
     #if IS_NLFO_MODE
     NLFO_STRUCT NLFO;                       // (无感算法)NLFO非线性磁链观测器
     #endif // IS_NLFO_MODE
 
-    // 19.无感参数数据
+    // 20.无感参数数据
     // （此处暂无数据）
 }MOTOR_TRANSFER_STRUCT;
 
@@ -279,14 +302,15 @@ typedef struct{
     float AngleComp_Offset;                 // (参数设计)随速度方向变化的固定相位偏置
     #endif // CONFIG_AngleComp
 
-    // 14.最速控制结构体
-    // 15.霍尔有感结构体
-    // 16.高频正弦波注入
-    // 17.滑模观测器
-    // 18.非线性磁链观测器
+    // 14.抗齿槽离线标定
+    // 15.最速控制结构体
+    // 16.霍尔有感结构体
+    // 17.高频正弦波注入
+    // 18.滑模观测器
+    // 19.非线性磁链观测器
     // （此处暂无数据）
 
-    // 19.无感参数数据
+    // 20.无感参数数据
     #if CONFIG_MODE>=MODE_Sensorless_HFI
     float Low_angle;                        // (中间量)低速域电机的机械角度
     float High_angle;                       // (中间量)高速域电机的机械角度

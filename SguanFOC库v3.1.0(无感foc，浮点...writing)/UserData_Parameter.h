@@ -1,7 +1,7 @@
 #ifndef __USERDATA_PARAMETER_H
 #define __USERDATA_PARAMETER_H
 #include "SguanFOC.h"
-/* 电机控制User用户设置，Sguan.transfer数据 */
+/* 电机控制User用户设置，Sguan.transfer和Sguan.motor.identify.data数据 */
 
 /**
  * @description: 控制器参数设计的初始化代码
@@ -15,28 +15,28 @@ static inline void User_Parameter_Init(SguanFOC_System_STRUCT *user){
     // +---------------------------------------------------------+
     // 1.电流环参数
     user->transfer.Current_D.Wc = 100.0f;           // PID电流环D轴参数->微分滤波
-    user->transfer.Current_D.Kp = 0.3425f;          // PID电流环D轴参数->Kp
-    user->transfer.Current_D.Ki = 1257.27f;         // PID电流环D轴参数->Ki
+    user->transfer.Current_D.Kp = 0.3082f;          // PID电流环D轴参数->Kp
+    user->transfer.Current_D.Ki = 1131.54f;         // PID电流环D轴参数->Ki
     user->transfer.Current_D.Kd = 0.0f;             // PID电流环D轴参数->Kd
-    user->transfer.Current_D.OutMax = 12.0f;        // PID电流环D轴参数->最大限幅
-    user->transfer.Current_D.OutMin = -12.0f;       // PID电流环D轴参数->最小限幅
-    user->transfer.Current_D.IntMax = 50.0f;        // PID电流环D轴参数->积分项上限
-    user->transfer.Current_D.IntMin = -50.0f;       // PID电流环D轴参数->积分项下限
+    user->transfer.Current_D.OutMax = 10.0f;        // PID电流环D轴参数->最大限幅
+    user->transfer.Current_D.OutMin = -10.0f;       // PID电流环D轴参数->最小限幅
+    user->transfer.Current_D.IntMax = 150.0f;       // PID电流环D轴参数->积分项上限
+    user->transfer.Current_D.IntMin = -150.0f;      // PID电流环D轴参数->积分项下限
     /* =================================== 分割线 ================================= */
     user->transfer.Current_Q.Wc = 100.0f;           // PID电流环Q轴参数->微分滤波
-    user->transfer.Current_Q.Kp = 0.3425f;          // PID电流环Q轴参数->Kp
-    user->transfer.Current_Q.Ki = 1257.27f;         // PID电流环Q轴参数->Ki
+    user->transfer.Current_Q.Kp = 0.3082f;          // PID电流环Q轴参数->Kp
+    user->transfer.Current_Q.Ki = 1131.54f;         // PID电流环Q轴参数->Ki
     user->transfer.Current_Q.Kd = 0.0f;             // PID电流环Q轴参数->Kd
-    user->transfer.Current_Q.OutMax = 12.0f;        // PID电流环Q轴参数->最大限幅
-    user->transfer.Current_Q.OutMin = -12.0f;       // PID电流环Q轴参数->最小限幅
-    user->transfer.Current_Q.IntMax = 50.0f;        // PID电流环Q轴参数->积分项上限
-    user->transfer.Current_Q.IntMin = -50.0f;       // PID电流环Q轴参数->积分项下限
+    user->transfer.Current_Q.OutMax = 10.0f;        // PID电流环Q轴参数->最大限幅
+    user->transfer.Current_Q.OutMin = -10.0f;       // PID电流环Q轴参数->最小限幅
+    user->transfer.Current_Q.IntMax = 150.0f;       // PID电流环Q轴参数->积分项上限
+    user->transfer.Current_Q.IntMin = -150.0f;      // PID电流环Q轴参数->积分项下限
 
     // 2.转速环参数
     #if CONFIG_CtrlVel==Control_LADRC
-    user->transfer.Velocity.r = 50.0f;              // 双环速度外环speed的LADRC->速度因子
-    user->transfer.Velocity.b0 = 12e5;              // 双环速度外环speed的LADRC->控制量增益
-    user->transfer.Velocity.Wc = 200.0f;            // 双环速度外环speed的LADRC->控制器带宽
+    user->transfer.Velocity.r = 60.0f;              // 双环速度外环speed的LADRC->速度因子
+    user->transfer.Velocity.b0 = 8e5;              // 双环速度外环speed的LADRC->控制量增益
+    user->transfer.Velocity.Wc = 120.0f;            // 双环速度外环speed的LADRC->控制器带宽
     user->transfer.Velocity.OutMax = 10.5f;         // 双环速度外环speed的LADRC->输出上限
     user->transfer.Velocity.OutMin = -10.5f;        // 双环速度外环speed的LADRC->输出下限
     #elif CONFIG_CtrlVel==Control_SMC
@@ -104,7 +104,9 @@ static inline void User_Parameter_Init(SguanFOC_System_STRUCT *user){
     // 5.滤波器参数
     user->transfer.LPF_D.Wc = 31415.96f;            // 电机D轴电流滤波->截止频率
     user->transfer.LPF_Q.Wc = 31415.96f;            // 电机Q轴电流滤波->截止频率
-    user->transfer.LPF_encoder.Wc = 300.0f;         // 速度信号滤波->截止频率
+    user->transfer.LPF_encoder.Wc = 100.0f;         // 速度信号滤波->截止频率
+    user->transfer.LPF_alpha.Wc = 314100.0f;         // 速度信号滤波->截止频率
+    user->transfer.LPF_beta.Wc = 314100.0f;         // 速度信号滤波->截止频率
 
     // 6.锁相环参数
     user->transfer.PLL_encoder.Kp = 650.0f;         // 锁相环->比例项增益
@@ -119,7 +121,7 @@ static inline void User_Parameter_Init(SguanFOC_System_STRUCT *user){
     user->transfer.PLL_Debug.Kp = 650.0f;           // 锁相环->比例项增益
     user->transfer.PLL_Debug.Ki = 210000.0f;        // 锁相环->积分项增益
 
-    user->transfer.LPF_Debug.Wc = 300.0f;           // 速度信号滤波->截止频率
+    user->transfer.LPF_Debug.Wc = 100.0f;           // 速度信号滤波->截止频率
     #endif // IS_DEBUG_MODE
 
     // 8.扰动观测器参数
@@ -173,48 +175,62 @@ static inline void User_Parameter_Init(SguanFOC_System_STRUCT *user){
     user->value.AngleComp_Offset = 0.03f;           // (float)随速度方向变化的固定相位偏置
     #endif // CONFIG_AngleComp
 
-    // 14.最速控制结构体
+    // 14.抗齿槽离线标定
+    #if CONFIG_Cogging
+
+    #endif // CONFIG_Cogging
+
+    // 15.最速控制结构体
     #if IS_LTD_MODE
-    user->transfer.LTD.r = 2.0f;                    // LTD最速控制->跟踪因子2rad/s合适
+    user->transfer.LTD.r = 1.0f;                    // LTD最速控制->跟踪因子2rad/s合适
     #endif // IS_LTD_MODE
     
-    // 15.霍尔有感结构体
+    // 16.霍尔有感结构体
     #if IS_HALL_MODE
     user->transfer.Hall.Wc = 100.0f;                // 霍尔信号处理->滤波截止频率
     user->transfer.Hall.Hall_High = 0.6f;           // 霍尔信号处理->信号上边界
     user->transfer.Hall.Hall_Low = 0.4f;            // 霍尔信号处理->信号下边界
     #endif // IS_HALL_MODE
 
-    // 16.高频正弦波注入
+    // 17.高频正弦波注入
     #if IS_HFI_MODE
-    user->transfer.HFI.Wo = 3455.8f;                // 高频正弦波->注入电压角频率
-    user->transfer.HFI.h = 2.0f;                    // 高频正弦波->高频解调增益
-    user->transfer.HFI.Uh = 2.4f;                   // 高频正弦波->注入电压幅值
+    user->transfer.HFI.Wo = 6855.8f;                // 高频正弦波->注入电压角频率
+    user->transfer.HFI.h = 1.0f;                    // 高频正弦波->高频解调增益
+    user->transfer.HFI.Uh = 1.5f;                   // 高频正弦波->注入电压幅值
     user->transfer.HFI.K1 = 0.3f;                   // 高频正弦波->陷波分母系数
-    user->transfer.HFI.K2 = 0.1f;                   // 高频正弦波->陷波分子系数
+    user->transfer.HFI.K2 = 0.0f;                   // 高频正弦波->陷波分子系数
     user->transfer.HFI.zeta = 0.2f;                 // 高频正弦波->带通滤波阻尼比
     #endif // IS_HFI_MODE
 
-    // 17.滑模观测器
+    // 18.滑模观测器
     #if IS_SMO_MODE
     user->transfer.SMO.Wc = 10000.0f;               // 滑模观测器->反电动势低通滤波
     user->transfer.SMO.h = 3.5f;                    // 滑模观测器->滑模解调增益
-    user->transfer.SMO.IntMax = 2000.0f;            // 滑模观测器->观测器积分限幅
-    user->transfer.SMO.IntMin = -2000.0f;           // 滑模观测器->观测器积分限幅
+    user->transfer.SMO.IntMax = 1e10f;            // 滑模观测器->观测器积分限幅
+    user->transfer.SMO.IntMin = -1e10f;           // 滑模观测器->观测器积分限幅
     #endif // IS_SMO_MODE
 
-    // 18.非线性磁链观测器
+    // 19.非线性磁链观测器
     #if IS_NLFO_MODE
-    user->transfer.NLFO.Gain = 15000000;            // 非线性磁链->磁链观测解调增益
+    user->transfer.NLFO.Gain = 38000000;            // 非线性磁链->磁链观测解调增益
     #endif // IS_NLFO_MODE
 
-    // 19.无感参数数据
+    // 20.无感参数数据
     #if CONFIG_MODE>=MODE_Sensorless_HFI
-    user->value.Sensorless_Stop = 135.0f;           // 分界限->低速域观测器关闭
-    user->value.Sensorless_Open = 125.0f;           // 分界限->低速域观测器开启
-    user->value.Sensorless_AbsMax = 100.0f;         // 分界限->“过渡区”到“高速域”
-    user->value.Sensorless_AbsMin = 80.0f;          // 分界限->“低速域”到“过渡区”
+    user->value.Sensorless_Stop = 175.0f;           // 分界限->低速域观测器关闭
+    user->value.Sensorless_Open = 165.0f;           // 分界限->低速域观测器开启
+    user->value.Sensorless_AbsMax = 155.0f;         // 分界限->“过渡区”到“高速域”
+    user->value.Sensorless_AbsMin = 140.0f;          // 分界限->“低速域”到“过渡区”
     #endif // CONFIG_MODE
+
+
+    // +---------------------------------------------------------+
+    // |                电机参数辨识Parameter设计                   |
+    // +---------------------------------------------------------+
+    // 1.电机参数辨识设计的参数变量
+    #if CONFIG_Identify
+    
+    #endif // CONFIG_Identify
 }
 
 

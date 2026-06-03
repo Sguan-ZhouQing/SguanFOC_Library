@@ -75,7 +75,7 @@ void SMO_Init(SMO_STRUCT *smo){
 
     smo->data.I_num = (float)(((double)(smo->T))/2.0);
     smo->data.F_num = (float)(temp0/den);
-    smo->data.F_den = (float)(-2.0+temp0/den);
+    smo->data.F_den = (float)((-2.0+temp0)/den);
 
     smo->data.Gain0 = (float)(1.0/((double)(smo->Ld)));
     smo->data.Gain1 = (float)(((double)(smo->Rs))/((double)(smo->Ld)));
@@ -116,7 +116,7 @@ void SMO_Init(SMO_STRUCT *smo){
  */
 void SMO_Loop(SMO_STRUCT *smo){
     SMO_RUN(smo,&smo->alpha);
-    smo->beta.Input_Iy = smo->alpha.Output_Ix;
     SMO_RUN(smo,&smo->beta);
     smo->alpha.Input_Iy = smo->beta.Output_Ix;
+    smo->beta.Input_Iy = smo->alpha.Output_Ix;
 }

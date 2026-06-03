@@ -28,12 +28,18 @@ static inline void User_UserTX(void){
     Sguan.txdata.fdata[9]  = Sguan.foc.Ud_in;           // D轴电压指令 (V)
     Sguan.txdata.fdata[10] = Sguan.foc.Real_VBUS;       // 母线电压实际值 (V)
     Sguan.txdata.fdata[11] = Sguan.foc.Du;              // U相占空比 (0~1)
-    Sguan.txdata.fdata[12] = Sguan.foc.Dv;              // V相占空比 (0~1)
-    Sguan.txdata.fdata[13] = Sguan.foc.Dw;              // W相占空比 (0~1)
-    Sguan.txdata.fdata[14] = Sguan.current.Real_Ia;     // A相瞬时电流值 (A)
+    // Sguan.txdata.fdata[12] = Sguan.foc.Dv;              // V相占空比 (0~1)
+    // Sguan.txdata.fdata[13] = Sguan.foc.Dw;              // W相占空比 (0~1)
+
+    // Sguan.txdata.fdata[12] = Sguan.encoder.Sensorless_Speed;
+    // Sguan.txdata.fdata[13] = Sguan.encoder.Sensorless_Pos;
+    // Sguan.txdata.fdata[14] = Sguan.encoder.Sensorless_We;
+    // Sguan.txdata.fdata[15] = Sguan.encoder.Sensorless_Re;
+
+    // Sguan.txdata.fdata[14] = Sguan.current.Real_Ia;     // A相瞬时电流值 (A)
 
     // ========== 组4: 系统配置与辅助信息 (15) ==========
-    Sguan.txdata.fdata[15] = (float)CONFIG_MODE;        // 当前控制模式 (0-10)
+    // Sguan.txdata.fdata[15] = (float)CONFIG_MODE;        // 当前控制模式 (0-10)
 }
 
 /**

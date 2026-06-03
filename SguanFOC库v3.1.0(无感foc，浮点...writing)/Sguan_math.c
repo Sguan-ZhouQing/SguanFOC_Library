@@ -76,6 +76,11 @@ float Value_Gain_Get(float *gain,
 
 // 参数取模[0, 2π)
 float Value_normalize(float angle){
+    if ((angle >= 100.0f) || (angle <= -100.0f)){
+        return 0.0f;
+    }
+    
+
     while (1){
         if (angle > Value_2PI)
             angle -= Value_2PI;
