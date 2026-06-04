@@ -1,0 +1,33 @@
+#ifndef __SGUAN_PLL_H
+#define __SGUAN_PLL_H
+
+/* SguanFOC配置文件声明 */
+#include "Sguan_Config.h"
+
+typedef struct{
+    float We_i;             // (数据)数据历史输入值
+    float Re_i;             // (数据)数据历史输入值
+    float X_num[2];         // (中间量)PI传递函数分子系数
+    float Y_num;            // (中间量)积分项分母系数
+
+    float Error;            // (输入数据)Error真实反馈数据
+    float OutWe;            // (输出数据)OutWe电角速度输出
+    float OutRe;            // (输出数据)OutRe电角度输出
+}PLL_GO_STRUCT;
+
+typedef struct{
+    PLL_GO_STRUCT go;       // (结构体)PID运算结构体
+
+    float T;                // (系统时钟)T运算离散周期
+    
+    float Kp;               // (参数设计)Kp比例项增益
+    float Ki;               // (参数设计)Ki积分项增益
+
+    uint8_t is_position_mode; // (参数设计)位置环模式标志位
+}PLL_STRUCT;
+
+void PLL_Init(PLL_STRUCT *pll);
+void PLL_Loop(PLL_STRUCT *pll);
+
+
+#endif // SGUAN_PLL_H
