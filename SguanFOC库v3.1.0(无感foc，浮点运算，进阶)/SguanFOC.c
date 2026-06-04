@@ -893,11 +893,6 @@ static void Encoder_Virtual_Angle(SguanFOC_System_STRUCT *sguan){
     sguan->encoder.Real_Re = Value_normalize(
                 sguan->encoder.Real_Pos*sguan->motor.Poles);
     Last_Real_Speed = sguan->encoder.Real_Speed;
-
-    // 3.电子角度计算sine和cosine
-    fast_sin_cos(sguan->encoder.Real_Re,
-                &sguan->foc.sine,
-                &sguan->foc.cosine);
 }
 
 // Calculate处理机械角度，计算编码数值Encoder
@@ -931,11 +926,6 @@ static void Encoder_Sensor_Encoder(SguanFOC_System_STRUCT *sguan){
     #else // IS_Debug_MODE
     sguan->foc.Speed_in = sguan->foc.Target_Speed;
     #endif // IS_Debug_MODE
-
-    // 5.电子角度计算sine和cosine
-    fast_sin_cos(sguan->encoder.Real_Re,
-                &sguan->foc.sine,
-                &sguan->foc.cosine);
 }
 
 // Calculate处理电角度，计算编码器数值HALL
@@ -962,11 +952,6 @@ static void Encoder_Sensor_Hall(SguanFOC_System_STRUCT *sguan){
     Transfer_LTD_Loop(&sguan->transfer.LTD, 
                     &sguan->foc.Speed_in, 
                     sguan->foc.Target_Speed);
-
-    // 4.电子角度计算sine和cosine
-    fast_sin_cos(sguan->encoder.Real_Re,
-                &sguan->foc.sine,
-                &sguan->foc.cosine);
     #endif // IS_HALL_MODE
 }
 
@@ -999,11 +984,6 @@ static void Encoder_Sensorless_HFI(SguanFOC_System_STRUCT *sguan){
     Transfer_LTD_Loop(&sguan->transfer.LTD, 
                     &sguan->foc.Speed_in, 
                     sguan->foc.Target_Speed);
-
-    // 5.电子角度计算sine和cosine
-    fast_sin_cos(sguan->encoder.Real_Re,
-                &sguan->foc.sine,
-                &sguan->foc.cosine);
 
     // 6.特殊处理(防止跨越低速域)
     Value_Limit(&sguan->foc.Target_Speed, 
@@ -1075,10 +1055,6 @@ static void Encoder_Sensorless_Tall(SguanFOC_System_STRUCT *sguan){
                             sguan->motor.Poles);
     Last_Speed_in = sguan->foc.Speed_in;
     Last_High_Wm = sguan->value.High_Wm;
-
-    fast_sin_cos(sguan->encoder.Real_Re,
-                &sguan->foc.sine,
-                &sguan->foc.cosine);
     #endif // IS_IF_MODE
 }
 
@@ -1150,13 +1126,8 @@ static void Encoder_Sensorless_Normal(SguanFOC_System_STRUCT *sguan){
     sguan->encoder.Real_Re = Value_normalize(
                             sguan->encoder.Real_Pos*
                             sguan->motor.Poles);
-
-    fast_sin_cos(sguan->encoder.Real_Re,
-                &sguan->foc.sine,
-                &sguan->foc.cosine);
     #endif // IS_COM_MODE
 }
-
 
 static void Debug_Sensorless_HFI(SguanFOC_System_STRUCT *sguan){
     #if CONFIG_MODE==MODE_Debug_HFI
@@ -1913,10 +1884,24 @@ static void Sguan_Calculate_High_Loop(SguanFOC_System_STRUCT *sguan){
         // 1.电机相线和各轴电流计算
         Current_Tick(sguan);
 
-        // 2.电机角度和角速度计算
+        // 2.电机角度和角速度计算，并相位补偿
         Encoder_Tick[Value_set(CONFIG_MODE,
             MODE_Debug_HN,0)](sguan);
-        
+        #if CONFIG_AngleComp
+        sguan->value.AngleComp_Re = sguan->encoder.Real_Re + 
+                                AngleComp_Loop(
+                                sguan->encoder.Real_We, 
+                                sguan->value.AngleComp_Td, 
+                                sguan->value.AngleComp_Offset);
+        fast_sin_cos(sguan->value.AngleComp_Re,
+                    &sguan->foc.sine,
+                    &sguan->foc.cosine);          
+        #else // CONFIG_AngleComp
+        fast_sin_cos(sguan->encoder.Real_Re,
+                    &sguan->foc.sine,
+                    &sguan->foc.cosine);
+        #endif // CONFIG_AngleComp
+
         // 3.外载“无感观测器”
         Debug_Tick[Value_set(CONFIG_MODE,
             MODE_Debug_HN,0)](sguan);
