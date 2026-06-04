@@ -120,7 +120,7 @@
  * @reminder: 1->开启相位延迟补偿，恒定延迟补偿，固定Td和Offset补偿算法
  * @return {*}
  */
-#define Open_AngleComp_Calculate 0
+#define Open_AngleComp_Calculate 1
 
 /**
  * @description: 宏定义0或1决定“电流前馈”是否开启(开启最优)
