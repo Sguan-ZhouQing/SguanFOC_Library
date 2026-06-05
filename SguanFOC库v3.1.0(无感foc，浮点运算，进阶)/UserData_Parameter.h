@@ -135,10 +135,10 @@ static inline void User_Parameter_Init(SguanFOC_System_STRUCT *user){
     // 9.谐波抑制
     #if CONFIG_Inhibit
     user->transfer.TPNF_D.K1 = 0.3f;                // 谐波抑制陷波滤波器->阻尼比
-    user->transfer.TPNF_D.K2 = 0.1f;                // 谐波抑制陷波滤波器->阻尼比
+    user->transfer.TPNF_D.K2 = 0.0f;                // 谐波抑制陷波滤波器->阻尼比
 
     user->transfer.TPNF_Q.K1 = 0.3f;                // 谐波抑制陷波滤波器->阻尼比
-    user->transfer.TPNF_Q.K2 = 0.1f;                // 谐波抑制陷波滤波器->阻尼比
+    user->transfer.TPNF_Q.K2 = 0.0f;                // 谐波抑制陷波滤波器->阻尼比
     #endif // CONFIG_Inhibit
 
     // 10.弱磁控制参数
@@ -163,8 +163,8 @@ static inline void User_Parameter_Init(SguanFOC_System_STRUCT *user){
 
     // 12.死区补偿参数
     #if CONFIG_DeadZone
-    user->value.DeadZone_Time = 1e-10f;             // (float)死区时间填写(死区补偿参数)
-    user->value.DeadZone_CurMin = 0.1f;             // (float)补偿最小相电流(死区补偿参数)
+    user->value.DeadZone_Time = 12e-8f;             // (float)死区时间填写(死区补偿参数)
+    user->value.DeadZone_CurMin = 0.25f;             // (float)补偿最小相电流(死区补偿参数)
     #endif // CONFIG_DeadZone
 
     // 13.角度补偿参数
@@ -232,9 +232,9 @@ static inline void User_Parameter_Init(SguanFOC_System_STRUCT *user){
     // |                电机参数辨识Parameter设计                   |
     // +---------------------------------------------------------+
     // 1.电机参数辨识设计的参数变量
-    user->motor.identify.go.Set_Uh = 2.4f;          // 电阻电感辨识注入电压幅值
+    user->motor.identify.go.Set_Uh = 2.0f;          // 电阻电感辨识注入电压幅值
     user->motor.identify.go.Set_Us = 3.8f;          // 磁链辨识注入电压幅值
-    user->motor.identify.go.Set_Delay = 2.4f;       // 辨识中途延时的单位时间
+    user->motor.identify.go.Set_Delay = 600.0f;       // 辨识中途延时的单位时间
 }
 
 

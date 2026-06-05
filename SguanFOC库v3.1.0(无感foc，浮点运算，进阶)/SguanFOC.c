@@ -765,7 +765,6 @@ static void Offset_Rad_Hall(SguanFOC_System_STRUCT *sguan){
 static void Offset_HFI_Init(SguanFOC_System_STRUCT *sguan){
     #if IS_HFI_MODE
     NSD_SetUd_Init(&sguan->transfer.NSD);
-    sguan->foc.Ud_in = sguan->transfer.NSD.go.Output_Ud;
     #endif // IS_HFI_MODE
 }
 
@@ -773,6 +772,7 @@ static void Offset_HFI_Init(SguanFOC_System_STRUCT *sguan){
 static void Init_Tick(SguanFOC_System_STRUCT *sguan){
     #if IS_HFI_MODE
     // 1.若NSD极性辨识成功，则赋值给offset
+    sguan->foc.Ud_in = sguan->transfer.NSD.go.Output_Ud;
     if (NSD_ReadOffset_Loop(&sguan->transfer.NSD)){
         #if IS_DEBUG_MODE
         sguan->encoder.Sensorless_offset = -sguan->transfer.NSD.go.Output_Flag*Value_PI;
@@ -790,8 +790,11 @@ static void Init_Tick(SguanFOC_System_STRUCT *sguan){
     sguan->motor.identify.go.Input_Iq = sguan->current.Real_Iq;
     sguan->motor.identify.go.Input_We = sguan->encoder.Real_We;
     Identify_ReadLs_Loop(&sguan->motor.identify);
-    sguan->foc.Ud_in = sguan->motor.identify.go.Output_Ud;
-    sguan->foc.Uq_in = sguan->motor.identify.go.Output_Uq;
+    if ((sguan->motor.identify.go.Step == 1) || 
+        (sguan->motor.identify.go.Step == 2)){
+        sguan->foc.Ud_in = sguan->motor.identify.go.Output_Ud;
+        sguan->foc.Uq_in = sguan->motor.identify.go.Output_Uq;
+    }
 }
 
 // Current读取当前的电流值并更新3相电流(未滤波)
@@ -1538,39 +1541,37 @@ static void Status_Protection_Loop(SguanFOC_System_STRUCT *sguan){
 
 // Status电机出现错误的时候，参数设置为零
 static void Status_Zero(SguanFOC_System_STRUCT *sguan){
-    static uint8_t status = 0xFF;
+    static uint8_t status = 0;
     if (status != sguan->status){
-        // 1.电压给定归零
-        sguan->foc.Ud_in = 0.0f;
-        sguan->foc.Uq_in = 0.0f;
+        if ((sguan->status >= MOTOR_STATUS_ENCODER_ERROR) || 
+            (sguan->status == MOTOR_STATUS_STANDBY)){
+            // 1.电压给定归零
+            sguan->foc.Ud_in = 0.0f;
+            sguan->foc.Uq_in = 0.0f;
 
-        // 2.偏置数值归零
-        sguan->encoder.Real_offset = 0.0f;
-        sguan->current.Current_offset0 = 0.0f;
-        sguan->current.Current_offset1 = 0.0f;
+            // 2.偏置数值归零
+            sguan->encoder.Real_offset = 0.0f;
+            sguan->current.Current_offset0 = 0.0f;
+            sguan->current.Current_offset1 = 0.0f;
 
-        // 3.清零Target数值
-        sguan->foc.Target_Id = 0.0f;
-        sguan->foc.Target_Iq = 0.0f;
-        sguan->foc.Target_Speed = 0.0f;
-        sguan->foc.Target_Pos = 0.0f;
+            // 3.清零Target数值
+            sguan->foc.Target_Id = 0.0f;
+            sguan->foc.Target_Iq = 0.0f;
+            sguan->foc.Target_Speed = 0.0f;
+            sguan->foc.Target_Pos = 0.0f;
 
-        // 4.给零位电机位置
-        sguan->foc.sine = 0.0f;
-        sguan->foc.cosine = 1.0f;
+            // 4.给零位电机位置
+            sguan->foc.sine = 0.0f;
+            sguan->foc.cosine = 1.0f;
 
-        float Ualpha, Ubeta;
-        ipark(&Ualpha, 
-            &Ubeta, 
-            sguan->foc.Ud_in, 
-            sguan->foc.Uq_in, 
-            0.0f, 
-            1.0f);
-        PWM_Tick(sguan,
-            (Ualpha/sguan->foc.Real_VBUS),
-            (Ubeta/sguan->foc.Real_VBUS));
-
-        // 5.更新当前状态机
+            float Ualpha, Ubeta;
+            ipark(&Ualpha, 
+                &Ubeta, 0.0f, 0.0f, 
+                0.0f, 1.0f);
+            PWM_Tick(sguan,
+                (Ualpha/sguan->foc.Real_VBUS),
+                (Ubeta/sguan->foc.Real_VBUS));
+        }
         status = sguan->status;
     }
 }
@@ -2046,11 +2047,9 @@ void SguanFOC_High_Loop(void){
             // 计算编码器和电流，运算PID并执行SVPWM
             Sguan_Calculate_High_Loop(&Sguan);
         }
+
         // 3.如果出现错误状态，在此清零参数
-        if ((Sguan.status >= MOTOR_STATUS_ENCODER_ERROR) || 
-            (Sguan.status == MOTOR_STATUS_STANDBY)){
-            Status_Zero(&Sguan);
-        }
+        Status_Zero(&Sguan);
 
         // 4.如果开启Debug，则在此对应电机实时数据
         #if CONFIG_Printf==1

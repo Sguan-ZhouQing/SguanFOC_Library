@@ -28,6 +28,7 @@ void Identify_ReadRs_Init(IDENTIFY_STRUCT *identify){
     if ((CONFIG_Identify == 1) || (CONFIG_Identify == 2)){
         // 1.D轴注入一半Uh并等待电机稳定
         // （需提前定位好电机角度到零位）
+        identify->go.Step = 1;
         identify->go.Output_Ud = identify->go.Set_Uh/2.0f;
         User_Delay((uint32_t)identify->go.Set_Delay);
 
@@ -44,7 +45,8 @@ void Identify_ReadRs_Init(IDENTIFY_STRUCT *identify){
         // 5.计算电机相电阻并切换Step标志位
         identify->Rs = identify->go.Set_Uh/
             (2.0f*(identify->go.Current_h - Current));
-        identify->go.Step = 1;
+        identify->go.Output_Ud = 0.0f;
+        identify->go.Step = 2;
 
         // 6.延时为电感参数辨识提高时间
         User_Delay((uint32_t)(identify->go.Set_Delay*10.0f));
@@ -86,14 +88,14 @@ void Identify_ReadFlux_Init(IDENTIFY_STRUCT *identify){
  */
 void Identify_ReadLs_Loop(IDENTIFY_STRUCT *identify){
     // 1.如果无电机极性辨识进程则直接不参与下面计算
-    if ((identify->go.Step >= 2) || (!CONFIG_Identify)){
+    if ((identify->go.Step >= 3) || (!CONFIG_Identify)){
         return;
     }
 
     // 2.电机电感参数辨识
     // (需要SVPWM/SPWM使能，电流计算使能)
     // (需要编码器使能，Init_Tick()运行会刷新掉角度值)
-    if (identify->go.Step == 1){
+    if (identify->go.Step == 2){
         if (CONFIG_Identify == 1){
             // 1.D轴注入全部Uh并记录电流达到时间
             identify->go.Output_Ud = identify->go.Set_Uh;
