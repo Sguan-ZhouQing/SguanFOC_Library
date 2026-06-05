@@ -782,9 +782,7 @@ static void Init_Tick(SguanFOC_System_STRUCT *sguan){
     }
 
     // 2.若控制器在失能，高频注入权力交接在它手中
-    if (sguan->value.Sensorless_Flag == 0){
-        sguan->foc.Ud_in += sguan->transfer.HFI.go.Output_Uin;
-    }
+    sguan->foc.Ud_in += sguan->transfer.HFI.go.Output_Uin;
     #endif // IS_HFI_MODE
 
     // 3.电机DQ轴电感参数辨识
@@ -1118,11 +1116,11 @@ static void Encoder_Sensorless_Normal(SguanFOC_System_STRUCT *sguan){
 
     if ((Speed_Abs >= sguan->value.Sensorless_Stop) && 
         (Delta >= 0)){
-        sguan->value.Sensorless_Flag = 2;
+        sguan->value.Sensorless_Flag = 1;
     }
     else if ((Speed_Abs <= sguan->value.Sensorless_Open) && 
         (Delta < 0)){
-        sguan->value.Sensorless_Flag = 1;
+        sguan->value.Sensorless_Flag = 0;
     }
     #else // IS_HFI_MODE
     Transfer_Hall_Loop(sguan, &sguan->transfer.PLL_another);
@@ -1233,11 +1231,11 @@ static void Debug_Sensorless_Normal(SguanFOC_System_STRUCT *sguan){
     // 4.低速域运算电机速度和角度
     if ((Speed_Abs >= sguan->value.Sensorless_Stop) && 
         (Delta >= 0)){
-        sguan->value.Sensorless_Flag = 2;
+        sguan->value.Sensorless_Flag = 1;
     }
     else if ((Speed_Abs <= sguan->value.Sensorless_Open) && 
         (Delta < 0)){
-        sguan->value.Sensorless_Flag = 1;
+        sguan->value.Sensorless_Flag = 0;
     }
     Transfer_HFI_Loop(sguan, &sguan->transfer.PLL_another);
     sguan->value.Low_Wm = sguan->transfer.PLL_another.go.OutWe;
@@ -1370,7 +1368,7 @@ static void Control_VelCur_DOUBLE(SguanFOC_System_STRUCT *sguan){
 
     // 9.高频注入信号叠加处理
     #if IS_HFI_MODE
-    if (sguan->value.Sensorless_Flag == 1){
+    if (!sguan->value.Sensorless_Flag){
         sguan->foc.Ud_in += sguan->transfer.HFI.go.Output_Uin;
     }
     #endif // IS_HFI_MODE
