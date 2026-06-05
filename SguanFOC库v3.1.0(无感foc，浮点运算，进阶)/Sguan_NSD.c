@@ -71,6 +71,7 @@ void NSD_SetUd_Init(NSD_STRUCT *nsd){
     // 5.NSD电机极性辨识结束
     nsd->go.Output_Ud = 0.0f;
     nsd->go.Step = 4;
+    User_Delay((uint32_t)(nsd->Cycle*100.0f));
 }
 
 /**
@@ -98,16 +99,23 @@ uint8_t NSD_ReadOffset_Loop(NSD_STRUCT *nsd){
     nsd->go.p_o[0] = High;
 
     // 4.高频信号数值积分值并判断输出
-    switch (nsd->go.Step)
-    {
+    switch (nsd->go.Step){
     case 1:
-        nsd->go.Integration += nsd->T*High;
+        nsd->go.Integration0 += nsd->T*High;
+        break;
+    case 2:
+        if (nsd->go.Integration0 < 0){
+            nsd->go.Integration0 = -nsd->go.Integration0;
+        }
         break;
     case 3:
-        nsd->go.Integration -= nsd->T*High;
+        nsd->go.Integration1 += nsd->T*High;
         break;
     case 4:
-        if (nsd->go.Integration < 0.0f){
+        if (nsd->go.Integration1 < 0){
+            nsd->go.Integration1 = -nsd->go.Integration1;
+        }
+        if ((nsd->go.Integration0 - nsd->go.Integration1) < 0.0f){
             nsd->go.Output_Flag = 1;
         }
         return 1;

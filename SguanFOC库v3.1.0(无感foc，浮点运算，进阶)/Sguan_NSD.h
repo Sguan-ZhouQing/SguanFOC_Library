@@ -14,7 +14,8 @@ typedef struct{
     float Output_Ud;        // (输出数据)输出D轴的电压偏置
     uint8_t Output_Flag;    // (输出数据)输出D轴高频积分信号
 
-    float Integration;      // (数据)前向欧拉的积分值
+    float Integration0;      // (数据)前向欧拉的积分值
+    float Integration1;      // (数据)前向欧拉的积分值
     uint8_t Step;           // (数据)电机转子极性辨识标志位
     // (1245分别表示正偏置开始，正偏置结束，负偏置开始，负偏置结束)
     // (积分只会在Step为1开始正积分，然后在Step为3开始负积分)
