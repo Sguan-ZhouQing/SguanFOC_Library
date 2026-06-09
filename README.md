@@ -32,7 +32,7 @@
 ## 1.简单开始 Start 🚀
 
 > *「引入头文件。填好接口。你的电机闭环转动。」*
-> *"Include the header. Implement the hooks. Your motor closes the loop."*
+> *"Include the header. Implement the hooks. Motor closes the loop."*
 
 ```c
 #include "SguanFOC.h"
@@ -127,7 +127,7 @@ LADRC线自抗扰控制  MTPA最大转矩比控制 FW弱磁控制
 ## 5.控制模式一览
 
 > *「一个宏定义。切换模式。你的电机适配任意场景。」*
-> *"One macro. Switch modes. Your motor adapts to any scenario."*
+> *"One macro. Switch modes. Motor adapts to any scenario."*
 
 - 🎯 **19 种控制模式**：开环 → 有感 → 无感 → 全速域融合
 - 🎛️ **4 种控制算法**：PID / LADRC / SMC / STA
