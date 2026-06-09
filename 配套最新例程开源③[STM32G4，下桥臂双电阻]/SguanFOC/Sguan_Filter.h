@@ -4,50 +4,54 @@
 /* SguanFOC配置文件声明 */
 #include "Sguan_Config.h"
 
+// =========================== LPF低通滤波器 ========================
 typedef struct{
-    float i[3];             // (数据)历史输入值
-    float o[3];             // (数据)历史输出值
+    float i[2];             // (数据)历史输入值
+    float o[2];             // (数据)历史输出值
 
-    float Input;            // (数据)Input输入
-    float Output;           // (数据)Output输出
+    float Input;            // (输入数据)Input输入
+    float Output;           // (输出数据)Output输出
 
-    float num[3];           // (中间量)传递函数分子系数
-    float den[3];           // (中间量)传递函数分母系数
-}FILTER_STRUCT;
+    float num[2];           // (中间量)传递函数分子系数
+    float den[2];           // (中间量)传递函数分母系数
+}LPF_GO_STRUCT;
 
 typedef struct{
-    FILTER_STRUCT filter;   // (结构体)二阶低通结构体
+    LPF_GO_STRUCT filter;   // (结构体)滤波器运算数据
 
-    double Wc;              // (参数设计)Wc巴特沃斯截止频率
-    double T;               // (参数设计)T周期
+    float T;                // (系统时钟)T离散周期
+    float Wc;               // (参数设计)Wc截止频率
 }LPF_STRUCT;
 
+void LPF_Init(LPF_STRUCT *lpf);
+void LPF_Loop(LPF_STRUCT *lpf);
 
-// ============================ Q31 版本代码 ============================
+
+// ======================== TPNF三参数陷波滤波器 =======================
+typedef struct{
+    float i[2];             // (数据)历史输入值
+    float o[2];             // (数据)历史输出值
+
+    float Input;            // (输入数据)Input输入
+    float Output;           // (输出数据)Output输出
+
+    float Gain0;            // (中间量)增益系数
+    float Gain1;            // (中间量)增益系数
+    float Gain2;            // (中间量)增益系数
+}TPNF_GO_STRUCT;
 
 typedef struct{
-    Q31_t i[3];             // (数据)历史输入值
-    Q31_t o[3];             // (数据)历史输出值
+    TPNF_GO_STRUCT filter;  // (结构体)滤波器运算数据
 
-    Q31_t Input;            // (数据)Input输入
-    Q31_t Output;           // (数据)Output输出
+    float T;                // (系统时钟)T离散周期
 
-    Q31_t num[3];           // (中间量)传递函数分子系数
-    Q31_t den[2];           // (中间量)传递函数分母系数
-}FILTER_STRUCT_q31;
+    float Wo;               // (参数设计)Wo陷波频率
+    float K1;               // (参数设计)K1分母阻尼比
+    float K2;               // (参数设计)K2分子阻尼比
+}TPNF_STRUCT;
 
-typedef struct{
-    FILTER_STRUCT_q31 filter; // (结构体)二阶低通结构体
-
-    double Wc;              // (参数设计)Wc巴特沃斯截止频率
-    double T;               // (参数设计)T周期
-}LPF_STRUCT_q31;
-
-void LPF_Init(LPF_STRUCT *bpf);
-void LPF_Loop(LPF_STRUCT *bpf);
-
-uint8_t LPF_Init_q31(LPF_STRUCT_q31 *bpf);
-void LPF_Loop_q31(LPF_STRUCT_q31 *bpf);
+void TPNF_Init(TPNF_STRUCT *tpnf);
+void TPNF_Loop(TPNF_STRUCT *tpnf);
 
 
 #endif // SGUAN_FILTER_H

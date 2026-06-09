@@ -41,8 +41,8 @@ extern "C" {
 
 /* Exported constants --------------------------------------------------------*/
 /* USER CODE BEGIN EC */
-uint16_t Encoder_GetCount(void);
-float SS_Encoder_GetRad(void);
+float SguanDemo_Encoder_GetRad(void);
+
 /* USER CODE END EC */
 
 /* Exported macro ------------------------------------------------------------*/

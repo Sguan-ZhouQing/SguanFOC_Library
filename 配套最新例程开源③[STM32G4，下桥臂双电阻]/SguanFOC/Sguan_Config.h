@@ -2,44 +2,35 @@
 #define __SGUAN_CONFIG_H
 
 #include "Sguan_IQmath.h"
+#include "Sguan_math.h"
+#include "UserData_Config.h"
 
-// ============================ 系统配置 宏定义 ============================
-#define CONFIG_PI           Open_PI_Control
-#define CONFIG_MTPA         Open_MTPA_Calculate
-#define CONFIG_FW           Open_FW_Calculate
-#define CONFIG_Q31          Open_Q31_Calculate
-#define CONFIG_Float        Open_float_Calculate
-#define CONFIG_Debug        Open_Printf_Debug
+// ============================ 系统配置 宏定义 ==============================
+#define CONFIG_MODE         Define_Run_Mode             // (定义)电机运行模式
+#define CONFIG_CtrlVel      Switch_MOTOR_Control_Vel    // (选择)转速环控制器
+#define CONFIG_CtrlPos      Switch_MOTOR_Control_Pos    // (选择)位置环控制器
+#define CONFIG_PWM          Switch_MOTOR_PWM            // (选择)PWM调制技术
+#define CONFIG_Filter       Switch_MOTOR_Filter         // (选择)不同滤波算法
+#define CONFIG_Identify     Switch_MOTOR_Identify       // (选择)电机参数辨识
+#define CONFIG_Start        Switch_MOTOR_Start          // (选择)电机启动方式
+#define CONFIG_Printf       Switch_Printf_Debug         // (选择)实时打印状态机
+#define CONFIG_Cogging      Switch_Cogging_Calculate    // (选择)抗齿槽算法
+#define CONFIG_AngleComp    Open_AngleComp_Calculate    // (开关)相位延迟补偿
+#define CONFIG_CurFF        Open_Current_Feedforward    // (开关)电流前馈解耦
+#define CONFIG_VelFF        Open_Velocity_Feedforward   // (开关)速度前馈解耦
+#define CONFIG_DOB          Open_DOB_Calculate          // (开关)扰动观测器
+#define CONFIG_Inhibit      Open_Inhibit_Calculate      // (开关)电机谐波抑制
+#define CONFIG_MTPA         Open_MTPA_Calculate         // (开关)最大力矩控制
+#define CONFIG_FW           Open_FW_Calculate           // (开关)弱磁控制
+#define CONFIG_DeadZone     Open_DeadZone_Calculate     // (开关)死区补偿算法
+#define CONFIG_BASE         BASE_Cogging_Num            // (基值)抗齿槽Q轴电流标定
 
-
-// ============================ Q31标幺化 宏定义 ===========================
-// 标幺化基准值(Config)
-#define BASE_Time           Q_Time
-#define BASE_Rad            Q_Rad
-#define BASE_Current        Q_Current
-#define BASE_Voltage        Q_Voltage
-#define BASE_Speed          Q_Speed
-#define BASE_Hz             Q_Hz
-#define BASE_Inductor       Q_Inductor
-#define BASE_Flux           Q_Flux
-#define BASE_Resistor       Q_Resistor
-
-// 默认数值缩放倍率(Sguan_Fiter)
-#define BASE_Filter_Num     16.0f
-#define SHIFT_Filter_Num    4
-
-// 默认数值缩放倍率(Sguan_PLL)
-#define BASE_PLL_Num        16.0f
-#define INT32_PLL_Num_16    134217728
-#define SHIFT_PLL_Num       4
-// #define BASE_Num         16.0f
-// #define INT32_Num_16     IQmath_Q31_from_float(1.0f,BASE_Num)
-// #define SHIFT_Num        4
-
+// ============================ 安全边界 宏定义 ============================
+#define PMSM_MAX_Ctrl       3                           // 控制模式PID,LADRC,SMC,STA这4种(0-3)
 
 // ======================== 控制系统离散周期 宏定义 =========================
 // 离散控制周期大小
-#define PMSM_RUN_T          TIM_T
+#define PMSM_RUN_T          TIM_T                       // 系统离散运行时间
 
 
 #endif // SGUAN_CONFIG_H

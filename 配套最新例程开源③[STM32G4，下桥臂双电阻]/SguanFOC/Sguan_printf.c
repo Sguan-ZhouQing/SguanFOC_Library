@@ -1,127 +1,245 @@
 /*
  * @Author: 星必尘Sguan
  * @GitHub: https://github.com/Sguan-ZhouQing
- * @Date: 2026-01-27 00:07:53
+ * @Date: 2026-04-09 16:15:07
  * @LastEditors: 星必尘Sguan|3464647102@qq.com
- * @LastEditTime: 2026-04-01 03:45:00
+ * @LastEditTime: 2026-06-05 03:49:55
  * @FilePath: \SguanFOC_Debug\SguanFOC\Sguan_printf.c
  * @Description: SguanFOC库的“JustFloat通讯协议”实现
+ * 包含特性：真·哈希字典极速映射、防乱码粘包熔断、O(n)单遍解析
  * 
  * Copyright (c) 2026 by $星必尘Sguan, All Rights Reserved. 
  */
-#include "Sguan_printf.h"
-/* 外部函数文件声明 */
+#include "SguanFOC.h"
+
+/* UserData外部文件声明 */
 #include "UserData_Function.h"
 #include "UserData_UserControl.h"
 #include <stdio.h>
 #include <string.h>
-/* 内部函数文件声明 */
-static float Get_Data(void);
-uint8_t Sguan_PrintfBuff[200];
 
-/* ================= 重定向设计 BEGIN ================= */
+/* 内部私有变量与函数 */
+uint8_t Sguan_PrintfBuff[200];
+static float Get_Data_Fast(uint8_t start_idx);
+static void Printf_Adjust(void);
+static void Handle_MOTOR(float value);
+static void Handle_Speed(float value);
+static void Handle_Position(float value);
+static void Handle_Id(float value);
+static void Handle_Iq(float value);
+static void Handle_Ud(float value);
+static void Handle_Uq(float value);
+
+/* ==================== 重定向设计 =================== */
 // 支持printf函数，而无需选择MicroLIB
 #if 1
 #pragma import(__use_no_semihosting)
-//标准库需要的支持函数
-struct __FILE{ 
-	int handle; 
-}; 
-// 支持printf函数，而不需要选择MicroLIB
+struct __FILE { int handle; }; 
 FILE __stdout;
-//定义_sys_exit避免使用半主机模式
-void _sys_exit(int x){ 
-	x = x; 
-} 
+void _sys_exit(int x) { x = x; } 
+
+int fputc(int ch, FILE *f) {
+    User_CorrespondSet((uint8_t *)&ch, 1);
+    return ch;
+}
 #endif
 
-//串口重定向函数printf，不使用到MicroLIB
-int fputc(int ch,FILE *f){
-	User_CorrespondSet((uint8_t *)&ch,1);
-	return ch;
+
+/* ==================== 哈希/字典映射实现 =================== */
+// 轻量级字符串哈希函数 (DJB2算法)
+static uint32_t Hash_Compute(const char *str, uint8_t len){
+    uint32_t hash = 5381;
+    for (uint8_t i = 0; i < len; i++) {
+        hash = ((hash << 5) + hash) + str[i]; 
+    }
+    return hash;
 }
-/* ================= 重定向设计 END ================= */
+
+// 指令处理回调函数库->MOTOR
+static void Handle_MOTOR(float value){
+    if (value >= 0.5f) Sguan.Func_Start();
+    else Sguan.Func_Stop();
+    // MOTOR=6.88?
+    // motor = value;
+}
+
+// 指令处理回调函数库->Speed
+static void Handle_Speed(float value){
+    Sguan.Func_Set_Velocity(value);
+    // Speed=50.0?
+    // if(motor <= 1){
+    //     CAN_TX(0x11,SPEED,value);
+    // }
+    // else if(motor <= 2){
+    //     CAN_TX(0x22,SPEED,value);
+    // }
+    // else if(motor <= 3){
+    //     CAN_TX(0x33,SPEED,value);
+    // }
+}
+
+// 指令处理回调函数库->Position
+static void Handle_Position(float value){
+    Sguan.Func_Set_Position(value);
+    // Position=50.0?
+
+    // CAN_TX(id,POSITION,value);
+}
+
+// 指令处理回调函数库->Id
+static void Handle_Id(float value){
+    Sguan.Func_Set_Id(value);
+}
+
+// 指令处理回调函数库->Iq
+static void Handle_Iq(float value){
+    Sguan.Func_Set_Iq(value);
+}
+
+// 指令处理回调函数库->Ud
+static void Handle_Ud(float value){
+    Sguan.Func_Set_Ud(value);
+}
+
+// 指令处理回调函数库->Uq
+static void Handle_Uq(float value){
+    Sguan.Func_Set_Uq(value);
+}
 
 
-// [接收]数据解析函数(格式：AO=13.14?)
-static float Get_Data(void){
-    uint8_t data_Start_Num = 0;
-    uint8_t data_End_Num = 0;
-    uint8_t minus_Flag = 0;
-    float data_return = 0;
-    // 查找等号和问号的位置
-    for(uint8_t i = 0; i < 200; i++){
-        if(Sguan_PrintfBuff[i] == '=') data_Start_Num = i + 1;
-        if(Sguan_PrintfBuff[i] == '?'){
-            data_End_Num = i - 1;
-            break;
-        }
-    }
-    if(Sguan_PrintfBuff[data_Start_Num] == '-'){
-        data_Start_Num += 1;
-        minus_Flag = 1;
-    }
+// 动态可修改的指令字典（预留 hash_val 位置为 0）
+CMD_MAP_STRUCT Cmd_Dict[] = {
+    {"MOTOR",       0, Handle_MOTOR},
+    {"Speed",       0, Handle_Speed},
+    {"Position",    0, Handle_Position},
+    {"Id",          0, Handle_Id},
+    {"Iq",          0, Handle_Iq},
+    {"Ud",          0, Handle_Ud},
+    {"Uq",          0, Handle_Uq},
+    {"User0",       0, Handle_User0_Adjust},
+    {"User1",       0, Handle_User0_Adjust},
+    {"User2",       0, Handle_User0_Adjust}
+};
+
+#define DICT_COUNT (sizeof(Cmd_Dict) / sizeof(CMD_MAP_STRUCT))
+
+/**
+ * @description: [接收]实时参数调整函数 - 真·哈希查表
+ */
+static void Printf_Adjust(void){
+    uint8_t eq_pos = 0;
     
-    data_return = 0;
-    uint8_t decimal_point = 0;
-    uint8_t decimal_digits = 0;  // 记录小数位数
-    // 先找到小数点的位置
-    for(uint8_t i = data_Start_Num; i <= data_End_Num; i++){
-        if(Sguan_PrintfBuff[i] == '.'){
-            decimal_point = i;
-            break;
-        }
+    // 1. 寻找等号，确定指令 Key 的长度
+    while (Sguan_PrintfBuff[eq_pos] != '=' && eq_pos < 50){
+        if (Sguan_PrintfBuff[eq_pos] == '\0') return;
+        eq_pos++;
     }
-    
-    // 处理整数部分和小数部分
-    for(uint8_t i = data_Start_Num; i <= data_End_Num; i++){
-        if(Sguan_PrintfBuff[i] == '.'){
-            continue;  // 跳过小数点
-        }
-        if(i < decimal_point || decimal_point == 0){
-            // 整数部分
-            data_return = data_return * 10 + (Sguan_PrintfBuff[i] - '0');
-        } else{
-            // 小数部分：根据小数位的位置计算权重
-            decimal_digits++;
-            float decimal_weight = 1.0f;
-            for(uint8_t j = 0; j < decimal_digits; j++){
-                decimal_weight *= 0.1f;
+
+    // 2. 提取数值
+    float data_val = Get_Data_Fast(eq_pos + 1);
+
+    // 3. 计算当前收到指令的哈希值
+    uint32_t rx_hash = Hash_Compute((const char*)Sguan_PrintfBuff, eq_pos);
+
+    // 4. 哈希查表匹配 (纯整数比较，速度极快)
+    for (uint8_t i = 0; i < DICT_COUNT; i++){
+        if (Cmd_Dict[i].hash_val == rx_hash){
+            // 严谨起见：发生哈希碰撞时，二次确认字符串内容
+            if (strncmp((char*)Sguan_PrintfBuff, Cmd_Dict[i].name, eq_pos) == 0){
+                if (Cmd_Dict[i].callback != NULL) {
+                    Cmd_Dict[i].callback(data_val);
+                }
+                break;
             }
-            data_return += (Sguan_PrintfBuff[i] - '0') * decimal_weight;
         }
     }
-    if(minus_Flag == 1) data_return = -data_return;
-    return data_return;
+
+    // 5. 清理缓冲区
+    memset(Sguan_PrintfBuff, 0, sizeof(Sguan_PrintfBuff));
 }
 
-// [初始化]初始化JustFloat数据帧尾
-void Printf_Init(PRINTF_STRUCT *str){
+/**
+ * @description: 极速浮点解析 (单遍扫描 + 异常数据熔断截断)
+ */
+static float Get_Data_Fast(uint8_t start_idx){
+    float result = 0.0f;
+    float frac_weight = 0.1f;
+    uint8_t i = start_idx;
+    int8_t sign = 1;
+    uint8_t in_fraction = 0;
+
+    if (Sguan_PrintfBuff[i] == '-'){
+        sign = -1;
+        i++;
+    }
+
+    while (Sguan_PrintfBuff[i] != '?' && Sguan_PrintfBuff[i] != '\0' && i < 200){
+        uint8_t c = Sguan_PrintfBuff[i];
+        
+        if (c == '.') {
+            in_fraction = 1;
+        } else if (c >= '0' && c <= '9'){
+            if (!in_fraction) {
+                result = result * 10.0f + (c - '0');
+            } else {
+                result += (c - '0') * frac_weight;
+                frac_weight *= 0.1f;
+            }
+        } else {
+            // 遇到非数字/小数点的异常字符(如粘包带来的字母)，立刻截断
+            break; 
+        }
+        i++;
+    }
+    return result * (float)sign;
+}
+
+/* ==================== 通用 Loop 函数 =================== */
+
+void Printf_TX_Init(PRINTF_STRUCT *str){
     str->tail[0] = 0x00;
     str->tail[1] = 0x00;
     str->tail[2] = 0x80;
     str->tail[3] = 0x7f;
-    /* JustFloa数据帧尾格式 */
 }
 
-// [发送]发送数据Tick函数，发送周期可自定
-void Printf_Loop(PRINTF_STRUCT *str){
-    // 发送JustFloat数据
-    User_CorrespondSet((uint8_t *)str,sizeof(PRINTF_STRUCT));
+void Printf_TX_Loop(PRINTF_STRUCT *str){
+    User_UserTX();
+    User_CorrespondSet((uint8_t *)str, sizeof(PRINTF_STRUCT));
 }
 
-// [接收]实时参数调整函数（需要根据你的实际结构体定义进行调整）
-void Printf_Adjust(void){
-    float data_Get = Get_Data();
-    if(Sguan_PrintfBuff[0]=='A' && Sguan_PrintfBuff[1]=='O'){
-        User_AO_Adjust(data_Get);
+void Printf_RX_Init(void){
+    for (uint8_t i = 0; i < DICT_COUNT; i++){
+        uint8_t len = strlen(Cmd_Dict[i].name);
+        Cmd_Dict[i].hash_val = Hash_Compute(Cmd_Dict[i].name, len);
     }
-    if(Sguan_PrintfBuff[0]=='B' && Sguan_PrintfBuff[1]=='O'){
-        User_BO_Adjust(data_Get);
-    }
-    if(Sguan_PrintfBuff[0]=='C' && Sguan_PrintfBuff[1]=='O'){
-        User_CO_Adjust(data_Get);
-    }
-    memset(Sguan_PrintfBuff, 0, sizeof(Sguan_PrintfBuff));
 }
 
+void Printf_RX_Loop(uint8_t *data, uint16_t length){
+    static uint16_t buff_ptr = 0;
+    
+    for (uint16_t i = 0; i < length; i++){
+        uint8_t ch = data[i];
+
+        // 1. 过滤：无视掉换行、回车、空格等无意义字符，防干扰
+        if (ch == '\r' || ch == '\n' || ch == ' '){
+            continue;
+        }
+        
+        Sguan_PrintfBuff[buff_ptr++] = ch;
+        
+        // 2. 遇到帧尾 '?' 触发解析
+        if (ch == '?') {
+            Printf_Adjust();
+            buff_ptr = 0; // 重置索引
+            continue;
+        }
+        
+        // 3. 熔断保护（防粘包 / 防死滞溢出）
+        // 如果积累了 40 个字节还没见到 '?'，直接丢弃清空，防止系统死机
+        if (buff_ptr >= 40) {
+            memset(Sguan_PrintfBuff, 0, sizeof(Sguan_PrintfBuff));
+            buff_ptr = 0;
+        }
+    }
+}

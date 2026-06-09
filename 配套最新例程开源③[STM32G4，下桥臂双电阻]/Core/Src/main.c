@@ -59,16 +59,11 @@ void SystemClock_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-uint16_t Encoder_GetCount(void) {
-    return (uint16_t)(__HAL_TIM_GET_COUNTER(&htim3));
+float SguanDemo_Encoder_GetRad(void) {
+    uint16_t count = (uint16_t)(__HAL_TIM_GET_COUNTER(&htim3));
+    return ((float)count) * (2.0f * Value_PI / 4096.0f);
 }
 
-float SS_Encoder_GetRad(void) {
-    uint16_t count = Encoder_GetCount();
-    // 确保使用浮点运算
-    float rad = ((float)count) * (2.0f * Value_PI / 4096.0f);
-    return rad;
-}
 /* USER CODE END 0 */
 
 /**
@@ -108,16 +103,14 @@ int main(void)
   MX_TIM3_Init();
   MX_TIM2_Init();
   /* USER CODE BEGIN 2 */
-  HAL_TIM_Base_Start_IT(&htim1);
-  HAL_TIM_Base_Start_IT(&htim2);
-  HAL_UARTEx_ReceiveToIdle_DMA(&huart1, Sguan_PrintfBuff, sizeof(Sguan_PrintfBuff));
-  __HAL_DMA_DISABLE_IT(huart1.hdmarx, DMA_IT_HT);
-  HAL_GPIO_WritePin(SD4_GPIO_Port,SD4_Pin,GPIO_PIN_SET);
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  Sguan.mode = Velocity_OPEN_MODE;       // LADRC线自抗扰“速度环”补偿系数
+  HAL_Delay(1000);
+  // Sguan.Func_Start();
+  // printf("Handle_Speed=50.0?\n");
   while (1)
   {
     SguanFOC_main_Loop();

@@ -4,12 +4,27 @@
 /* SguanFOC配置文件声明 */
 #include "Sguan_Config.h"
 
-// 最大转矩电流比
-void MTPA_Loop(float *Target_id,float flux,float Ld,float Lq,float iq);
-void MTPA_Loop_q31(Q31_t *Target_id,Q31_t flux,Q31_t Ld,Q31_t Lq,Q31_t iq);
-
-// 弱磁控制(待写)
-// 三次谐波注入(待写)
+void MTPA_Loop(float *Target_id, 
+            float flux, 
+            float Ld, 
+            float Lq, 
+            float iq);
+float FW_Loop(void *fw, 
+            float Ud, 
+            float Uq, 
+            float Real_Speed, 
+            float Base_Speed, 
+            float Percentage, 
+            float Vbus);
+void DeadZone_Loop(float *Ua_duty, 
+            float *Ub_duty, 
+            float *Uc_duty, 
+            float Ia, 
+            float Ib, 
+            float Ic, 
+            float Current_Min, 
+            float Dead_Time);
+float AngleComp_Loop(float We,float Td,float Offset);
 
 
 #endif // SGUAN_OPTIMIZE_H

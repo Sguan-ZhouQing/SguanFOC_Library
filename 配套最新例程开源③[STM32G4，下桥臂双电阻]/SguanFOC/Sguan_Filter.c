@@ -3,104 +3,130 @@
  * @GitHub: https://github.com/Sguan-ZhouQing
  * @Date: 2026-01-26 22:37:25
  * @LastEditors: 星必尘Sguan|3464647102@qq.com
- * @LastEditTime: 2026-04-01 03:45:55
+ * @LastEditTime: 2026-06-05 03:46:18
  * @FilePath: \SguanFOC_Debug\SguanFOC\Sguan_Filter.c
- * @Description: SguanFOC库的“二阶巴特沃斯滤低通滤波器”实现
+ * @Description: SguanFOC库的“LPF和TPNF滤波器算法”实现
  * 
  * Copyright (c) 2026 by $星必尘Sguan, All Rights Reserved. 
  */
 #include "Sguan_Filter.h"
 
-// 二阶典型环节参数初始化，主函数调用
+// =============================== LPF低通滤波器 ============================
+/**
+ * @description: 低通滤波器的参数初始化
+ * @reminder: (初始化相关系数float->double->float)
+ * @reminder: (单浮点转double运算，提高系数精度)
+ * @param {LPF_STRUCT} *lpf
+ * @return {*}
+ */
 void LPF_Init(LPF_STRUCT *lpf){
-    double temp1 = lpf->T*lpf->Wc*2.828427124746f;
-    double temp2 = lpf->T*lpf->T*lpf->Wc*lpf->Wc;
-    lpf->filter.num[0] = (float)temp2;
-    lpf->filter.num[1] = (float)(2*temp2);
-    lpf->filter.num[2] = (float)temp2;
-    lpf->filter.den[0] = (float)(temp2+temp1+4);
-    lpf->filter.den[1] = (float)(-8+2*temp2);
-    lpf->filter.den[2] = (float)(temp2-temp1+4);
-    // 初始化为零
-    for (int n = 0; n < 3; n++){
-        lpf->filter.i[n] = 0;
-        lpf->filter.o[n] = 0;
-    }
-    lpf->filter.Input = 0;
-    lpf->filter.Output = 0;
+    // 1.宏定义选择需要使用的滤波器(本质依旧是二阶传递函数)
+    #if CONFIG_Filter==0x01
+    double A = 0.9361693222916462; // 品质Q=1.186,db=0.1
+    double B = 1.4775803817752846; // 切比雪夫滤波器
+    lpf->Wc *= A;
+    double temp1 = ((double)lpf->T)*((double)lpf->Wc)*B;
+    #elif CONFIG_Filter==0x02
+    lpf->Wc *= Value_SQRT3;         // 贝塞尔滤波器
+    double temp1 = ((double)lpf->T)*((double)lpf->Wc)*((double)Value_INV_SQRT3);
+    #else // CONFIG_Filter
+    double temp1 = ((double)lpf->T)*((double)lpf->Wc)*((double)Value_2_SQRT2);
+    #endif // CONFIG_Filter
+
+    // 2.计算其余传递函数系数
+    double temp2 = ((double)lpf->T)*((double)lpf->T)*
+                    ((double)lpf->Wc)*((double)lpf->Wc);
+    double den = temp2+temp1+4.0;
+
+    lpf->filter.num[0] = (float)(temp2/den);
+    lpf->filter.num[1] = (float)((2.0*temp2)/den);
+    lpf->filter.den[0] = (float)((-8.0+2.0*temp2)/den);
+    lpf->filter.den[1] = (float)((temp2-temp1+4.0)/den);
+
+    // 3.初始化为零
+    lpf->filter.i[0] = 0.0f;
+    lpf->filter.i[1] = 0.0f;
+    lpf->filter.o[0] = 0.0f;
+    lpf->filter.o[1] = 0.0f;
+    lpf->filter.Input = 0.0f;
+    lpf->filter.Output = 0.0f;
 }
 
-// 定时器1ms中断服务函数
+/**
+ * @description: 滤波器离散服务函数
+ * @reminder: https://github.com/Sguan-ZhouQing/SguanFOC_Library/blob/main/%E9%85%8D%E5%A5%97Simulink%E6%A8%A1%E5%9E%8B%E5%BC%80%E6%BA%90%E2%91%A1%5B%E7%AE%97%E6%B3%95%E5%8E%9F%E7%90%86%E5%9B%BE%5D/Sguan_Filter.png
+ * @reminder: (上方链接是此Sguan_Filter模块Simulink原理仿真图)
+ * @param {LPF_STRUCT} *lpf
+ * @return {*}
+ */
 void LPF_Loop(LPF_STRUCT *lpf){
-    // 更新历史输入和输出数值
-    for (int n = 2; n > 0; n--){
-        lpf->filter.i[n] = lpf->filter.i[n-1];
-        lpf->filter.o[n] = lpf->filter.o[n-1];
-    }
+    // 1.带入差分方程，计算输出
+    lpf->filter.Output = lpf->filter.num[0]*(lpf->filter.Input+lpf->filter.i[1]) + 
+                        lpf->filter.num[1]*lpf->filter.i[0] - 
+                        lpf->filter.den[0]*lpf->filter.o[0] - 
+                        lpf->filter.den[1]*lpf->filter.o[1];
 
-    // 更新当前输入,计算输出
+    // 2.更新历史输入和输出数值
+    lpf->filter.i[1] = lpf->filter.i[0];
     lpf->filter.i[0] = lpf->filter.Input;
-    float num = lpf->filter.num[0] * lpf->filter.i[0] + 
-                lpf->filter.num[1] * lpf->filter.i[1] + 
-                lpf->filter.num[2] * lpf->filter.i[2];
-    float den = lpf->filter.den[1] * lpf->filter.o[1] + 
-                lpf->filter.den[2] * lpf->filter.o[2];
-
-    // 安全检查并输出结果，避免除以零或产生NaN/Inf
-    if (lpf->filter.den[0] != 0.0f && !Value_isnan(den) && !Value_isinf(den)) {
-        lpf->filter.o[0] = (num - den) / lpf->filter.den[0];
-    }
-    if (Value_isnan(lpf->filter.o[0]) || Value_isinf(lpf->filter.o[0])) {
-        lpf->filter.o[0] = 0.0f;
-    }
-    lpf->filter.Output = lpf->filter.o[0];
+    lpf->filter.o[1] = lpf->filter.o[0];
+    lpf->filter.o[0] = lpf->filter.Output;
 }
 
 
-// ============================ Q31 版本代码 ============================
+// =========================== TPNF三参数陷波滤波器 ==========================
+/**
+ * @description: 陷波滤波器的参数初始化
+ * @reminder: (初始化相关系数float->double->float)
+ * @reminder: (单浮点转double运算，提高系数精度)
+ * @param {TPNF_STRUCT} *tpnf
+ * @return {*}
+ */
+void TPNF_Init(TPNF_STRUCT *tpnf){
+    // 1.计算传递函数增益
+    tpnf->filter.Gain0 = (float)(((double)tpnf->T)*((double)tpnf->K1));
+    tpnf->filter.Gain1 = (float)(((double)tpnf->T)*((double)tpnf->K2));
+    tpnf->filter.Gain2 = (float)(((double)tpnf->T)*((double)tpnf->T));
 
-uint8_t LPF_Init_q31(LPF_STRUCT_q31 *lpf){
-    double temp1 = lpf->T*lpf->Wc*2.828427124746;
-    double temp2 = lpf->T*lpf->T*lpf->Wc*lpf->Wc;
-    lpf->filter.num[0] = IQmath_Q31_from_float((float)(temp2/(temp2+temp1+4.0)),BASE_Filter_Num);
-    lpf->filter.num[1] = IQmath_Q31_from_float((float)((2.0*temp2)/(temp2+temp1+4.0)),BASE_Filter_Num);
-    lpf->filter.num[2] = IQmath_Q31_from_float((float)(temp2/(temp2+temp1+4.0)),BASE_Filter_Num);
-    lpf->filter.den[0] = IQmath_Q31_from_float((float)((-8.0+2.0*temp2)/(temp2+temp1+4.0)),BASE_Filter_Num);
-    lpf->filter.den[1] = IQmath_Q31_from_float((float)((temp2-temp1+4.0)/(temp2+temp1+4.0)),BASE_Filter_Num);
-
-    for (int n = 0; n < 3; n++){
-        lpf->filter.i[n] = 0;
-        lpf->filter.o[n] = 0;
-    }
-    lpf->filter.Input = 0;
-    lpf->filter.Output = 0;
-
-    if (((temp2/(temp2+temp1+4.0)) <= BASE_Filter_Num) && 
-        (((2.0*temp2)/(temp2+temp1+4.0)) <= BASE_Filter_Num) && 
-        ((temp2/(temp2+temp1+4.0)) <= BASE_Filter_Num) && 
-        (((-8.0+2.0*temp2)/(temp2+temp1+4.0)) <= BASE_Filter_Num) && 
-        (((temp2-temp1+4.0)/(temp2+temp1+4.0)) <= BASE_Filter_Num)){
-        return 0x00;
-    }
-    else{
-        return 0x01;
-    }
+    // 2.初始化为零
+    tpnf->filter.i[0] = 0.0f;
+    tpnf->filter.i[1] = 0.0f;
+    tpnf->filter.o[0] = 0.0f;
+    tpnf->filter.o[1] = 0.0f;
+    tpnf->filter.Input = 0.0f;
+    tpnf->filter.Output = 0.0f;
 }
 
-void LPF_Loop_q31(LPF_STRUCT_q31 *lpf){
-    for (int n = 2; n > 0; n--){
-        lpf->filter.i[n] = lpf->filter.i[n-1];
-        lpf->filter.o[n] = lpf->filter.o[n-1];
-    }
+/**
+ * @description: 滤波器离散服务函数
+ * @reminder: https://github.com/Sguan-ZhouQing/SguanFOC_Library/blob/main/%E9%85%8D%E5%A5%97Simulink%E6%A8%A1%E5%9E%8B%E5%BC%80%E6%BA%90%E2%91%A1%5B%E7%AE%97%E6%B3%95%E5%8E%9F%E7%90%86%E5%9B%BE%5D/Sguan_Filter.png
+ * @reminder: (上方链接是此Sguan_Filter模块Simulink原理仿真图)
+ * @param {TPNF_STRUCT} *tpnf
+ * @return {*}
+ */
+void TPNF_Loop(TPNF_STRUCT *tpnf){
+    // 1.计算传递函数分子分母系数
+    float temp0 = tpnf->filter.Gain0*tpnf->Wo;
+    float temp1 = tpnf->filter.Gain1*tpnf->Wo;
+    float temp2 = tpnf->filter.Gain2*tpnf->Wo*tpnf->Wo;
+    float num = 4.0f+temp2;
+    float den = 4.0f+4.0f*temp0+temp2;
 
-    lpf->filter.i[0] = lpf->filter.Input;
-    Q31_t x = IQmath_Q31_mul(lpf->filter.num[0],lpf->filter.i[0]) -
-            IQmath_Q31_mul(lpf->filter.den[0],lpf->filter.o[1]) +  
-            IQmath_Q31_mul(lpf->filter.num[1],lpf->filter.i[1]) + 
-            IQmath_Q31_mul(lpf->filter.num[2],lpf->filter.i[2]) - 
-            IQmath_Q31_mul(lpf->filter.den[1],lpf->filter.o[2]);
+    float num_0 = (num+4.0f*temp1)/den;
+    float num_1 = (num-8.0f+temp2)/den;
+    float num_2 = (num-4.0f*temp1)/den;
+    float den_0 = (num-4.0f*temp0)/den;
 
-    lpf->filter.o[0] = IQmath_Q31_Shift_Left(x,SHIFT_Filter_Num);
-    lpf->filter.Output = lpf->filter.o[0];
+    // 2.带入差分方程，计算输出
+    tpnf->filter.Output = num_0*tpnf->filter.Input + 
+                        num_1*(tpnf->filter.i[0]-tpnf->filter.o[0]) + 
+                        num_2*tpnf->filter.i[1] - 
+                        den_0*tpnf->filter.o[1];
+
+    // 3.更新历史输入和输出数值
+    tpnf->filter.i[1] = tpnf->filter.i[0];
+    tpnf->filter.i[0] = tpnf->filter.Input;
+    tpnf->filter.o[1] = tpnf->filter.o[0];
+    tpnf->filter.o[0] = tpnf->filter.Output;
 }
 
