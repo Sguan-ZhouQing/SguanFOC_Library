@@ -1,6 +1,5 @@
 # SguanFOC - High-Performance Field-Oriented Control Library ![Brushless Motor](https://cdn.jsdelivr.net/gh/Sguan-ZhouQing/SguanFOC_Library@main/%E9%85%8D%E5%A5%97QT%E4%B8%8A%E4%BD%8D%E6%9C%BA%E5%8F%8AFOC%E4%BD%BF%E7%94%A8%E8%AF%B4%E6%98%8E%E2%91%A0%5BPDF%5D/Image/MOTOR.svg)
 
-
 > *"Pure C. A few lines of config. Your motor spins like silk."*
 
 [![Version](https://img.shields.io/badge/Version-3.1.0-blue)](https://github.com/Sguan-ZhouQing/SguanFOC_Library)
