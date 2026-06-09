@@ -26,7 +26,7 @@
   👉 <a href="https://www.bilibili.com/video/BV13e9gBEEce?vd_source=7aed43223d7aff10698a55de16717980">观看SguanFOC最新移植视频（哔哩哔哩）</a>
 </sub></p>
 
-> 📣 **MIT 协议开源。** 个人和商用都免费，无需授权。跨平台通用——ARM、DSP、任何支持 C 语言的 MCU𒁈 都能用!
+> 📣 **MIT 协议开源。** 个人和商用都免费，无需授权。跨平台通用...ARM、DSP、任何支持C语言的 MCU𒁈 都能用!
 
 
 ## 1.简单开始 Start 🚀
