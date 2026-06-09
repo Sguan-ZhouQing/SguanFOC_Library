@@ -53,7 +53,7 @@ void TIM2_IRQHandler(void) {
 }
 
 void USART1_IRQHandler(void) {
-    SguanFOC_Printf_Loop();          // ④ Serial debugging: receive parsing, real-time commands
+    SguanFOC_Printf_Loop(Sguan_PrintfBuff, Size); // ④ Serial debugging: receive parsing
     // Your other serial interrupt tasks
 }
 
