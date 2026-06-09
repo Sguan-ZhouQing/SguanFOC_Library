@@ -32,7 +32,7 @@
 ## 1.简单开始 Start 🚀
 
 > *「引入头文件。填好接口。你的电机闭环转动。」*
-> *"Include the header. Implement the hooks. Motor closes the loop."*
+> *"Include the header. Implement the hooks. Motor closes loop."*
 
 ```c
 #include "SguanFOC.h"
