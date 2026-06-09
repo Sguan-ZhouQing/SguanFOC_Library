@@ -1,20 +1,83 @@
-# SguanFOC - 高性能磁场定向控制库
+# SguanFOC - 高性能磁场定向控制库 ![无刷电机](https://cdn.jsdelivr.net/gh/Sguan-ZhouQing/SguanFOC_Library@main/%E9%85%8D%E5%A5%97QT%E4%B8%8A%E4%BD%8D%E6%9C%BA%E5%8F%8AFOC%E4%BD%BF%E7%94%A8%E8%AF%B4%E6%98%8E%E2%91%A0%5BPDF%5D/Image/MOTOR.svg)
 
-![Version](https://img.shields.io/badge/Version-3.1.0-blue)
-![License](https://img.shields.io/badge/License-MIT-green)
-![Language](https://img.shields.io/badge/Language-C-00599C)
- <img src="https://img.shields.io/badge/🔄_完整FOC-开箱即用-red">
-![Platform](https://img.shields.io/badge/Platform-ARM%20%7C%20DSP%20%7C%20任何C语言MCU-orange)
+> *「纯 C 语言。几行配置。你的电机丝滑运转。」*
+> *"Pure C. A few lines of config. Your motor spins like silk."*
+
+[![Version](https://img.shields.io/badge/Version-3.1.0-blue)](https://github.com/Sguan-ZhouQing/SguanFOC_Library)
+[![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
+[![Language](https://img.shields.io/badge/Language-C-00599C)](https://en.wikipedia.org/wiki/C_(programming_language))
+[![Platform](https://img.shields.io/badge/Platform-ARM%20%7C%20DSP%20%7C%20任何C语言MCU-orange)](https://github.com/Sguan-ZhouQing/SguanFOC_Library)
+[![完整FOC](https://img.shields.io/badge/🔄_完整FOC-开箱即用-red)](https://github.com/Sguan-ZhouQing/SguanFOC_Library)
 [**English**](https://github.com/Sguan-ZhouQing/SguanFOC_Library/blob/main/%E9%85%8D%E5%A5%97QT%E4%B8%8A%E4%BD%8D%E6%9C%BA%E5%8F%8AFOC%E4%BD%BF%E7%94%A8%E8%AF%B4%E6%98%8E%E2%91%A0%5BPDF%5D/README_EN.md) | [**中文**](https://github.com/Sguan-ZhouQing/SguanFOC_Library/blob/main/README.md)
 
----
+<br>
 
-## ![无刷电机](https://github.com/user-attachments/assets/bf4b151d-f330-4d1e-a4ff-1aaee886554e) 项目简介
+**在你的 MCU 里跑一套完整 FOC，从坐标变换到 SVPWM，从有感到无感。**
 
-**SguanFOC库** 是一个完全使用纯C语言编写的开源磁场定向控制(FOC)算法库，专为嵌入式微控制器设计。该库提供了从坐标变换到SVPWM生成的完整FOC算法实现，全面覆盖从无感位置观测到多环闭环控制的完整技术链。它具有高性能、易移植、可配置性强等特点，可适用于所有C语言开发的电机控制项目。
+<br>
+
+5分钟初始化，你能让一台无刷电机转起来——有感、无感、霍尔，任你选。从 **有感三环FOC** 到 **HFI高频注入 + 高速域无感观测**，全速域覆盖。不是「能转就行」的那种水平——是伺服级响应、工业级稳定。
+
+**你看到的每一个控制算法，都在真实硬件上跑通过。** 不是论文仿真，不是概念验证，就是 C语言 + MCU !
+
+![SguanFOC 系统架构图](https://cdn.jsdelivr.net/gh/Sguan-ZhouQing/SguanFOC_Library@main/%E9%85%8D%E5%A5%97QT%E4%B8%8A%E4%BD%8D%E6%9C%BA%E5%8F%8AFOC%E4%BD%BF%E7%94%A8%E8%AF%B4%E6%98%8E%E2%91%A0%5BPDF%5D/Image/SguanFOC_main.png)
+
+<p align="center"><sub>
+  ▲ 【代码框架图例->SguanFOC库文件包含关系】
+  👉 <a href="https://www.bilibili.com/video/BV13e9gBEEce?vd_source=7aed43223d7aff10698a55de16717980">观看SguanFOC最新移植视频（哔哩哔哩）</a>
+</sub></p>
+
+> 📣 **MIT 协议开源。** 个人和商用都免费，无需授权。跨平台通用...ARM、DSP、任何支持C语言的 MCU𒁈 都能用!
 
 
-## 📋 版本路线图
+## 1.简单开始 Start 🚀
+
+> *「引入头文件。填好接口。你的电机闭环转动。」*
+> *"Include the header. Implement the hooks. Motor closes loop."*
+
+```c
+#include "SguanFOC.h"
+
+int main(void) {
+    MCU_Init();                      // 你的MCU平台 + 外设初始化
+    while(1) {
+        SguanFOC_main_Loop();        // ①初始化 + 串口数据收发
+    }
+}
+
+void TIM1_IRQHandler(void) {
+    SguanFOC_High_Loop();            // ②高频任务：电流环、角度计算、PWM 生成
+    // 你的其他高优先级中断任务
+}
+
+void TIM2_IRQHandler(void) {
+    SguanFOC_Low_Loop();             // ③低频任务：状态机切换、故障保护
+    // 你的其他低优先级中断任务
+}
+
+void USART1_IRQHandler(void) {
+    SguanFOC_Printf_Loop();          // ④串口调试：接收解析、实时指令
+    // 你的其他串口中断任务
+}
+
+// ⑤用户自定义：在UserData_*.h文件中依次填写好电机控制模式和运行参数
+
+```
+
+## 2.Star 趋势(^^)
+
+> *「点个 Star。收藏项目。你的同行都在用。」*
+> *"Hit the star. Bookmark it. Your peers are already using it."*
+
+<a href="https://www.star-history.com/?repos=Sguan-ZhouQing%2FSguanFOC_Library&type=date&legend=top-left">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=Sguan-ZhouQing/SguanFOC_Library&type=date&theme=dark&legend=top-left" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=Sguan-ZhouQing/SguanFOC_Library&type=date&legend=top-left" />
+   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=Sguan-ZhouQing/SguanFOC_Library&type=date&legend=top-left" />
+ </picture>
+</a>
+
+## 3.📋版本路线图(库代码功能展示)
 
 ```
 SguanFOC Library Evolution
@@ -46,442 +109,153 @@ NSD转子极性辨识  电机参数辨识 SMC滑模控制
 PLL锁相环速度跟踪  PID闭环控制  STA超螺旋滑模控制
 LADRC线自抗扰控制  MTPA最大转矩比控制 FW弱磁控制
 三种典型二阶滤波器  printf重定向  用户接口提供
-
-SguanFOC库v3.1.1 ->
-定位：无感FOC电机控制算法库  Q31定点运算
-电机状态机  优化的数学运算  Justfloat串口协议
-HFI高频方波注入与转子位置估算
-SMO静止坐标系滑膜观测器算法
-NSD转子极性辨识  电机参数辨识
-PLL锁相环速度跟踪  PID闭环控制  STA滑模控制 
-LADRC线自抗扰控制  MTPA弱磁控制  前馈解耦
-巴特沃斯滤波器  printf重定向  用户接口提供
-
-SguanFOC库v3.2.0 ->待加入扩展Kerman滤波器,ModbusRTU的RS485通信，更多的无感算法
-
 ═══════════════════════════════════════════════════════════════
 ```
+## 4.无感算法实物验证图示
+![HFI 切换至 NLFO 示意图](https://cdn.jsdelivr.net/gh/Sguan-ZhouQing/SguanFOC_Library@main/%E9%85%8D%E5%A5%97QT%E4%B8%8A%E4%BD%8D%E6%9C%BA%E5%8F%8AFOC%E4%BD%BF%E7%94%A8%E8%AF%B4%E6%98%8E%E2%91%A0%5BPDF%5D/Image/HFI_to_NLFO.jpg)
+
+```
+* 上面内容是HFI高频正弦波注入切SMO滑模观测器
+* 上面内容是HFI高频正弦波注入切NLFO非线性磁链观测器
+* (图例为简单调参验证，深度调试后效果更好)
+* (SguanFOC其余功能正常,参数辨识和极性辨识有缺陷,后面项目会得到修复)
+```
+
+![HFI 切换至 SMO 示意图](https://cdn.jsdelivr.net/gh/Sguan-ZhouQing/SguanFOC_Library@main/%E9%85%8D%E5%A5%97QT%E4%B8%8A%E4%BD%8D%E6%9C%BA%E5%8F%8AFOC%E4%BD%BF%E7%94%A8%E8%AF%B4%E6%98%8E%E2%91%A0%5BPDF%5D/Image/HFI_to_SMO.jpg)
 
 ---
 
-## 🏗️ 系统架构
+## 5.控制模式一览
 
+> *「一个宏定义。切换模式。你的电机适配任意场景。」*
+> *"One macro. Switch modes. Motor adapts to any scenario."*
+
+- 🎯 **19 种控制模式**：开环 → 有感 → 无感 → 全速域融合
+- 🎛️ **4 种控制算法**：PID / LADRC / SMC / STA
+- 🔬 **3 种无感观测器**：HFI / SMO / NLFO
+- ⚡ **10+ 高级功能**：MTPA / 弱磁 / 谐波抑制 / 参数辨识 / 死区补偿...
+
+| 编号 | 模式 | 说明 | 定位方式 | 适用场景 |
+|:----:|:-----|:-----|:---------|:---------|
+| **0** | `MODE_VF_OPENLOOP` | VF 压频比开环 | 无传感器 | 开环强拖，电机初步测试 |
+| **1** | `MODE_IF_OPENLOOP` | IF 流频比开环 | 无传感器 | 开环强拖，电流限幅保护 |
+| **2** | `MODE_Voltag_OPEN` | 电压开环 | 编码器 | 电压模式调试 |
+| **3** | `MODE_Current_SINGLE` | 电流单闭环 | 编码器 | 力矩控制模式 |
+| **4** | `MODE_VelCur_DOUBLE` | 速度-电流串级闭环 | 编码器 | 通用速度控制 |
+| **5** | `MODE_PosVelCur_THREE` | 位置-速度-电流三环 | 编码器 | 伺服定位、精密控制 |
+| **6** | `MODE_Sensor_Hall` | 有感霍尔_转速环 | 霍尔传感器 | 低成本速度控制 |
+| **7** | `MODE_Sensorless_HFI` | 高频注入_转速环 | 无感 (HFI) | 零低速运行 |
+| **8** | `MODE_Sensorless_SMO` | 滑模观测_转速环 | 无感 (SMO) | 中高速运行 |
+| **9** | `MODE_Sensorless_NLFO` | 非线性磁链_转速环 | 无感 (NLFO) | 中高速运行 |
+| **10** | `MODE_Sensorless_HS` | 高频滑模结合_转速环 | 无感 (HFI+SMO) | 全速域平滑切换 |
+| **11** | `MODE_Sensorless_HN` | 高频磁链结合_转速环 | 无感 (HFI+NLFO) | 全速域平滑切换 |
+| **12** | `MODE_Sensorless_AS` | 霍尔滑模结合_转速环 | 霍尔 + SMO | 全速域融合控制 |
+| **13** | `MODE_Sensorless_AN` | 霍尔磁链结合_转速环 | 霍尔 + NLFO | 全速域融合控制 |
+| **14** | `MODE_Debug_HFI` | HFI 测试_转速环 | 编码器（外载观测）| HFI 算法调试 |
+| **15** | `MODE_Debug_SMO` | SMO 测试_转速环 | 编码器（外载观测）| SMO 算法调试 |
+| **16** | `MODE_Debug_NLFO` | NLFO 测试_转速环 | 编码器（外载观测）| NLFO 算法调试 |
+| **17** | `MODE_Debug_HS` | HFI 切 SMO_转速环 | 编码器（融合测试）| 观测器切换调试 |
+| **18** | `MODE_Debug_HN` | HFI 切 NLFO_转速环 | 编码器（融合测试）| 观测器切换调试 |
+
+在 `UserData_Config.h` 中修改宏定义：
+
+```c
+// 选择你需要的模式（0-18）
+#define Define_Run_Mode 11   // 例如：全速域 HFI+NLFO 无感控制
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                         SguanFOC Core                           │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                 │
-│  ┌─────────────────┐    ┌─────────────────┐    ┌─────────────┐  │
-│  │   状态机层       │    │   算法层        │    │   通信层     │  │
-│  │  ═════════════  │    │  ═════════════  │    │  ═════════  │  │
-│  │ • STANDBY       │    │ • PID           │    │ • JustFloat │  │
-│  │ • INITIALIZING  │    │ • STA           │    │ • printf    │  │
-│  │ • CALIBRATING   │    │ • LADRC         │    │ • UART/CAN  │  │
-│  │ • IDLE          │    │ • MTPA          │    │ • Modbus*   │  │
-│  │ • TORQUE_CTRL   │    │ • PLL           │    └─────────────┘  │
-│  │ • SPEED_CTRL    │    │ • HFI*          │                     │
-│  │ • POSITION_CTRL │    │ • SMO*          │    ┌─────────────┐  │
-│  │ • ERROR_HANDLER │    │ • Kerman*       │    │   滤波层     │  │
-│  └─────────────────┘    └─────────────────┘    │  ═════════  │  │
-│                                                │ •ButterWorth│  │
-│  ┌─────────────────┐    ┌─────────────────┐    │ •数学运算    │  │
-│  │   变换层         │    │   驱动层        │    └─────────────┘  │
-│  │  ═════════════  │    │  ═════════════  │                     │
-│  │ • Clarke/Park   │    │ • PWM生成       │    ┌─────────────┐  │
-│  │ • Inverse Park  │    │ • ADC采样       │    │   辨识层*    │  │
-│  │ • SVPWM         │    │ • 编码器读取     │    │  ═════════  │  │
-│  │ • 坐标变换       │    │ • 电流采样      │    │ • 参数辨识   │  │
-│  └─────────────────┘    └─────────────────┘    │ • NSD极性   │  │
-│                                                └─────────────┘  │
-└─────────────────────────────────────────────────────────────────┘
-                         * 表示v3.1.0+版本特性
-```
+
+| 你的需求 | 推荐模式 |
+|:---------|:---------|
+| 刚拿到电机，想快速转起来 | `0` 或 `1` (开环强拖) |
+| 做绕线机力矩控制 | `3` (电流单闭环) |
+| 做平衡车、轮毂电机 | `4` (速度-电流双闭环) |
+| 做云台、机械臂、CNC、3D打印机 | `5` (位置-速度-电流三闭环) |
+| 低成本项目（用霍尔传感器）| `6` (有感霍尔) |
+| 无人机、高速风机（无传感器）| `11` (全速域 HFI+NLFO) |
+| 算法研究、观测器调参 | `14` - `18` (Debug 模式) |
 
 ---
 
-## 🧩 核心模块详解
+## 6.上官硬件开源
 
-### 📐 数学运算库 - `Sguan_math.c/.h`
+> *「原理图。PCB。你的硬件一步到位。」*
+> *"Schematic. PCB. Your hardware runs out of the box."*
 
-```c
-// 优化的数学运算 - 比标准库快30%以上
-float fast_sin(float x);                                 // 快速正弦
-float fast_cos(float x);                                 // 快速余弦  
-void fast_sin_cos(float x, float *sin_x, float *cos_x);  // 同时计算
-float Value_sqrtf(float x);                              // 牛顿迭代平方根
-float Value_fabsf(float x);                              // 位操作绝对值
-int Value_isnan(float x);                                // NaN检测
-int Value_isinf(float x);                                // 无穷大检测
-
-// 坐标变换
-void clarke(float *i_alpha, float *i_beta, float i_a, float i_b);
-void park(float *i_d, float *i_q, float i_alpha, float i_beta, float sine, float cosine);
-void ipark(float *u_alpha, float *u_beta, float u_d, float u_q, float sine, float cosine);
-
-// SVPWM空间矢量调制
-void SVPWM(float d, float q, float sin_phi, float cos_phi, 
-           float *d_u, float *d_v, float *d_w);
-```
-
-### 🎛️ 控制算法集
-
-#### PID控制器 - `Sguan_PID.c/.h`
-```c
-typedef struct {
-    float Kp, Ki, Kd;                                    // 增益参数
-    float OutMax, OutMin;                                // 输出限幅
-    float IntMax, IntMin;                                // 积分限幅
-    float Wc;                                            // 微分滤波截止频率
-    float T;                                             // 采样周期
-} PID_STRUCT;
-
-void PID_Init(PID_STRUCT *pid);
-void PID_Loop(PID_STRUCT *pid);                          // 误差计算并输出
-```
-
-#### IMC内模控制 - `Sguan_InternalModel.c/.h`
-```c
-typedef struct {
-    float Rs, Ls;                                        // 电机电阻、电感
-    float T;                                             // 采样周期
-    IMC_STRUCT imc;                                      // 内模控制器
-} INTERNALMODEL_STRUCT;
-
-void InternalModel_Init(INTERNALMODEL_STRUCT *im);
-void InternalModel_Loop(INTERNALMODEL_STRUCT *im);
-```
-
-#### LADRC线自抗扰 - `Sguan_Ladrc.c/.h`
-```c
-typedef struct {
-    float r;                                             // 跟踪微分器速度因子
-    float b0;                                            // 控制量增益
-    float wc;                                            // 控制器带宽
-    float T;                                             // 采样周期
-    LINEAR_STRUCT linear;                                // 线性自抗扰变量
-    DATA_STRUCT data;                                    // 自动计算的参数
-} LADRC_STRUCT;
-
-void Ladrc_Init(LADRC_STRUCT *ladrc);
-void Ladrc_Loop(LADRC_STRUCT *ladrc);
-```
-
-#### PLL锁相环 - `Sguan_PLL.c/.h`
-```c
-typedef struct {
-    double Kp, Ki;                                       // PI参数
-    double T;                                            // 采样周期
-    uint8_t is_position_mode;                            // 位置环模式标志
-    GO_STRUCT go;                                        // 锁相环变量
-} PLL_STRUCT;
-
-void PLL_Init(PLL_STRUCT *pll);
-void PLL_Loop(PLL_STRUCT *pll);                          // 角度误差输入，角速度/角度输出
-```
-
-### 🔄 滤波器
-
-#### 二阶巴特沃斯低通 - `Sguan_Filter.c/.h`
-```c
-typedef struct {
-    double Wc;                                           // 截止频率
-    double T;                                            // 采样周期
-    FILTER_STRUCT filter;                                // 滤波器状态
-} BPF_STRUCT;
-
-void BPF_Init(BPF_STRUCT *bpf);
-void BPF_Loop(BPF_STRUCT *bpf);                          // 输入 -> 输出
-```
-
-### 🤖 电机状态机 - `Sguan_MotorStatus.c/.h`
-
-```c
-// 24种状态全面覆盖
-typedef enum {
-    // 初始化与运行状态 (0x00-0x03)
-    MOTOR_STATUS_STANDBY,                                // 待机
-    MOTOR_STATUS_UNINITIALIZED,                          // 未初始化
-    MOTOR_STATUS_INITIALIZING,                           // 初始化中
-    MOTOR_STATUS_CALIBRATING,                            // 校准中
-    
-    // 运行状态 (0x04-0x0D)
-    MOTOR_STATUS_IDLE,                                   // 空闲
-    MOTOR_STATUS_TORQUE_INCREASING,                      // 力矩增大
-    MOTOR_STATUS_TORQUE_DECREASING,                      // 力矩减小
-    MOTOR_STATUS_TORQUE_CONTROL,                         // 力矩保持
-    MOTOR_STATUS_ACCELERATING,                           // 加速中
-    MOTOR_STATUS_DECELERATING,                           // 减速中
-    MOTOR_STATUS_CONST_SPEED,                            // 恒速
-    MOTOR_STATUS_POSITION_INCREASING,                    // 位置增加
-    MOTOR_STATUS_POSITION_DECREASING,                    // 位置减少
-    MOTOR_STATUS_POSITION_HOLD,                          // 位置保持
-    
-    // 硬件错误 (0x0E-0x15)
-    MOTOR_STATUS_OVERVOLTAGE,                            // 过压
-    MOTOR_STATUS_UNDERVOLTAGE,                           // 欠压
-    MOTOR_STATUS_OVERTEMPERATURE,                        // 过温
-    MOTOR_STATUS_UNDERTEMPERATURE,                       // 低温
-    MOTOR_STATUS_OVERCURRENT,                            // 过流
-    MOTOR_STATUS_ENCODER_ERROR,                          // 编码器故障
-    MOTOR_STATUS_SENSOR_ERROR,                           // 传感器故障
-    MOTOR_STATUS_PWM_CALC_FAULT,                         // PWM计算错误
-    
-    // 安全状态 (0x16-0x17)
-    MOTOR_STATUS_EMERGENCY_STOP,                         // 急停
-    MOTOR_STATUS_DISABLED                                // 失能
-} MOTOR_STATUS;
-
-void MotorStatus_Loop(uint8_t *status);                  // 自动调度状态处理函数
-```
-
-### 📡 通信协议
-
-#### JustFloat协议 - `Sguan_printf.c/.h`
-```c
-typedef struct {
-    float fdata[CH_COUNT];                               // 默认12个浮点数
-    uint8_t tail[4];                                     // 帧尾 {0x00,0x00,0x80,0x7f}
-} PRINTF_STRUCT;
-
-void Printf_Init(PRINTF_STRUCT *str);
-void Printf_Loop(PRINTF_STRUCT *str);                    // 发送数据
-void Printf_Adjust(void);                                // 接收解析
-```
+![PCB 板示意图](https://cdn.jsdelivr.net/gh/Sguan-ZhouQing/SguanFOC_Library@main/%E9%85%8D%E5%A5%97QT%E4%B8%8A%E4%BD%8D%E6%9C%BA%E5%8F%8AFOC%E4%BD%BF%E7%94%A8%E8%AF%B4%E6%98%8E%E2%91%A0%5BPDF%5D/Image/PCB_CH32.jpg)
 
 ---
 
-## 🎯 版本详细说明
+## 7.📁仓库结构
 
-### 📦 v3.0.x - 有感FOC · 基础算法库
+```
+SguanFOC_Library/
+├── SguanFOC.c/h                # 核心框架
+├── Sguan_math.c/h              # 数学运算 + 坐标变换
+├── Sguan_IQmath.c/h            # 定点库
+├── Sguan_PID.c/h               # PID 控制器
+├── Sguan_Ladrc.c/h             # LADRC 自抗扰
+├── Sguan_SMC.c/h               # 滑模控制
+├── Sguan_STA.c/h               # 超螺旋滑模
+├── Sguan_PLL.c/h               # 锁相环
+├── Sguan_Filter.c/h            # 巴特沃斯/切比雪夫/贝塞尔
+├── Sguan_SVPWM.c/h             # SVPWM 调制
+├── Sguan_SPWM.c/h              # SPWM + 三次谐波注入
+├── Sguan_HFI.c/h               # 高频注入
+├── Sguan_SMO.c/h               # 滑模观测器
+├── Sguan_NLFO.c/h              # 非线性磁链观测器
+├── Sguan_NSD.c/h               # 极性辨识
+├── Sguan_DOB.c/h               # 扰动观测器
+├── Sguan_Optimize.c/h          # MTPA/弱磁/死区/角度补偿
+├── Sguan_Cogging.c/h           # 抗齿槽标定
+├── Sguan_Identify.c/h          # 参数辨识
+├── Sguan_printf.c/h            # JustFloat 通信
+├── Sguan_MotorStatus.c/h       # 状态机
+├── Sguan_Feedforward.c/h       # 前馈环节
+├── Sguan_Hall.c/h              # 三霍尔信号处理
+├── UserData_Config.h           # (用户)配置开关
+├── UserData_Function.h         # (用户)硬件接口
+├── UserData_Motor.h            # (用户)电机参数
+├── UserData_Parameter.h        # (用户)控制器参数
+├── UserData_Status.h           # (用户)状态机回调
+└── UserData_UserControl.h      # (用户)指令处理
+```
 
-| 版本 | 运算类型 | 发布日期 | 核心功能 |
-|:----:|:--------:|:--------:|:---------|
-| **v3.0.0** | `float`浮点 | 2026.03 | 有感FOC完整实现，基础控制算法，用户接口封装 |
-| **v3.0.1** | `Q31`定点 | 计划中 | 浮点转定点，性能优化，低端MCU适配 |
-
-**功能清单：**
-- ✅ 电机状态机 - 24种状态全面覆盖
-- ✅ 优化的数学运算 - 快速sin/cos/sqrt
-- ✅ JustFloat串口协议 - 兼容匿名上位机
-- ✅ PLL锁相环速度跟踪 - 高精度角度/速度估算
-- ✅ PID闭环控制 - 位置/速度/电流三环
-- ✅ IMC内模控制 - 电流环参数自适应
-- ✅ LADRC线自抗扰控制 - 速度环高性能控制
-- ✅ MTPA弱磁控制 - IPMSM最大转矩电流比
-- ✅ 前馈解耦 - dq轴解耦控制
-- ✅ 巴特沃斯滤波器 - 二阶低通滤波
-- ✅ printf重定向 - 串口调试支持
-- ✅ 用户接口提供 - 硬件抽象层封装
-
-### 🔮 v3.1.x - 无感FOC · 观测器算法库
-
-| 版本 | 运算类型 | 发布日期 | 核心功能 |
-|:----:|:--------:|:--------:|:---------|
-| **v3.1.0** | `float`浮点 | 计划中 | 无感FOC实现，多种观测器算法 |
-| **v3.1.1** | `Q31`定点 | 计划中 | 无感算法定点化，性能优化 |
-
-**新增功能：**
-- ✅ HFI高频方波注入 - 零低速转子位置估算
-- ✅ SMO滑膜观测器 - 中高速转子位置估算
-- ✅ NSD转子极性辨识 - N/S极判别
-- ✅ 电机参数辨识 - Rs/Ld/Lq/Flux在线辨识
-
-### 🚀 v3.2.x - 扩展功能 · 高级算法库
-
-| 版本 | 发布日期 | 核心功能 |
-|:----:|:--------:|:---------|
-| **v3.2.0** | 计划中 | 扩展卡尔曼滤波，ModbusRTU，更多无感算法 |
-
-**新增功能：**
-- ✅ 扩展卡尔曼滤波器 - 高精度状态估计
-- ✅ ModbusRTU协议 - RS485工业通信
-- ✅ 更多无感算法 - 观测器算法补充
+👉 [**完整 API 操作文档**](https://github.com/Sguan-ZhouQing/SguanFOC_Library/blob/main/%E9%85%8D%E5%A5%97QT%E4%B8%8A%E4%BD%8D%E6%9C%BA%E5%8F%8AFOC%E4%BD%BF%E7%94%A8%E8%AF%B4%E6%98%8E%E2%91%A0%5BPDF%5D/Sguan%E4%BD%BF%E7%94%A8%E8%AF%B4%E6%98%8E%E4%B9%A6.pdf)
 
 ---
 
-## 🔧 快速开始
+## 8.License
 
-### 1️⃣ 硬件抽象层实现
+本项目采用 **MIT 协议**开源。
 
-```c
-// UserData_Function.h - 实现硬件接口
-static inline void User_InitialInit(void) {
-    // 初始化PWM定时器、ADC、编码器、驱动芯片
-    HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
-    HAL_ADC_Start_DMA(&hadc1, (uint32_t*)adc_buf, 2);
-    // ...
-}
+你可以**自由使用、修改、分发**本代码库，**包括商业用途**——公司内部使用、客户项目交付、做成付费产品售卖，均无限制。无需事先授权，无需支付任何费用。
 
-static inline int32_t User_ReadADC_Raw(uint8_t Current_CH) {
-    // 返回ADC原始值
-    switch(Current_CH) {
-        case 0: return adc_buf[0];  // IA相
-        case 1: return adc_buf[1];  // IB相
-        default: return 0;
-    }
-}
+MIT 协议仅要求保留版权声明，不强制注明出处，但欢迎告知我们你的使用场景。
 
-static inline float User_Encoder_ReadRad(void) {
-    // 返回编码器角度 (0-2π)
-    uint32_t enc_raw = __HAL_TIM_GET_COUNTER(&htim2);
-    return (float)enc_raw / ENC_RESOLUTION * 2 * PI;
-}
-
-static inline void User_PwmDuty_Set(uint16_t Duty_u, uint16_t Duty_v, uint16_t Duty_w) {
-    // 设置三相PWM占空比
-    __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, Duty_u);
-    __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, Duty_v);
-    __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_3, Duty_w);
-}
-```
-
-### 2️⃣ 电机参数配置
-
-```c
-// UserData_Motor.h - 配置电机参数
-static inline void User_MotorSet(void) {
-    // 控制模式选择
-    Sguan.mode = VelCur_DOUBLE_MODE;  // 速度-电流双环
-    
-    // 电机实体参数
-    Sguan.identify.Ld = 0.00005193f;   // D轴电感 (H)
-    Sguan.identify.Lq = 0.00005193f;   // Q轴电感 (H)
-    Sguan.identify.Rs = 0.19067f;      // 相电阻 (Ω)
-    Sguan.identify.Flux = 0.00028043f; // 磁链 (Wb)
-    
-    // 电机结构参数
-    Sguan.motor.Poles = 7;              // 极对数
-    Sguan.motor.VBUS = 12.0f;           // 母线电压 (V)
-    Sguan.motor.Duty = 4249;             // PWM满占空比
-    
-    // 采样参数
-    Sguan.motor.ADC_Precision = 4096;    // 12位ADC
-    Sguan.motor.MCU_Voltage = 3.3f;      // ADC基准电压
-    Sguan.motor.Amplifier = 10.0f;       // 运放增益
-    Sguan.motor.Sampling_Rs = 0.005f;    // 采样电阻 (Ω)
-    
-    // 安全参数
-    Sguan.safe.VBUS_MAX = 14.0f;         // 过压阈值
-    Sguan.safe.VBUS_MIM = 10.0f;         // 欠压阈值
-    Sguan.safe.Qcur_MAX = 10.0f;         // Q轴电流限幅 (A)
-}
-```
-
-### 3️⃣ 控制器参数配置
-
-```c
-// UserData_Parameter.h - 配置控制参数
-static inline void User_ParameterSet(void) {
-    // 滤波器参数
-    Sguan.bpf.CurrentD.Wc = 31415.96f;   // 电流滤波 (5kHz)
-    Sguan.bpf.CurrentQ.Wc = 31415.96f;   // 电流滤波 (5kHz)
-    Sguan.bpf.Encoder.Wc = 314.1596f;    // 速度滤波 (50Hz)
-    
-    // 电流环PID参数
-    Sguan.control.Current_D.Kp = 0.261f;
-    Sguan.control.Current_D.Ki = 958.41f;
-    Sguan.control.Current_D.OutMax = 12.0f;
-    
-    // 速度环PID参数
-    Sguan.control.Velocity.Kp = 0.06f;
-    Sguan.control.Velocity.Ki = 0.4f;
-    Sguan.control.Velocity.OutMax = 10.5f;
-    
-    // 位置环PD参数
-    Sguan.control.Position.Kp = 12.0f;
-    Sguan.control.Position.Kd = 0.0f;
-    
-    // 锁相环参数
-    Sguan.encoder.pll.Kp = 650.0f;
-    Sguan.encoder.pll.Ki = 210000.0f;
-}
-```
-
-### 4️⃣ 集成到主程序
-
-```c
-// main.c
-#include "SguanFOC.h"
-
-int main(void) {
-    HAL_Init();
-    SystemClock_Config();
-    
-    // 用户初始化
-    User_InitialInit();
-    
-    while(1) {
-        SguanFOC_main_Loop();      // 主循环任务
-    }
-}
-
-// 20kHz PWM中断
-void TIM1_UP_IRQHandler(void) {
-    SguanFOC_High_Loop();          // 高速控制环
-}
-
-// 1kHz 定时器中断
-void TIM3_IRQHandler(void) {
-    SguanFOC_Low_Loop();           // 低速状态机
-}
-
-// 串口接收中断
-void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
-    SguanFOC_Printf_Loop(rx_buffer, rx_len);  // 协议解析
-}
-```
+> 📄 详见 [LICENSE](LICENSE) 文件
 
 ---
 
-## 📊 性能指标
+## 9.Connect 源代码作者
 
-| 指标 | v3.0.0 | v3.0.1 | 说明 |
-|:-----|:------:|:------:|:-----|
-| 控制周期 | 20-50µs | 20-50µs | 取决于主频 |
-| 代码大小 | ~15KB | ~12KB | Flash占用 |
-| RAM占用 | ~2KB | ~2KB | 每电机 |
-| 最大转速 | 100k RPM | 100k RPM | 取决于极对数 |
-| 电流环带宽 | 2-5kHz | 2-5kHz | 可配置 |
-| 速度环带宽 | 200-500Hz | 200-500Hz | 可配置 |
+星必尘Sguan 是一名嵌入式算法工程师、开源硬件爱好者、独立开发者。代表作：SguanFOC 开源项目（GitHub FOC 算法库）。全平台分享电机控制、嵌入式开发与开源硬件技术。
 
----
+| 平台 | 账号 | 链接 |
+|---|---|---|
+| GitHub | Sguan-ZhouQing | https://github.com/Sguan-ZhouQing |
+| B 站 | 星必尘Sguan | [https://space.bilibili.com/564956515](https://space.bilibili.com/564956515) |
+| 抖音 | 星必尘Sguan | 抖音号：dy9q15ail4xc |
+| 粉丝群 | 【Sguan(^^)】水友快乐屋 | 群号：716279199 |
+| 邮箱 | 技术交流 | 3464647102@qq.com |
 
-## 🔜 开发计划
+技术咨询、项目合作 → 通过以上平台或邮箱联系即可。
 
-```
-2026 Q2 ──── v3.0.1 有感FOC定点运算版本发布
-2026 Q3 ──── v3.1.0 无感FOC浮点运算版本发布
-2026 Q4 ──── v3.1.1 无感FOC定点运算版本发布
-2027 Q1 ──── v3.2.0 扩展卡尔曼+ModbusRTU版本发布
-```
+<p align="center">
+  <b>SguanFOC - 让电机控制更简单</b> 🚀
+</p>
 
----
+<p align="center">
+  <img src="https://img.shields.io/badge/⭐-无论您是大佬或者小白，在此电机控制代码项目中，如果对你有帮助，请给我们一个Star！-brightgreen">
+</p>
 
-## 🤝 贡献指南
 
-我们欢迎社区贡献！如果你有改进建议或bug修复：
-
-1. 🍴 Fork 本项目
-2. 🌿 创建特性分支 (`git checkout -b feature/AmazingFeature`)
-3. 💾 提交更改 (`git commit -m 'Add some AmazingFeature'`)
-4. 📤 推送到分支 (`git push origin feature/AmazingFeature`)
-5. 🔃 开启Pull Request
-
----
-
-## 📞 联系支持及致谢
-
-| 渠道 | 联系方式 |
-|:-----|:---------|
-| 👨‍💻 **作者** | 星必尘Sguan                     |
-| 📧 **邮箱** | 3464647102@qq.com |
-| 🐛 **Issues** | [GitHub Issues](https://github.com/Sguan-ZhouQing/SguanFOC_Library/issues) |
-| 📚 **Wiki** | [项目Wiki](https://github.com/Sguan-ZhouQing/SguanFOC_Library/wiki) |
-
-本项目采用MIT许可证 - 详见 [LICENSE](LICENSE) 文件。感谢所有为项目做出贡献的开发者们！
-
-<img src="https://img.shields.io/badge/⭐-如果这个项目对你有帮助，请给我们一个Star！-brightgreen">
-
----
-
-**SguanFOC - 让电机控制更简单** 🚀
