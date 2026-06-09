@@ -8,6 +8,7 @@
 [![Language](https://img.shields.io/badge/Language-C-00599C)](https://en.wikipedia.org/wiki/C_(programming_language))
 [![Platform](https://img.shields.io/badge/Platform-ARM%20%7C%20DSP%20%7C%20任何C语言MCU-orange)](https://github.com/Sguan-ZhouQing/SguanFOC_Library)
 [![完整FOC](https://img.shields.io/badge/🔄_完整FOC-开箱即用-red)](https://github.com/Sguan-ZhouQing/SguanFOC_Library)
+[**English**](https://github.com/Sguan-ZhouQing/SguanFOC_Library/blob/main/%E9%85%8D%E5%A5%97QT%E4%B8%8A%E4%BD%8D%E6%9C%BA%E5%8F%8AFOC%E4%BD%BF%E7%94%A8%E8%AF%B4%E6%98%8E%E2%91%A0%5BPDF%5D/README_EN.md) | [**中文**](https://github.com/Sguan-ZhouQing/SguanFOC_Library/blob/main/README.md)
 
 <br>
 
