@@ -1,456 +1,254 @@
-# SguanFOC - High-Performance Field-Oriented Control Library
-![Version](https://img.shields.io/badge/Version-3.0.1-blue)
-![License](https://img.shields.io/badge/License-MIT-green)
-![Language](https://img.shields.io/badge/Language-C-00599C)
-<img src="https://img.shields.io/badge/🔄_Full_FOC-Out-of-the-Box-red">
-![Platform](https://img.shields.io/badge/Platform-ARM%20%7C%20DSP%20%7C%20Any_C_MCU-orange)
+# SguanFOC - High-Performance Field-Oriented Control Library ![Brushless Motor](https://cdn.jsdelivr.net/gh/Sguan-ZhouQing/SguanFOC_Library@main/%E9%85%8D%E5%A5%97QT%E4%B8%8A%E4%BD%8D%E6%9C%BA%E5%8F%8AFOC%E4%BD%BF%E7%94%A8%E8%AF%B4%E6%98%8E%E2%91%A0%5BPDF%5D/Image/MOTOR.svg)
+
+> *"Pure C. A few lines of config. Your motor spins like silk."*
+
+[![Version](https://img.shields.io/badge/Version-3.1.0-blue)](https://github.com/Sguan-ZhouQing/SguanFOC_Library)
+[![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
+[![Language](https://img.shields.io/badge/Language-C-00599C)](https://en.wikipedia.org/wiki/C_(programming_language))
+[![Platform](https://img.shields.io/badge/Platform-ARM%20%7C%20DSP%20%7C%20Any%20C%20MCU-orange)](https://github.com/Sguan-ZhouQing/SguanFOC_Library)
+[![Full FOC](https://img.shields.io/badge/🔄_Full_FOC-Ready_to_Use-red)](https://github.com/Sguan-ZhouQing/SguanFOC_Library)
 [**English**](https://github.com/Sguan-ZhouQing/SguanFOC_Library/blob/main/%E9%85%8D%E5%A5%97QT%E4%B8%8A%E4%BD%8D%E6%9C%BA%E5%8F%8AFOC%E4%BD%BF%E7%94%A8%E8%AF%B4%E6%98%8E%E2%91%A0%5BPDF%5D/README_EN.md) | [**中文**](https://github.com/Sguan-ZhouQing/SguanFOC_Library/blob/main/README.md)
 
----
+<br>
 
-## ![Brushless Motor](https://github.com/user-attachments/assets/bf4b151d-f330-4d1e-a4ff-1aaee886554e) Project Overview
-**SguanFOC Library** is an open-source Field-Oriented Control (FOC) algorithm library written entirely in standard C, designed for embedded MCUs. It implements the full FOC chain from coordinate transformation to SVPWM generation, covering sensorless position observation and multi-loop closed-loop control. It is high-performance, portable, highly configurable, and suitable for all C-language motor control projects.
+**Run a complete FOC in your MCU — from coordinate transform to SVPWM, from sensored to sensorless.**
 
-## 📋 Version Roadmap
-```
-SguanFOC Library Evolution
-═══════════════════════════════════════════════════════════════
-SguanFOC Library v3.0.0 ->
-Target: Sensor-based FOC motor control | Floating-point
-Motor state machine | Optimized math | Justfloat UART protocol
-PLL speed tracking | PID closed-loop | IMC inner mold concept
-LADRC linear ADRC | MTPA flux-weakening | Feedforward decoupling
-Butterworth filter | printf redirection | User HAL interface
+<br>
 
-SguanFOC Library v3.0.1 ->
-Target: Sensor-based FOC motor control | Q31 fixed-point
-Motor state machine | Optimized math | Justfloat UART protocol
-PLL speed tracking | PID closed-loop | IMC inner mold concept
-Synovial control | MTPA flux-weakening | Feedforward decoupling
-Butterworth filter | printf redirection | User HAL interface
+5 minutes of initialization, and you can spin a brushless motor — sensored, sensorless, Hall, your choice. From **sensored three-loop FOC** to **HFI high-frequency injection + high-speed domain sensorless observer**, covering the full speed range. Not just a "it spins" level — it's servo-grade response, industrial-grade stability.
 
-SguanFOC Library v3.1.0 ->
-Target: Sensorless FOC motor control | Floating-point
-Motor state machine | Optimized math | Justfloat UART protocol
-HFI high-frequency square-wave injection & rotor position estimation
-SMO sliding-mode observer in stationary frame
-NSD rotor polarity identification | Motor parameter identification
-PLL speed tracking | PID closed-loop | Second-order synovial control
-LADRC linear ADRC | MTPA flux-weakening | Feedforward decoupling
-Butterworth filter | printf redirection | User HAL interface
+**Every control algorithm you see has been tested on real hardware.** Not a paper simulation, not a proof of concept — just C language + MCU!
 
-SguanFOC Library v3.1.1 ->
-Target: Sensorless FOC motor control | Q31 fixed-point
-Motor state machine | Optimized math | Justfloat UART protocol
-HFI high-frequency square-wave injection & rotor position estimation
-SMO sliding-mode observer in stationary frame
-NSD rotor polarity identification | Motor parameter identification
-PLL speed tracking | PID closed-loop | Second-order synovial control
-LADRC linear ADRC | MTPA flux-weakening | Feedforward decoupling
-Butterworth filter | printf redirection | User HAL interface
+![SguanFOC System Architecture Diagram](https://cdn.jsdelivr.net/gh/Sguan-ZhouQing/SguanFOC_Library@main/%E9%85%8D%E5%A5%97QT%E4%B8%8A%E4%BD%8D%E6%9C%BA%E5%8F%8AFOC%E4%BD%BF%E7%94%A8%E8%AF%B4%E6%98%8E%E2%91%A0%5BPDF%5D/Image/SguanFOC_main.png)
 
-SguanFOC Library v3.2.0 -> Planned: Extended Kalman filter, ModbusRTU over RS485, more sensorless algorithms
-═══════════════════════════════════════════════════════════════
-```
+<p align="center"><sub>
+  ▲ [Code Framework Legend -> SguanFOC Library File Inclusion Relationships]
+  👉 <a href="https://www.bilibili.com/video/BV13e9gBEEce?vd_source=7aed43223d7aff10698a55de16717980">Watch the latest SguanFOC porting video (Bilibili)</a>
+</sub></p>
 
----
+> 📣 **Open-sourced under the MIT license.** Free for personal and commercial use, no authorization required. Cross-platform universal... ARM, DSP, any C-language MCU can use it!
 
-## 🏗️ System Architecture
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                         SguanFOC Core                           │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                 │
-│  ┌─────────────────┐    ┌─────────────────┐    ┌─────────────┐  │
-│  │ State Machine   │    │ Algorithm Layer │    │ Communication│  │
-│  │ ════════════════│    │ ════════════════│    │ ════════════│  │
-│  │ • STANDBY       │    │ • PID           │    │ • JustFloat │  │
-│  │ • INITIALIZING  │    │ • STA           │    │ • printf    │  │
-│  │ • CALIBRATING   │    │ • LADRC         │    │ • UART/CAN  │  │
-│  │ • IDLE          │    │ • MTPA          │    │ • Modbus*   │  │
-│  │ • TORQUE_CTRL   │    │ • PLL           │    └─────────────┘  │
-│  │ • SPEED_CTRL    │    │ • HFI*          │                     │
-│  │ • POSITION_CTRL │    │ • SMO*          │    ┌─────────────┐  │
-│  │ • ERROR_HANDLER │    │ • Kalman*       │    │ Filter Layer │  │
-│  └─────────────────┘    └─────────────────┘    │ ════════════│  │
-│                                                │ • Butterworth│  │
-│  ┌─────────────────┐    ┌─────────────────┐    │ • Math Utils │  │
-│  │ Transformation  │    │ Driver Layer    │    └─────────────┘  │
-│  │ ════════════════│    │ ════════════════│                     │
-│  │ • Clarke/Park   │    │ • PWM Generation│    ┌─────────────┐  │
-│  │ • Inverse Park  │    │ • ADC Sampling  │    │ Ident Layer*│  │
-│  │ • SVPWM         │    │ • Encoder Read  │    │ ════════════│  │
-│  │ • Coord Trans   │    │ • Current Sample│    │ • Param ID  │  │
-│  └─────────────────┘    └─────────────────┘    │ • NSD Polarity│ │
-│                                                └─────────────┘  │
-└─────────────────────────────────────────────────────────────────┘
-                         * Features for v3.1.0+
-```
+## 1. Simple Start 🚀
 
----
+> *"Include the header. Implement the hooks. Motor closes loop."*
 
-## 🧩 Core Modules
-
-### 📐 Math Library – `Sguan_math.c/.h`
 ```c
-// Optimized math – >30% faster than standard library
-float fast_sin(float x);                                 // Fast sine
-float fast_cos(float x);                                 // Fast cosine
-void fast_sin_cos(float x, float *sin_x, float *cos_x);  // Simultaneous compute
-float Value_sqrtf(float x);                              // Newton–Raphson sqrt
-float Value_fabsf(float x);                              // Bitwise absolute value
-int Value_isnan(float x);                                // NaN check
-int Value_isinf(float x);                                // Inf check
-
-// Coordinate transformations
-void clarke(float *i_alpha, float *i_beta, float i_a, float i_b);
-void park(float *i_d, float *i_q, float i_alpha, float i_beta, float sine, float cosine);
-void ipark(float *u_alpha, float *u_beta, float u_d, float u_q, float sine, float cosine);
-
-// SVPWM
-void SVPWM(float d, float q, float sin_phi, float cos_phi,
-           float *d_u, float *d_v, float *d_w);
-```
-
-### 🎛️ Control Algorithms
-
-#### PID Controller – `Sguan_PID.c/.h`
-```c
-typedef struct {
-    float Kp, Ki, Kd;                                    // Gains
-    float OutMax, OutMin;                                // Output clamp
-    float IntMax, IntMin;                                // Integral clamp
-    float Wc;                                            // Derivative filter cutoff
-    float T;                                             // Sample period
-} PID_STRUCT;
-
-void PID_Init(PID_STRUCT *pid);
-void PID_Loop(PID_STRUCT *pid);                          // Compute error & output
-```
-
-#### IMC Internal Model Control – `Sguan_InternalModel.c/.h`
-```c
-typedef struct {
-    float Rs, Ls;                                        // Motor resistance, inductance
-    float T;                                             // Sample period
-    IMC_STRUCT imc;                                      // IMC controller
-} INTERNALMODEL_STRUCT;
-
-void InternalModel_Init(INTERNALMODEL_STRUCT *im);
-void InternalModel_Loop(INTERNALMODEL_STRUCT *im);
-```
-
-#### LADRC Linear ADRC – `Sguan_Ladrc.c/.h`
-```c
-typedef struct {
-    float r;                                             // Tracking differentiator speed
-    float b0;                                            // Control gain
-    float wc;                                            // Controller bandwidth
-    float T;                                             // Sample period
-    LINEAR_STRUCT linear;                                // Linear ADRC state
-    DATA_STRUCT data;                                    // Auto-calculated params
-} LADRC_STRUCT;
-
-void Ladrc_Init(LADRC_STRUCT *ladrc);
-void Ladrc_Loop(LADRC_STRUCT *ladrc);
-```
-
-#### PLL Phase-Locked Loop – `Sguan_PLL.c/.h`
-```c
-typedef struct {
-    double Kp, Ki;                                       // PI gains
-    double T;                                            // Sample period
-    uint8_t is_position_mode;                            // Position loop flag
-    GO_STRUCT go;                                        // PLL internal state
-} PLL_STRUCT;
-
-void PLL_Init(PLL_STRUCT *pll);
-void PLL_Loop(PLL_STRUCT *pll);                          // Angle error → speed/angle output
-```
-
-### 🔄 Filter
-#### 2nd-Order Butterworth LPF – `Sguan_Filter.c/.h`
-```c
-typedef struct {
-    double Wc;                                           // Cutoff frequency
-    double T;                                            // Sample period
-    FILTER_STRUCT filter;                                // Filter state
-} BPF_STRUCT;
-
-void BPF_Init(BPF_STRUCT *bpf);
-void BPF_Loop(BPF_STRUCT *bpf);                          // Input → filtered output
-```
-
-### 🤖 Motor State Machine – `Sguan_MotorStatus.c/.h`
-```c
-// 24 states fully covered
-typedef enum {
-    // Init & startup (0x00–0x03)
-    MOTOR_STATUS_STANDBY,                                // Standby
-    MOTOR_STATUS_UNINITIALIZED,                          // Uninitialized
-    MOTOR_STATUS_INITIALIZING,                           // Initializing
-    MOTOR_STATUS_CALIBRATING,                            // Calibrating
-
-    // Running (0x04–0x0D)
-    MOTOR_STATUS_IDLE,                                   // Idle
-    MOTOR_STATUS_TORQUE_INCREASING,                      // Torque rising
-    MOTOR_STATUS_TORQUE_DECREASING,                      // Torque falling
-    MOTOR_STATUS_TORQUE_CONTROL,                         // Torque hold
-    MOTOR_STATUS_ACCELERATING,                           // Accelerating
-    MOTOR_STATUS_DECELERATING,                           // Decelerating
-    MOTOR_STATUS_CONST_SPEED,                            // Constant speed
-    MOTOR_STATUS_POSITION_INCREASING,                    // Position increasing
-    MOTOR_STATUS_POSITION_DECREASING,                    // Position decreasing
-    MOTOR_STATUS_POSITION_HOLD,                          // Position hold
-
-    // Hardware faults (0x0E–0x15)
-    MOTOR_STATUS_OVERVOLTAGE,                            // Overvoltage
-    MOTOR_STATUS_UNDERVOLTAGE,                           // Undervoltage
-    MOTOR_STATUS_OVERTEMPERATURE,                        // Overtemperature
-    MOTOR_STATUS_UNDERTEMPERATURE,                       // Undertemperature
-    MOTOR_STATUS_OVERCURRENT,                            // Overcurrent
-    MOTOR_STATUS_ENCODER_ERROR,                          // Encoder fault
-    MOTOR_STATUS_SENSOR_ERROR,                           // Sensor fault
-    MOTOR_STATUS_PWM_CALC_FAULT,                         // PWM calculation error
-
-    // Safety (0x16–0x17)
-    MOTOR_STATUS_EMERGENCY_STOP,                         // Emergency stop
-    MOTOR_STATUS_DISABLED                                // Disabled
-} MOTOR_STATUS;
-
-void MotorStatus_Loop(uint8_t *status);                  // Auto state dispatcher
-```
-
-### 📡 Communication Protocol
-#### JustFloat Protocol – `Sguan_printf.c/.h`
-```c
-typedef struct {
-    float fdata[CH_COUNT];                               // Default 12 floats
-    uint8_t tail[4];                                     // Frame tail {0x00,0x00,0x80,0x7f}
-} PRINTF_STRUCT;
-
-void Printf_Init(PRINTF_STRUCT *str);
-void Printf_Loop(PRINTF_STRUCT *str);                    // Transmit data
-void Printf_Adjust(void);                                // Parse received data
-```
-
----
-
-## 🎯 Version Details
-
-### 📦 v3.0.x – Sensor‑Based FOC · Core Library
-| Version | Math Type | Release | Core Features |
-|:-------:|:---------:|:-------:|:-------------|
-| **v3.0.0** | `float` | 2026.03 | Full sensor‑based FOC, basic controls, user HAL |
-| **v3.0.1** | `Q31` | Planned | Fixed-point, optimization, low‑end MCU support |
-
-**Features:**
-- ✅ Motor state machine (24 states)
-- ✅ Optimized fast math (sin/cos/sqrt)
-- ✅ JustFloat UART (compatible with Vofa/Anonymous上位机)
-- ✅ PLL speed tracking
-- ✅ PID position/speed/current triple loop
-- ✅ IMC current loop adaptation
-- ✅ LADRC high-performance speed loop
-- ✅ MTPA flux-weakening for IPMSM
-- ✅ dq-axis feedforward decoupling
-- ✅ 2nd-order Butterworth LPF
-- ✅ printf redirection for debugging
-- ✅ Hardware abstraction layer
-
-### 🔮 v3.1.x – Sensorless FOC · Observer Library
-| Version | Math Type | Release | Core Features |
-|:-------:|:---------:|:-------:|:-------------|
-| **v3.1.0** | `float` | Planned | Full sensorless FOC, multiple observers |
-| **v3.1.1** | `Q31` | Planned | Fixed-point sensorless, performance tuning |
-
-**New Features:**
-- ✅ HFI high‑frequency injection (zero/low speed)
-- ✅ SMO sliding‑mode observer (medium/high speed)
-- ✅ NSD rotor polarity detection
-- ✅ Online parameter ID (Rs/Ld/Lq/Flux)
-
-### 🚀 v3.2.x – Extended Features · Advanced Library
-| Version | Release | Core Features |
-|:-------:|:-------:|:-------------|
-| **v3.2.0** | Planned | Extended Kalman filter, ModbusRTU, more sensorless algorithms |
-
-**New Features:**
-- ✅ Extended Kalman filter (high‑precision state estimation)
-- ✅ ModbusRTU over RS485 (industrial comms)
-- ✅ Additional sensorless observers
-
----
-
-## 🔧 Quick Start
-
-### 1️⃣ Hardware Abstraction Layer
-```c
-// UserData_Function.h – implement hardware hooks
-static inline void User_InitialInit(void) {
-    // Init PWM, ADC, encoder, driver
-    HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
-    HAL_ADC_Start_DMA(&hadc1, (uint32_t*)adc_buf, 2);
-    // ...
-}
-
-static inline int32_t User_ReadADC_Raw(uint8_t Current_CH) {
-    switch(Current_CH) {
-        case 0: return adc_buf[0];  // Phase IA
-        case 1: return adc_buf[1];  // Phase IB
-        default: return 0;
-    }
-}
-
-static inline float User_Encoder_ReadRad(void) {
-    // Return angle 0–2π
-    uint32_t enc_raw = __HAL_TIM_GET_COUNTER(&htim2);
-    return (float)enc_raw / ENC_RESOLUTION * 2 * PI;
-}
-
-static inline void User_PwmDuty_Set(uint16_t Duty_u, uint16_t Duty_v, uint16_t Duty_w) {
-    __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, Duty_u);
-    __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, Duty_v);
-    __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_3, Duty_w);
-}
-```
-
-### 2️⃣ Motor Configuration
-```c
-// UserData_Motor.h
-static inline void User_MotorSet(void) {
-    Sguan.mode = VelCur_DOUBLE_MODE;  // Speed–current dual loop
-
-    // Motor parameters
-    Sguan.identify.Ld = 0.00005193f;
-    Sguan.identify.Lq = 0.00005193f;
-    Sguan.identify.Rs = 0.19067f;
-    Sguan.identify.Flux = 0.00028043f;
-
-    // Physical
-    Sguan.motor.Poles = 7;
-    Sguan.motor.VBUS = 12.0f;
-    Sguan.motor.Duty = 4249;
-
-    // Sampling
-    Sguan.motor.ADC_Precision = 4096;
-    Sguan.motor.MCU_Voltage = 3.3f;
-    Sguan.motor.Amplifier = 10.0f;
-    Sguan.motor.Sampling_Rs = 0.005f;
-
-    // Safety
-    Sguan.safe.VBUS_MAX = 14.0f;
-    Sguan.safe.VBUS_MIM = 10.0f;
-    Sguan.safe.Qcur_MAX = 10.0f;
-}
-```
-
-### 3️⃣ Controller Tuning
-```c
-// UserData_Parameter.h
-static inline void User_ParameterSet(void) {
-    // Filters
-    Sguan.bpf.CurrentD.Wc = 31415.96f;
-    Sguan.bpf.CurrentQ.Wc = 31415.96f;
-    Sguan.bpf.Encoder.Wc = 314.1596f;
-
-    // Current loop PID
-    Sguan.control.Current_D.Kp = 0.261f;
-    Sguan.control.Current_D.Ki = 958.41f;
-    Sguan.control.Current_D.OutMax = 12.0f;
-
-    // Speed loop PID
-    Sguan.control.Velocity.Kp = 0.06f;
-    Sguan.control.Velocity.Ki = 0.4f;
-    Sguan.control.Velocity.OutMax = 10.5f;
-
-    // Position loop PD
-    Sguan.control.Position.Kp = 12.0f;
-    Sguan.control.Position.Kd = 0.0f;
-
-    // PLL
-    Sguan.encoder.pll.Kp = 650.0f;
-    Sguan.encoder.pll.Ki = 210000.0f;
-}
-```
-
-### 4️⃣ Main Integration
-```c
-// main.c
 #include "SguanFOC.h"
 
 int main(void) {
-    HAL_Init();
-    SystemClock_Config();
-    User_InitialInit();
-
+    MCU_Init();                      // Your MCU platform + peripheral init
     while(1) {
-        SguanFOC_main_Loop();      // Background tasks
+        SguanFOC_main_Loop();        // ① Initialization + serial data Tx/Rx
     }
 }
 
-// 20kHz PWM interrupt
-void TIM1_UP_IRQHandler(void) {
-    SguanFOC_High_Loop();          // High‑speed control loop
+void TIM1_IRQHandler(void) {
+    SguanFOC_High_Loop();            // ② High-frequency task: current loop, angle calculation, PWM generation
+    // Your other high-priority interrupt tasks
 }
 
-// 1kHz timer interrupt
-void TIM3_IRQHandler(void) {
-    SguanFOC_Low_Loop();           // State machine & slow loops
+void TIM2_IRQHandler(void) {
+    SguanFOC_Low_Loop();             // ③ Low-frequency task: state machine switching, fault protection
+    // Your other low-priority interrupt tasks
 }
 
-// UART RX complete
-void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
-    SguanFOC_Printf_Loop(rx_buffer, rx_len);
+void USART1_IRQHandler(void) {
+    SguanFOC_Printf_Loop();          // ④ Serial debugging: receive parsing, real-time commands
+    // Your other serial interrupt tasks
 }
+
+// ⑤ User-defined: Fill in motor control mode and operation parameters in UserData_*.h files in order
 ```
 
----
+## 2. Star Trends (^^)
 
-## 📊 Performance
-| Metric | v3.0.0 | v3.0.1 | Notes |
-|:-------|:------:|:------:|:------|
-| Control cycle | 20–50µs | 20–50µs | Depends on clock |
-| Flash size | ~15KB | ~12KB | |
-| RAM per motor | ~2KB | ~2KB | |
-| Max speed | 100k RPM | 100k RPM | Depends on pole pairs |
-| Current loop bandwidth | 2–5kHz | 2–5kHz | Configurable |
-| Speed loop bandwidth | 200–500Hz | 200–500Hz | Configurable |
+> *"Hit the star. Bookmark it. Your peers are already using it."*
 
----
+<a href="https://www.star-history.com/?repos=Sguan-ZhouQing%2FSguanFOC_Library&type=date&legend=top-left">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=Sguan-ZhouQing/SguanFOC_Library&type=date&theme=dark&legend=top-left" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=Sguan-ZhouQing/SguanFOC_Library&type=date&legend=top-left" />
+   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=Sguan-ZhouQing/SguanFOC_Library&type=date&legend=top-left" />
+ </picture>
+</a>
 
-## 🔜 Development Plan
+## 3. 📋 Version Roadmap (Library Code Functionality Showcase)
+
 ```
-2026 Q2 ──── v3.0.1 Sensor‑based FOC fixed‑point release
-2026 Q3 ──── v3.1.0 Sensorless FOC floating‑point release
-2026 Q4 ──── v3.1.1 Sensorless FOC fixed‑point release
-2027 Q1 ──── v3.2.0 Extended Kalman + ModbusRTU release
+SguanFOC Library Evolution
+═══════════════════════════════════════════════════════════════
+
+SguanFOC Library v3.0.0 ->
+Positioning: Sensored FOC motor control algorithm library, floating-point operations
+Motor state machine, optimized mathematical operations, Justfloat serial protocol
+PLL phase-locked loop speed tracking, PID closed-loop control, IMC internal model concept
+LADRC linear active disturbance rejection control, MTPA maximum torque per ampere, feedforward decoupling
+Butterworth filter, printf redirection, user interface provided
+
+SguanFOC Library v3.0.1 ->
+Positioning: Sensored FOC motor control algorithm library, Q31 fixed-point operations
+Motor state machine, optimized mathematical operations, Justfloat serial protocol
+PLL phase-locked loop speed tracking, PID closed-loop control, IMC internal model concept
+STA second-order sliding mode control, MTPA maximum torque per ampere, feedforward decoupling
+Butterworth filter, printf redirection, user interface provided
+
+SguanFOC Library v3.1.0 ->
+Positioning: Sensorless FOC motor control algorithm library, floating-point operations
+Motor state machine, optimized mathematical operations, Justfloat serial protocol
+HFI high-frequency sine wave injection and rotor position estimation, harmonic suppression
+SMO stationary frame sliding mode observer algorithm, SVPWM and SPWM with third harmonic injection
+NLFO nonlinear flux linkage observer, Hall mode, feedforward decoupling
+DOB super-twisting sliding mode disturbance observer, field weakening control
+Anti-cogging algorithm, angle phase delay compensation, dead-time compensation
+NSD rotor polarity identification, motor parameter identification, SMC sliding mode control
+PLL phase-locked loop speed tracking, PID closed-loop control, STA super-twisting sliding mode control
+LADRC linear active disturbance rejection control, MTPA maximum torque per ampere, FW field weakening control
+Three typical second-order filters, printf redirection, user interface provided
+═══════════════════════════════════════════════════════════════
 ```
 
----
+## 4. Sensorless Algorithm Hardware Verification Diagrams
 
-## 🤝 Contributing
-Community contributions are welcome!
-1. Fork this project
-2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+![HFI to NLFO Diagram](https://cdn.jsdelivr.net/gh/Sguan-ZhouQing/SguanFOC_Library@main/%E9%85%8D%E5%A5%97QT%E4%B8%8A%E4%BD%8D%E6%9C%BA%E5%8F%8AFOC%E4%BD%BF%E7%94%A8%E8%AF%B4%E6%98%8E%E2%91%A0%5BPDF%5D/Image/HFI_to_NLFO.jpg)
 
----
+```
+* The above shows HFI high-frequency sine wave injection switching to SMO sliding mode observer
+* The above shows HFI high-frequency sine wave injection switching to NLFO nonlinear flux linkage observer
+* (Illustrations are from simple parameter tuning verification; deeper debugging yields better results)
+* (Other SguanFOC functions are normal; parameter identification and polarity identification have defects to be fixed in future projects)
+```
 
-## 📞 Support & Credits
-| Channel | Contact |
-|:--------|:--------|
-| 👨‍💻 **Author** | XingBichen Sguan |
-| 📧 **Email** | 3464647102@qq.com |
-| 🐛 **Issues** | [GitHub Issues](https://github.com/Sguan-ZhouQing/SguanFOC_Library/issues) |
-| 📚 **Wiki** | [Project Wiki](https://github.com/Sguan-ZhouQing/SguanFOC_Library/wiki) |
-
-Released under the MIT License – see [LICENSE](LICENSE). Thanks to all contributors!
-
-<img src="https://img.shields.io/badge/⭐-Star_if_this_project_helps_you!-brightgreen">
+![HFI to SMO Diagram](https://cdn.jsdelivr.net/gh/Sguan-ZhouQing/SguanFOC_Library@main/%E9%85%8D%E5%A5%97QT%E4%B8%8A%E4%BD%8D%E6%9C%BA%E5%8F%8AFOC%E4%BD%BF%E7%94%A8%E8%AF%B4%E6%98%8E%E2%91%A0%5BPDF%5D/Image/HFI_to_SMO.jpg)
 
 ---
 
-**SguanFOC – Make Motor Control Simpler** 🚀
+## 5. Control Mode Overview
+
+> *"One macro. Switch modes. Motor adapts to any scenario."*
+
+- 🎯 **19 Control Modes**: Open-loop → Sensored → Sensorless → Full-speed fusion
+- 🎛️ **4 Control Algorithms**: PID / LADRC / SMC / STA
+- 🔬 **3 Sensorless Observers**: HFI / SMO / NLFO
+- ⚡ **10+ Advanced Features**: MTPA / Field Weakening / Harmonic Suppression / Parameter Identification / Dead-time Compensation...
+
+| Index | Mode | Description | Positioning Method | Application Scenario |
+|:----:|:-----|:-----|:---------|:---------|
+| **0** | `MODE_VF_OPENLOOP` | V/F open-loop | Sensorless | Open-loop forced start, motor preliminary test |
+| **1** | `MODE_IF_OPENLOOP` | I/F open-loop | Sensorless | Open-loop forced start, current limiting protection |
+| **2** | `MODE_Voltag_OPEN` | Voltage open-loop | Encoder | Voltage mode debugging |
+| **3** | `MODE_Current_SINGLE` | Single current loop | Encoder | Torque control mode |
+| **4** | `MODE_VelCur_DOUBLE` | Velocity-current cascade loop | Encoder | General speed control |
+| **5** | `MODE_PosVelCur_THREE` | Position-velocity-current three loops | Encoder | Servo positioning, precision control |
+| **6** | `MODE_Sensor_Hall` | Sensored Hall speed loop | Hall sensor | Low-cost speed control |
+| **7** | `MODE_Sensorless_HFI` | High-frequency injection speed loop | Sensorless (HFI) | Zero/low speed operation |
+| **8** | `MODE_Sensorless_SMO` | Sliding mode observer speed loop | Sensorless (SMO) | Medium/high speed operation |
+| **9** | `MODE_Sensorless_NLFO` | Nonlinear flux linkage speed loop | Sensorless (NLFO) | Medium/high speed operation |
+| **10** | `MODE_Sensorless_HS` | HFI+SMO combined speed loop | Sensorless (HFI+SMO) | Smooth full-speed switching |
+| **11** | `MODE_Sensorless_HN` | HFI+NLFO combined speed loop | Sensorless (HFI+NLFO) | Smooth full-speed switching |
+| **12** | `MODE_Sensorless_AS` | Hall+SMO combined speed loop | Hall + SMO | Full-speed fusion control |
+| **13** | `MODE_Sensorless_AN` | Hall+NLFO combined speed loop | Hall + NLFO | Full-speed fusion control |
+| **14** | `MODE_Debug_HFI` | HFI test speed loop | Encoder (external observation) | HFI algorithm debugging |
+| **15** | `MODE_Debug_SMO` | SMO test speed loop | Encoder (external observation) | SMO algorithm debugging |
+| **16** | `MODE_Debug_NLFO` | NLFO test speed loop | Encoder (external observation) | NLFO algorithm debugging |
+| **17** | `MODE_Debug_HS` | HFI to SMO speed loop | Encoder (fusion test) | Observer switching debugging |
+| **18** | `MODE_Debug_HN` | HFI to NLFO speed loop | Encoder (fusion test) | Observer switching debugging |
+
+Modify the macro definition in `UserData_Config.h`:
+
+```c
+// Select the mode you need (0-18)
+#define Define_Run_Mode 11   // Example: Full-speed HFI+NLFO sensorless control
+```
+
+| Your Need | Recommended Mode |
+|:---------|:---------|
+| Just got the motor, want to spin it quickly | `0` or `1` (Open-loop forced start) |
+| Winding machine torque control | `3` (Single current loop) |
+| Self-balancing vehicle, hub motor | `4` (Speed-current double loop) |
+| Gimbal, robotic arm, CNC, 3D printer | `5` (Position-velocity-current three loops) |
+| Low-cost project (using Hall sensor) | `6` (Sensored Hall) |
+| Drone, high-speed fan (sensorless) | `11` (Full-speed HFI+NLFO) |
+| Algorithm research, observer tuning | `14` - `18` (Debug modes) |
+
+---
+
+## 6. Open-Source Hardware by Shangguan
+
+> *"Schematic. PCB. Your hardware runs out of the box."*
+
+![PCB Board Diagram](https://cdn.jsdelivr.net/gh/Sguan-ZhouQing/SguanFOC_Library@main/%E9%85%8D%E5%A5%97QT%E4%B8%8A%E4%BD%8D%E6%9C%BA%E5%8F%8AFOC%E4%BD%BF%E7%94%A8%E8%AF%B4%E6%98%8E%E2%91%A0%5BPDF%5D/Image/PCB_CH32.jpg)
+
+---
+
+## 7. 📁 Repository Structure
+
+```
+SguanFOC_Library/
+├── SguanFOC.c/h                # Core framework
+├── Sguan_math.c/h              # Mathematical operations + coordinate transforms
+├── Sguan_IQmath.c/h            # Fixed-point library
+├── Sguan_PID.c/h               # PID controller
+├── Sguan_Ladrc.c/h             # LADRC active disturbance rejection
+├── Sguan_SMC.c/h               # Sliding mode control
+├── Sguan_STA.c/h               # Super-twisting sliding mode
+├── Sguan_PLL.c/h               # Phase-locked loop
+├── Sguan_Filter.c/h            # Butterworth/Chebyshev/Bessel filters
+├── Sguan_SVPWM.c/h             # SVPWM modulation
+├── Sguan_SPWM.c/h              # SPWM + third harmonic injection
+├── Sguan_HFI.c/h               # High-frequency injection
+├── Sguan_SMO.c/h               # Sliding mode observer
+├── Sguan_NLFO.c/h              # Nonlinear flux linkage observer
+├── Sguan_NSD.c/h               # Polarity identification
+├── Sguan_DOB.c/h               # Disturbance observer
+├── Sguan_Optimize.c/h          # MTPA/Field Weakening/Dead-time/Angle compensation
+├── Sguan_Cogging.c/h           # Anti-cogging calibration
+├── Sguan_Identify.c/h          # Parameter identification
+├── Sguan_printf.c/h            # JustFloat communication
+├── Sguan_MotorStatus.c/h       # State machine
+├── Sguan_Feedforward.c/h       # Feedforward stage
+├── Sguan_Hall.c/h              # Triple Hall signal processing
+├── UserData_Config.h           # (User) configuration switches
+├── UserData_Function.h         # (User) hardware interface
+├── UserData_Motor.h            # (User) motor parameters
+├── UserData_Parameter.h        # (User) controller parameters
+├── UserData_Status.h           # (User) state machine callbacks
+└── UserData_UserControl.h      # (User) command processing
+```
+
+👉 [**Complete API Operation Documentation**](https://github.com/Sguan-ZhouQing/SguanFOC_Library/blob/main/%E9%85%8D%E5%A5%97QT%E4%B8%8A%E4%BD%8D%E6%9C%BA%E5%8F%8AFOC%E4%BD%BF%E7%94%A8%E8%AF%B4%E6%98%8E%E2%91%A0%5BPDF%5D/Sguan%E4%BD%BF%E7%94%A8%E8%AF%B4%E6%98%8E%E4%B9%A6.pdf)
+
+---
+
+## 8. License
+
+This project is open-sourced under the **MIT License**.
+
+You are free to **use, modify, and distribute** this codebase, **including for commercial purposes** — internal company use, customer project delivery, selling as a paid product — all without restrictions. No prior authorization required, no fees.
+
+The MIT license only requires retaining the copyright notice. It does not mandate attribution, though we welcome being informed of your use case.
+
+> 📄 See [LICENSE](LICENSE) for details
+
+---
+
+## 9. Connect with the Source Code Author
+
+Xingbichen Sguan is an embedded algorithm engineer, open-source hardware enthusiast, and independent developer. Representative work: SguanFOC open-source project (GitHub FOC algorithm library). Shares motor control, embedded development, and open-source hardware technology across platforms.
+
+| Platform | Account | Link |
+|---|---|---|
+| GitHub | Sguan-ZhouQing | https://github.com/Sguan-ZhouQing |
+| Bilibili | Xingbichen Sguan | [https://space.bilibili.com/564956515](https://space.bilibili.com/564956515) |
+| TikTok | Xingbichen Sguan | TikTok ID: dy9q15ail4xc |
+| Fan Group | [Sguan(^^)] Water Friends Happy House | Group ID: 716279199 |
+| Email | Technical Communication | 3464647102@qq.com |
+
+Technical inquiries, project collaboration → Contact via platforms above or email.
+
+<p align="center">
+  <b>SguanFOC - Making Motor Control Simpler</b> 🚀
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/⭐-Whether%20you%20are%20an%20expert%20or%20beginner%2C%20if%20this%20motor%20control%20code%20project%20helps%20you%2C%20please%20give%20us%20a%20Star!-brightgreen">
+</p>
