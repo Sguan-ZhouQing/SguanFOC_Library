@@ -56,7 +56,7 @@ void TIM2_IRQHandler(void) {
 }
 
 void USART1_IRQHandler(void) {
-    SguanFOC_Printf_Loop();          // ④串口调试：接收解析、实时指令
+    SguanFOC_Printf_Loop(Sguan_PrintfBuff, Size)； // ④串口调试：接收解析
     // 你的其他串口中断任务
 }
 
