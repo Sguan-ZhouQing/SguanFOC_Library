@@ -1065,7 +1065,7 @@ static void Encoder_Sensorless_Tall(SguanFOC_System_STRUCT *sguan){
 
     // 8.电机角度相关数值更新
     Value_Correct(&sguan->value.Low_angle, (sguan->value.Low_angle - sguan->value.High_angle));
-    sguan->encoder.Sensorless_Pos = Value_normalize(sguan->value.Low_angle*Normalized_Gain + 
+    sguan->encoder.Real_Speed = Value_normalize(sguan->value.Low_angle*Normalized_Gain + 
                             sguan->value.High_angle*sguan->value.Sensorless_Gain);
     sguan->encoder.Real_We = sguan->encoder.Real_Speed*sguan->motor.Poles;
     sguan->encoder.Real_Re = Value_normalize(
@@ -1145,7 +1145,7 @@ static void Encoder_Sensorless_Normal(SguanFOC_System_STRUCT *sguan){
     // 8.电机角度相关数值更新
     sguan->encoder.Real_Speed = sguan->transfer.LPF_encoder.filter.Output;
     Value_Correct(&sguan->value.Low_angle, (sguan->value.Low_angle - sguan->value.High_angle));
-    sguan->encoder.Sensorless_Pos = Value_normalize(sguan->value.Low_angle*Normalized_Gain + 
+    sguan->encoder.Real_Speed = Value_normalize(sguan->value.Low_angle*Normalized_Gain + 
                             sguan->value.High_angle*sguan->value.Sensorless_Gain);
     sguan->encoder.Real_We = sguan->encoder.Real_Speed*sguan->motor.Poles;
     sguan->encoder.Real_Re = Value_normalize(
