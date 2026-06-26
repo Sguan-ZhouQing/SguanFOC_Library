@@ -10,7 +10,7 @@
 // |   1.SVPWM/SPWM是否使能     2.电流计算是否使能             |
 // |   3.编码器运算是否使能      4.控制器是否使能               |
 // |   MOTOR_STATUS_STANDBY        NULL(用户无控制权)         |
-// |   MOTOR_STATUS_START          1(用户无控制权)         |
+// |   MOTOR_STATUS_START          1(用户无控制权)            |
 // |   MOTOR_STATUS_INITIALIZING   123(用户无控制权)          |
 // |   MOTOR_STATUS_CALIBRATING    1234(用户无控制权)         |
 // |   MOTOR_STATUS_IDLE           1234(控制权交接完成)       |

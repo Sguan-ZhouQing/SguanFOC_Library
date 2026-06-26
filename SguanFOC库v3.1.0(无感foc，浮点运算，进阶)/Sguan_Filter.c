@@ -113,7 +113,7 @@ void TPNF_Loop(TPNF_STRUCT *tpnf){
     float den = 4.0f+4.0f*temp0+temp2;
 
     float num_0 = (num+4.0f*temp1)/den;
-    float num_1 = (num-8.0f+temp2)/den;
+    float num_1 = (-8.0f+2.0f*temp2)/den;
     float num_2 = (num-4.0f*temp1)/den;
     float den_0 = (num-4.0f*temp0)/den;
 

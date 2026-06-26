@@ -59,16 +59,31 @@ static uint32_t Hash_Compute(const char *str, uint8_t len){
 static void Handle_MOTOR(float value){
     if (value >= 0.5f) Sguan.Func_Start();
     else Sguan.Func_Stop();
+    // MOTOR=6.88?
+    // motor = value;
 }
 
 // 指令处理回调函数库->Speed
 static void Handle_Speed(float value){
     Sguan.Func_Set_Velocity(value);
+    // Speed=50.0?
+    // if(motor <= 1){
+    //     CAN_TX(0x11,SPEED,value);
+    // }
+    // else if(motor <= 2){
+    //     CAN_TX(0x22,SPEED,value);
+    // }
+    // else if(motor <= 3){
+    //     CAN_TX(0x33,SPEED,value);
+    // }
 }
 
 // 指令处理回调函数库->Position
 static void Handle_Position(float value){
     Sguan.Func_Set_Position(value);
+    // Position=50.0?
+
+    // CAN_TX(id,POSITION,value);
 }
 
 // 指令处理回调函数库->Id

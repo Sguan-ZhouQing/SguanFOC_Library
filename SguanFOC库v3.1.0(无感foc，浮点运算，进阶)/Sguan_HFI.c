@@ -28,12 +28,12 @@ void HFI_Init(HFI_STRUCT *hfi){
     double den2 = 4.0+8.0*temp0+4.0*temp2;
 
     hfi->go.s1_num[0] = (float)((4.0+4.0*temp1+temp2)/den1);
-    hfi->go.s1_num[1] = (float)((-8.0+2.0*temp2+4.0)/den1);
+    hfi->go.s1_num[1] = (float)((-8.0+2.0*temp2)/den1);
     hfi->go.s1_num[2] = (float)((4.0-4.0*temp1+temp2)/den1);
     hfi->go.s1_den = (float)((4.0-4.0*temp0+temp2)/den1);
 
     hfi->go.s2_num[0] = (float)((4.0+8.0*temp1+4.0*temp2)/den2);
-    hfi->go.s2_num[1] = (float)((-8.0+8.0*temp2+4.0)/den2);
+    hfi->go.s2_num[1] = (float)((-8.0+8.0*temp2)/den2);
     hfi->go.s2_num[2] = (float)((4.0-8.0*temp1+4.0*temp2)/den2);
     hfi->go.s2_den = (float)((4.0-8.0*temp0+4.0*temp2)/den2);
 
@@ -88,38 +88,6 @@ void HFI_Init(HFI_STRUCT *hfi){
 
 /**
  * @description: 无感高频方波注入的离散运行函数
- * @reminder: (处理DQ轴电流环的基频信号量)
- * @reminder: https://github.com/Sguan-ZhouQing/SguanFOC_Library/blob/main/%E9%85%8D%E5%A5%97Simulink%E6%A8%A1%E5%9E%8B%E5%BC%80%E6%BA%90%E2%91%A1%5B%E7%AE%97%E6%B3%95%E5%8E%9F%E7%90%86%E5%9B%BE%5D/Sguan_HFI.png
- * @reminder: (上方链接是此Sguan_HFI模块Simulink原理仿真图)
- * @param {HFI_STRUCT} *hfi
- * @return {*}
- */
-void HFI_Current_Loop(HFI_STRUCT *hfi){
-    // 1.带入差分方程，计算输出
-    hfi->go.Output_Id = hfi->go.s1_num[0]*hfi->go.Input_Id + 
-                        hfi->go.s1_num[1]*(hfi->data0.x_i[0]-hfi->data0.x_o[0]) + 
-                        hfi->go.s1_num[2]*hfi->data0.x_i[1] - 
-                        hfi->go.s1_den*hfi->data0.x_o[1];
-
-    hfi->go.Output_Iq = hfi->go.s1_num[0]*hfi->go.Input_Iq + 
-                        hfi->go.s1_num[1]*(hfi->data0.y_i[0]-hfi->data0.y_o[0]) + 
-                        hfi->go.s1_num[2]*hfi->data0.y_i[1] - 
-                        hfi->go.s1_den*hfi->data0.y_o[1];
-
-    // 2.更新历史输入和输出数值
-    hfi->data0.x_i[1] = hfi->data0.x_i[0];
-    hfi->data0.x_i[0] = hfi->go.Input_Id;
-    hfi->data0.x_o[1] = hfi->data0.x_o[0];
-    hfi->data0.x_o[0] = hfi->go.Output_Id;
-
-    hfi->data0.y_i[1] = hfi->data0.y_i[0];
-    hfi->data0.y_i[0] = hfi->go.Input_Iq;
-    hfi->data0.y_o[1] = hfi->data0.y_o[0];
-    hfi->data0.y_o[0] = hfi->go.Output_Iq;
-}
-
-/**
- * @description: 无感高频方波注入的离散运行函数
  * @reminder: (处理Q轴坐标系下的高频信号)
  * @reminder: https://github.com/Sguan-ZhouQing/SguanFOC_Library/blob/main/%E9%85%8D%E5%A5%97Simulink%E6%A8%A1%E5%9E%8B%E5%BC%80%E6%BA%90%E2%91%A1%5B%E7%AE%97%E6%B3%95%E5%8E%9F%E7%90%86%E5%9B%BE%5D/Sguan_HFI.png
  * @reminder: (上方链接是此Sguan_HFI模块Simulink原理仿真图)
@@ -160,4 +128,36 @@ void HFI_ReadRad_Loop(HFI_STRUCT *hfi){
     float Cosine;
     fast_sin_cos(hfi->go.Angle, &hfi->go.Sine[0], &Cosine);
     hfi->go.Output_Uin = Cosine*hfi->Uh;
+}
+
+/**
+ * @description: 无感高频方波注入的离散运行函数
+ * @reminder: (处理DQ轴电流环的基频信号量)
+ * @reminder: https://github.com/Sguan-ZhouQing/SguanFOC_Library/blob/main/%E9%85%8D%E5%A5%97Simulink%E6%A8%A1%E5%9E%8B%E5%BC%80%E6%BA%90%E2%91%A1%5B%E7%AE%97%E6%B3%95%E5%8E%9F%E7%90%86%E5%9B%BE%5D/Sguan_HFI.png
+ * @reminder: (上方链接是此Sguan_HFI模块Simulink原理仿真图)
+ * @param {HFI_STRUCT} *hfi
+ * @return {*}
+ */
+void HFI_Current_Loop(HFI_STRUCT *hfi){
+    // 1.带入差分方程，计算输出
+    hfi->go.Output_Id = hfi->go.s1_num[0]*hfi->go.Input_Id + 
+                        hfi->go.s1_num[1]*(hfi->data0.x_i[0]-hfi->data0.x_o[0]) + 
+                        hfi->go.s1_num[2]*hfi->data0.x_i[1] - 
+                        hfi->go.s1_den*hfi->data0.x_o[1];
+
+    hfi->go.Output_Iq = hfi->go.s1_num[0]*hfi->go.Input_Iq + 
+                        hfi->go.s1_num[1]*(hfi->data0.y_i[0]-hfi->data0.y_o[0]) + 
+                        hfi->go.s1_num[2]*hfi->data0.y_i[1] - 
+                        hfi->go.s1_den*hfi->data0.y_o[1];
+
+    // 2.更新历史输入和输出数值
+    hfi->data0.x_i[1] = hfi->data0.x_i[0];
+    hfi->data0.x_i[0] = hfi->go.Input_Id;
+    hfi->data0.x_o[1] = hfi->data0.x_o[0];
+    hfi->data0.x_o[0] = hfi->go.Output_Id;
+
+    hfi->data0.y_i[1] = hfi->data0.y_i[0];
+    hfi->data0.y_i[0] = hfi->go.Input_Iq;
+    hfi->data0.y_o[1] = hfi->data0.y_o[0];
+    hfi->data0.y_o[0] = hfi->go.Output_Iq;
 }
