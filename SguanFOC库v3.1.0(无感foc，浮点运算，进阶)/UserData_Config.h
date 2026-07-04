@@ -26,7 +26,7 @@
  * @reminder: 18->MODE_Debug_HN         HFI切NLFO_转速环    (高精度编码器提供Rad)
  * @return {*}
  */
-#define Define_Run_Mode 3
+#define Define_Run_Mode 0
 
 /**
  * @description: 宏定义0-3决定“电机速度环”的控制方式(默认使用PI控制)
@@ -112,7 +112,7 @@
  * @reminder: （过程中十分耗时...想要等待一定时间）
  * @return {*}
  */
-#define Switch_Cogging_Calculate 1
+#define Switch_Cogging_Calculate 0
 
 /**
  * @description: 宏定义0或1决定“AngleComp相位延迟补偿”是否开启(默认关闭)
@@ -120,7 +120,7 @@
  * @reminder: 1->开启相位延迟补偿，恒定延迟补偿，固定Td和Offset补偿算法
  * @return {*}
  */
-#define Open_AngleComp_Calculate 1
+#define Open_AngleComp_Calculate 0
 
 /**
  * @description: 宏定义0或1决定“电流前馈”是否开启(开启最优)
