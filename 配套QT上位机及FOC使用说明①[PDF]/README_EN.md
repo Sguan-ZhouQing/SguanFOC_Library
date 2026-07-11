@@ -66,9 +66,9 @@ void USART1_IRQHandler(void) {
 
 <a href="https://www.star-history.com/?repos=Sguan-ZhouQing%2FSguanFOC_Library&type=date&legend=top-left">
  <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=Sguan-ZhouQing/SguanFOC_Library&type=date&theme=dark&legend=top-left" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=Sguan-ZhouQing/SguanFOC_Library&type=date&legend=top-left" />
-   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=Sguan-ZhouQing/SguanFOC_Library&type=date&legend=top-left" />
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=Sguan-ZhouQing/SguanFOC_Library&type=date&theme=dark&legend=top-left&sealed_token=DCNZHrFTcRWg8JwcxzJZ7Me5CysRVo28rEYaTqCv7jwAFsEV2JCu7urRkgF67jWIudWG1NzAXrsyGJAKMvDuN9xXhMSHM9Upuw94HtD1lZx1Cn9p5KdCiQ" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=Sguan-ZhouQing/SguanFOC_Library&type=date&legend=top-left&sealed_token=DCNZHrFTcRWg8JwcxzJZ7Me5CysRVo28rEYaTqCv7jwAFsEV2JCu7urRkgF67jWIudWG1NzAXrsyGJAKMvDuN9xXhMSHM9Upuw94HtD1lZx1Cn9p5KdCiQ" />
+   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=Sguan-ZhouQing/SguanFOC_Library&type=date&legend=top-left&sealed_token=DCNZHrFTcRWg8JwcxzJZ7Me5CysRVo28rEYaTqCv7jwAFsEV2JCu7urRkgF67jWIudWG1NzAXrsyGJAKMvDuN9xXhMSHM9Upuw94HtD1lZx1Cn9p5KdCiQ" />
  </picture>
 </a>
 
