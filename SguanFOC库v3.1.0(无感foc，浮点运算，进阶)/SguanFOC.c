@@ -439,7 +439,7 @@ static void Transfer_Hall_Loop(SguanFOC_System_STRUCT *sguan,
     Transfer_PLL_Loop(pll, 
                     CONFIG_MODE, 
                     sguan->motor.Poles, 
-                    (Hall_We - sguan->encoder.Real_offset)*
+                    (Hall_We - Value_normalize(sguan->encoder.Real_offset*sguan->motor.Poles))*
                     sguan->motor.Encoder_Dir);
     #endif // IS_HALL_MODE
 }
