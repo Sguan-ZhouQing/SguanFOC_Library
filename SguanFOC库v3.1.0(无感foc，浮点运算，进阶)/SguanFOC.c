@@ -1707,8 +1707,8 @@ static void Status_Switch_Loop(SguanFOC_System_STRUCT *sguan){
     }
     // 3.过流保护
     if ((sguan->status != MOTOR_STATUS_OVERCURRENT) && 
-        (sguan->current.Real_Id > sguan->safe.Dcur_MAX) || 
-        (sguan->current.Real_Iq > sguan->safe.Qcur_MAX)){
+        ((sguan->current.Real_Id > sguan->safe.Dcur_MAX) || 
+        (sguan->current.Real_Iq > sguan->safe.Qcur_MAX))){
         sguan->status = MOTOR_STATUS_OVERCURRENT;
     }
     // 4.编码错误
