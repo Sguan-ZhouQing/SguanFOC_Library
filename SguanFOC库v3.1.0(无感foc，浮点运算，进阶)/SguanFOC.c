@@ -1696,7 +1696,7 @@ static void Status_Switch_Loop(SguanFOC_System_STRUCT *sguan){
     }
     // 2.驱动器物理温度Temp状态机
     if (User_Temperature_DataGet() != Value_N_INF){        
-        if ((sguan->status != MOTOR_STATUS_UNDERTEMPERATURE) && 
+        if ((sguan->status != MOTOR_STATUS_OVERTEMPERATURE) && 
             sguan->foc.Real_Temp > sguan->safe.Temp_MAX){
             sguan->status = MOTOR_STATUS_OVERTEMPERATURE;
         }
