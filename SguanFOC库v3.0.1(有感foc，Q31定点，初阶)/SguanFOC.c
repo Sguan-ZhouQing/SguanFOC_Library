@@ -804,7 +804,7 @@ static void Control_Current_SINGLE_q31(SguanFOC_System_STRUCT *sguan){
     MTPA_Loop_q31(&sguan->foc.Target_Id_q31,
                 sguan->identify.Flux_q31,
                 sguan->identify.Ld_q31,
-                sguan->current.Real_Iq_q31,
+                sguan->identify.Lq_q31,
                 sguan->current.Real_Iq_q31);
     #endif // CONFIG_MTPA
 
@@ -850,7 +850,7 @@ static void Control_VelCur_DOUBLE_q31(SguanFOC_System_STRUCT *sguan){
     MTPA_Loop_q31(&sguan->foc.Target_Id_q31,
                 sguan->identify.Flux_q31,
                 sguan->identify.Ld_q31,
-                sguan->current.Real_Iq_q31,
+                sguan->identify.Lq_q31,
                 sguan->current.Real_Iq_q31);
     #endif // CONFIG_MTPA
 
@@ -886,7 +886,7 @@ static void Control_VelCur_DOUBLE_q31(SguanFOC_System_STRUCT *sguan){
     MTPA_Loop_q31(&sguan->foc.Target_Id_q31,
                 sguan->identify.Flux_q31,
                 sguan->identify.Ld_q31,
-                sguan->current.Real_Iq_q31,
+                sguan->identify.Lq_q31,
                 sguan->current.Real_Iq_q31);
     #endif // CONFIG_MTPA
 
@@ -939,7 +939,7 @@ static void Control_PosVelCur_THREE_q31(SguanFOC_System_STRUCT *sguan){
     MTPA_Loop_q31(&sguan->foc.Target_Id_q31,
                 sguan->identify.Flux_q31,
                 sguan->identify.Ld_q31,
-                sguan->current.Real_Iq_q31,
+                sguan->identify.Lq_q31,
                 sguan->current.Real_Iq_q31);
     #endif // CONFIG_MTPA
 
@@ -981,7 +981,7 @@ static void Control_PosVelCur_THREE_q31(SguanFOC_System_STRUCT *sguan){
     MTPA_Loop_q31(&sguan->foc.Target_Id_q31,
                 sguan->identify.Flux_q31,
                 sguan->identify.Ld_q31,
-                sguan->current.Real_Iq_q31,
+                sguan->identify.Lq_q31,
                 sguan->current.Real_Iq_q31);
     #endif // CONFIG_MTPA
 
@@ -1153,7 +1153,7 @@ static void Status_Switch_Loop(SguanFOC_System_STRUCT *sguan){
     }
     // 2.驱动器物理温度Temp状态机
     if (User_Temperature_DataGet() != -9999.0f){        
-        if ((sguan->status != MOTOR_STATUS_UNDERTEMPERATURE) && 
+        if ((sguan->status != MOTOR_STATUS_OVERTEMPERATURE) && 
             sguan->foc.Real_Temp > sguan->safe.Temp_MAX){
             sguan->status = MOTOR_STATUS_OVERTEMPERATURE;
         }
