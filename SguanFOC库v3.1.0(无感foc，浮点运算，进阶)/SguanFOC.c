@@ -434,6 +434,7 @@ static void Transfer_Hall_Loop(SguanFOC_System_STRUCT *sguan,
     sguan->transfer.Hall.go.Input_Ga = User_Encoder_ReadHall(0);
     sguan->transfer.Hall.go.Input_Gb = User_Encoder_ReadHall(1);
     sguan->transfer.Hall.go.Input_Gc = User_Encoder_ReadHall(2);
+	Hall_Loop(&sguan->transfer.Hall);
     float Hall_We = sguan->transfer.Hall.go.Output_Rad;
     Transfer_PLL_Loop(pll, 
                     CONFIG_MODE, 
