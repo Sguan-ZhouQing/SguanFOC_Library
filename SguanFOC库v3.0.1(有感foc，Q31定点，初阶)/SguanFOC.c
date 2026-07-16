@@ -1171,8 +1171,8 @@ static void Status_Switch_Loop(SguanFOC_System_STRUCT *sguan){
     }
     #else // CONFIG_Q31
     if ((sguan->status != MOTOR_STATUS_OVERCURRENT) && 
-        (sguan->current.Real_Id_q31 > sguan->safe.Dcur_MAX_q31) || 
-        (sguan->current.Real_Iq_q31 > sguan->safe.Qcur_MAX_q31)){
+        ((sguan->current.Real_Id_q31 > sguan->safe.Dcur_MAX_q31) || 
+        (sguan->current.Real_Iq_q31 > sguan->safe.Qcur_MAX_q31))){
         sguan->status = MOTOR_STATUS_OVERCURRENT;
     }
     #endif // CONFIG_Q31
