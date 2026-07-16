@@ -305,7 +305,7 @@ static void Control_Current_SINGLE(SguanFOC_System_STRUCT *sguan){
     FW_MTPA_Loop(&sguan->foc.Target_Id,
                 sguan->identify.Flux,
                 sguan->identify.Ld,
-                sguan->current.Real_Iq,
+                sguan->identify.Lq,
                 sguan->current.Real_Iq);
     #endif // Open_FW_Calculate                    
 
@@ -350,7 +350,7 @@ static void Control_VelCur_DOUBLE(SguanFOC_System_STRUCT *sguan){
     FW_MTPA_Loop(&sguan->foc.Target_Id,
                 sguan->identify.Flux,
                 sguan->identify.Ld,
-                sguan->current.Real_Iq,
+                sguan->identify.Lq,
                 sguan->current.Real_Iq);
     #endif // Open_FW_Calculate
 
@@ -437,7 +437,7 @@ static void Control_PosVelCur_THREE(SguanFOC_System_STRUCT *sguan){
     FW_MTPA_Loop(&sguan->foc.Target_Id,
                 sguan->identify.Flux,
                 sguan->identify.Ld,
-                sguan->current.Real_Iq,
+                sguan->identify.Lq,
                 sguan->current.Real_Iq);
     #endif // Open_FW_Calculate
 
