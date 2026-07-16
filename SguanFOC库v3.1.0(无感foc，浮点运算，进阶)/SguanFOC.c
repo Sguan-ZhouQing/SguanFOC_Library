@@ -840,14 +840,14 @@ static void Current_Tick(SguanFOC_System_STRUCT *sguan){
         sguan->foc.sine,
         sguan->foc.cosine);
 
-    // // 3.DQ轴高频信号陷波过滤
-    // #if IS_HFI_MODE
-    // sguan->transfer.HFI.go.Input_Id = Id_Raw;
-    // sguan->transfer.HFI.go.Input_Iq = Iq_Raw;
-    // HFI_Current_Loop(&sguan->transfer.HFI);
-    // Id_Raw = sguan->transfer.HFI.go.Output_Id;
-    // Iq_Raw = sguan->transfer.HFI.go.Output_Iq;
-    // #endif // IS_HFI_MODE
+    // 3.DQ轴高频信号陷波过滤
+    #if IS_HFI_MODE
+    sguan->transfer.HFI.go.Input_Id = Id_Raw;
+    sguan->transfer.HFI.go.Input_Iq = Iq_Raw;
+    HFI_Current_Loop(&sguan->transfer.HFI);
+    Id_Raw = sguan->transfer.HFI.go.Output_Id;
+    Iq_Raw = sguan->transfer.HFI.go.Output_Iq;
+    #endif // IS_HFI_MODE
 
     // 4.DQ轴电流谐波抑制(抑制电机5、7次主要谐波)
     #if CONFIG_Inhibit
@@ -1333,7 +1333,7 @@ static void Control_VelCur_DOUBLE(SguanFOC_System_STRUCT *sguan){
     MTPA_Loop(&sguan->foc.Target_Id,
             sguan->motor.identify.Flux,
             sguan->motor.identify.Ld,
-            sguan->current.Real_Iq,
+            sguan->motor.identify.Lq,
             sguan->current.Real_Iq);
     #endif // CONFIG_MTPA
 
@@ -1438,7 +1438,7 @@ static void Control_PosVelCur_THREE(SguanFOC_System_STRUCT *sguan){
     MTPA_Loop(&sguan->foc.Target_Id,
             sguan->motor.identify.Flux,
             sguan->motor.identify.Ld,
-            sguan->current.Real_Iq,
+            sguan->motor.identify.Lq,
             sguan->current.Real_Iq);
     #endif // CONFIG_MTPA
 
@@ -2027,23 +2027,10 @@ static void Sguan_Calculate_main_Loop(SguanFOC_System_STRUCT *sguan){
         // (Offset需要电机零位)
         Offset_Rad_Init[Value_set(CONFIG_MODE, 
             MODE_Debug_HN,0)](sguan);
+		
+		// 如果强拖，这里定位零点
         sguan->foc.Ud_in = 3.0f;
         User_Delay(1200);
-        sguan->foc.Ud_in = 0.0f;
-        User_Delay(800);
-
-        // 1.电机强拖到D轴零位
-        sguan->foc.Ud_in = 3.0f;
-        User_Delay(1200);
-
-        // 2.读取高精度编码器的偏置
-        for (uint8_t i = 0; i < 10; i++){
-            sguan->encoder.Real_offset += User_Encoder_ReadRad();
-            User_Delay(2);
-        }
-        sguan->encoder.Real_offset = sguan->encoder.Real_offset/10.0f;
-
-        // 3.释放电机电压
         sguan->foc.Ud_in = 0.0f;
         User_Delay(800);
 
