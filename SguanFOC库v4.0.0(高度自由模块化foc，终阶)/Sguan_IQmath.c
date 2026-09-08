@@ -277,7 +277,7 @@ static Q15_t IQmath_Q15_convert_base(Q15_t q, float old_base, float new_base){
 }
 
 // ================== 全局函数(同时兼容Q15和Q31)=====================
-Sguan_t IQmath_Q_from_float(float f, float base_value){
+SguanQ IQmath_Q_from_float(float f, float base_value){
     #if DATA_Define_IQmath==IQmath_Define_Q15
     return IQmath_Q15_from_float(f, base_value);
     #else // DATA_Define_IQmath
@@ -285,7 +285,7 @@ Sguan_t IQmath_Q_from_float(float f, float base_value){
     #endif // DATA_Define_IQmath
 }
 
-float IQmath_Q_to_float(Sguan_t q, float base_value){
+float IQmath_Q_to_float(SguanQ q, float base_value){
     #if DATA_Define_IQmath==IQmath_Define_Q15
     return IQmath_Q15_to_float(q, base_value);
     #else // DATA_Define_IQmath
@@ -293,7 +293,7 @@ float IQmath_Q_to_float(Sguan_t q, float base_value){
     #endif // DATA_Define_IQmath
 }
 
-Sguan_t IQmath_Q_add(Sguan_t a, Sguan_t b){
+SguanQ IQmath_Q_add(SguanQ a, SguanQ b){
     #if DATA_Define_IQmath==IQmath_Define_Q15
     return IQmath_Q15_add(a, b);
     #else // DATA_Define_IQmath
@@ -301,7 +301,7 @@ Sguan_t IQmath_Q_add(Sguan_t a, Sguan_t b){
     #endif // DATA_Define_IQmath
 }
 
-Sguan_t IQmath_Q_sub(Sguan_t a, Sguan_t b){
+SguanQ IQmath_Q_sub(SguanQ a, SguanQ b){
     #if DATA_Define_IQmath==IQmath_Define_Q15
     return IQmath_Q15_sub(a, b);
     #else // DATA_Define_IQmath
@@ -309,7 +309,7 @@ Sguan_t IQmath_Q_sub(Sguan_t a, Sguan_t b){
     #endif // DATA_Define_IQmath
 }
 
-Sguan_t IQmath_Q_mul(Sguan_t a, Sguan_t b){
+SguanQ IQmath_Q_mul(SguanQ a, SguanQ b){
     #if DATA_Define_IQmath==IQmath_Define_Q15
     return IQmath_Q15_mul(a, b);
     #else // DATA_Define_IQmath
@@ -317,7 +317,7 @@ Sguan_t IQmath_Q_mul(Sguan_t a, Sguan_t b){
     #endif // DATA_Define_IQmath
 }
 
-Sguan_t IQmath_Q_div(Sguan_t a, Sguan_t b){
+SguanQ IQmath_Q_div(SguanQ a, SguanQ b){
     #if DATA_Define_IQmath==IQmath_Define_Q15
     return IQmath_Q15_div(a, b);
     #else // DATA_Define_IQmath
@@ -325,7 +325,7 @@ Sguan_t IQmath_Q_div(Sguan_t a, Sguan_t b){
     #endif // DATA_Define_IQmath
 }
 
-Sguan_t IQmath_Q_convert_base(Sguan_t q, float old_base, float new_base){
+SguanQ IQmath_Q_convert_base(SguanQ q, float old_base, float new_base){
     #if DATA_Define_IQmath==IQmath_Define_Q15
     return IQmath_Q15_convert_base(q, old_base, new_base);
     #else // DATA_Define_IQmath

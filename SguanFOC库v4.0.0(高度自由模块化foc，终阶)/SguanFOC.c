@@ -1,8 +1,10 @@
 #include "SguanFOC.h"
 
+SguanFOC_STRUCT Sguan;
+
 
 void SguanFOC_High_Loop(void){
-    
+
 }
 
 void SguanFOC_Low_Loop(void){

@@ -1,7 +1,7 @@
 #include "Sguan_Math.h"
 
 // 常量宏定义声明
-#define Value_512_2PI       81.487330863050417f
+#define MATH_Value_512_2PI       81.487330863050417f
 
 static const float sin_tab[512] = {
     0.0000000000f, 0.0122715384f, 0.0245412290f, 0.0368072242f, 0.0490676761f, 0.0613207407f,
@@ -93,16 +93,16 @@ static const float sin_tab[512] = {
 };
 
 // 快速正弦算法sine
-float fast_sin(float theta){
+float Math_sin(float theta){
     while (1){
-        if (theta > Value_2PI)
-            theta = theta - Value_2PI;
+        if (theta > MATH_Value_2PI)
+            theta = theta - MATH_Value_2PI;
         else if (theta < 0)
-            theta = theta + Value_2PI;
+            theta = theta + MATH_Value_2PI;
         else
             break;
     }
-    float idx_f = theta * Value_512_2PI;
+    float idx_f = theta * MATH_Value_512_2PI;
     int idx = (int)idx_f;
     
     if (idx >= 512) idx = 511;
@@ -111,15 +111,15 @@ float fast_sin(float theta){
 }
 
 // 快速求解sine和cosine
-void fast_sin_cos(float x, float *sin_x, float *cos_x){
-  *sin_x = fast_sin(x);
-  *cos_x = fast_cos(x);
+void Math_sin_cos(float x, float *sin_x, float *cos_x){
+  *sin_x = Math_sin(x);
+  *cos_x = Math_cos(x);
 }
 
 // 快速求解tan函数
-float fast_tan(float x){
+float Math_tan(float x){
     float sine,cosine;
-    fast_sin_cos(x, &sine, &cosine);
+    Math_sin_cos(x, &sine, &cosine);
     return sine/cosine;
 }
 
@@ -151,15 +151,15 @@ static const float ATAN_TABLE[91] = {
 };
 
 // 快速求解反三角tan函数
-float fast_atan(float x){
+float Math_atan(float x){
     if (x != x){
       return x;
     }
     if (x < 0.0f){
-      return -fast_atan(-x);
+      return -Math_atan(-x);
     }
     if (x > 1.0f){
-      return (float)((float)Value_PI_2 - (float)fast_atan(1.0f / x));
+      return (float)((float)MATH_Value_PI_2 - (float)Math_atan(1.0f / x));
     }
 
     float pos = (float)x *90.0f;
