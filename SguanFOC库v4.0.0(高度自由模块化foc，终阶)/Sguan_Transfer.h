@@ -823,6 +823,33 @@ typedef struct Nlfo{
     NlfoParams params;
     NlfoData *data;
 }Nlfo;
+// --------------------------- NLFO (无感)非线性磁链观测器 ---------------------------
+typedef struct{
+    SguanQ input;
+}VcfoIn;
+
+typedef struct{
+    SguanQ output;
+}VcfoOut;
+
+typedef struct{
+    SguanQ t;
+    SguanQ wo;
+
+    SguanQ k1;
+    SguanQ k2;
+
+    uint8_t recalculate_total_flag;
+}VcfoParams;
+
+typedef struct VcfoData VcfoData;
+
+typedef struct Vcfo{
+    VcfoIn in;
+    VcfoOut out;
+    VcfoParams params;
+    VcfoData *data;
+}Vcfo;
 // --------------------------- HFI (无感)高频正弦波注入 ---------------------------
 typedef struct{
     SguanQ input;
@@ -1221,6 +1248,7 @@ void transfer_dob_init(Dob *dob);
 void transfer_rls_init(Rls *rls);
 void transfer_smo_init(Smo *smo);
 void transfer_nlfo_init(Nlfo *nlfo);
+void transfer_vcfo_init(Vcfo *vcfo);
 void transfer_hfi_init(Hfi *hfi);
 void transfer_rolo_init(Rolo *rolo);
 void transfer_mars_init(Mars *mars);
@@ -1257,6 +1285,7 @@ void transfer_dob_loop(Dob *dob);
 void transfer_rls_loop(Rls *rls);
 void transfer_smo_loop(Smo *smo);
 void transfer_nlfo_loop(Nlfo *nlfo);
+void transfer_vcfo_loop(Vcfo *vcfo);
 void transfer_hfi_loop(Hfi *hfi);
 void transfer_rolo_loop(Rolo *rolo);
 void transfer_mars_loop(Mars *mars);
@@ -1282,126 +1311,129 @@ void transfer_singlers_loop(SingleRs *singlers);
 
 // ==================== 实例获取：块实例统一由 .c 的静态池提供，用户只拿指针 ====================
 #if CONFIG_TRANSFER1
-Transfer1 *transfer_transfer1_get(int ch);
+Transfer1 *transfer_transfer1_get(uint8_t motor, int ch);
 #endif
 #if CONFIG_TRANSFER2
-Transfer2 *transfer_transfer2_get(int ch);
+Transfer2 *transfer_transfer2_get(uint8_t motor, int ch);
 #endif
 #if CONFIG_TRANSFER3
-Transfer3 *transfer_transfer3_get(int ch);
+Transfer3 *transfer_transfer3_get(uint8_t motor, int ch);
 #endif
 #if CONFIG_TRANSFER4
-Transfer4 *transfer_transfer4_get(int ch);
+Transfer4 *transfer_transfer4_get(uint8_t motor, int ch);
 #endif
 #if CONFIG_TRANSFER5
-Transfer5 *transfer_transfer5_get(int ch);
+Transfer5 *transfer_transfer5_get(uint8_t motor, int ch);
 #endif
 #if CONFIG_INTEGRATOR
-Integrator *transfer_integrator_get(int ch);
+Integrator *transfer_integrator_get(uint8_t motor, int ch);
 #endif
 #if CONFIG_DERIVATIVE
-Derivative *transfer_derivative_get(int ch);
+Derivative *transfer_derivative_get(uint8_t motor, int ch);
 #endif
 #if CONFIG_DFT
-Dft *transfer_dft_get(int ch);
+Dft *transfer_dft_get(uint8_t motor, int ch);
 #endif
 #if CONFIG_HALL
-Hall *transfer_hall_get(int ch);
+Hall *transfer_hall_get(uint8_t motor, int ch);
 #endif
 #if CONFIG_LADRC1
-Ladrc1 *transfer_ladrc1_get(int ch);
+Ladrc1 *transfer_ladrc1_get(uint8_t motor, int ch);
 #endif
 #if CONFIG_LADRC2
-Ladrc2 *transfer_ladrc2_get(int ch);
+Ladrc2 *transfer_ladrc2_get(uint8_t motor, int ch);
 #endif
 #if CONFIG_SMC
-Smc *transfer_smc_get(int ch);
+Smc *transfer_smc_get(uint8_t motor, int ch);
 #endif
 #if CONFIG_DPCC
-Dpcc *transfer_dpcc_get(int ch);
+Dpcc *transfer_dpcc_get(uint8_t motor, int ch);
 #endif
 #if CONFIG_PIR
-Pir *transfer_pir_get(int ch);
+Pir *transfer_pir_get(uint8_t motor, int ch);
 #endif
 #if CONFIG_PID
-Pid *transfer_pid_get(int ch);
+Pid *transfer_pid_get(uint8_t motor, int ch);
 #endif
 #if CONFIG_PLL
-Pll *transfer_pll_get(int ch);
+Pll *transfer_pll_get(uint8_t motor, int ch);
 #endif
 #if CONFIG_LPF1
-Lpf1 *transfer_lpf1_get(int ch);
+Lpf1 *transfer_lpf1_get(uint8_t motor, int ch);
 #endif
 #if CONFIG_LPF2
-Lpf2 *transfer_lpf2_get(int ch);
+Lpf2 *transfer_lpf2_get(uint8_t motor, int ch);
 #endif
 #if CONFIG_HPF1
-Hpf1 *transfer_hpf1_get(int ch);
+Hpf1 *transfer_hpf1_get(uint8_t motor, int ch);
 #endif
 #if CONFIG_HPF2
-Hpf2 *transfer_hpf2_get(int ch);
+Hpf2 *transfer_hpf2_get(uint8_t motor, int ch);
 #endif
 #if CONFIG_BPF1
-Bpf1 *transfer_bpf1_get(int ch);
+Bpf1 *transfer_bpf1_get(uint8_t motor, int ch);
 #endif
 #if CONFIG_BPF2
-Bpf2 *transfer_bpf2_get(int ch);
+Bpf2 *transfer_bpf2_get(uint8_t motor, int ch);
 #endif
 #if CONFIG_NF
-Nf *transfer_nf_get(int ch);
+Nf *transfer_nf_get(uint8_t motor, int ch);
 #endif
 #if CONFIG_TPNF
-Tpnf *transfer_tpnf_get(int ch);
+Tpnf *transfer_tpnf_get(uint8_t motor, int ch);
 #endif
 #if CONFIG_DOB
-Dob *transfer_dob_get(int ch);
+Dob *transfer_dob_get(uint8_t motor, int ch);
 #endif
 #if CONFIG_RLS
-Rls *transfer_rls_get(int ch);
+Rls *transfer_rls_get(uint8_t motor, int ch);
 #endif
 #if CONFIG_SMO
-Smo *transfer_smo_get(int ch);
+Smo *transfer_smo_get(uint8_t motor, int ch);
 #endif
 #if CONFIG_NLFO
-Nlfo *transfer_nlfo_get(int ch);
+Nlfo *transfer_nlfo_get(uint8_t motor, int ch);
+#endif
+#if CONFIG_VCFO
+Vcfo *transfer_vcfo_get(uint8_t motor, int ch);
 #endif
 #if CONFIG_HFI
-Hfi *transfer_hfi_get(int ch);
+Hfi *transfer_hfi_get(uint8_t motor, int ch);
 #endif
 #if CONFIG_ROLO
-Rolo *transfer_rolo_get(int ch);
+Rolo *transfer_rolo_get(uint8_t motor, int ch);
 #endif
 #if CONFIG_MARS
-Mars *transfer_mars_get(int ch);
+Mars *transfer_mars_get(uint8_t motor, int ch);
 #endif
 #if CONFIG_EKF
-Ekf *transfer_ekf_get(int ch);
+Ekf *transfer_ekf_get(uint8_t motor, int ch);
 #endif
 #if CONFIG_DELAY1
-Delay1 *transfer_delay1_get(int ch);
+Delay1 *transfer_delay1_get(uint8_t motor, int ch);
 #endif
 #if CONFIG_DELAY2
-Delay2 *transfer_delay2_get(int ch);
+Delay2 *transfer_delay2_get(uint8_t motor, int ch);
 #endif
 #if CONFIG_DELAY3
-Delay3 *transfer_delay3_get(int ch);
+Delay3 *transfer_delay3_get(uint8_t motor, int ch);
 #endif
 // ==================== 单一功能模块实例（单实例，无通道参数，顺序同 README） ====================
-Sine *transfer_sine_get(void);
-Cosine *transfer_cosine_get(void);
-SinCos *transfer_sincos_get(void);
-Tan *transfer_tan_get(void);
-Atan *transfer_atan_get(void);
-Limit *transfer_limit_get(void);
-Sign *transfer_sign_get(void);
-Clarke *transfer_clarke_get(void);
-Park *transfer_park_get(void);
-Ipark *transfer_ipark_get(void);
-Spwm0 *transfer_spwm0_get(void);
-Spwm *transfer_spwm_get(void);
-Svpwm *transfer_svpwm_get(void);
-Swpwm *transfer_swpwm_get(void);
-SingleRs *transfer_singlers_get(void);
+Sine *transfer_sine_get(uint8_t motor);
+Cosine *transfer_cosine_get(uint8_t motor);
+SinCos *transfer_sincos_get(uint8_t motor);
+Tan *transfer_tan_get(uint8_t motor);
+Atan *transfer_atan_get(uint8_t motor);
+Limit *transfer_limit_get(uint8_t motor);
+Sign *transfer_sign_get(uint8_t motor);
+Clarke *transfer_clarke_get(uint8_t motor);
+Park *transfer_park_get(uint8_t motor);
+Ipark *transfer_ipark_get(uint8_t motor);
+Spwm0 *transfer_spwm0_get(uint8_t motor);
+Spwm *transfer_spwm_get(uint8_t motor);
+Svpwm *transfer_svpwm_get(uint8_t motor);
+Swpwm *transfer_swpwm_get(uint8_t motor);
+SingleRs *transfer_singlers_get(uint8_t motor);
 // ---------------------------工程模块Transfer---------------------------
 void transfer_reinit_integrator(void *p);
 

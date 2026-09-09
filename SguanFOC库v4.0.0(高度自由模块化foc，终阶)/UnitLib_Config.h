@@ -29,6 +29,7 @@
 #define CODE_DEFINE_RLS         0
 #define CODE_DEFINE_SMO         0
 #define CODE_DEFINE_NLFO        0
+#define CODE_DEFINE_VCFO        0
 #define CODE_DEFINE_HFI         0
 #define CODE_DEFINE_ROLO        0
 #define CODE_DEFINE_MARS        0

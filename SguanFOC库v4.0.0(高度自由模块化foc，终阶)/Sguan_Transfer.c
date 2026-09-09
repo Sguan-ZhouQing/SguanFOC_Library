@@ -1411,6 +1411,38 @@ void transfer_nlfo_loop(Nlfo *nlfo){
 
     #endif // CONFIG_IQmath
 }
+// ---------------------------工程模块Transfer---------------------------
+
+
+
+struct VcfoData {
+    SguanQ num;
+    SguanQ den;
+};
+
+
+void transfer_vcfo_init(Vcfo *vcfo){
+    #if CONFIG_IQmath
+
+
+    #else // CONFIG_IQmath
+
+
+    
+    #endif // CONFIG_IQmath
+}
+
+void transfer_vcfo_loop(Vcfo *vcfo){
+    #if CONFIG_IQmath
+
+
+    #else // CONFIG_IQmath
+
+
+    
+
+    #endif // CONFIG_IQmath
+}
 
 // ---------------------------工程模块Transfer---------------------------
 
@@ -1833,378 +1865,418 @@ void transfer_reinit_integrator(void *p){
 
 // ==================== 实例池：块实例统一住在这里，用户通过 _get() 拿指针 ====================
 #if CONFIG_TRANSFER1
-static Transfer1 transfer1_pool[CONFIG_TRANSFER1];
-static Transfer1Data transfer1_data_pool[CONFIG_TRANSFER1];
-Transfer1 *transfer_transfer1_get(int ch) {
-    if (ch >= CONFIG_TRANSFER1) return 0;
-    Transfer1 *self = &transfer1_pool[ch];
-    self->data = &transfer1_data_pool[ch];
+static Transfer1 transfer1_pool[CONFIG_MOTOR][CONFIG_TRANSFER1];
+static Transfer1Data transfer1_data_pool[CONFIG_MOTOR][CONFIG_TRANSFER1];
+Transfer1 *transfer_transfer1_get(uint8_t motor, int ch) {
+    if (motor >= CONFIG_MOTOR || ch >= CONFIG_TRANSFER1) return 0;
+    Transfer1 *self = &transfer1_pool[motor][ch];
+    self->data = &transfer1_data_pool[motor][ch];
     return self;
 }
 #endif
 #if CONFIG_TRANSFER2
-static Transfer2 transfer2_pool[CONFIG_TRANSFER2];
-static Transfer2Data transfer2_data_pool[CONFIG_TRANSFER2];
-Transfer2 *transfer_transfer2_get(int ch) {
-    if (ch >= CONFIG_TRANSFER2) return 0;
-    Transfer2 *self = &transfer2_pool[ch];
-    self->data = &transfer2_data_pool[ch];
+static Transfer2 transfer2_pool[CONFIG_MOTOR][CONFIG_TRANSFER2];
+static Transfer2Data transfer2_data_pool[CONFIG_MOTOR][CONFIG_TRANSFER2];
+Transfer2 *transfer_transfer2_get(uint8_t motor, int ch) {
+    if (motor >= CONFIG_MOTOR || ch >= CONFIG_TRANSFER2) return 0;
+    Transfer2 *self = &transfer2_pool[motor][ch];
+    self->data = &transfer2_data_pool[motor][ch];
     return self;
 }
 #endif
 #if CONFIG_TRANSFER3
-static Transfer3 transfer3_pool[CONFIG_TRANSFER3];
-static Transfer3Data transfer3_data_pool[CONFIG_TRANSFER3];
-Transfer3 *transfer_transfer3_get(int ch) {
-    if (ch >= CONFIG_TRANSFER3) return 0;
-    Transfer3 *self = &transfer3_pool[ch];
-    self->data = &transfer3_data_pool[ch];
+static Transfer3 transfer3_pool[CONFIG_MOTOR][CONFIG_TRANSFER3];
+static Transfer3Data transfer3_data_pool[CONFIG_MOTOR][CONFIG_TRANSFER3];
+Transfer3 *transfer_transfer3_get(uint8_t motor, int ch) {
+    if (motor >= CONFIG_MOTOR || ch >= CONFIG_TRANSFER3) return 0;
+    Transfer3 *self = &transfer3_pool[motor][ch];
+    self->data = &transfer3_data_pool[motor][ch];
     return self;
 }
 #endif
 #if CONFIG_TRANSFER4
-static Transfer4 transfer4_pool[CONFIG_TRANSFER4];
-static Transfer4Data transfer4_data_pool[CONFIG_TRANSFER4];
-Transfer4 *transfer_transfer4_get(int ch) {
-    if (ch >= CONFIG_TRANSFER4) return 0;
-    Transfer4 *self = &transfer4_pool[ch];
-    self->data = &transfer4_data_pool[ch];
+static Transfer4 transfer4_pool[CONFIG_MOTOR][CONFIG_TRANSFER4];
+static Transfer4Data transfer4_data_pool[CONFIG_MOTOR][CONFIG_TRANSFER4];
+Transfer4 *transfer_transfer4_get(uint8_t motor, int ch) {
+    if (motor >= CONFIG_MOTOR || ch >= CONFIG_TRANSFER4) return 0;
+    Transfer4 *self = &transfer4_pool[motor][ch];
+    self->data = &transfer4_data_pool[motor][ch];
     return self;
 }
 #endif
 #if CONFIG_TRANSFER5
-static Transfer5 transfer5_pool[CONFIG_TRANSFER5];
-static Transfer5Data transfer5_data_pool[CONFIG_TRANSFER5];
-Transfer5 *transfer_transfer5_get(int ch) {
-    if (ch >= CONFIG_TRANSFER5) return 0;
-    Transfer5 *self = &transfer5_pool[ch];
-    self->data = &transfer5_data_pool[ch];
+static Transfer5 transfer5_pool[CONFIG_MOTOR][CONFIG_TRANSFER5];
+static Transfer5Data transfer5_data_pool[CONFIG_MOTOR][CONFIG_TRANSFER5];
+Transfer5 *transfer_transfer5_get(uint8_t motor, int ch) {
+    if (motor >= CONFIG_MOTOR || ch >= CONFIG_TRANSFER5) return 0;
+    Transfer5 *self = &transfer5_pool[motor][ch];
+    self->data = &transfer5_data_pool[motor][ch];
     return self;
 }
 #endif
 #if CONFIG_INTEGRATOR
-static Integrator integrator_pool[CONFIG_INTEGRATOR];
-static IntegratorData integrator_data_pool[CONFIG_INTEGRATOR];
-Integrator *transfer_integrator_get(int ch) {
-    if (ch >= CONFIG_INTEGRATOR) return 0;
-    Integrator *self = &integrator_pool[ch];
-    self->data = &integrator_data_pool[ch];
+static Integrator integrator_pool[CONFIG_MOTOR][CONFIG_INTEGRATOR];
+static IntegratorData integrator_data_pool[CONFIG_MOTOR][CONFIG_INTEGRATOR];
+Integrator *transfer_integrator_get(uint8_t motor, int ch) {
+    if (motor >= CONFIG_MOTOR || ch >= CONFIG_INTEGRATOR) return 0;
+    Integrator *self = &integrator_pool[motor][ch];
+    self->data = &integrator_data_pool[motor][ch];
     return self;
 }
 #endif
 #if CONFIG_DERIVATIVE
-static Derivative derivative_pool[CONFIG_DERIVATIVE];
-static DerivativeData derivative_data_pool[CONFIG_DERIVATIVE];
-Derivative *transfer_derivative_get(int ch) {
-    if (ch >= CONFIG_DERIVATIVE) return 0;
-    Derivative *self = &derivative_pool[ch];
-    self->data = &derivative_data_pool[ch];
+static Derivative derivative_pool[CONFIG_MOTOR][CONFIG_DERIVATIVE];
+static DerivativeData derivative_data_pool[CONFIG_MOTOR][CONFIG_DERIVATIVE];
+Derivative *transfer_derivative_get(uint8_t motor, int ch) {
+    if (motor >= CONFIG_MOTOR || ch >= CONFIG_DERIVATIVE) return 0;
+    Derivative *self = &derivative_pool[motor][ch];
+    self->data = &derivative_data_pool[motor][ch];
     return self;
 }
 #endif
 #if CONFIG_DERIVATIVE
-static Dft dft_pool[CONFIG_DFT];
-static DftData dft_data_pool[CONFIG_DFT];
-Dft *transfer_dft_get(int ch) {
-    if (ch >= CONFIG_DFT) return 0;
-    Dft *self = &dft_pool[ch];
-    self->data = &dft_data_pool[ch];
+static Dft dft_pool[CONFIG_MOTOR][CONFIG_DFT];
+static DftData dft_data_pool[CONFIG_MOTOR][CONFIG_DFT];
+Dft *transfer_dft_get(uint8_t motor, int ch) {
+    if (motor >= CONFIG_MOTOR || ch >= CONFIG_DFT) return 0;
+    Dft *self = &dft_pool[motor][ch];
+    self->data = &dft_data_pool[motor][ch];
     return self;
 }
 #endif
 #if CONFIG_HALL
-static Hall hall_pool[CONFIG_HALL];
-static HallData hall_data_pool[CONFIG_HALL];
-Hall *transfer_hall_get(int ch) {
-    if (ch >= CONFIG_HALL) return 0;
-    Hall *self = &hall_pool[ch];
-    self->data = &hall_data_pool[ch];
+static Hall hall_pool[CONFIG_MOTOR][CONFIG_HALL];
+static HallData hall_data_pool[CONFIG_MOTOR][CONFIG_HALL];
+Hall *transfer_hall_get(uint8_t motor, int ch) {
+    if (motor >= CONFIG_MOTOR || ch >= CONFIG_HALL) return 0;
+    Hall *self = &hall_pool[motor][ch];
+    self->data = &hall_data_pool[motor][ch];
     return self;
 }
 #endif
 #if CONFIG_LADRC1
-static Ladrc1 ladrc1_pool[CONFIG_LADRC1];
-static Ladrc1Data ladrc1_data_pool[CONFIG_LADRC1];
-Ladrc1 *transfer_ladrc1_get(int ch) {
-    if (ch >= CONFIG_LADRC1) return 0;
-    Ladrc1 *self = &ladrc1_pool[ch];
-    self->data = &ladrc1_data_pool[ch];
+static Ladrc1 ladrc1_pool[CONFIG_MOTOR][CONFIG_LADRC1];
+static Ladrc1Data ladrc1_data_pool[CONFIG_MOTOR][CONFIG_LADRC1];
+Ladrc1 *transfer_ladrc1_get(uint8_t motor, int ch) {
+    if (motor >= CONFIG_MOTOR || ch >= CONFIG_LADRC1) return 0;
+    Ladrc1 *self = &ladrc1_pool[motor][ch];
+    self->data = &ladrc1_data_pool[motor][ch];
     return self;
 }
 #endif
 #if CONFIG_LADRC2
-static Ladrc2 ladrc2_pool[CONFIG_LADRC2];
-static Ladrc2Data ladrc2_data_pool[CONFIG_LADRC2];
-Ladrc2 *transfer_ladrc2_get(int ch) {
-    if (ch >= CONFIG_LADRC2) return 0;
-    Ladrc2 *self = &ladrc2_pool[ch];
-    self->data = &ladrc2_data_pool[ch];
+static Ladrc2 ladrc2_pool[CONFIG_MOTOR][CONFIG_LADRC2];
+static Ladrc2Data ladrc2_data_pool[CONFIG_MOTOR][CONFIG_LADRC2];
+Ladrc2 *transfer_ladrc2_get(uint8_t motor, int ch) {
+    if (motor >= CONFIG_MOTOR || ch >= CONFIG_LADRC2) return 0;
+    Ladrc2 *self = &ladrc2_pool[motor][ch];
+    self->data = &ladrc2_data_pool[motor][ch];
     return self;
 }
 #endif
 #if CONFIG_SMC
-static Smc smc_pool[CONFIG_SMC];
-static SmcData smc_data_pool[CONFIG_SMC];
-Smc *transfer_smc_get(int ch) {
-    if (ch >= CONFIG_SMC) return 0;
-    Smc *self = &smc_pool[ch];
-    self->data = &smc_data_pool[ch];
+static Smc smc_pool[CONFIG_MOTOR][CONFIG_SMC];
+static SmcData smc_data_pool[CONFIG_MOTOR][CONFIG_SMC];
+Smc *transfer_smc_get(uint8_t motor, int ch) {
+    if (motor >= CONFIG_MOTOR || ch >= CONFIG_SMC) return 0;
+    Smc *self = &smc_pool[motor][ch];
+    self->data = &smc_data_pool[motor][ch];
     return self;
 }
 #endif
 #if CONFIG_DPCC
-static Dpcc dpcc_pool[CONFIG_DPCC];
-static DpccData dpcc_data_pool[CONFIG_DPCC];
-Dpcc *transfer_dpcc_get(int ch) {
-    if (ch >= CONFIG_DPCC) return 0;
-    Dpcc *self = &dpcc_pool[ch];
-    self->data = &dpcc_data_pool[ch];
+static Dpcc dpcc_pool[CONFIG_MOTOR][CONFIG_DPCC];
+static DpccData dpcc_data_pool[CONFIG_MOTOR][CONFIG_DPCC];
+Dpcc *transfer_dpcc_get(uint8_t motor, int ch) {
+    if (motor >= CONFIG_MOTOR || ch >= CONFIG_DPCC) return 0;
+    Dpcc *self = &dpcc_pool[motor][ch];
+    self->data = &dpcc_data_pool[motor][ch];
     return self;
 }
 #endif
 #if CONFIG_PIR
-static Pir pir_pool[CONFIG_PIR];
-static PirData pir_data_pool[CONFIG_PIR];
-Pir *transfer_pir_get(int ch) {
-    if (ch >= CONFIG_PIR) return 0;
-    Pir *self = &pir_pool[ch];
-    self->data = &pir_data_pool[ch];
+static Pir pir_pool[CONFIG_MOTOR][CONFIG_PIR];
+static PirData pir_data_pool[CONFIG_MOTOR][CONFIG_PIR];
+Pir *transfer_pir_get(uint8_t motor, int ch) {
+    if (motor >= CONFIG_MOTOR || ch >= CONFIG_PIR) return 0;
+    Pir *self = &pir_pool[motor][ch];
+    self->data = &pir_data_pool[motor][ch];
     return self;
 }
 #endif
 #if CONFIG_PID
-static Pid pid_pool[CONFIG_PID];
-static PidData pid_data_pool[CONFIG_PID];
-Pid *transfer_pid_get(int ch) {
-    if (ch >= CONFIG_PID) return 0;
-    Pid *self = &pid_pool[ch];
-    self->data = &pid_data_pool[ch];
+static Pid pid_pool[CONFIG_MOTOR][CONFIG_PID];
+static PidData pid_data_pool[CONFIG_MOTOR][CONFIG_PID];
+Pid *transfer_pid_get(uint8_t motor, int ch) {
+    if (motor >= CONFIG_MOTOR || ch >= CONFIG_PID) return 0;
+    Pid *self = &pid_pool[motor][ch];
+    self->data = &pid_data_pool[motor][ch];
     return self;
 }
 #endif
 #if CONFIG_PLL
-static Pll pll_pool[CONFIG_PLL];
-static PllData pll_data_pool[CONFIG_PLL];
-Pll *transfer_pll_get(int ch) {
-    if (ch >= CONFIG_PLL) return 0;
-    Pll *self = &pll_pool[ch];
-    self->data = &pll_data_pool[ch];
+static Pll pll_pool[CONFIG_MOTOR][CONFIG_PLL];
+static PllData pll_data_pool[CONFIG_MOTOR][CONFIG_PLL];
+Pll *transfer_pll_get(uint8_t motor, int ch) {
+    if (motor >= CONFIG_MOTOR || ch >= CONFIG_PLL) return 0;
+    Pll *self = &pll_pool[motor][ch];
+    self->data = &pll_data_pool[motor][ch];
     return self;
 }
 #endif
 #if CONFIG_LPF1
-static Lpf1 lpf1_pool[CONFIG_LPF1];
-static Lpf1Data lpf1_data_pool[CONFIG_LPF1];
-Lpf1 *transfer_lpf1_get(int ch) {
-    if (ch >= CONFIG_LPF1) return 0;
-    Lpf1 *self = &lpf1_pool[ch];
-    self->data = &lpf1_data_pool[ch];
+static Lpf1 lpf1_pool[CONFIG_MOTOR][CONFIG_LPF1];
+static Lpf1Data lpf1_data_pool[CONFIG_MOTOR][CONFIG_LPF1];
+Lpf1 *transfer_lpf1_get(uint8_t motor, int ch) {
+    if (motor >= CONFIG_MOTOR || ch >= CONFIG_LPF1) return 0;
+    Lpf1 *self = &lpf1_pool[motor][ch];
+    self->data = &lpf1_data_pool[motor][ch];
     return self;
 }
 #endif
 #if CONFIG_LPF2
-static Lpf2 lpf2_pool[CONFIG_LPF2];
-static Lpf2Data lpf2_data_pool[CONFIG_LPF2];
-Lpf2 *transfer_lpf2_get(int ch) {
-    if (ch >= CONFIG_LPF2) return 0;
-    Lpf2 *self = &lpf2_pool[ch];
-    self->data = &lpf2_data_pool[ch];
+static Lpf2 lpf2_pool[CONFIG_MOTOR][CONFIG_LPF2];
+static Lpf2Data lpf2_data_pool[CONFIG_MOTOR][CONFIG_LPF2];
+Lpf2 *transfer_lpf2_get(uint8_t motor, int ch) {
+    if (motor >= CONFIG_MOTOR || ch >= CONFIG_LPF2) return 0;
+    Lpf2 *self = &lpf2_pool[motor][ch];
+    self->data = &lpf2_data_pool[motor][ch];
     return self;
 }
 #endif
 #if CONFIG_HPF1
-static Hpf1 hpf1_pool[CONFIG_HPF1];
-static Hpf1Data hpf1_data_pool[CONFIG_HPF1];
-Hpf1 *transfer_hpf1_get(int ch) {
-    if (ch >= CONFIG_HPF1) return 0;
-    Hpf1 *self = &hpf1_pool[ch];
-    self->data = &hpf1_data_pool[ch];
+static Hpf1 hpf1_pool[CONFIG_MOTOR][CONFIG_HPF1];
+static Hpf1Data hpf1_data_pool[CONFIG_MOTOR][CONFIG_HPF1];
+Hpf1 *transfer_hpf1_get(uint8_t motor, int ch) {
+    if (motor >= CONFIG_MOTOR || ch >= CONFIG_HPF1) return 0;
+    Hpf1 *self = &hpf1_pool[motor][ch];
+    self->data = &hpf1_data_pool[motor][ch];
     return self;
 }
 #endif
 #if CONFIG_HPF2
-static Hpf2 hpf2_pool[CONFIG_HPF2];
-static Hpf2Data hpf2_data_pool[CONFIG_HPF2];
-Hpf2 *transfer_hpf2_get(int ch) {
-    if (ch >= CONFIG_HPF2) return 0;
-    Hpf2 *self = &hpf2_pool[ch];
-    self->data = &hpf2_data_pool[ch];
+static Hpf2 hpf2_pool[CONFIG_MOTOR][CONFIG_HPF2];
+static Hpf2Data hpf2_data_pool[CONFIG_MOTOR][CONFIG_HPF2];
+Hpf2 *transfer_hpf2_get(uint8_t motor, int ch) {
+    if (motor >= CONFIG_MOTOR || ch >= CONFIG_HPF2) return 0;
+    Hpf2 *self = &hpf2_pool[motor][ch];
+    self->data = &hpf2_data_pool[motor][ch];
     return self;
 }
 #endif
 #if CONFIG_BPF1
-static Bpf1 bpf1_pool[CONFIG_BPF1];
-static Bpf1Data bpf1_data_pool[CONFIG_BPF1];
-Bpf1 *transfer_bpf1_get(int ch) {
-    if (ch >= CONFIG_BPF1) return 0;
-    Bpf1 *self = &bpf1_pool[ch];
-    self->data = &bpf1_data_pool[ch];
+static Bpf1 bpf1_pool[CONFIG_MOTOR][CONFIG_BPF1];
+static Bpf1Data bpf1_data_pool[CONFIG_MOTOR][CONFIG_BPF1];
+Bpf1 *transfer_bpf1_get(uint8_t motor, int ch) {
+    if (motor >= CONFIG_MOTOR || ch >= CONFIG_BPF1) return 0;
+    Bpf1 *self = &bpf1_pool[motor][ch];
+    self->data = &bpf1_data_pool[motor][ch];
     return self;
 }
 #endif
 #if CONFIG_BPF2
-static Bpf2 bpf2_pool[CONFIG_BPF2];
-static Bpf2Data bpf2_data_pool[CONFIG_BPF2];
-Bpf2 *transfer_bpf2_get(int ch) {
-    if (ch >= CONFIG_BPF2) return 0;
-    Bpf2 *self = &bpf2_pool[ch];
-    self->data = &bpf2_data_pool[ch];
+static Bpf2 bpf2_pool[CONFIG_MOTOR][CONFIG_BPF2];
+static Bpf2Data bpf2_data_pool[CONFIG_MOTOR][CONFIG_BPF2];
+Bpf2 *transfer_bpf2_get(uint8_t motor, int ch) {
+    if (motor >= CONFIG_MOTOR || ch >= CONFIG_BPF2) return 0;
+    Bpf2 *self = &bpf2_pool[motor][ch];
+    self->data = &bpf2_data_pool[motor][ch];
     return self;
 }
 #endif
 #if CONFIG_NF
-static Nf nf_pool[CONFIG_NF];
-static NfData nf_data_pool[CONFIG_NF];
-Nf *transfer_nf_get(int ch) {
-    if (ch >= CONFIG_NF) return 0;
-    Nf *self = &nf_pool[ch];
-    self->data = &nf_data_pool[ch];
+static Nf nf_pool[CONFIG_MOTOR][CONFIG_NF];
+static NfData nf_data_pool[CONFIG_MOTOR][CONFIG_NF];
+Nf *transfer_nf_get(uint8_t motor, int ch) {
+    if (motor >= CONFIG_MOTOR || ch >= CONFIG_NF) return 0;
+    Nf *self = &nf_pool[motor][ch];
+    self->data = &nf_data_pool[motor][ch];
     return self;
 }
 #endif
 #if CONFIG_TPNF
-static Tpnf tpnf_pool[CONFIG_TPNF];
-static TpnfData tpnf_data_pool[CONFIG_TPNF];
-Tpnf *transfer_tpnf_get(int ch) {
-    if (ch >= CONFIG_TPNF) return 0;
-    Tpnf *self = &tpnf_pool[ch];
-    self->data = &tpnf_data_pool[ch];
+static Tpnf tpnf_pool[CONFIG_MOTOR][CONFIG_TPNF];
+static TpnfData tpnf_data_pool[CONFIG_MOTOR][CONFIG_TPNF];
+Tpnf *transfer_tpnf_get(uint8_t motor, int ch) {
+    if (motor >= CONFIG_MOTOR || ch >= CONFIG_TPNF) return 0;
+    Tpnf *self = &tpnf_pool[motor][ch];
+    self->data = &tpnf_data_pool[motor][ch];
     return self;
 }
 #endif
 #if CONFIG_DOB
-static Dob dob_pool[CONFIG_DOB];
-static DobData dob_data_pool[CONFIG_DOB];
-Dob *transfer_dob_get(int ch) {
-    if (ch >= CONFIG_DOB) return 0;
-    Dob *self = &dob_pool[ch];
-    self->data = &dob_data_pool[ch];
+static Dob dob_pool[CONFIG_MOTOR][CONFIG_DOB];
+static DobData dob_data_pool[CONFIG_MOTOR][CONFIG_DOB];
+Dob *transfer_dob_get(uint8_t motor, int ch) {
+    if (motor >= CONFIG_MOTOR || ch >= CONFIG_DOB) return 0;
+    Dob *self = &dob_pool[motor][ch];
+    self->data = &dob_data_pool[motor][ch];
     return self;
 }
 #endif
 #if CONFIG_RLS
-static Rls rls_pool[CONFIG_RLS];
-static RlsData rls_data_pool[CONFIG_RLS];
-Rls *transfer_rls_get(int ch) {
-    if (ch >= CONFIG_RLS) return 0;
-    Rls *self = &rls_pool[ch];
-    self->data = &rls_data_pool[ch];
+static Rls rls_pool[CONFIG_MOTOR][CONFIG_RLS];
+static RlsData rls_data_pool[CONFIG_MOTOR][CONFIG_RLS];
+Rls *transfer_rls_get(uint8_t motor, int ch) {
+    if (motor >= CONFIG_MOTOR || ch >= CONFIG_RLS) return 0;
+    Rls *self = &rls_pool[motor][ch];
+    self->data = &rls_data_pool[motor][ch];
     return self;
 }
 #endif
 #if CONFIG_SMO
-static Smo smo_pool[CONFIG_SMO];
-static SmoData smo_data_pool[CONFIG_SMO];
-Smo *transfer_smo_get(int ch) {
-    if (ch >= CONFIG_SMO) return 0;
-    Smo *self = &smo_pool[ch];
-    self->data = &smo_data_pool[ch];
+static Smo smo_pool[CONFIG_MOTOR][CONFIG_SMO];
+static SmoData smo_data_pool[CONFIG_MOTOR][CONFIG_SMO];
+Smo *transfer_smo_get(uint8_t motor, int ch) {
+    if (motor >= CONFIG_MOTOR || ch >= CONFIG_SMO) return 0;
+    Smo *self = &smo_pool[motor][ch];
+    self->data = &smo_data_pool[motor][ch];
     return self;
 }
 #endif
 #if CONFIG_NLFO
-static Nlfo nlfo_pool[CONFIG_NLFO];
-static NlfoData nlfo_data_pool[CONFIG_NLFO];
-Nlfo *transfer_nlfo_get(int ch) {
-    if (ch >= CONFIG_NLFO) return 0;
-    Nlfo *self = &nlfo_pool[ch];
-    self->data = &nlfo_data_pool[ch];
+static Nlfo nlfo_pool[CONFIG_MOTOR][CONFIG_NLFO];
+static NlfoData nlfo_data_pool[CONFIG_MOTOR][CONFIG_NLFO];
+Nlfo *transfer_nlfo_get(uint8_t motor, int ch) {
+    if (motor >= CONFIG_MOTOR || ch >= CONFIG_NLFO) return 0;
+    Nlfo *self = &nlfo_pool[motor][ch];
+    self->data = &nlfo_data_pool[motor][ch];
+    return self;
+}
+#endif
+#if CONFIG_VCFO
+static Vcfo vcfo_pool[CONFIG_MOTOR][CONFIG_VCFO];
+static VcfoData vcfo_data_pool[CONFIG_MOTOR][CONFIG_VCFO];
+Vcfo *transfer_vcfo_get(uint8_t motor, int ch) {
+    if (motor >= CONFIG_MOTOR || ch >= CONFIG_VCFO) return 0;
+    Vcfo *self = &vcfo_pool[motor][ch];
+    self->data = &vcfo_data_pool[motor][ch];
     return self;
 }
 #endif
 #if CONFIG_HFI
-static Hfi hfi_pool[CONFIG_HFI];
-static HfiData hfi_data_pool[CONFIG_HFI];
-Hfi *transfer_hfi_get(int ch) {
-    if (ch >= CONFIG_HFI) return 0;
-    Hfi *self = &hfi_pool[ch];
-    self->data = &hfi_data_pool[ch];
+static Hfi hfi_pool[CONFIG_MOTOR][CONFIG_HFI];
+static HfiData hfi_data_pool[CONFIG_MOTOR][CONFIG_HFI];
+Hfi *transfer_hfi_get(uint8_t motor, int ch) {
+    if (motor >= CONFIG_MOTOR || ch >= CONFIG_HFI) return 0;
+    Hfi *self = &hfi_pool[motor][ch];
+    self->data = &hfi_data_pool[motor][ch];
     return self;
 }
 #endif
 #if CONFIG_ROLO
-static Rolo rolo_pool[CONFIG_ROLO];
-static RoloData rolo_data_pool[CONFIG_ROLO];
-Rolo *transfer_rolo_get(int ch) {
-    if (ch >= CONFIG_ROLO) return 0;
-    Rolo *self = &rolo_pool[ch];
-    self->data = &rolo_data_pool[ch];
+static Rolo rolo_pool[CONFIG_MOTOR][CONFIG_ROLO];
+static RoloData rolo_data_pool[CONFIG_MOTOR][CONFIG_ROLO];
+Rolo *transfer_rolo_get(uint8_t motor, int ch) {
+    if (motor >= CONFIG_MOTOR || ch >= CONFIG_ROLO) return 0;
+    Rolo *self = &rolo_pool[motor][ch];
+    self->data = &rolo_data_pool[motor][ch];
     return self;
 }
 #endif
 #if CONFIG_MARS
-static Mars mars_pool[CONFIG_MARS];
-static MarsData mars_data_pool[CONFIG_MARS];
-Mars *transfer_mars_get(int ch) {
-    if (ch >= CONFIG_MARS) return 0;
-    Mars *self = &mars_pool[ch];
-    self->data = &mars_data_pool[ch];
+static Mars mars_pool[CONFIG_MOTOR][CONFIG_MARS];
+static MarsData mars_data_pool[CONFIG_MOTOR][CONFIG_MARS];
+Mars *transfer_mars_get(uint8_t motor, int ch) {
+    if (motor >= CONFIG_MOTOR || ch >= CONFIG_MARS) return 0;
+    Mars *self = &mars_pool[motor][ch];
+    self->data = &mars_data_pool[motor][ch];
     return self;
 }
 #endif
 #if CONFIG_EKF
-static Ekf ekf_pool[CONFIG_EKF];
-static EkfData ekf_data_pool[CONFIG_EKF];
-Ekf *transfer_ekf_get(int ch) {
-    if (ch >= CONFIG_EKF) return 0;
-    Ekf *self = &ekf_pool[ch];
-    self->data = &ekf_data_pool[ch];
+static Ekf ekf_pool[CONFIG_MOTOR][CONFIG_EKF];
+static EkfData ekf_data_pool[CONFIG_MOTOR][CONFIG_EKF];
+Ekf *transfer_ekf_get(uint8_t motor, int ch) {
+    if (motor >= CONFIG_MOTOR || ch >= CONFIG_EKF) return 0;
+    Ekf *self = &ekf_pool[motor][ch];
+    self->data = &ekf_data_pool[motor][ch];
     return self;
 }
 #endif
 #if CONFIG_DELAY1
-static Delay1 delay1_pool[CONFIG_DELAY1];
-Delay1 *transfer_delay1_get(int ch) {
-    if (ch >= CONFIG_DELAY1) return 0;
-    return &delay1_pool[ch];
+static Delay1 delay1_pool[CONFIG_MOTOR][CONFIG_DELAY1];
+Delay1 *transfer_delay1_get(uint8_t motor, int ch) {
+    if (motor >= CONFIG_MOTOR || ch >= CONFIG_DELAY1) return 0;
+    return &delay1_pool[motor][ch];
 }
 #endif
 #if CONFIG_DELAY2
-static Delay2 delay2_pool[CONFIG_DELAY2];
-Delay2 *transfer_delay2_get(int ch) {
-    if (ch >= CONFIG_DELAY2) return 0;
-    return &delay2_pool[ch];
+static Delay2 delay2_pool[CONFIG_MOTOR][CONFIG_DELAY2];
+Delay2 *transfer_delay2_get(uint8_t motor, int ch) {
+    if (motor >= CONFIG_MOTOR || ch >= CONFIG_DELAY2) return 0;
+    return &delay2_pool[motor][ch];
 }
 #endif
 #if CONFIG_DELAY3
-static Delay3 delay3_pool[CONFIG_DELAY3];
-Delay3 *transfer_delay3_get(int ch) {
-    if (ch >= CONFIG_DELAY3) return 0;
-    return &delay3_pool[ch];
+static Delay3 delay3_pool[CONFIG_MOTOR][CONFIG_DELAY3];
+Delay3 *transfer_delay3_get(uint8_t motor, int ch) {
+    if (motor >= CONFIG_MOTOR || ch >= CONFIG_DELAY3) return 0;
+    return &delay3_pool[motor][ch];
 }
 #endif
 
 
 // ==================== 单一功能模块实例（单实例） ====================
-static Sine sine_instance;
-Sine *transfer_sine_get(void) { return &sine_instance; }
+static Sine sine_pool[CONFIG_MOTOR];
+Sine *transfer_sine_get(uint8_t motor) {
+    if (motor >= CONFIG_MOTOR) return 0;
+    return &sine_pool[motor];
+}
 
-static Cosine cosine_instance;
-Cosine *transfer_cosine_get(void) { return &cosine_instance; }
+static Cosine cosine_pool[CONFIG_MOTOR];
+Cosine *transfer_cosine_get(uint8_t motor) {
+    if (motor >= CONFIG_MOTOR) return 0;
+    return &cosine_pool[motor];
+}
 
-static Sign sign_instance;
-Sign *transfer_sign_get(void) { return &sign_instance; }
+static Sign sign_pool[CONFIG_MOTOR];
+Sign *transfer_sign_get(uint8_t motor) {
+    if (motor >= CONFIG_MOTOR) return 0;
+    return &sign_pool[motor];
+}
 
-static Clarke clarke_instance;
-Clarke *transfer_clarke_get(void) { return &clarke_instance; }
+static Clarke clarke_pool[CONFIG_MOTOR];
+Clarke *transfer_clarke_get(uint8_t motor) {
+    if (motor >= CONFIG_MOTOR) return 0;
+    return &clarke_pool[motor];
+}
 
-static Park park_instance;
-Park *transfer_park_get(void) { return &park_instance; }
+static Park park_pool[CONFIG_MOTOR];
+Park *transfer_park_get(uint8_t motor) {
+    if (motor >= CONFIG_MOTOR) return 0;
+    return &park_pool[motor];
+}
 
-static Ipark ipark_instance;
-Ipark *transfer_ipark_get(void) { return &ipark_instance; }
+static Ipark ipark_pool[CONFIG_MOTOR];
+Ipark *transfer_ipark_get(uint8_t motor) {
+    if (motor >= CONFIG_MOTOR) return 0;
+    return &ipark_pool[motor];
+}
 
-static Spwm0 spwm0_instance;
-Spwm0 *transfer_spwm0_get(void) { return &spwm0_instance; }
+static Spwm0 spwm0_pool[CONFIG_MOTOR];
+Spwm0 *transfer_spwm0_get(uint8_t motor) {
+    if (motor >= CONFIG_MOTOR) return 0;
+    return &spwm0_pool[motor];
+}
 
-static Spwm spwm_instance;
-Spwm *transfer_spwm_get(void) { return &spwm_instance; }
+static Spwm spwm_pool[CONFIG_MOTOR];
+Spwm *transfer_spwm_get(uint8_t motor) {
+    if (motor >= CONFIG_MOTOR) return 0;
+    return &spwm_pool[motor];
+}
 
-static Svpwm svpwm_instance;
-Svpwm *transfer_svpwm_get(void) { return &svpwm_instance; }
+static Svpwm svpwm_pool[CONFIG_MOTOR];
+Svpwm *transfer_svpwm_get(uint8_t motor) {
+    if (motor >= CONFIG_MOTOR) return 0;
+    return &svpwm_pool[motor];
+}
 
-static SingleRs singlers_instance;
-SingleRs *transfer_singlers_get(void) { return &singlers_instance; }
+static SingleRs singlers_pool[CONFIG_MOTOR];
+SingleRs *transfer_singlers_get(uint8_t motor) {
+    if (motor >= CONFIG_MOTOR) return 0;
+    return &singlers_pool[motor];
+}
 
 // ==================== 新增块：Tan/Atan/Limit + SinCos/Swpwm 实例 ====================
 void transfer_tan_loop(Tan *tan){
@@ -2219,17 +2291,32 @@ void transfer_limit_loop(Limit *limit){
     // TODO: 限幅函数
 }
 
-static SinCos sincos_instance;
-SinCos *transfer_sincos_get(void) { return &sincos_instance; }
+static SinCos sincos_pool[CONFIG_MOTOR];
+SinCos *transfer_sincos_get(uint8_t motor) {
+    if (motor >= CONFIG_MOTOR) return 0;
+    return &sincos_pool[motor];
+}
 
-static Swpwm swpwm_instance;
-Swpwm *transfer_swpwm_get(void) { return &swpwm_instance; }
+static Swpwm swpwm_pool[CONFIG_MOTOR];
+Swpwm *transfer_swpwm_get(uint8_t motor) {
+    if (motor >= CONFIG_MOTOR) return 0;
+    return &swpwm_pool[motor];
+}
 
-static Tan tan_instance;
-Tan *transfer_tan_get(void) { return &tan_instance; }
+static Tan tan_pool[CONFIG_MOTOR];
+Tan *transfer_tan_get(uint8_t motor) {
+    if (motor >= CONFIG_MOTOR) return 0;
+    return &tan_pool[motor];
+}
 
-static Atan atan_instance;
-Atan *transfer_atan_get(void) { return &atan_instance; }
+static Atan atan_pool[CONFIG_MOTOR];
+Atan *transfer_atan_get(uint8_t motor) {
+    if (motor >= CONFIG_MOTOR) return 0;
+    return &atan_pool[motor];
+}
 
-static Limit limit_instance;
-Limit *transfer_limit_get(void) { return &limit_instance; }
+static Limit limit_pool[CONFIG_MOTOR];
+Limit *transfer_limit_get(uint8_t motor) {
+    if (motor >= CONFIG_MOTOR) return 0;
+    return &limit_pool[motor];
+}

@@ -1,7 +1,20 @@
 #ifndef __SGUAN_MOTORSTATUS_H
 #define __SGUAN_MOTORSTATUS_H
 
+/* SguanFOC配置文件声明 */
 #include "Sguan_Config.h"
+#include "UserData_Status.h"
+
+typedef enum{
+    MOTOR_STATUS_STANDBY = 0x00,
+    MOTOR_STATUS_START = 0x01,
+    MOTOR_STATUS_INITIALIZING = 0x02,
+    MOTOR_STATUS_CALIBRATING = 0x03,
+    MOTOR_STATUS_IDLE = 0x04,
+    MOTOR_STATUS_TORQUE_INCREASING = 0x05,
+    MOTOR_STATUS_TORQUE_DECREASING = 0x06
+}MotorStatus;
+
 
 
 

@@ -36,6 +36,7 @@
 #define CONFIG_RLS          CODE_DEFINE_RLS
 #define CONFIG_SMO          CODE_DEFINE_SMO
 #define CONFIG_NLFO         CODE_DEFINE_NLFO
+#define CONFIG_VCFO         CODE_DEFINE_VCFO
 #define CONFIG_HFI          CODE_DEFINE_HFI
 #define CONFIG_ROLO         CODE_DEFINE_ROLO
 #define CONFIG_MARS         CODE_DEFINE_MARS
@@ -60,6 +61,15 @@
 
 // ======================== 控制系统离散周期 宏定义 =========================
 #define PMSM_RUN_T          TIM_T                       // 系统离散运行时间
+
+
+// ........................... 宏定义保护措施 .............................
+#if !(CONFIG_MOTOR >= 1 && CONFIG_MOTOR <= 6)
+#ifdef CONFIG_MOTOR
+#undef CONFIG_MOTOR
+#endif // CONFIG_MOTOR
+#define CONFIG_MOTOR 1  // 或根据你的需求设置
+#endif
 
 
 #endif // SGUAN_CONFIG_H

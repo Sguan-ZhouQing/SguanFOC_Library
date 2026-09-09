@@ -1,15 +1,15 @@
 #ifndef __SGUAN_IQMATH_H
 #define __SGUAN_IQMATH_H
 
-#include <stdint.h>
+#include "Sguan_Value.h"
 
 // !!!这里定义整体IQmath算法是使用Q31还是Q15
 #include "UserData_Config.h"
 #define CONFIG_IQMATH       DATA_DEFINE_IQMATH
 
 // 定点化计算格式
-typedef int16_t Q15;      // 1位符号+0位整数+15位小数
 typedef int32_t Q31;      // 1位符号+0位整数+31位小数
+typedef int16_t Q15;      // 1位符号+0位整数+15位小数
 
 #if DATA_DEFINE_IQMATH==0x01
 typedef Q31                 SguanQ;
