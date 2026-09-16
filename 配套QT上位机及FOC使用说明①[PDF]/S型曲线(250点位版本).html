@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>S 型速度 + 加速度 + LPF（250 点）</title>
+<style>
+  body {
+    background: #111;
+    color: #eee;
+    font-family: Arial, sans-serif;
+    text-align: center;
+    padding: 20px;
+  }
+  canvas {
+    background: #1a1a1a;
+    border: 1px solid #444;
+    border-radius: 8px;
+    cursor: crosshair;
+  }
+  .controls {
+    margin: 16px 0;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+  }
+  .control-group {
+    background: #222;
+    padding: 10px 16px;
+    border-radius: 8px;
+    border: 1px solid #333;
+  }
+  label {
+    display: block;
+    margin: 6px 0;
+    font-size: 14px;
+  }
+  input[type=range] {
+    width: 240px;
+    vertical-align: middle;
+  }
+  input[type=number] {
+    width: 100px;
+    background: #1a1a1a;
+    color: #4fc3f7;
+    border: 1px solid #444;
+    border-radius: 4px;
+    padding: 4px 6px;
+    font-family: monospace;
+    font-size: 13px;
+    vertical-align: middle;
+  }
+  .value {
+    display: inline-block;
+    min-width: 80px;
+    color: #4fc3f7;
+    font-family: monospace;
+  }
+  .info {
+    margin-top: 8px;
+    font-size: 13px;
+    color: #aaa;
+    font-family: monospace;
+  }
+  .legend {
+    margin-top: 6px;
+    font-size: 13px;
+    font-family: monospace;
+    line-height: 1.8;
+  }
+  .legend span {
+    margin: 0 12px;
+  }
+  .legend .blue   { color: #4fc3f7; }
+  .legend .green  { color: #66bb6a; }
+  .legend .orange { color: #ff9800; }
+  .legend .red    { color: #ef5350; }
+  .legend .purple { color: #ab47bc; }
+  .checkbox-group {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    margin-top: 8px;
+    font-size: 14px;
+    flex-wrap: wrap;
+  }
+  .checkbox-group label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0;
+  }
+</style>
+</head>
+<body>
+
+<h2>S 型速度 + 加速度 + LPF（250 点）</h2>
+
+<div class="controls">
+  <div class="control-group">
+    <label>X 轴缩放: <span class="value" id="xScaleVal">1.00</span></label>
+    <input type="range" id="xScale" min="0.2" max="5" step="0.01" value="1">
+  </div>
+  <div class="control-group">
+    <label>速度 Y 轴缩放: <span class="value" id="yScaleVal">1.00</span></label>
+    <input type="range" id="yScale" min="0.2" max="5" step="0.01" value="1">
+  </div>
+  <div class="control-group">
+    <label>速度 Y 轴偏移: <span class="value" id="yOffsetVal">0.00</span></label>
+    <input type="range" id="yOffset" min="-1" max="1" step="0.01" value="0">
+  </div>
+  <div class="control-group">
+    <label>加速度 Y 轴缩放: <span class="value" id="aScaleVal">1.00</span></label>
+    <input type="range" id="aScale" min="0.1" max="10" step="0.01" value="1">
+  </div>
+  <div class="control-group">
+    <label>
+      LPF 截止频率 ωc: <span class="value" id="wcVal">100.00</span> rad/s
+    </label>
+    <input type="range" id="wcSlider" min="0.01" max="500" step="0.01" value="100">
+    <input type="number" id="wcInput" min="0.000001" step="0.01" value="100">
+  </div>
+  <div class="control-group">
+    <label>定时周期 TS: <span class="value" id="tsVal">0.000050</span> s</label>
+    <input type="range" id="tsSlider" min="1" max="500" step="1" value="50">
+  </div>
+  <div class="control-group">
+    <label>查表保持时间 T_sample: <span class="value" id="tsampVal">0.004</span> s</label>
+    <input type="range" id="tsampSlider" min="1" max="200" step="1" value="4">
+  </div>
+  <div class="control-group">
+    <label>起始 0 段 T_pre: <span class="value" id="tpreVal">0.050</span> s</label>
+    <input type="range" id="tpreSlider" min="0" max="500" step="1" value="50">
+  </div>
+  <div class="control-group">
+    <label>末尾 1 段 T_post: <span class="value" id="tpostVal">0.050</span> s</label>
+    <input type="range" id="tpostSlider" min="0" max="500" step="1" value="50">
+  </div>
+</div>
+
+<div class="checkbox-group">
+  <label><input type="checkbox" id="showIdeal" checked> 理想速度</label>
+  <label><input type="checkbox" id="showStep" checked> 阶梯输入</label>
+  <label><input type="checkbox" id="showLPF" checked> LPF 速度</label>
+  <label><input type="checkbox" id="showAccIdeal" checked> 理想加速度</label>
+  <label><input type="checkbox" id="showAccLPF" checked> LPF 加速度</label>
+</div>
+
+<canvas id="canvas" width="1100" height="560"></canvas>
+<div class="info" id="info">鼠标悬停查看数值</div>
+<div class="legend">
+  <span class="blue">■ 理想速度</span>
+  <span class="green">■ 阶梯输入</span>
+  <span class="orange">■ LPF 速度</span>
+  <span class="red">■ 理想加速度</span>
+  <span class="purple">■ LPF 加速度</span>
+</div>
+
+<script>
+/* ================== 数据（250 点） ================== */
+const speed_tab = [
+    0.000000000000000, 0.000032257717976, 0.000129031672259, 0.000290319439955,
+    0.000516121857800, 0.000806438911241, 0.001161275431514, 0.001580622512847,
+    0.002064484171569, 0.002612867858261, 0.003225759603083, 0.003903166158125,
+    0.004645087290555, 0.005451533477753, 0.006322484463453, 0.007257950026542,
+    0.008257943205535, 0.009322439320385, 0.010451450012624, 0.011644974350929,
+    0.012903030961752, 0.014225585386157, 0.015612655319273, 0.017064258456230,
+    0.018580358475447, 0.020160973072052, 0.021806102246046, 0.023515766486526,
+    0.025289926677942, 0.027128599584103, 0.029031813144684, 0.030999517068267,
+    0.033031735569239, 0.035128466784954, 0.037289742380381, 0.039515506476164,
+    0.041805785149336, 0.044160604476929, 0.046579912304878, 0.049063738435507,
+    0.051612075418234, 0.054224956780672, 0.056902326643467, 0.059644207358360,
+    0.062450639903545, 0.065321549773216, 0.068256974220276, 0.071256920695305,
+    0.074321411550045, 0.077450387179852, 0.080643869936466, 0.083901911973953,
+    0.087224431335926, 0.090611457824707, 0.094063006341457, 0.097579106688499,
+    0.101159684360027, 0.104804769158363, 0.108514420688152, 0.112288542091846,
+    0.116127178072929, 0.120030328631401, 0.123998038470745, 0.128030225634575,
+    0.132126912474632, 0.136288180947304, 0.140513896942139, 0.144804134964943,
+    0.149158895015717, 0.153578206896782, 0.158061996102333, 0.162610292434692,
+    0.167223170399666, 0.171900495886803, 0.176642343401909, 0.181448698043823,
+    0.186319619417191, 0.191255018115044, 0.196254909038544, 0.201319396495819,
+    0.206448331475258, 0.211641773581505, 0.216899737715721, 0.222222283482552,
+    0.227609261870384, 0.233060777187347, 0.238576859235764, 0.244157403707504,
+    0.249802455306053, 0.255512028932571, 0.261286169290543, 0.267124772071838,
+    0.273027867078781, 0.278995573520660, 0.285027712583542, 0.291124373674393,
+    0.297285526990891, 0.303511291742325, 0.309801489114761, 0.316156208515167,
+    0.322575509548187, 0.329059273004532, 0.335607528686523, 0.342220306396484,
+    0.348897665739059, 0.355639457702637, 0.362445801496506, 0.369316697120667,
+    0.376252055168152, 0.383251905441284, 0.390316307544708, 0.397445291280746,
+    0.404638677835464, 0.411896616220474, 0.419219136238098, 0.426606088876724,
+    0.434057563543320, 0.441573530435562, 0.449154138565063, 0.456799149513245,
+    0.464508652687073, 0.472282797098160, 0.480121344327927, 0.488024443387985,
+    0.495992004871368, 0.504008114337921, 0.511975646018982, 0.519878745079041,
+    0.527717292308807, 0.535491406917572, 0.543200969696045, 0.550845980644226,
+    0.558426558971405, 0.565942525863647, 0.573394000530243, 0.580780982971191,
+    0.588103473186493, 0.595361411571503, 0.602554798126221, 0.609683811664581,
+    0.616748154163361, 0.623748004436493, 0.630683362483978, 0.637554287910461,
+    0.644360601902008, 0.651102423667908, 0.657779812812805, 0.664392530918121,
+    0.670940816402435, 0.677424550056458, 0.683843851089478, 0.690198600292206,
+    0.696488797664642, 0.702714562416077, 0.708875715732574, 0.714972376823425,
+    0.721004486083984, 0.726972222328186, 0.732875287532806, 0.738713920116425,
+    0.744488060474396, 0.750197649002075, 0.755842685699463, 0.761423230171204,
+    0.766939282417297, 0.772390782833099, 0.777777791023254, 0.783100306987762,
+    0.788358271121979, 0.793551743030548, 0.798680663108826, 0.803745150566101,
+    0.808745026588440, 0.813680410385132, 0.818551361560822, 0.823357701301575,
+    0.828099548816681, 0.832776904106140, 0.837389767169952, 0.841938078403473,
+    0.846421837806702, 0.850841164588928, 0.855195939540863, 0.859486162662506,
+    0.863711893558502, 0.867873132228851, 0.871969819068909, 0.876002013683319,
+    0.879969716072083, 0.883872866630554, 0.887711524963379, 0.891485631465912,
+    0.895195245742798, 0.898840367794037, 0.902420938014984, 0.905937016010284,
+    0.909388601779938, 0.912775635719299, 0.916098117828369, 0.919356167316437,
+    0.922549664974213, 0.925678610801697, 0.928743124008179, 0.931743085384369,
+    0.934678494930267, 0.937549412250519, 0.940355837345123, 0.943097710609436,
+    0.945775091648102, 0.948387980461121, 0.950936317443848, 0.953420102596283,
+    0.955839395523071, 0.958194255828857, 0.960484504699707, 0.962710261344910,
+    0.964871585369110, 0.966968297958374, 0.969000518321991, 0.970968186855316,
+    0.972871422767639, 0.974710106849670, 0.976484239101410, 0.978193938732147,
+    0.979839026927948, 0.981419682502747, 0.982935786247253, 0.984387338161469,
+    0.985774457454681, 0.987096965312958, 0.988355040550232, 0.989548563957214,
+    0.990677595138550, 0.991742074489594, 0.992742061614990, 0.993677556514740,
+    0.994548499584198, 0.995354950428009, 0.996096849441528, 0.996774256229401,
+    0.997387111186981, 0.997935533523560, 0.998419404029846, 0.998838722705841,
+    0.999193549156189, 0.999483883380890, 0.999709665775299, 0.999870955944061,
+    0.999967753887177, 1.000000000000000
+];
+
+/* ================== 基本设置 ================== */
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+
+const W = canvas.width;
+const H = canvas.height;
+const PAD = 60;
+
+const xScaleSlider = document.getElementById('xScale');
+const yScaleSlider = document.getElementById('yScale');
+const yOffsetSlider = document.getElementById('yOffset');
+const aScaleSlider = document.getElementById('aScale');
+const wcSlider = document.getElementById('wcSlider');
+const wcInput = document.getElementById('wcInput');
+const tsSlider = document.getElementById('tsSlider');
+const tsampSlider = document.getElementById('tsampSlider');
+const tpreSlider = document.getElementById('tpreSlider');
+const tpostSlider = document.getElementById('tpostSlider');
+
+const xScaleVal = document.getElementById('xScaleVal');
+const yScaleVal = document.getElementById('yScaleVal');
+const yOffsetVal = document.getElementById('yOffsetVal');
+const aScaleVal = document.getElementById('aScaleVal');
+const wcVal = document.getElementById('wcVal');
+const tsVal = document.getElementById('tsVal');
+const tsampVal = document.getElementById('tsampVal');
+const tpreVal = document.getElementById('tpreVal');
+const tpostVal = document.getElementById('tpostVal');
+
+const showIdeal = document.getElementById('showIdeal');
+const showStep = document.getElementById('showStep');
+const showLPF = document.getElementById('showLPF');
+const showAccIdeal = document.getElementById('showAccIdeal');
+const showAccLPF = document.getElementById('showAccLPF');
+
+const info = document.getElementById('info');
+
+let mouseX = -1;
+let mouseY = -1;
+
+const N = speed_tab.length;
+const V_MIN = 0;
+const V_MAX = 1;
+
+let xScale = 1;
+let yScale = 1;
+let yOffset = 0;
+let aScale = 1;
+
+let wc = 100;
+let TS = 50e-6;
+let T_SAMPLE = 4e-3;   // 250 点，每点 4ms
+let T_PRE = 50e-3;
+let T_POST = 50e-3;
+
+let simTime = [];
+let simStep = [];
+let simLPF = [];
+let simIdeal = [];
+let simAccIdeal = [];
+let simAccLPF = [];
+
+/* 加速度固定参考值：a = 1.0 对应图高一半（aScale=1 时） */
+const A_REF = 1.0;
+
+/* ================== 理想 S 型速度与加速度 ================== */
+function idealSpeedAt(tRel, T_S) {
+    if (tRel <= 0) return 0;
+    if (tRel >= T_S) return 1;
+    const K = 4 / (T_S * T_S);
+    const half = T_S / 2;
+    if (tRel <= half) {
+        return 0.5 * K * tRel * tRel;
+    } else {
+        const dt = T_S - tRel;
+        return 1 - 0.5 * K * dt * dt;
+    }
+}
+
+function idealAccAt(tRel, T_S) {
+    if (tRel <= 0) return 0;
+    if (tRel >= T_S) return 0;
+    const K = 4 / (T_S * T_S);
+    const half = T_S / 2;
+    if (tRel <= half) {
+        return K * tRel;
+    } else {
+        return K * (T_S - tRel);
+    }
+}
+
+/* ================== 真实离散仿真 ================== */
+function computeSimulation() {
+    simTime = [];
+    simStep = [];
+    simLPF = [];
+    simIdeal = [];
+    simAccIdeal = [];
+    simAccLPF = [];
+
+    const T_S = (N - 1) * T_SAMPLE;
+    const T_total = T_PRE + T_S + T_POST;
+    const totalSteps = Math.round(T_total / TS);
+
+    const alpha = (wc * TS) / (1 + wc * TS);
+
+    let y = 0;
+
+    function stepInputAt(t) {
+        if (t < T_PRE) return 0;
+        if (t < T_PRE + T_S) {
+            const tRel = t - T_PRE;
+            let idx = Math.floor(tRel / T_SAMPLE);
+            if (idx < 0) idx = 0;
+            if (idx >= N) idx = N - 1;
+            return speed_tab[idx];
+        }
+        return 1;
+    }
+
+    for (let k = 0; k <= totalSteps; k++) {
+        const t = k * TS;
+        const x = stepInputAt(t);
+
+        y = y + alpha * (x - y);
+
+        let vIdeal;
+        let aIdeal;
+        if (t < T_PRE) {
+            vIdeal = 0;
+            aIdeal = 0;
+        } else if (t < T_PRE + T_S) {
+            const tRel = t - T_PRE;
+            vIdeal = idealSpeedAt(tRel, T_S);
+            aIdeal = idealAccAt(tRel, T_S);
+        } else {
+            vIdeal = 1;
+            aIdeal = 0;
+        }
+
+        simTime.push(t);
+        simStep.push(x);
+        simLPF.push(y);
+        simIdeal.push(vIdeal);
+        simAccIdeal.push(aIdeal);
+    }
+
+    /* LPF 加速度：对 LPF 速度做中心差分 */
+    const n = simTime.length;
+    simAccLPF = new Array(n).fill(0);
+
+    for (let k = 1; k < n - 1; k++) {
+        const dt = simTime[k + 1] - simTime[k - 1];
+        simAccLPF[k] = (simLPF[k + 1] - simLPF[k - 1]) / dt;
+    }
+    simAccLPF[0] = simAccLPF[1] || 0;
+    simAccLPF[n - 1] = simAccLPF[n - 2] || 0;
+
+    /* 轻微滑动平均，去掉数值差分毛刺 */
+    const win = 5;
+    const aTmp = simAccLPF.slice();
+    for (let k = 0; k < n; k++) {
+        let sum = 0;
+        let cnt = 0;
+        for (let j = -win; j <= win; j++) {
+            const idx = k + j;
+            if (idx >= 0 && idx < n) {
+                sum += aTmp[idx];
+                cnt++;
+            }
+        }
+        simAccLPF[k] = sum / cnt;
+    }
+}
+
+/* ================== 坐标映射 ================== */
+let T_MIN = 0;
+let T_MAX = 1;
+
+function updateRange() {
+    T_MIN = 0;
+    T_MAX = simTime.length > 0 ? simTime[simTime.length - 1] : 1;
+}
+
+function dataToScreenX(t) {
+    const norm = (t - T_MIN) / (T_MAX - T_MIN);
+    const scaled = 0.5 + (norm - 0.5) * xScale;
+    return PAD + scaled * (W - 2 * PAD);
+}
+
+function dataToScreenY(v) {
+    const norm = (v - V_MIN) / (V_MAX - V_MIN);
+    const scaled = 0.5 + (norm - 0.5) * yScale + yOffset;
+    return H - PAD - scaled * (H - 2 * PAD);
+}
+
+/* 加速度映射：固定参考 A_REF，完全由 aScale 控制 */
+function accToScreenY(a) {
+    const norm = a / A_REF;
+    const scaled = norm * 0.5 * aScale;
+    return H - PAD - scaled * (H - 2 * PAD);
+}
+
+function screenToDataX(sx) {
+    const scaled = (sx - PAD) / (W - 2 * PAD);
+    const norm = 0.5 + (scaled - 0.5) / xScale;
+    return T_MIN + norm * (T_MAX - T_MIN);
+}
+
+function screenToDataY(sy) {
+    const scaled = (H - PAD - sy) / (H - 2 * PAD);
+    const norm = (scaled - 0.5 - yOffset) / yScale + 0.5;
+    return V_MIN + norm * (V_MAX - V_MIN);
+}
+
+/* ================== 绘制 ================== */
+function draw() {
+    ctx.clearRect(0, 0, W, H);
+
+    ctx.strokeStyle = '#2a2a2a';
+    ctx.lineWidth = 0.5;
+    for (let i = 0; i <= 10; i++) {
+        const y = PAD + (H - 2 * PAD) * i / 10;
+        ctx.beginPath();
+        ctx.moveTo(PAD, y);
+        ctx.lineTo(W - PAD, y);
+        ctx.stroke();
+    }
+    for (let i = 0; i <= 10; i++) {
+        const x = PAD + (W - 2 * PAD) * i / 10;
+        ctx.beginPath();
+        ctx.moveTo(x, PAD);
+        ctx.lineTo(x, H - PAD);
+        ctx.stroke();
+    }
+
+    ctx.strokeStyle = '#666';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(PAD, H - PAD);
+    ctx.lineTo(W - PAD, H - PAD);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(PAD, PAD);
+    ctx.lineTo(PAD, H - PAD);
+    ctx.stroke();
+
+    ctx.fillStyle = '#aaa';
+    ctx.font = '14px Arial';
+    ctx.fillText('时间 t (s)', W - PAD - 80, H - PAD + 30);
+    ctx.fillText('速度 v / 加速度 a', PAD - 50, PAD - 10);
+
+    ctx.font = '12px monospace';
+    ctx.fillStyle = '#888';
+    for (let i = 0; i <= 10; i++) {
+        const y = PAD + (H - 2 * PAD) * i / 10;
+        const v = screenToDataY(y);
+        if (v >= -0.5 && v <= 1.5) {
+            ctx.fillText(v.toFixed(2), PAD - 50, y + 4);
+        }
+    }
+
+    for (let i = 0; i <= 10; i++) {
+        const x = PAD + (W - 2 * PAD) * i / 10;
+        const t = screenToDataX(x);
+        if (t >= -T_MAX * 0.05 && t <= T_MAX * 1.05) {
+            ctx.fillText(t.toFixed(3), x - 20, H - PAD + 18);
+        }
+    }
+
+    if (simTime.length === 0) return;
+
+    /* 理想速度 */
+    if (showIdeal.checked) {
+        ctx.strokeStyle = '#4fc3f7';
+        ctx.lineWidth = 2.0;
+        ctx.beginPath();
+        for (let k = 0; k < simTime.length; k++) {
+            const x = dataToScreenX(simTime[k]);
+            const y = dataToScreenY(simIdeal[k]);
+            if (k === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+    }
+
+    /* 阶梯输入 */
+    if (showStep.checked) {
+        ctx.strokeStyle = '#66bb6a';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        for (let k = 0; k < simTime.length; k++) {
+            const x = dataToScreenX(simTime[k]);
+            const y = dataToScreenY(simStep[k]);
+            if (k === 0) {
+                ctx.moveTo(x, y);
+            } else {
+                const xPrev = dataToScreenX(simTime[k - 1]);
+                const yPrev = dataToScreenY(simStep[k - 1]);
+                ctx.lineTo(x, yPrev);
+                ctx.lineTo(x, y);
+            }
+        }
+        ctx.stroke();
+    }
+
+    /* LPF 速度 */
+    if (showLPF.checked) {
+        ctx.strokeStyle = '#ff9800';
+        ctx.lineWidth = 2.0;
+        ctx.beginPath();
+        for (let k = 0; k < simTime.length; k++) {
+            const x = dataToScreenX(simTime[k]);
+            const y = dataToScreenY(simLPF[k]);
+            if (k === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+    }
+
+    /* 理想加速度 */
+    if (showAccIdeal.checked) {
+        ctx.strokeStyle = '#ef5350';
+        ctx.lineWidth = 1.8;
+        ctx.beginPath();
+        for (let k = 0; k < simTime.length; k++) {
+            const x = dataToScreenX(simTime[k]);
+            const y = accToScreenY(simAccIdeal[k]);
+            if (k === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+    }
+
+    /* LPF 加速度 */
+    if (showAccLPF.checked) {
+        ctx.strokeStyle = '#ab47bc';
+        ctx.lineWidth = 1.8;
+        ctx.beginPath();
+        for (let k = 0; k < simTime.length; k++) {
+            const x = dataToScreenX(simTime[k]);
+            const y = accToScreenY(simAccLPF[k]);
+            if (k === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+    }
+
+    /* 悬停 */
+    if (mouseX >= PAD && mouseX <= W - PAD && mouseY >= PAD && mouseY <= H - PAD) {
+        const tHover = screenToDataX(mouseX);
+        let idx = Math.round(tHover / TS);
+        if (idx < 0) idx = 0;
+        if (idx >= simTime.length) idx = simTime.length - 1;
+
+        const x = dataToScreenX(simTime[idx]);
+
+        ctx.strokeStyle = '#ff9800';
+        ctx.lineWidth = 1;
+        ctx.setLineDash([4, 4]);
+        ctx.beginPath();
+        ctx.moveTo(x, PAD);
+        ctx.lineTo(x, H - PAD);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        info.textContent =
+            `t = ${simTime[idx].toFixed(6)} s    ` +
+            `理想v = ${simIdeal[idx].toFixed(6)}    ` +
+            `LPFv = ${simLPF[idx].toFixed(6)}    ` +
+            `理想a = ${simAccIdeal[idx].toFixed(6)}    ` +
+            `LPFa = ${simAccLPF[idx].toFixed(6)}`;
+    } else {
+        info.textContent = '鼠标悬停查看数值';
+    }
+
+    ctx.fillStyle = '#aaa';
+    ctx.font = '13px monospace';
+    ctx.fillText(`X 缩放 = ${xScale.toFixed(2)}`, PAD + 10, PAD + 18);
+    ctx.fillText(`速度 Y 缩放 = ${yScale.toFixed(2)}`, PAD + 10, PAD + 36);
+    ctx.fillText(`速度 Y 偏移 = ${yOffset.toFixed(2)}`, PAD + 10, PAD + 54);
+    ctx.fillText(`加速度 Y 缩放 = ${aScale.toFixed(2)}`, PAD + 10, PAD + 72);
+    ctx.fillText(`加速度参考 A_REF = ${A_REF.toFixed(2)}`, PAD + 10, PAD + 90);
+    ctx.fillText(`ωc = ${wc.toFixed(2)} rad/s`, PAD + 10, PAD + 108);
+    ctx.fillText(`TS = ${(TS * 1e6).toFixed(1)} µs`, PAD + 10, PAD + 126);
+    ctx.fillText(`T_sample = ${(T_SAMPLE * 1e3).toFixed(1)} ms`, PAD + 10, PAD + 144);
+    ctx.fillText(`T_pre = ${(T_PRE * 1e3).toFixed(1)} ms`, PAD + 10, PAD + 162);
+    ctx.fillText(`T_post = ${(T_POST * 1e3).toFixed(1)} ms`, PAD + 10, PAD + 180);
+    ctx.fillText(`总时间 = ${T_MAX.toFixed(3)} s`, PAD + 10, PAD + 198);
+}
+
+/* ================== 事件 ================== */
+function refresh() {
+    computeSimulation();
+    updateRange();
+    draw();
+}
+
+function autoInitAScale() {
+    const T_S = (N - 1) * T_SAMPLE;
+    const aMax = 2 / T_S;
+    let s = A_REF / aMax;
+    if (s < 0.1) s = 0.1;
+    if (s > 10) s = 10;
+    aScale = s;
+    aScaleSlider.value = s;
+    aScaleVal.textContent = s.toFixed(2);
+}
+
+xScaleSlider.addEventListener('input', () => {
+    xScale = parseFloat(xScaleSlider.value);
+    xScaleVal.textContent = xScale.toFixed(2);
+    draw();
+});
+
+yScaleSlider.addEventListener('input', () => {
+    yScale = parseFloat(yScaleSlider.value);
+    yScaleVal.textContent = yScale.toFixed(2);
+    draw();
+});
+
+yOffsetSlider.addEventListener('input', () => {
+    yOffset = parseFloat(yOffsetSlider.value);
+    yOffsetVal.textContent = yOffset.toFixed(2);
+    draw();
+});
+
+aScaleSlider.addEventListener('input', () => {
+    aScale = parseFloat(aScaleSlider.value);
+    aScaleVal.textContent = aScale.toFixed(2);
+    draw();
+});
+
+wcSlider.addEventListener('input', () => {
+    wc = parseFloat(wcSlider.value);
+    wcVal.textContent = wc.toFixed(2);
+    wcInput.value = wc.toFixed(2);
+    refresh();
+});
+
+function applyWcInput() {
+    let v = parseFloat(wcInput.value);
+    if (!isFinite(v) || v <= 0) {
+        wcInput.value = wc.toFixed(2);
+        return;
+    }
+    wc = v;
+    wcVal.textContent = wc.toFixed(2);
+    if (wc >= parseFloat(wcSlider.min) && wc <= parseFloat(wcSlider.max)) {
+        wcSlider.value = wc;
+    }
+    refresh();
+}
+wcInput.addEventListener('change', applyWcInput);
+wcInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+        e.preventDefault();
+        applyWcInput();
+    }
+});
+
+tsSlider.addEventListener('input', () => {
+    const us = parseFloat(tsSlider.value);
+    TS = us * 1e-6;
+    tsVal.textContent = TS.toFixed(6);
+    refresh();
+});
+
+tsampSlider.addEventListener('input', () => {
+    const ms = parseFloat(tsampSlider.value);
+    T_SAMPLE = ms * 1e-3;
+    tsampVal.textContent = T_SAMPLE.toFixed(3);
+    autoInitAScale();
+    refresh();
+});
+
+tpreSlider.addEventListener('input', () => {
+    const ms = parseFloat(tpreSlider.value);
+    T_PRE = ms * 1e-3;
+    tpreVal.textContent = T_PRE.toFixed(3);
+    refresh();
+});
+
+tpostSlider.addEventListener('input', () => {
+    const ms = parseFloat(tpostSlider.value);
+    T_POST = ms * 1e-3;
+    tpostVal.textContent = T_POST.toFixed(3);
+    refresh();
+});
+
+showIdeal.addEventListener('change', draw);
+showStep.addEventListener('change', draw);
+showLPF.addEventListener('change', draw);
+showAccIdeal.addEventListener('change', draw);
+showAccLPF.addEventListener('change', draw);
+
+canvas.addEventListener('mousemove', (e) => {
+    const rect = canvas.getBoundingClientRect();
+    mouseX = (e.clientX - rect.left) * (canvas.width / rect.width);
+    mouseY = (e.clientY - rect.top) * (canvas.height / rect.height);
+    draw();
+});
+
+canvas.addEventListener('mouseleave', () => {
+    mouseX = -1;
+    mouseY = -1;
+    draw();
+});
+
+/* 初始化 */
+autoInitAScale();
+refresh();
+</script>
+</body>
+</html>
