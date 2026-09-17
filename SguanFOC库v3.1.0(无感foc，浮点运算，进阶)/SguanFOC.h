@@ -320,6 +320,8 @@ typedef struct{
     float Sensorless_Gain;                  // (中间量)观测器切换权重增益
     uint8_t Sensorless_Flag;                // (中间量)高频注入信号开关标志位
 
+    float Speed_abs;                        // (中间量)速度Speed_in的绝对值
+
     float Sensorless_Stop;                  // (参数设计)无感低速域观测器停止运行界限
     float Sensorless_Open;                  // (参数设计)无感低速域观测器开始运行界限
     float Sensorless_AbsMax;                // (参数设计)角度解耦过渡区_高速域分界线
