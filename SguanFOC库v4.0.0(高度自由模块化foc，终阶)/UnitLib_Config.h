@@ -8,6 +8,7 @@
 #define CODE_DEFINE_TRANSFER5   0
 #define CODE_DEFINE_INTEGRATOR  0
 #define CODE_DEFINE_DERIVATIVE  0
+#define CODE_DEFINE_CURVE       0
 #define CODE_DEFINE_DFT         0
 #define CODE_DEFINE_HALL        0
 #define CODE_DEFINE_LADRC1      0

@@ -470,6 +470,51 @@ void transfer_derivative_loop(Derivative *derivative){
     derivative->data->o = derivative->out.output;
     #endif // CONFIG_IQmath
 }
+// ---------------------------工程模块Transfer---------------------------
+static const float speed_tab[100] = {
+    0.000000000000000f, 0.000204061405384f, 0.000816243642475f, 0.001836552750319f,
+    0.003264978528023f, 0.005101525224745f, 0.007346192840487f, 0.009998980909586f,
+    0.013059905730188f, 0.016528937965631f, 0.020406091585755f, 0.024691363796592f,
+    0.029384758323431f, 0.034486301243305f, 0.039995938539505f, 0.045913696289063f,
+    0.052239574491978f, 0.058973576873541f, 0.066115736961365f, 0.073665976524353f,
+    0.081624343991280f, 0.089990831911564f, 0.098765432834625f, 0.107948206365108f,
+    0.117539055645466f, 0.127538025379181f, 0.137945115566254f, 0.148760333657265f,
+    0.159983724355698f, 0.171615183353424f, 0.183654755353928f, 0.196102455258369f,
+    0.208958268165588f, 0.222222283482552f, 0.235894337296486f, 0.249974519014359f,
+    0.264462828636169f, 0.279359251260757f, 0.294663876295090f, 0.310376554727554f,
+    0.326497316360474f, 0.343026250600815f, 0.359963268041611f, 0.377308517694473f,
+    0.395061790943146f, 0.413223177194595f, 0.431792706251144f, 0.450770318508148f,
+    0.470156192779541f, 0.489950060844421f, 0.510050058364868f, 0.529843926429749f,
+    0.549229741096497f, 0.568207383155823f, 0.586776912212372f, 0.604938328266144f,
+    0.622691571712494f, 0.640036821365356f, 0.656973838806152f, 0.673502743244171f,
+    0.689623534679413f, 0.705336213111877f, 0.720640838146210f, 0.735537230968475f,
+    0.750025570392609f, 0.764105737209320f, 0.777777791023254f, 0.791041791439056f,
+    0.803897619247437f, 0.816345334053040f, 0.828384876251221f, 0.840016305446625f,
+    0.851239740848541f, 0.862054944038391f, 0.872462034225464f, 0.882461011409760f,
+    0.892051815986633f, 0.901234626770020f, 0.910009205341339f, 0.918375670909882f,
+    0.926334083080292f, 0.933884322643280f, 0.941026449203491f, 0.947760462760925f,
+    0.954086363315582f, 0.960004091262817f, 0.965513706207275f, 0.970615267753601f,
+    0.975308656692505f, 0.979593932628632f, 0.983471095561981f, 0.986940085887909f,
+    0.990001022815704f, 0.992653846740723f, 0.994898498058319f, 0.996735036373138f,
+    0.998163461685181f, 0.999183773994446f, 0.999795913696289f, 1.000000000000000f
+};
+
+struct CurveData {
+    SguanQ i;
+    SguanQ o;
+
+    SguanQ data_num[2];
+    SguanQ data_den[2];
+};
+
+void transfer_curve_init(Curve *curve){
+
+}
+
+void transfer_curve_loop(Curve *curve){
+    
+}
+
 
 // ---------------------------工程模块Transfer---------------------------
 struct DftData {
@@ -1714,9 +1759,50 @@ void transfer_sincos_loop(SinCos *sincos){
 }
 
 // ---------------------------工程模块Transfer---------------------------
+void transfer_tan_loop(Tan *tan){
+    #if CONFIG_IQmath
+
+
+    #else // CONFIG_IQmath
+
+
+    
+
+    #endif // CONFIG_IQmath
+}
+
+
+// ---------------------------工程模块Transfer---------------------------
+void transfer_atan_loop(Atan *atan){
+    #if CONFIG_IQmath
+
+
+    #else // CONFIG_IQmath
+
+
+    
+
+    #endif // CONFIG_IQmath
+}
 
 
 
+// ---------------------------工程模块Transfer---------------------------
+void transfer_limit_loop(Limit *limit){
+    #if CONFIG_IQmath
+
+
+    #else // CONFIG_IQmath
+
+
+    
+
+    #endif // CONFIG_IQmath
+}
+
+
+
+// ---------------------------工程模块Transfer---------------------------
 void transfer_sign_loop(Sign *sign){
     #if CONFIG_IQmath
 
@@ -1728,6 +1814,7 @@ void transfer_sign_loop(Sign *sign){
 
     #endif // CONFIG_IQmath
 }
+
 
 // ---------------------------工程模块Transfer---------------------------
 
@@ -1811,8 +1898,6 @@ void transfer_spwm_loop(Spwm *spwm){
 
 // ---------------------------工程模块Transfer---------------------------
 
-
-
 void transfer_svpwm_loop(Svpwm *svpwm){
     #if CONFIG_IQmath
 
@@ -1835,10 +1920,6 @@ void transfer_swpwm_loop(Swpwm *swpwm){
 
 // ---------------------------工程模块Transfer---------------------------
 
-
-
-
-
 void transfer_singlers_loop(SingleRs *singlers){
     #if CONFIG_IQmath
 
@@ -1851,8 +1932,11 @@ void transfer_singlers_loop(SingleRs *singlers){
     #endif // CONFIG_IQmath
 }
 
+
+
+
 // ---------------------------工程模块Transfer---------------------------
-void transfer_reinit_integrator(void *p){
+void transfer_reset_integrator(void *p){
     #if CONFIG_IQmath
 
 
@@ -1863,7 +1947,7 @@ void transfer_reinit_integrator(void *p){
     #endif // CONFIG_IQmath
 }
 
-// ==================== 实例池：块实例统一住在这里，用户通过 _get() 拿指针 ====================
+// ================== 实例池（块实例统一住在这里，用户通过 _get() 拿指针）==================
 #if CONFIG_TRANSFER1
 static Transfer1 transfer1_pool[CONFIG_MOTOR][CONFIG_TRANSFER1];
 static Transfer1Data transfer1_data_pool[CONFIG_MOTOR][CONFIG_TRANSFER1];
@@ -1934,7 +2018,17 @@ Derivative *transfer_derivative_get(uint8_t motor, int ch) {
     return self;
 }
 #endif
-#if CONFIG_DERIVATIVE
+#if CONFIG_CURVE
+static Curve curve_pool[CONFIG_MOTOR][CONFIG_CURVE];
+static CurveData curve_data_pool[CONFIG_MOTOR][CONFIG_CURVE];
+Curve *transfer_curve_get(uint8_t motor, int ch) {
+    if (motor >= CONFIG_MOTOR || ch >= CONFIG_CURVE) return 0;
+    Curve *self = &curve_pool[motor][ch];
+    self->data = &curve_data_pool[motor][ch];
+    return self;
+}
+#endif
+#if CONFIG_DFT
 static Dft dft_pool[CONFIG_MOTOR][CONFIG_DFT];
 static DftData dft_data_pool[CONFIG_MOTOR][CONFIG_DFT];
 Dft *transfer_dft_get(uint8_t motor, int ch) {
@@ -2278,18 +2372,13 @@ SingleRs *transfer_singlers_get(uint8_t motor) {
     return &singlers_pool[motor];
 }
 
-// ==================== 新增块：Tan/Atan/Limit + SinCos/Swpwm 实例 ====================
-void transfer_tan_loop(Tan *tan){
-    // TODO: 正切求解
-}
 
-void transfer_atan_loop(Atan *atan){
-    // TODO: 反正切求解
-}
 
-void transfer_limit_loop(Limit *limit){
-    // TODO: 限幅函数
-}
+
+
+
+
+//////////////////////////////////////////////////
 
 static SinCos sincos_pool[CONFIG_MOTOR];
 SinCos *transfer_sincos_get(uint8_t motor) {

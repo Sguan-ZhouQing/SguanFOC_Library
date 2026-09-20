@@ -1,8 +1,8 @@
 #include "Sguan_Printf.h"
 
-/* UserData外部文件声明 */
+/* SguanFOC配置文件声明 */
 #include "UserData_Driver.h"
-#include "UserData_UserControl.h"
+#include "UnitLib_UserControl.h"
 #include <stdio.h>
 #include <string.h>
 
@@ -10,13 +10,6 @@
 uint8_t sguan_printfBuff[200];
 static float Get_Data_Fast(uint8_t start_idx);
 static void Printf_Adjust(void);
-static void handle_motor(float value);
-static void handle_speed(float value);
-static void handle_position(float value);
-static void handle_id(float value);
-static void handle_iq(float value);
-static void handle_ud(float value);
-static void handle_uq(float value);
 
 
 /* ==================== 哈希/字典映射实现 =================== */
@@ -28,53 +21,6 @@ static uint32_t Hash_Compute(const char *str, uint8_t len){
     }
     return hash;
 }
-
-// 指令处理回调函数库->MOTOR
-static void handle_motor(float value){
-
-}
-
-// 指令处理回调函数库->Speed
-static void handle_speed(float value){
-
-}
-
-// 指令处理回调函数库->Position
-static void handle_position(float value){
-
-}
-
-// 指令处理回调函数库->Id
-static void handle_id(float value){
-
-}
-
-// 指令处理回调函数库->Iq
-static void handle_iq(float value){
-
-}
-
-// 指令处理回调函数库->Ud
-static void handle_ud(float value){
-
-}
-
-// 指令处理回调函数库->Uq
-static void handle_uq(float value){
-
-}
-
-
-// 动态可修改的指令字典（预留 hash_val 位置为 0）
-CmdMap cmd_dict[] = {
-    {"MOTOR",       0, handle_motor},
-    {"Speed",       0, handle_speed},
-    {"Position",    0, handle_position},
-    {"Id",          0, handle_id},
-    {"Iq",          0, handle_iq},
-    {"Ud",          0, handle_ud},
-    {"Uq",          0, handle_uq}
-};
 
 #define DICT_COUNT (sizeof(cmd_dict) / sizeof(CmdMap))
 

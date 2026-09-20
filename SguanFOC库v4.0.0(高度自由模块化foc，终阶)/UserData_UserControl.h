@@ -1,8 +1,0 @@
-#ifndef __USERDATA_USERCONTROL_H
-#define __USERDATA_USERCONTROL_H
-
-
-
-
-
-#endif // USERDATA_USERCONTROL_H

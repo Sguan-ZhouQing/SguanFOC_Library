@@ -1,6 +1,6 @@
 #include "SguanFOC.h"
 
-// 外部文件声明
+/* SguanFOC配置文件声明 */
 #include "UnitLib_main.h"
 
 static void sguanfoc_high_loop(SguanFoc *sguan);
@@ -50,7 +50,7 @@ MOTOR_LIST
 // 5. 结构体数组初始化
 SguanFoc sguanfoc[CONFIG_MOTOR] = {
     #define X(n) { \
-        .id = n, \
+        .id_flag = n, \
         .func_high_loop = high_loop_##n, \
         .func_low_loop = low_loop_##n, \
         .func_printf_loop = sguanfoc_printf_loop, \
@@ -62,12 +62,12 @@ SguanFoc sguanfoc[CONFIG_MOTOR] = {
 
 
 static void sguanfoc_high_loop(SguanFoc *sguan){
-    // sguan->id
+    // sguan->id_flag
 
 }
 
 static void sguanfoc_low_loop(SguanFoc *sguan){
-    // sguan->id
+    // sguan->id_flag
 
 }
 
@@ -76,7 +76,7 @@ static void sguanfoc_printf_loop(uint8_t *data, uint16_t length){
 }
 
 static void sguanfoc_main_loop(SguanFoc *sguan){
-    // sguan->id
+    // sguan->id_flag
 
 }
 

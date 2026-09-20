@@ -1,6 +1,7 @@
 #ifndef SGUAN_TRANSFER_H
 #define SGUAN_TRANSFER_H
 
+/* SguanFOC配置文件声明 */
 #include "Sguan_Config.h"
 
 // ================================================================
@@ -220,6 +221,33 @@ typedef struct Derivative{
     DerivativeParams params;
     DerivativeData *data;
 }Derivative;
+// --------------------------- Curve S型曲线加减速函数 ---------------------------
+typedef struct{
+    SguanQ input;
+}CurveIn;
+
+typedef struct{
+    SguanQ output;
+}CurveOut;
+
+typedef struct{
+    SguanQ t;
+    SguanQ wo;
+
+    SguanQ k1;
+    SguanQ k2;
+
+    uint8_t recalculate_total_flag;
+}CurveParams;
+
+typedef struct CurveData CurveData;
+
+typedef struct SingleRs{
+    CurveIn in;
+    CurveOut out;
+    CurveParams params;
+    CurveData *data;
+}Curve;
 // --------------------------- DFT 快速傅里叶变换 ---------------------------
 typedef struct{
     SguanQ input;
@@ -998,7 +1026,7 @@ typedef struct Delay3{
     Delay3Out out;
 }Delay3;
 
-// --------------------------- 单一功能模块（无 Data：全可见） ---------------------------
+// --------------------------- Sine 正弦发生器 ---------------------------
 typedef struct{
     SguanQ input;
 }SineIn;
@@ -1024,6 +1052,65 @@ typedef struct Cosine{
     CosineIn in;
     CosineOut out;
 }Cosine;
+// --------------------------- SinCos 正余弦发生器 ---------------------------
+typedef struct{
+    SguanQ input;
+}SinCosIn;
+
+typedef struct{
+    SguanQ sine;
+    SguanQ cosine;
+}SinCosOut;
+
+typedef struct SinCos{
+    SinCosIn in;
+    SinCosOut out;
+}SinCos;
+// --------------------------- Tan 正切求解器 ---------------------------
+typedef struct{
+    SguanQ input;
+}TanIn;
+
+typedef struct{
+    SguanQ output;
+}TanOut;
+
+typedef struct Tan{
+    TanIn in;
+    TanOut out;
+}Tan;
+// --------------------------- Atan 反正切求解器 ---------------------------
+typedef struct{
+    SguanQ input;
+}AtanIn;
+
+typedef struct{
+    SguanQ output;
+}AtanOut;
+
+typedef struct Atan{
+    AtanIn in;
+    AtanOut out;
+}Atan;
+// --------------------------- Limit 限幅函数 ---------------------------
+typedef struct{
+    SguanQ input;
+}LimitIn;
+
+typedef struct{
+    SguanQ output;
+}LimitOut;
+
+typedef struct{
+    SguanQ out_max;
+    SguanQ out_min;
+}LimitParams;
+
+typedef struct Limit{
+    LimitIn in;
+    LimitOut out;
+    LimitParams params;
+}Limit;
 // --------------------------- Sign 符号函数 ---------------------------
 typedef struct{
     SguanQ we;
@@ -1122,7 +1209,21 @@ typedef struct Svpwm{
     SvpwmIn in;
     SvpwmOut out;
 }Svpwm;
-// --------------------------- SingleRs 单电阻采样函数（有 Data：半隐藏） ---------------------------
+// --------------------------- Swpwm 电调PWM无感方波 ---------------------------
+typedef struct{
+    SguanQ we;
+    SguanQ wh;
+}SwpwmIn;
+
+typedef struct{
+    SguanQ output;
+}SwpwmOut;
+
+typedef struct Swpwm{
+    SwpwmIn in;
+    SwpwmOut out;
+}Swpwm;
+// --------------------------- SingleRs 单电阻采样函数 ---------------------------
 typedef struct{
     SguanQ input;
 }SingleRsIn;
@@ -1146,79 +1247,6 @@ typedef struct SingleRs{
     SingleRsOut out;
     SingleRsParams params;
 }SingleRs;
-// --------------------------- SinCos 正余弦发生器 ---------------------------
-typedef struct{
-    SguanQ input;
-}SinCosIn;
-
-typedef struct{
-    SguanQ sine;
-    SguanQ cosine;
-}SinCosOut;
-
-typedef struct SinCos{
-    SinCosIn in;
-    SinCosOut out;
-}SinCos;
-// --------------------------- Tan 正切求解器 ---------------------------
-typedef struct{
-    SguanQ input;
-}TanIn;
-
-typedef struct{
-    SguanQ output;
-}TanOut;
-
-typedef struct Tan{
-    TanIn in;
-    TanOut out;
-}Tan;
-// --------------------------- Atan 反正切求解器 ---------------------------
-typedef struct{
-    SguanQ input;
-}AtanIn;
-
-typedef struct{
-    SguanQ output;
-}AtanOut;
-
-typedef struct Atan{
-    AtanIn in;
-    AtanOut out;
-}Atan;
-// --------------------------- Limit 限幅函数 ---------------------------
-typedef struct{
-    SguanQ input;
-}LimitIn;
-
-typedef struct{
-    SguanQ output;
-}LimitOut;
-
-typedef struct{
-    SguanQ out_max;
-    SguanQ out_min;
-}LimitParams;
-
-typedef struct Limit{
-    LimitIn in;
-    LimitOut out;
-    LimitParams params;
-}Limit;
-// --------------------------- Swpwm 电调PWM无感方波 ---------------------------
-typedef struct{
-    SguanQ we;
-    SguanQ wh;
-}SwpwmIn;
-
-typedef struct{
-    SguanQ output;
-}SwpwmOut;
-
-typedef struct Swpwm{
-    SwpwmIn in;
-    SwpwmOut out;
-}Swpwm;
 
 void transfer_transfer1_init(Transfer1 *transfer);
 void transfer_transfer2_init(Transfer2 *transfer);
@@ -1227,6 +1255,7 @@ void transfer_transfer4_init(Transfer4 *transfer);
 void transfer_transfer5_init(Transfer5 *transfer);
 void transfer_integrator_init(Integrator *integrator);
 void transfer_derivative_init(Derivative *derivative);
+void transfer_curve_init(Curve *curve);
 void transfer_dft_init(Dft *dft);
 void transfer_hall_init(Hall *hall);
 void transfer_ladrc1_init(Ladrc1 *ladrc);
@@ -1264,6 +1293,7 @@ void transfer_transfer4_loop(Transfer4 *transfer);
 void transfer_transfer5_loop(Transfer5 *transfer);
 void transfer_integrator_loop(Integrator *integrator);
 void transfer_derivative_loop(Derivative *derivative);
+void transfer_curve_loop(Curve *curve);
 void transfer_dft_loop(Dft *dft);
 void transfer_hall_loop(Hall *hall);
 void transfer_ladrc1_loop(Ladrc1 *ladrc);
@@ -1293,6 +1323,7 @@ void transfer_ekf_loop(Ekf *ekf);
 void transfer_delay1_loop(Delay1 *delay);
 void transfer_delay2_loop(Delay2 *delay);
 void transfer_delay3_loop(Delay3 *delay);
+
 void transfer_sine_loop(Sine *sine);
 void transfer_cosine_loop(Cosine *cosine);
 void transfer_sincos_loop(SinCos *sincos);
@@ -1308,6 +1339,8 @@ void transfer_spwm_loop(Spwm *spwm);
 void transfer_svpwm_loop(Svpwm *svpwm);
 void transfer_swpwm_loop(Swpwm *swpwm);
 void transfer_singlers_loop(SingleRs *singlers);
+
+void transfer_reset_integrator(void *p);
 
 // ==================== 实例获取：块实例统一由 .c 的静态池提供，用户只拿指针 ====================
 #if CONFIG_TRANSFER1
@@ -1333,6 +1366,9 @@ Derivative *transfer_derivative_get(uint8_t motor, int ch);
 #endif
 #if CONFIG_DFT
 Dft *transfer_dft_get(uint8_t motor, int ch);
+#endif
+#if CONFIG_CURVE
+Curve *transfer_curve_get(uint8_t motor, int ch);
 #endif
 #if CONFIG_HALL
 Hall *transfer_hall_get(uint8_t motor, int ch);
@@ -1418,7 +1454,7 @@ Delay2 *transfer_delay2_get(uint8_t motor, int ch);
 #if CONFIG_DELAY3
 Delay3 *transfer_delay3_get(uint8_t motor, int ch);
 #endif
-// ==================== 单一功能模块实例（单实例，无通道参数，顺序同 README） ====================
+// ==================== 单一功能模块实例（单实例，无通道参数） ====================
 Sine *transfer_sine_get(uint8_t motor);
 Cosine *transfer_cosine_get(uint8_t motor);
 SinCos *transfer_sincos_get(uint8_t motor);
@@ -1435,7 +1471,171 @@ Svpwm *transfer_svpwm_get(uint8_t motor);
 Swpwm *transfer_swpwm_get(uint8_t motor);
 SingleRs *transfer_singlers_get(uint8_t motor);
 // ---------------------------工程模块Transfer---------------------------
-void transfer_reinit_integrator(void *p);
+typedef struct{
+    #if CONFIG_TRANSFER1 // 典型一阶传递函数
+    Transfer1 *transfer1_ch[CONFIG_TRANSFER1];
+    #endif // CONFIG_TRANSFER1
+
+    #if CONFIG_TRANSFER2 // 典型二阶传递函数
+    Transfer2 *transfer2_ch[CONFIG_TRANSFER2];
+    #endif // CONFIG_TRANSFER2
+
+    #if CONFIG_TRANSFER3 // 典型三阶传递函数
+    Transfer3 *transfer3_ch[CONFIG_TRANSFER3];
+    #endif // CONFIG_TRANSFER3
+
+    #if CONFIG_TRANSFER4 // 典型四阶传递函数
+    Transfer4 *transfer4_ch[CONFIG_TRANSFER4];
+    #endif // CONFIG_TRANSFER4
+
+    #if CONFIG_TRANSFER5 // 典型五阶传递函数
+    Transfer5 *transfer5_ch[CONFIG_TRANSFER5];
+    #endif // CONFIG_TRANSFER5
+
+    #if CONFIG_INTEGRATOR // 积分器
+    Integrator *integrator_ch[CONFIG_INTEGRATOR];
+    #endif // CONFIG_INTEGRATOR
+
+    #if CONFIG_DERIVATIVE // 微分器
+    Derivative *derivative_ch[CONFIG_DERIVATIVE];
+    #endif // CONFIG_DERIVATIVE
+
+    #if CONFIG_CURVE // S型曲线加减速函数
+    Curve *curve_ch[CONFIG_CURVE];
+    #endif // CONFIG_DFT
+
+    #if CONFIG_DFT // 快速傅里叶变换
+    Dft *dft_ch[CONFIG_DFT];
+    #endif // CONFIG_DFT
+
+    #if CONFIG_HALL // 霍尔编码器
+    Hall *hall_ch[CONFIG_HALL];
+    #endif // CONFIG_HALL
+
+    #if CONFIG_LADRC1 // 一阶线性自适应抗干扰控制
+    Ladrc1 *ladrc1_ch[CONFIG_LADRC1];
+    #endif // CONFIG_LADRC1
+
+    #if CONFIG_LADRC2 // 二阶线性自适应抗干扰控制
+    Ladrc2 *ladrc2_ch[CONFIG_LADRC2];
+    #endif // CONFIG_LADRC2
+
+    #if CONFIG_SMC // 传统指数型趋近率的滑模控制
+    Smc *smc_ch[CONFIG_SMC];
+    #endif // CONFIG_SMC
+
+    #if CONFIG_DPCC // 增量式电流预测控制
+    Dpcc *dpcc_ch[CONFIG_DPCC];
+    #endif // CONFIG_DPCC
+
+    #if CONFIG_PIR // 比例积分谐振调节器
+    Pir *pir_ch[CONFIG_PIR];
+    #endif // CONFIG_PIR
+
+    #if CONFIG_PID // 传统闭环控制器
+    Pid *pid_ch[CONFIG_PID];
+    #endif // CONFIG_PID
+
+    #if CONFIG_PLL // 开环锁相环
+    Pll *pll_ch[CONFIG_PLL];
+    #endif // CONFIG_PLL
+
+    #if CONFIG_LPF1 // 一阶低通滤波器
+    Lpf1 *lpf1_ch[CONFIG_LPF1];
+    #endif // CONFIG_LPF1
+
+    #if CONFIG_LPF2 // 二阶低通滤波器
+    Lpf2 *lpf2_ch[CONFIG_LPF2];
+    #endif // CONFIG_LPF2
+
+    #if CONFIG_HPF1 // 一阶高通滤波器
+    Hpf1 *hpf1_ch[CONFIG_HPF1];
+    #endif // CONFIG_HPF1
+
+    #if CONFIG_HPF2 // 二阶高通滤波器
+    Hpf2 *hpf2_ch[CONFIG_HPF2];
+    #endif // CONFIG_HPF2
+
+    #if CONFIG_BPF1 // 带通滤波器(一阶低通和高通串联)
+    Bpf1 *bpf1_ch[CONFIG_BPF1];
+    #endif // CONFIG_BPF1
+
+    #if CONFIG_BPF2 // 带通滤波器(典型二阶系统改型)
+    Bpf2 *bpf2_ch[CONFIG_BPF2];
+    #endif // CONFIG_BPF2
+
+    #if CONFIG_NF // 陷波滤波器(典型二阶系统改型)
+    Nf *nf_ch[CONFIG_NF];
+    #endif // CONFIG_NF
+
+    #if CONFIG_TPNF // 陷波滤波器(三参数陷波滤波器)
+    Tpnf *tpnf_ch[CONFIG_TPNF];
+    #endif // CONFIG_TPNF
+
+    #if CONFIG_DOB // 超螺旋滑模扰动观测器
+    Dob *dob_ch[CONFIG_DOB];
+    #endif // CONFIG_DOB
+
+    #if CONFIG_RLS // 电机参数在线辨识观测器
+    Rls *rls_ch[CONFIG_RLS];
+    #endif // CONFIG_RLS
+
+    #if CONFIG_SMO // (无感)滑模观测器
+    Smo *smo_ch[CONFIG_SMO];
+    #endif // CONFIG_SMO
+
+    #if CONFIG_NLFO // (无感)非线性磁链观测器
+    Nlfo *nlfo_ch[CONFIG_NLFO];
+    #endif // CONFIG_NLFO
+
+    #if CONFIG_VCFO // (无感)电压电流互补磁链观测器
+    Vcfo *vcfo_ch[CONFIG_VCFO];
+    #endif // CONFIG_VCFO
+
+    #if CONFIG_HFI // (无感)高频正弦波注入
+    Hfi *hfi_ch[CONFIG_HFI];
+    #endif // CONFIG_HFI
+
+    #if CONFIG_ROLO // (无感)降阶龙伯格观测器
+    Rolo *rolo_ch[CONFIG_ROLO];
+    #endif // CONFIG_ROLO
+
+    #if CONFIG_MARS // (无感)模型参考自适应观测器
+    Mars *mars_ch[CONFIG_MARS];
+    #endif // CONFIG_MARS
+
+    #if CONFIG_EKF // (无感)扩展卡尔曼滤波
+    Ekf *ekf_ch[CONFIG_EKF];
+    #endif // CONFIG_EKF
+
+    #if CONFIG_DELAY1 // 延时函数(延时一拍)
+    Delay1 *delay1_ch[CONFIG_DELAY1];
+    #endif // CONFIG_DELAY1
+
+    #if CONFIG_DELAY2 // 延时函数(延时两拍)
+    Delay2 *delay2_ch[CONFIG_DELAY2];
+    #endif // CONFIG_DELAY2
+
+    #if CONFIG_DELAY3 // 延时函数(延时三拍)
+    Delay3 *delay3_ch[CONFIG_DELAY3];
+    #endif // CONFIG_DELAY3
+
+    Sine *sine;                     // 正弦发生器
+    Cosine *cosine;                 // 余弦发生器
+    SinCos *sincos;                 // 正余弦发生器
+    Tan *tan;                       // 正切求解器
+    Atan *atan;                     // 反正切求解器
+    Limit *limit;                   // 限幅函数
+    Sign *sign;                     // 符号函数
+    Clarke *clarke;                 // 克拉克变换
+    Park *park;                     // 帕克变换
+    Ipark *ipark;                   // 帕克逆变换
+    Spwm0 *spwm0;                   // 零序注入的SPWM模块
+    Spwm *spwm;                     // 普通SPWM模块
+    Svpwm *svpwm;                   // 七段式SVPWM模块
+    Swpwm *swpwm;                   // 电调PWM无感方波
+    SingleRs *singlers;             // 单电阻采样函数
+}Transfer;
 
 
 #endif // SGUAN_TRANSFER_H

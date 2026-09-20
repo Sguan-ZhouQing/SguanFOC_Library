@@ -1,6 +1,7 @@
 #ifndef __SGUAN_CONFIG_H
 #define __SGUAN_CONFIG_H
 
+/* SguanFOC配置文件声明 */
 #include "Sguan_IQmath.h"
 #include "Sguan_Math.h"
 #include "UnitLib_Config.h"
@@ -15,6 +16,7 @@
 #define CONFIG_TRANSFER5    CODE_DEFINE_TRANSFER5
 #define CONFIG_INTEGRATOR   CODE_DEFINE_INTEGRATOR
 #define CONFIG_DERIVATIVE   CODE_DEFINE_DERIVATIVE
+#define CONFIG_CURVE        CODE_DEFINE_CURVE
 #define CONFIG_DFT          CODE_DEFINE_DFT
 #define CONFIG_HALL         CODE_DEFINE_HALL
 #define CONFIG_LADRC1       CODE_DEFINE_LADRC1

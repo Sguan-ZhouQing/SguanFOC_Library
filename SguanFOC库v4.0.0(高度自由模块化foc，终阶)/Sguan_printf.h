@@ -1,7 +1,9 @@
 #ifndef __SGUAN_PRINTF_H
 #define __SGUAN_PRINTF_H
 
+/* SguanFOC配置文件声明 */
 #include "Sguan_Config.h"
+
 
 #define CH_COUNT      10    // JustFloat 通道数
 #define CMD_MAX_LEN   20    // 最大支持的指令长度

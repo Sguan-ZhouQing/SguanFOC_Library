@@ -1,7 +1,9 @@
 #ifndef __SGUAN_MATH_H
 #define __SGUAN_MATH_H
 
+/* SguanFOC配置文件声明 */
 #include "Sguan_Value.h"
+
 
 // 快速正余弦求解float版本
 float Math_sin(float x);

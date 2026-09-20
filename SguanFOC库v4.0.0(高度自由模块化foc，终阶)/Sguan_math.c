@@ -173,3 +173,7 @@ float Math_atan(float x){
     float y1 = ATAN_TABLE[i + 1];
     return y0 + (y1 - y0)*t;
 }
+
+
+
+

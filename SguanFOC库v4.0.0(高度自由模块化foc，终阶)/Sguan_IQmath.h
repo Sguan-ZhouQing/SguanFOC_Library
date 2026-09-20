@@ -1,10 +1,11 @@
 #ifndef __SGUAN_IQMATH_H
 #define __SGUAN_IQMATH_H
 
+/* SguanFOC配置文件声明 */
 #include "Sguan_Value.h"
-
-// !!!这里定义整体IQmath算法是使用Q31还是Q15
 #include "UserData_Config.h"
+
+
 #define CONFIG_IQMATH       DATA_DEFINE_IQMATH
 
 // 定点化计算格式
