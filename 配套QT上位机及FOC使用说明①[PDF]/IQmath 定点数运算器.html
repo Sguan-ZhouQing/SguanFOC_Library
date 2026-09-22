@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IQmath 定点数运算器 · Q31 / Q15 / float</title>
+<style>
+  :root{
+    --bg:#f7f8fa;
+    --card:#ffffff;
+    --border:#e8eaed;
+    --line:#eef0f3;
+    --text:#1f2430;
+    --muted:#8a92a6;
+    --faint:#9aa1b1;
+    --accent:#3b6ef6;
+    --accent-soft:#eef3ff;
+    --warn:#c2410c;
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    font-family:system-ui,-apple-system,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+    font-size:14px;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  .page{max-width:900px;margin:0 auto;padding:44px 20px 90px;}
+  header h1{
+    font-size:22px;font-weight:600;margin:0 0 6px;letter-spacing:.2px;
+  }
+  header p{margin:0 0 26px;color:var(--muted);font-size:13px;}
+
+  .card{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:20px 22px;
+    margin-bottom:16px;
+    box-shadow:0 1px 2px rgba(16,24,40,.03);
+  }
+  .card-head{display:flex;align-items:baseline;gap:10px;margin-bottom:16px;flex-wrap:wrap;}
+  .card-head h2{font-size:14px;font-weight:600;margin:0;letter-spacing:.3px;}
+  .card-head .hint{font-size:12px;color:var(--faint);font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;}
+
+  .grid{display:grid;gap:12px;}
+  .grid-2{grid-template-columns:1fr 1fr;}
+  .grid-3{grid-template-columns:1fr 1fr 1fr;}
+  @media (max-width:680px){
+    .grid-2,.grid-3{grid-template-columns:1fr;}
+  }
+
+  .field{display:flex;flex-direction:column;gap:6px;min-width:0;}
+  .field label{font-size:12px;color:var(--muted);}
+
+  input[type=number],select{
+    font:inherit;
+    font-variant-numeric:tabular-nums;
+    padding:9px 12px;
+    border:1px solid #e2e5ea;
+    border-radius:9px;
+    background:#fff;
+    color:var(--text);
+    outline:none;
+    width:100%;
+    transition:border-color .15s,box-shadow .15s;
+  }
+  input[type=number]:focus,select:focus{
+    border-color:#9db6f8;
+    box-shadow:0 0 0 3px rgba(59,110,246,.10);
+  }
+  select{cursor:pointer;appearance:none;
+    background-image:linear-gradient(45deg,transparent 50%,#9aa1b1 50%),linear-gradient(135deg,#9aa1b1 50%,transparent 50%);
+    background-position:calc(100% - 16px) 50%,calc(100% - 11px) 50%;
+    background-size:5px 5px,5px 5px;
+    background-repeat:no-repeat;
+    padding-right:32px;
+  }
+
+  .chips{display:flex;gap:8px;flex-wrap:wrap;}
+  .chip{
+    font:inherit;font-size:12px;padding:7px 14px;border-radius:8px;
+    border:1px solid #e2e5ea;background:#fbfcfd;color:#5b6474;cursor:pointer;
+    transition:all .15s;
+  }
+  .chip:hover{border-color:#c9d6f7;background:var(--accent-soft);color:var(--accent);}
+
+  .seg{display:inline-flex;background:#f1f3f6;border-radius:9px;padding:3px;gap:2px;}
+  .seg button{
+    border:none;background:transparent;padding:6px 16px;border-radius:7px;
+    font:inherit;font-size:13px;color:#69707f;cursor:pointer;transition:all .15s;
+  }
+  .seg button.active{background:#fff;color:var(--text);font-weight:500;box-shadow:0 1px 2px rgba(16,24,40,.08);}
+
+  .result{
+    background:#fafbfc;
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:12px 14px;
+    min-width:0;
+  }
+  .result .label{
+    font-size:11px;letter-spacing:.6px;color:var(--faint);
+    text-transform:uppercase;
+  }
+  .result .value{
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    font-size:18px;font-weight:600;color:var(--text);
+    word-break:break-all;margin:2px 0 4px;line-height:1.4;
+  }
+  .result .value.accent{color:var(--accent);}
+  .result .meta{
+    font-size:12px;color:var(--muted);
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    word-break:break-all;line-height:1.5;
+  }
+  .result .meta.warn{color:var(--warn);}
+
+  .tip{margin:12px 0 0;font-size:12px;color:var(--faint);}
+  .mb14{margin-bottom:14px;}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header>
+    <h1>IQmath 定点数运算器</h1>
+    <p>Q31 / Q15 / float 数值互转 · 基数换算 · 定点四则运算</p>
+  </header>
+
+  <!-- ================= 全局基数 ================= -->
+  <section class="card">
+    <div class="card-head">
+      <h2>全局基数 base</h2>
+      <span class="hint">默认 1.0，表示 Q 值满量程对应的物理量</span>
+    </div>
+    <div class="grid grid-2">
+      <div class="field">
+        <label>base（需 &gt; 0）</label>
+        <input id="baseInput" type="number" step="any" value="1">
+      </div>
+      <div class="field">
+        <label>快捷设置</label>
+        <div class="chips">
+          <button class="chip" data-base="1">1</button>
+          <button class="chip" data-base="3.3">3.3</button>
+          <button class="chip" data-base="12">12</button>
+          <button class="chip" data-base="24">24</button>
+          <button class="chip" data-base="100">100</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= float -> Q ================= -->
+  <section class="card">
+    <div class="card-head">
+      <h2>float → Q31 / Q15</h2>
+      <span class="hint">iqmath_from_float</span>
+    </div>
+    <div class="field mb14">
+      <label>浮点值</label>
+      <input id="fInput" type="number" step="any" value="0.5">
+    </div>
+    <div class="grid grid-2">
+      <div class="result">
+        <div class="label">Q31</div>
+        <div class="value accent" id="q31Out">—</div>
+        <div class="meta" id="q31Meta"></div>
+      </div>
+      <div class="result">
+        <div class="label">Q15</div>
+        <div class="value accent" id="q15Out">—</div>
+        <div class="meta" id="q15Meta"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= Q -> float ================= -->
+  <section class="card">
+    <div class="card-head">
+      <h2>Q31 / Q15 → float</h2>
+      <span class="hint">iqmath_to_float</span>
+    </div>
+    <div class="grid grid-2 mb14">
+      <div class="field">
+        <label>格式</label>
+        <select id="qFormat">
+          <option value="q31">Q31（int32）</option>
+          <option value="q15">Q15（int16）</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>定点原始整数</label>
+        <input id="qInput" type="number" step="1" value="1073741824">
+      </div>
+    </div>
+    <div class="result">
+      <div class="label">浮点值</div>
+      <div class="value accent" id="floatOut">—</div>
+      <div class="meta" id="floatMeta"></div>
+    </div>
+  </section>
+
+  <!-- ================= 基数互转 ================= -->
+  <section class="card">
+    <div class="card-head">
+      <h2>基数 / 单位互转</h2>
+      <span class="hint">iqmath_convert_base</span>
+    </div>
+    <div class="grid grid-3 mb14">
+      <div class="field">
+        <label>格式</label>
+        <select id="cbFormat">
+          <option value="q31">Q31</option>
+          <option value="q15">Q15</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>旧基数 old_base</label>
+        <input id="cbOld" type="number" step="any" value="1">
+      </div>
+      <div class="field">
+        <label>新基数 new_base</label>
+        <input id="cbNew" type="number" step="any" value="3.3">
+      </div>
+    </div>
+    <div class="field mb14">
+      <label>定点原始整数 q</label>
+      <input id="cbQ" type="number" step="1" value="1073741824">
+    </div>
+    <div class="result">
+      <div class="label">换算结果</div>
+      <div class="value accent" id="cbOut">—</div>
+      <div class="meta" id="cbMeta"></div>
+    </div>
+  </section>
+
+  <!-- ================= 四则运算 ================= -->
+  <section class="card">
+    <div class="card-head">
+      <h2>四则运算</h2>
+      <span class="hint">iqmath_add / sub / mul / div</span>
+    </div>
+    <div class="mb14">
+      <div class="seg" id="opSeg">
+        <button class="active" data-fmt="q31">Q31</button>
+        <button data-fmt="q15">Q15</button>
+        <button data-fmt="float">float</button>
+      </div>
+    </div>
+    <div class="grid grid-3 mb14">
+      <div class="field">
+        <label>操作数 A</label>
+        <input id="opA" type="number" step="any" value="1073741824">
+      </div>
+      <div class="field">
+        <label>运算符</label>
+        <select id="opSel">
+          <option value="add">＋　加</option>
+          <option value="sub">－　减</option>
+          <option value="mul">×　乘</option>
+          <option value="div">÷　除</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>操作数 B</label>
+        <input id="opB" type="number" step="any" value="1073741824">
+      </div>
+    </div>
+    <div class="result">
+      <div class="label">结果</div>
+      <div class="value accent" id="opOut">—</div>
+      <div class="meta" id="opMeta"></div>
+    </div>
+    <p class="tip" id="opTip"></p>
+  </section>
+
+</div>
+
+<script>
+/* =====================================================================
+   常量
+   ===================================================================== */
+const Q31_MAX = 2147483647;
+const Q31_MIN = -2147483648;
+const Q15_MAX = 32767;
+const Q15_MIN = -32768;
+
+const el = id => document.getElementById(id);
+
+/* =====================================================================
+   基础工具
+   ===================================================================== */
+function clamp(x, lo, hi){ return x < lo ? lo : (x > hi ? hi : x); }
+
+/* C 的 (int64_t) 转换 = 向零截断；这里先 ±0.5 再截断 = 四舍五入(远离零) */
+function roundHalfAwayFromZero(x){
+  return x >= 0 ? Math.floor(x + 0.5) : Math.ceil(x - 0.5);
+}
+
+function hex32(v){
+  return '0x' + BigInt.asUintN(32, BigInt(v)).toString(16).toUpperCase().padStart(8, '0');
+}
+function hex16(v){
+  return '0x' + BigInt.asUintN(16, BigInt(v)).toString(16).toUpperCase().padStart(4, '0');
+}
+
+function fmtFloat(x){
+  if (typeof x === 'bigint') return x.toString();
+  if (Number.isNaN(x)) return 'NaN';
+  if (!Number.isFinite(x)) return x > 0 ? '∞' : '-∞';
+  if (Object.is(x, -0)) x = 0;
+  if (Number.isInteger(x) && Math.abs(x) < 1e15) return x.toString();
+  const a = Math.abs(x);
+  if (a !== 0 && (a < 1e-4 || a >= 1e16)){
+    return x.toExponential(6).replace(/\.?0+e/, 'e');
+  }
+  let s = x.toPrecision(12);
+  if (s.includes('e')) return s;
+  if (s.includes('.')) s = s.replace(/0+$/, '').replace(/\.$/, '');
+  return s;
+}
+
+/* =====================================================================
+   Q31 核心（严格对应 Sguan_IQmath.c）
+   ===================================================================== */
+function q31FromFloat(f, base){
+  if (!(base > 0) || Number.isNaN(f)) return 0;
+  let scaled;
+  if (base !== 1.0){
+    const normalized = f / base;
+    if (normalized >= 1.0) return Q31_MAX;
+    if (normalized <= -1.0) return Q31_MIN;
+    scaled = normalized * 2147483648.0;
+  } else {
+    scaled = f * 2147483648.0;
+  }
+  const r = roundHalfAwayFromZero(scaled);
+  if (r > Q31_MAX) return Q31_MAX;
+  if (r < Q31_MIN) return Q31_MIN;
+  return r;
+}
+
+function q31ToFloat(q, base){
+  if (!(base > 0)) return 0;
+  return q * (1 / 2147483648) * base;
+}
+
+function q31Add(a, b){
+  const sum = Number(BigInt.asIntN(32, BigInt(a) + BigInt(b)));
+  if (a > 0 && b > 0 && sum <= 0) return Q31_MAX;
+  if (a < 0 && b < 0 && sum >= 0) return Q31_MIN;
+  return sum;
+}
+
+function q31Sub(a, b){
+  const diff = Number(BigInt.asIntN(32, BigInt(a) - BigInt(b)));
+  if (a > 0 && b < 0 && diff <= 0) return Q31_MAX;
+  if (a < 0 && b > 0 && diff >= 0) return Q31_MIN;
+  return diff;
+}
+
+function q31Mul(a, b){
+  let r = BigInt(a) * BigInt(b) + (1n << 30n);
+  r >>= 31n;                       // BigInt 的 >> 对负数即为算术右移
+  if (r > 2147483647n) return Q31_MAX;
+  if (r < -2147483648n) return Q31_MIN;
+  return Number(r);
+}
+
+function q31Div(a, b){
+  if (b === 0) return a >= 0 ? Q31_MAX : Q31_MIN;
+  const num = BigInt(a) << 31n;
+  const bb  = BigInt(b);
+  let res = num / bb;              // BigInt 除法向零截断
+  const rem = num % bb;            // 余数符号跟随被除数
+  if (rem !== 0n){
+    const remAbs = rem < 0n ? -rem : rem;
+    const bAbs   = bb  < 0n ? -bb  : bb;
+    if (remAbs * 2n >= bAbs) res += (num >= 0n) ? 1n : -1n;
+  }
+  if (res > 2147483647n) return Q31_MAX;
+  if (res < -2147483648n) return Q31_MIN;
+  return Number(res);
+}
+
+function q31ConvertBase(q, oldBase, newBase){
+  if (!(oldBase > 0) || !(newBase > 0)) return 0;
+  if (Math.abs(oldBase - newBase) < 1e-6) return q;
+  const ratio = oldBase / newBase;
+  const result = q * ratio;
+  if (result > 2147483647.0) return Q31_MAX;
+  if (result < -2147483648.0) return Q31_MIN;
+  return roundHalfAwayFromZero(result);
+}
+
+/* =====================================================================
+   Q15 核心
+   ===================================================================== */
+function q15FromFloat(f, base){
+  if (!(base > 0) || Number.isNaN(f)) return 0;
+  let scaled;
+  if (base !== 1.0){
+    const normalized = f / base;
+    if (normalized >= 1.0) return Q15_MAX;
+    if (normalized <= -1.0) return Q15_MIN;
+    scaled = normalized * 32768.0;
+  } else {
+    scaled = f * 32768.0;
+  }
+  const r = roundHalfAwayFromZero(scaled);
+  if (r > Q15_MAX) return Q15_MAX;
+  if (r < Q15_MIN) return Q15_MIN;
+  return r;
+}
+
+function q15ToFloat(q, base){
+  if (!(base > 0)) return 0;
+  return q * (1 / 32768) * base;
+}
+
+function q15Add(a, b){
+  const sum = Number(BigInt.asIntN(16, BigInt(a) + BigInt(b)));
+  if (a > 0 && b > 0 && sum <= 0) return Q15_MAX;
+  if (a < 0 && b < 0 && sum >= 0) return Q15_MIN;
+  return sum;
+}
+
+function q15Sub(a, b){
+  const diff = Number(BigInt.asIntN(16, BigInt(a) - BigInt(b)));
+  if (a > 0 && b < 0 && diff <= 0) return Q15_MAX;
+  if (a < 0 && b > 0 && diff >= 0) return Q15_MIN;
+  return diff;
+}
+
+function q15Mul(a, b){
+  let r = BigInt(a) * BigInt(b) + (1n << 14n);
+  r >>= 15n;
+  if (r > 32767n) return Q15_MAX;
+  if (r < -32768n) return Q15_MIN;
+  return Number(r);
+}
+
+function q15Div(a, b){
+  if (b === 0) return a >= 0 ? Q15_MAX : Q15_MIN;
+  const num = BigInt(a) << 15n;
+  const bb  = BigInt(b);
+  let res = num / bb;
+  const rem = num % bb;
+  if (rem !== 0n){
+    const remAbs = rem < 0n ? -rem : rem;
+    const bAbs   = bb  < 0n ? -bb  : bb;
+    if (remAbs * 2n >= bAbs) res += (num >= 0n) ? 1n : -1n;
+  }
+  if (res > 32767n) return Q15_MAX;
+  if (res < -32768n) return Q15_MIN;
+  return Number(res);
+}
+
+function q15ConvertBase(q, oldBase, newBase){
+  if (!(oldBase > 0) || !(newBase > 0)) return 0;
+  if (Math.abs(oldBase - newBase) < 1e-6) return q;
+  const ratio = oldBase / newBase;
+  const result = q * ratio;
+  if (result > 32767.0) return Q15_MAX;
+  if (result < -32768.0) return Q15_MIN;
+  return roundHalfAwayFromZero(result);
+}
+
+/* =====================================================================
+   输入读取
+   ===================================================================== */
+function getBase(){
+  const s = el('baseInput').value.trim();
+  if (s === '') return 1;
+  return Number(s);           // 可能是 NaN
+}
+
+function readNumber(id){
+  const s = el(id).value.trim();
+  if (s === '') return null;
+  const v = Number(s);
+  return Number.isFinite(v) ? v : null;
+}
+
+/* =====================================================================
+   渲染：float -> Q31 / Q15
+   ===================================================================== */
+function renderFloatToQ(base){
+  const f = readNumber('fInput');
+  const o31 = el('q31Out'), m31 = el('q31Meta');
+  const o15 = el('q15Out'), m15 = el('q15Meta');
+
+  if (f === null){
+    o31.textContent = '—'; m31.textContent = '';
+    o15.textContent = '—'; m15.textContent = '';
+    return;
+  }
+
+  const q31 = q31FromFloat(f, base);
+  const q15 = q15FromFloat(f, base);
+
+  o31.textContent = String(q31);
+  o15.textContent = String(q15);
+
+  const baseNote = (Number.isFinite(base) && base > 0)
+      ? `实际表示 ≈ ${fmtFloat(q31ToFloat(q31, base))}`
+      : `base 无效（需 > 0），按 C 逻辑返回 0`;
+
+  m31.textContent = `${hex32(q31)} · ${baseNote} · 归一化 ${fmtFloat(q31 / 2147483648)}`;
+  m15.textContent = `${hex16(q15)} · 实际表示 ≈ ${fmtFloat(q15ToFloat(q15, base))} · 归一化 ${fmtFloat(q15 / 32768)}`;
+  m31.className = (Number.isFinite(base) && base > 0) ? 'meta' : 'meta warn';
+}
+
+/* =====================================================================
+   渲染：Q31 / Q15 -> float
+   ===================================================================== */
+function renderQToFloat(base){
+  const fmt = el('qFormat').value;
+  const out = el('floatOut'), meta = el('floatMeta');
+
+  let q = readNumber('qInput');
+  if (q === null){
+    out.textContent = '—'; meta.textContent = '';
+    return;
+  }
+  q = Math.trunc(q);
+
+  const isQ31 = (fmt === 'q31');
+  const lo = isQ31 ? Q31_MIN : Q15_MIN;
+  const hi = isQ31 ? Q31_MAX : Q15_MAX;
+  const qc = clamp(q, lo, hi);
+
+  const val = isQ31 ? q31ToFloat(qc, base) : q15ToFloat(qc, base);
+  out.textContent = fmtFloat(val);
+
+  const scale = isQ31 ? 2147483648 : 32768;
+  meta.textContent =
+      `${isQ31 ? 'Q31' : 'Q15'} = ${qc}` +
+      ` · ${isQ31 ? hex32(qc) : hex16(qc)}` +
+      ` · 归一化 ${fmtFloat(qc / scale)}` +
+      (qc !== q ? ' · 已截断到表示范围' : '');
+  meta.className = (qc !== q) ? 'meta warn' : 'meta';
+}
+
+/* =====================================================================
+   渲染：基数互转
+   ===================================================================== */
+function renderBaseConv(){
+  const fmt = el('cbFormat').value;
+  const out = el('cbOut'), meta = el('cbMeta');
+
+  let q = readNumber('cbQ');
+  const oldB = readNumber('cbOld');
+  const newB = readNumber('cbNew');
+
+  if (q === null || oldB === null || newB === null){
+    out.textContent = '—'; meta.textContent = '';
+    return;
+  }
+  q = Math.trunc(q);
+
+  const isQ31 = (fmt === 'q31');
+  const lo = isQ31 ? Q31_MIN : Q15_MIN;
+  const hi = isQ31 ? Q31_MAX : Q15_MAX;
+  const qc = clamp(q, lo, hi);
+
+  const res = isQ31 ? q31ConvertBase(qc, oldB, newB)
+                    : q15ConvertBase(qc, oldB, newB);
+
+  out.textContent = String(res);
+
+  const vOld = (isQ31 ? q31ToFloat(qc, oldB) : q15ToFloat(qc, oldB));
+  const vNew = (isQ31 ? q31ToFloat(res, newB) : q15ToFloat(res, newB));
+
+  meta.textContent =
+      `${isQ31 ? hex32(res) : hex16(res)}` +
+      ` · 旧基数物理值 ≈ ${fmtFloat(vOld)}` +
+      ` → 新基数物理值 ≈ ${fmtFloat(vNew)}`;
+}
+
+/* =====================================================================
+   渲染：四则运算
+   ===================================================================== */
+let opFmt = 'q31';
+
+const OP_TIPS = {
+  q31: 'Q31 模式：请输入原始整数，范围 −2147483648 ~ 2147483647（对应 −1.0 ~ 0.9999999995）。',
+  q15: 'Q15 模式：请输入原始整数，范围 −32768 ~ 32767（对应 −1.0 ~ 0.9999694824）。',
+  float: 'float 模式：直接输入浮点数，按普通浮点运算进行。'
+};
+
+function renderOp(base){
+  const out = el('opOut'), meta = el('opMeta');
+
+  let a = readNumber('opA');
+  let b = readNumber('opB');
+  const op = el('opSel').value;
+
+  el('opTip').textContent = OP_TIPS[opFmt];
+
+  if (a === null || b === null){
+    out.textContent = '—'; meta.textContent = '';
+    return;
+  }
+
+  if (opFmt === 'float'){
+    let res;
+    switch (op){
+      case 'add': res = a + b; break;
+      case 'sub': res = a - b; break;
+      case 'mul': res = a * b; break;
+      default:    res = a / b; break;
+    }
+    out.textContent = fmtFloat(res);
+    meta.textContent = `float 运算 · A = ${fmtFloat(a)}，B = ${fmtFloat(b)}`;
+    return;
+  }
+
+  const isQ31 = (opFmt === 'q31');
+  const lo = isQ31 ? Q31_MIN : Q15_MIN;
+  const hi = isQ31 ? Q31_MAX : Q15_MAX;
+
+  const ai = clamp(Math.trunc(a), lo, hi);
+  const bi = clamp(Math.trunc(b), lo, hi);
+
+  let res;
+  if (isQ31){
+    switch (op){
+      case 'add': res = q31Add(ai, bi); break;
+      case 'sub': res = q31Sub(ai, bi); break;
+      case 'mul': res = q31Mul(ai, bi); break;
+      default:    res = q31Div(ai, bi); break;
+    }
+  } else {
+    switch (op){
+      case 'add': res = q15Add(ai, bi); break;
+      case 'sub': res = q15Sub(ai, bi); break;
+      case 'mul': res = q15Mul(ai, bi); break;
+      default:    res = q15Div(ai, bi); break;
+    }
+  }
+
+  out.textContent = String(res);
+
+  const scale = isQ31 ? 2147483648 : 32768;
+  const toVal = isQ31 ? q31ToFloat : q15ToFloat;
+
+  meta.textContent =
+      `${isQ31 ? hex32(res) : hex16(res)}` +
+      ` · 归一化 ${fmtFloat(res / scale)}` +
+      ` · 实际表示 ≈ ${fmtFloat(toVal(res, base))}` +
+      ((ai !== Math.trunc(a) || bi !== Math.trunc(b)) ? ' · 输入已截断到表示范围' : '');
+  meta.className = (ai !== Math.trunc(a) || bi !== Math.trunc(b)) ? 'meta warn' : 'meta';
+}
+
+/* =====================================================================
+   总渲染
+   ===================================================================== */
+function renderAll(){
+  const base = getBase();
+  renderFloatToQ(base);
+  renderQToFloat(base);
+  renderBaseConv();
+  renderOp(base);
+}
+
+/* =====================================================================
+   事件绑定
+   ===================================================================== */
+document.querySelectorAll('input, select').forEach(node => {
+  node.addEventListener('input', renderAll);
+  node.addEventListener('change', renderAll);
+});
+
+/* base 快捷按钮 */
+document.querySelectorAll('.chip').forEach(btn => {
+  btn.addEventListener('click', () => {
+    el('baseInput').value = btn.dataset.base;
+    renderAll();
+  });
+});
+
+/* 运算格式切换 */
+document.querySelectorAll('#opSeg button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('#opSeg button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    opFmt = btn.dataset.fmt;
+
+    if (opFmt === 'q31'){
+      el('opA').value = '1073741824';
+      el('opB').value = '1073741824';
+    } else if (opFmt === 'q15'){
+      el('opA').value = '16384';
+      el('opB').value = '16384';
+    } else {
+      el('opA').value = '0.5';
+      el('opB').value = '0.5';
+    }
+    renderAll();
+  });
+});
+
+/* 切换 Q 格式时给出合理默认值 */
+el('qFormat').addEventListener('change', () => {
+  if (el('qFormat').value === 'q31'){
+    el('qInput').value = '1073741824';
+  } else {
+    el('qInput').value = '16384';
+  }
+  renderAll();
+});
+
+el('cbFormat').addEventListener('change', () => {
+  if (el('cbFormat').value === 'q31'){
+    el('cbQ').value = '1073741824';
+  } else {
+    el('cbQ').value = '16384';
+  }
+  renderAll();
+});
+
+/* 首次渲染 */
+renderAll();
+</script>
+</body>
+</html>
