@@ -5,76 +5,23 @@
 #include "UnitLib_main.h"
 
 
-static inline void status_standby_loop(void){
-
-}
-
-static inline void status_ready_loop(void){
-
-}
-
-static inline void status_initial_loop(void){
-
-}
-
-// ===================================================
-static inline void status_increasing_loop(void){
-
-}
-
-static inline void status_decreasing_loop(void){
-
-}
-
-static inline void status_hold_loop(void){
-
-}
-
-// ===================================================
-static inline void status_overvoltage_loop(void){
-
-}
-
-static inline void status_undervoltage_loop(void){
-
-}
-
-static inline void status_overcurrent_loop(void){
-
-}
-
-static inline void status_overtemp_motor_loop(void){
-
-}
-
-static inline void status_undertemp_motor_loop(void){
-
-}
-
-static inline void status_overtemp_driver_loop(void){
-
-}
-
-static inline void status_undertemp_driver_loop(void){
-
-}
-
-static inline void status_overtemp_pcb_loop(void){
-
-}
-
-static inline void status_undertemp_pcb_loop(void){
-
-}
-
-static inline void status_stuck_loop(void){
-
-}
-
-static inline void status_fault_loop(void){
-
-}
-
+void status_standby_loop(void);
+void status_ready_loop(void);
+void status_initial_loop(void);
+void status_increasing_loop(void);
+void status_decreasing_loop(void);
+void status_hold_loop(void);
+void status_overvoltage_loop(void);
+void status_undervoltage_loop(void);
+void status_overcurrent_loop(void);
+void status_overtemp_motor_loop(void);
+void status_undertemp_motor_loop(void);
+void status_overtemp_driver_loop(void);
+void status_undertemp_driver_loop(void);
+void status_overtemp_pcb_loop(void);
+void status_undertemp_pcb_loop(void);
+void status_stuck_loop(void);
+void status_fault_loop(void);
 
 
 

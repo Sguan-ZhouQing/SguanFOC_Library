@@ -4,7 +4,6 @@
 /* SguanFOC配置文件声明 */
 #include "Sguan_Config.h"
 
-
 #define CH_COUNT      10    // JustFloat 通道数
 #define CMD_MAX_LEN   20    // 最大支持的指令长度
 #define HASH_SIZE     32    // 哈希表大小
@@ -17,16 +16,16 @@ typedef struct{
 }CmdMap;
 
 typedef struct{
-    float fdata[CH_COUNT];
     uint8_t tail[4];
+    float fdata[CH_COUNT];
 }Printf;
 
-extern uint8_t sguan_printfBuff[64];
+extern uint8_t sguan_printfbuff[64];
 
-void Printf_TX_Init(Printf *str);
-void Printf_TX_Loop(Printf *str);
-void Printf_RX_Init(void);
-void Printf_RX_Loop(uint8_t *data, uint16_t length);
+void printf_tx_init(Printf *str);
+void printf_tx_loop(Printf *str);
+void printf_rx_init(void);
+void printf_rx_loop(uint8_t *data, uint16_t length);
 
 
 #endif // SGUAN_PRINTF_H

@@ -32,6 +32,7 @@
 #define CONFIG_HPF2         CODE_DEFINE_HPF2
 #define CONFIG_BPF1         CODE_DEFINE_BPF1
 #define CONFIG_BPF2         CODE_DEFINE_BPF2
+#define CONFIG_SOGI         CODE_DEFINE_SOGI
 #define CONFIG_NF           CODE_DEFINE_NF
 #define CONFIG_TPNF         CODE_DEFINE_TPNF
 #define CONFIG_DOB          CODE_DEFINE_DOB
@@ -57,8 +58,8 @@
 #define CONFIG_Uint32       CODE_DEFINE_UINT32
 // ======================== Value模块使用 宏定义 =========================
 // #define CONFIG_IQMATH       DATA_DEFINE_IQMATH
-#define CONFIG_Q31          IQmath_DEFINE_Q31
-#define CONFIG_Q15          IQmath_DEFINE_Q15
+#define CONFIG_Q31          0x01
+#define CONFIG_Q15          0x02
 
 
 // ======================== 控制系统离散周期 宏定义 =========================

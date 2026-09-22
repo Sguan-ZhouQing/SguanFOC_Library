@@ -24,6 +24,7 @@
 #define CODE_DEFINE_HPF2        0
 #define CODE_DEFINE_BPF1        0
 #define CODE_DEFINE_BPF2        0
+#define CODE_DEFINE_SOGI        0
 #define CODE_DEFINE_NF          0
 #define CODE_DEFINE_TPNF        0
 #define CODE_DEFINE_DOB         0

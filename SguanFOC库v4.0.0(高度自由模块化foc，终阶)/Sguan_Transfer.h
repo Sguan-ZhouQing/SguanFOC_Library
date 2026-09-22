@@ -242,7 +242,7 @@ typedef struct{
 
 typedef struct CurveData CurveData;
 
-typedef struct SingleRs{
+typedef struct Curve{
     CurveIn in;
     CurveOut out;
     CurveParams params;
@@ -691,6 +691,31 @@ typedef struct Bpf2{
     Bpf2Params params;
     Bpf2Data *data;
 }Bpf2;
+// --------------------------- BPF2 带通滤波器(典型二阶系统改型) ---------------------------
+typedef struct{
+    SguanQ input;
+}SogiIn;
+
+typedef struct{
+    SguanQ output;
+}SogiOut;
+
+typedef struct{
+    SguanQ t;
+    SguanQ wo;
+    SguanQ zeta;
+
+    uint8_t recalculate_total_flag;
+}SogiParams;
+
+typedef struct SogiData SogiData;
+
+typedef struct Sogi{
+    SogiIn in;
+    SogiOut out;
+    SogiParams params;
+    SogiData *data;
+}Sogi;
 // --------------------------- NF 陷波滤波器(典型二阶系统改型) ---------------------------
 typedef struct{
     SguanQ input;
@@ -1271,6 +1296,7 @@ void transfer_hpf1_init(Hpf1 *hpf);
 void transfer_hpf2_init(Hpf2 *hpf);
 void transfer_bpf1_init(Bpf1 *bpf);
 void transfer_bpf2_init(Bpf2 *bpf);
+void transfer_sogi_init(Sogi *sogi);
 void transfer_nf_init(Nf *nf);
 void transfer_tpnf_init(Tpnf *tpnf);
 void transfer_dob_init(Dob *dob);
@@ -1309,6 +1335,7 @@ void transfer_hpf1_loop(Hpf1 *hpf);
 void transfer_hpf2_loop(Hpf2 *hpf);
 void transfer_bpf1_loop(Bpf1 *bpf);
 void transfer_bpf2_loop(Bpf2 *bpf);
+void transfer_sogi_loop(Sogi *sogi);
 void transfer_nf_loop(Nf *nf);
 void transfer_tpnf_loop(Tpnf *tpnf);
 void transfer_dob_loop(Dob *dob);
@@ -1411,6 +1438,9 @@ Bpf1 *transfer_bpf1_get(uint8_t motor, int ch);
 #endif
 #if CONFIG_BPF2
 Bpf2 *transfer_bpf2_get(uint8_t motor, int ch);
+#endif
+#if CONFIG_SOGI
+Sogi *transfer_sogi_get(uint8_t motor, int ch);
 #endif
 #if CONFIG_NF
 Nf *transfer_nf_get(uint8_t motor, int ch);
@@ -1564,6 +1594,10 @@ typedef struct{
     Bpf2 *bpf2_ch[CONFIG_BPF2];
     #endif // CONFIG_BPF2
 
+    #if CONFIG_SOGI // 广义积分器(典型二阶系统改型)
+    Sogi *sogi_ch[CONFIG_SOGI];
+    #endif // CONFIG_BPF2
+
     #if CONFIG_NF // 陷波滤波器(典型二阶系统改型)
     Nf *nf_ch[CONFIG_NF];
     #endif // CONFIG_NF
@@ -1636,6 +1670,8 @@ typedef struct{
     Swpwm *swpwm;                   // 电调PWM无感方波
     SingleRs *singlers;             // 单电阻采样函数
 }Transfer;
+
+void transfer_init(Transfer *transfer);
 
 
 #endif // SGUAN_TRANSFER_H

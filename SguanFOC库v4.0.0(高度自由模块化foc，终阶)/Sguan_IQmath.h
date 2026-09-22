@@ -5,7 +5,6 @@
 #include "Sguan_Value.h"
 #include "UserData_Config.h"
 
-
 #define CONFIG_IQMATH       DATA_DEFINE_IQMATH
 
 // 定点化计算格式
@@ -30,13 +29,14 @@ typedef float               SguanQ;
 #define Q15_HALF        0x4000          // 表示0.5(特殊场景会用到)
 
 // Q的定点化公式计算
-SguanQ IQmath_Q_from_float(float f, float base_value);
-float IQmath_Q_to_float(SguanQ q, float base_value);
-SguanQ IQmath_Q_add(SguanQ a, SguanQ b);
-SguanQ IQmath_Q_sub(SguanQ a, SguanQ b);
-SguanQ IQmath_Q_mul(SguanQ a, SguanQ b);
-SguanQ IQmath_Q_div(SguanQ a, SguanQ b);
-SguanQ IQmath_Q_convert_base(SguanQ q, float old_base, float new_base);
-
+SguanQ iqmath_from_float(float f, float base_value);
+float iqmath_to_float(SguanQ q, float base_value);
+SguanQ iqmath_add(SguanQ a, SguanQ b);
+SguanQ iqmath_sub(SguanQ a, SguanQ b);
+SguanQ iqmath_mul(SguanQ a, SguanQ b);
+SguanQ iqmath_div(SguanQ a, SguanQ b);
+SguanQ iqmath_convert_base(SguanQ q, float old_base, float new_base);
+SguanQ iqmath_abs(SguanQ x);
+SguanQ iqmath_zero(void);
 
 #endif // SGUAN_IQMATH_H

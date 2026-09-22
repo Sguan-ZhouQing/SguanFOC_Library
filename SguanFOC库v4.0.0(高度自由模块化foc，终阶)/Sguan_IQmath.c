@@ -1,7 +1,7 @@
 #include "Sguan_IQmath.h"
 
-#define IQmath_Define_Q31 0x01
-#define IQmath_Define_Q15 0x02
+#define IQMATH_DEFINE_Q31 0x01
+#define IQMATH_DEFINE_Q15 0x02
 // ===================== Q31 常量定义 =====================
 static const int64_t Q31_MAX_64 = 2147483647LL;
 static const int64_t Q31_MIN_64 = -2147483648LL;
@@ -10,12 +10,12 @@ static const int32_t Q15_MAX_32 = 32767;
 static const int32_t Q15_MIN_32 = -32768;
 
 // ===================== 辅助函数 =====================
-static float Value_fabsf(float x) {
+static float value_fabsf(float x) {
     return (x < 0) ? -x : x;
 }
 
 // ================== 局部静态函数(Q31版本)=====================
-static Q31 IQmath_Q31_from_float(float f, float base_value){
+static Q31 iqmath_q31_from_float(float f, float base_value){
     double scaled;
     if (base_value <= 0.0f || f != f){ 
         return 0;
@@ -48,7 +48,7 @@ static Q31 IQmath_Q31_from_float(float f, float base_value){
     return (Q31)result;
 }
 
-static float IQmath_Q31_to_float(Q31 q, float base_value){
+static float iqmath_q31_to_float(Q31 q, float base_value){
     if (base_value <= 0.0f){
         return 0.0f;
     }
@@ -57,7 +57,7 @@ static float IQmath_Q31_to_float(Q31 q, float base_value){
     return (float)(normalized * base_value);
 }
 
-static Q31 IQmath_Q31_add(Q31 a, Q31 b){
+static Q31 iqmath_q31_add(Q31 a, Q31 b){
     int32_t sum = a + b;
     if ((a > 0) && (b > 0) && (sum <= 0)){
         return Q31_MAX;
@@ -68,7 +68,7 @@ static Q31 IQmath_Q31_add(Q31 a, Q31 b){
     return sum;
 }
 
-static Q31 IQmath_Q31_sub(Q31 a, Q31 b){
+static Q31 iqmath_q31_sub(Q31 a, Q31 b){
     int32_t diff = a - b;
     if ((a > 0) && (b < 0) && (diff <= 0)){
         return Q31_MAX;
@@ -79,7 +79,7 @@ static Q31 IQmath_Q31_sub(Q31 a, Q31 b){
     return diff;
 }
 
-static Q31 IQmath_Q31_mul(Q31 a, Q31 b){
+static Q31 iqmath_q31_mul(Q31 a, Q31 b){
     int64_t result = (int64_t)a * (int64_t)b;
     result += 1LL << 30;
     result >>= 31;
@@ -93,7 +93,7 @@ static Q31 IQmath_Q31_mul(Q31 a, Q31 b){
     return (Q31)result;
 }
 
-static Q31 IQmath_Q31_div(Q31 a, Q31 b){
+static Q31 iqmath_q31_div(Q31 a, Q31 b){
     if (b == 0){
         return (a >= 0) ? Q31_MAX : Q31_MIN;
     }
@@ -118,12 +118,12 @@ static Q31 IQmath_Q31_div(Q31 a, Q31 b){
     return (Q31)result;
 }
 
-static Q31 IQmath_Q31_convert_base(Q31 q, float old_base, float new_base){
+static Q31 iqmath_q31_convert_base(Q31 q, float old_base, float new_base){
     if (old_base <= 0.0f || new_base <= 0.0f){
         return 0;
     }
     
-    if (Value_fabsf(old_base - new_base) < 1e-6f){
+    if (value_fabsf(old_base - new_base) < 1e-6f){
         return q;
     }
     
@@ -146,7 +146,7 @@ static Q31 IQmath_Q31_convert_base(Q31 q, float old_base, float new_base){
 }
 
 // ================== 局部静态函数(Q15版本)=====================
-static Q15 IQmath_Q15_from_float(float f, float base_value){
+static Q15 iqmath_q15_from_float(float f, float base_value){
     double scaled;
     if (base_value <= 0.0f || f != f){ 
         return 0;
@@ -179,7 +179,7 @@ static Q15 IQmath_Q15_from_float(float f, float base_value){
     return (Q15)result;
 }
 
-static float IQmath_Q15_to_float(Q15 q, float base_value){
+static float iqmath_q15_to_float(Q15 q, float base_value){
     if (base_value <= 0.0f){
         return 0.0f;
     }
@@ -188,7 +188,7 @@ static float IQmath_Q15_to_float(Q15 q, float base_value){
     return (float)(normalized * base_value);
 }
 
-static Q15 IQmath_Q15_add(Q15 a, Q15 b){
+static Q15 iqmath_q15_add(Q15 a, Q15 b){
     int16_t sum = a + b;
     if ((a > 0) && (b > 0) && (sum <= 0)){
         return Q15_MAX;
@@ -199,7 +199,7 @@ static Q15 IQmath_Q15_add(Q15 a, Q15 b){
     return sum;
 }
 
-static Q15 IQmath_Q15_sub(Q15 a, Q15 b){
+static Q15 iqmath_q15_sub(Q15 a, Q15 b){
     int16_t diff = a - b;
     if ((a > 0) && (b < 0) && (diff <= 0)){
         return Q15_MAX;
@@ -210,7 +210,7 @@ static Q15 IQmath_Q15_sub(Q15 a, Q15 b){
     return diff;
 }
 
-static Q15 IQmath_Q15_mul(Q15 a, Q15 b){
+static Q15 iqmath_q15_mul(Q15 a, Q15 b){
     int32_t result = (int32_t)a * (int32_t)b;
     result += 1 << 14;
     result >>= 15;
@@ -224,7 +224,7 @@ static Q15 IQmath_Q15_mul(Q15 a, Q15 b){
     return (Q15)result;
 }
 
-static Q15 IQmath_Q15_div(Q15 a, Q15 b){
+static Q15 iqmath_q15_div(Q15 a, Q15 b){
     if (b == 0){
         return (a >= 0) ? Q15_MAX : Q15_MIN;
     }
@@ -249,12 +249,12 @@ static Q15 IQmath_Q15_div(Q15 a, Q15 b){
     return (Q15)result;
 }
 
-static Q15 IQmath_Q15_convert_base(Q15 q, float old_base, float new_base){
+static Q15 iqmath_q15_convert_base(Q15 q, float old_base, float new_base){
     if (old_base <= 0.0f || new_base <= 0.0f){
         return 0;
     }
     
-    if (Value_fabsf(old_base - new_base) < 1e-6f){
+    if (value_fabsf(old_base - new_base) < 1e-6f){
         return q;
     }
     
@@ -277,73 +277,115 @@ static Q15 IQmath_Q15_convert_base(Q15 q, float old_base, float new_base){
 }
 
 // ================== 全局函数(同时兼容Q15和Q31)=====================
-SguanQ IQmath_Q_from_float(float f, float base_value){
-    #if CONFIG_IQMATH==IQmath_Define_Q15
-    (void)IQmath_Q31_from_float;
-    return IQmath_Q15_from_float(f, base_value);
+SguanQ iqmath_from_float(float f, float base_value){
+    #if CONFIG_IQMATH==IQMATH_DEFINE_Q31
+    (void)iqmath_q15_from_float;
+    return iqmath_q31_from_float(f, base_value);
+    #elif CONFIG_IQMATH==IQMATH_DEFINE_Q15
+    (void)iqmath_q31_from_float;
+    return iqmath_q15_from_float(f, base_value);
     #else // CONFIG_IQMATH
-    (void)IQmath_Q15_from_float;
-    return IQmath_Q31_from_float(f, base_value);
+    (void)iqmath_q31_from_float;
+    (void)iqmath_q15_from_float;
+    return (f/base_value);
     #endif // CONFIG_IQMATH
 }
 
-float IQmath_Q_to_float(SguanQ q, float base_value){
-    #if CONFIG_IQMATH==IQmath_Define_Q15
-    (void)IQmath_Q31_to_float;
-    return IQmath_Q15_to_float(q, base_value);
+float iqmath_to_float(SguanQ q, float base_value){
+    #if CONFIG_IQMATH==IQMATH_DEFINE_Q31
+    (void)iqmath_q15_to_float;
+    return iqmath_q31_to_float(q, base_value);
+    #elif CONFIG_IQMATH==IQMATH_DEFINE_Q15
+    (void)iqmath_q31_to_float;
+    return iqmath_q15_to_float(q, base_value);
     #else // CONFIG_IQMATH
-    (void)IQmath_Q15_to_float;
-    return IQmath_Q31_to_float(q, base_value);
+    (void)iqmath_q31_to_float;
+    (void)iqmath_q15_to_float;
+    return (q*base_value);
     #endif // CONFIG_IQMATH
 }
 
-SguanQ IQmath_Q_add(SguanQ a, SguanQ b){
-    #if CONFIG_IQMATH==IQmath_Define_Q15
-    (void)IQmath_Q31_add;
-    return IQmath_Q15_add(a, b);
+SguanQ iqmath_add(SguanQ a, SguanQ b){
+    #if CONFIG_IQMATH==IQMATH_DEFINE_Q31
+    (void)iqmath_q15_add;
+    return iqmath_q31_add(a, b);
+    #elif CONFIG_IQMATH==IQMATH_DEFINE_Q15
+    (void)iqmath_q31_add;
+    return iqmath_q15_add(a, b);
     #else // CONFIG_IQMATH
-    (void)IQmath_Q15_add;
-    return IQmath_Q31_add(a, b);
+    (void)iqmath_q31_add;
+    (void)iqmath_q15_add;
+    return (a + b);
     #endif // CONFIG_IQMATH
 }
 
-SguanQ IQmath_Q_sub(SguanQ a, SguanQ b){
-    #if CONFIG_IQMATH==IQmath_Define_Q15
-    (void)IQmath_Q31_sub;
-    return IQmath_Q15_sub(a, b);
+SguanQ iqmath_sub(SguanQ a, SguanQ b){
+    #if CONFIG_IQMATH==IQMATH_DEFINE_Q31
+    (void)iqmath_q15_sub;
+    return iqmath_q31_sub(a, b);
+    #elif CONFIG_IQMATH==IQMATH_DEFINE_Q15
+    (void)iqmath_q31_sub;
+    return iqmath_q15_sub(a, b);
     #else // CONFIG_IQMATH
-    (void)IQmath_Q15_sub;
-    return IQmath_Q31_sub(a, b);
+    (void)iqmath_q31_sub;
+    (void)iqmath_q15_sub;
+    return (a - b);
     #endif // CONFIG_IQMATH
 }
 
-SguanQ IQmath_Q_mul(SguanQ a, SguanQ b){
-    #if CONFIG_IQMATH==IQmath_Define_Q15
-    (void)IQmath_Q31_mul;
-    return IQmath_Q15_mul(a, b);
+SguanQ iqmath_mul(SguanQ a, SguanQ b){
+    #if CONFIG_IQMATH==IQMATH_DEFINE_Q31
+    (void)iqmath_q15_mul;
+    return iqmath_q31_mul(a, b);
+    #elif CONFIG_IQMATH==IQMATH_DEFINE_Q15
+    (void)iqmath_q31_mul;
+    return iqmath_q15_mul(a, b);
     #else // CONFIG_IQMATH
-    (void)IQmath_Q15_mul;
-    return IQmath_Q31_mul(a, b);
+    (void)iqmath_q31_mul;
+    (void)iqmath_q15_mul;
+    return (a * b);
     #endif // CONFIG_IQMATH
 }
 
-SguanQ IQmath_Q_div(SguanQ a, SguanQ b){
-    #if CONFIG_IQMATH==IQmath_Define_Q15
-    (void)IQmath_Q31_div;
-    return IQmath_Q15_div(a, b);
+SguanQ iqmath_div(SguanQ a, SguanQ b){
+    #if CONFIG_IQMATH==IQMATH_DEFINE_Q31
+    (void)iqmath_q15_div;
+    return iqmath_q31_div(a, b);
+    #elif CONFIG_IQMATH==IQMATH_DEFINE_Q15
+    (void)iqmath_q31_div;
+    return iqmath_q15_div(a, b);
     #else // CONFIG_IQMATH
-    (void)IQmath_Q15_div;
-    return IQmath_Q31_div(a, b);
+    (void)iqmath_q31_div;
+    (void)iqmath_q15_div;
+    return (a / b);
     #endif // CONFIG_IQMATH
 }
 
-SguanQ IQmath_Q_convert_base(SguanQ q, float old_base, float new_base){
-    #if CONFIG_IQMATH==IQmath_Define_Q15
-    (void)IQmath_Q31_convert_base;
-    return IQmath_Q15_convert_base(q, old_base, new_base);
+SguanQ iqmath_convert_base(SguanQ q, float old_base, float new_base){
+    #if CONFIG_IQMATH==IQMATH_DEFINE_Q31
+    (void)iqmath_q15_convert_base;
+    return iqmath_q31_convert_base(q, old_base, new_base);
+    #elif CONFIG_IQMATH==IQMATH_DEFINE_Q15
+    (void)iqmath_q31_convert_base;
+    return iqmath_q15_convert_base(q, old_base, new_base);
     #else // CONFIG_IQMATH
-    (void)IQmath_Q15_convert_base;
-    return IQmath_Q31_convert_base(q, old_base, new_base);
+    (void)iqmath_q31_convert_base;
+    (void)iqmath_q15_convert_base;
+    return (q * (new_base/old_base));
     #endif // CONFIG_IQMATH
 }
 
+// ========================================================================
+SguanQ iqmath_abs(SguanQ x){
+    return (x < 0) ? -x : x;
+}
+
+SguanQ iqmath_zero(void){
+    #if CONFIG_IQMATH==IQMATH_DEFINE_Q31
+    return 0;
+    #elif CONFIG_IQMATH==IQMATH_DEFINE_Q15
+    return 0;
+    #else // CONFIG_IQMATH
+    return 0.0f;
+    #endif // CONFIG_IQMATH
+}

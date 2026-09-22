@@ -1,7 +1,7 @@
 #include "Sguan_Math.h"
 
 // 常量宏定义声明
-#define MATH_Value_512_2PI       81.487330863050417f
+#define MATH_512_2PI  81.487330863050417f
 
 static const float sin_tab[512] = {
     0.0000000000f, 0.0122715384f, 0.0245412290f, 0.0368072242f, 0.0490676761f, 0.0613207407f,
@@ -93,16 +93,16 @@ static const float sin_tab[512] = {
 };
 
 // 快速正弦算法sine
-float Math_sin(float theta){
+float math_sin(float theta){
     while (1){
-        if (theta > MATH_Value_2PI)
-            theta = theta - MATH_Value_2PI;
+        if (theta > VALUE_2PI)
+            theta = theta - VALUE_2PI;
         else if (theta < 0)
-            theta = theta + MATH_Value_2PI;
+            theta = theta + VALUE_2PI;
         else
             break;
     }
-    float idx_f = theta * MATH_Value_512_2PI;
+    float idx_f = theta * MATH_512_2PI;
     int idx = (int)idx_f;
     
     if (idx >= 512) idx = 511;
@@ -111,20 +111,20 @@ float Math_sin(float theta){
 }
 
 // 快速求解sine和cosine
-void Math_sin_cos(float x, float *sin_x, float *cos_x){
-  *sin_x = Math_sin(x);
-  *cos_x = Math_cos(x);
+void math_sin_cos(float x, float *sin_x, float *cos_x){
+  *sin_x = math_sin(x);
+  *cos_x = math_cos(x);
 }
 
 // 快速求解tan函数
-float Math_tan(float x){
+float math_tan(float x){
     float sine,cosine;
-    Math_sin_cos(x, &sine, &cosine);
+    math_sin_cos(x, &sine, &cosine);
     return sine/cosine;
 }
 
 // 反三角tan表格数组
-static const float ATAN_TABLE[91] = {
+static const float atan_tab[91] = {
   0.000000000000000f, 0.011110653897607f, 0.022218565326719f, 0.033320995878247f, 
   0.044415215246910f, 0.055498505245716f, 0.066568163775823f, 0.077621508737393f,
   0.088655881867437f, 0.099668652491162f, 0.110657221173895f, 0.121619023261346f, 
@@ -151,26 +151,26 @@ static const float ATAN_TABLE[91] = {
 };
 
 // 快速求解反三角tan函数
-float Math_atan(float x){
+float math_atan(float x){
     if (x != x){
       return x;
     }
     if (x < 0.0f){
-      return -Math_atan(-x);
+      return -math_atan(-x);
     }
     if (x > 1.0f){
-      return (float)((float)MATH_Value_PI_2 - (float)Math_atan(1.0f / x));
+      return (float)((float)VALUE_PI_2 - (float)math_atan(1.0f / x));
     }
 
     float pos = (float)x *90.0f;
     int i = (int)pos;
     if (i >= 90){
-      return ATAN_TABLE[90];
+      return atan_tab[90];
     }
 
     float t = pos - (float)i;
-    float y0 = ATAN_TABLE[i];
-    float y1 = ATAN_TABLE[i + 1];
+    float y0 = atan_tab[i];
+    float y1 = atan_tab[i + 1];
     return y0 + (y1 - y0)*t;
 }
 

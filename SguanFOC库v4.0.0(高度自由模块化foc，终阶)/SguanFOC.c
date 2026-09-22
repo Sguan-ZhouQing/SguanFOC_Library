@@ -62,17 +62,40 @@ SguanFoc sguanfoc[CONFIG_MOTOR] = {
 
 
 static void sguanfoc_high_loop(SguanFoc *sguan){
-    // sguan->id_flag
-
+    #if CONFIG_MOTOR >= 2
+    switch (sguan->id_flag){
+    case MOTOR_ONE:
+        main_high_loop_one(sguan);
+        break;
+    case MOTOR_TWO:
+        main_high_loop_two(sguan);
+        break;
+    case MOTOR_THREE:
+        main_high_loop_three(sguan);
+        break;
+    case MOTOR_FOUR:
+        main_high_loop_four(sguan);
+        break;
+    case MOTOR_FIVE:
+        main_high_loop_five(sguan);
+        break;
+    case MOTOR_SIX:
+        main_high_loop_six(sguan);
+        break;
+    
+    default:
+        break;
+    }
+    #endif // CONFIG_MOTOR
+    main_high_loop(sguan);
 }
 
 static void sguanfoc_low_loop(SguanFoc *sguan){
-    // sguan->id_flag
-
+    main_low_loop(sguan);
 }
 
 static void sguanfoc_printf_loop(uint8_t *data, uint16_t length){
-
+    
 }
 
 static void sguanfoc_main_loop(SguanFoc *sguan){

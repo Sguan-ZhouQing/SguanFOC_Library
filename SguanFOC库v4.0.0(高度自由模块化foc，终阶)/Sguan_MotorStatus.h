@@ -4,7 +4,6 @@
 /* SguanFOC配置文件声明 */
 #include "Sguan_Config.h"
 
-
 typedef enum{
     status_standby = 0,                         // (standby)停机状态->待机
 
@@ -49,22 +48,23 @@ typedef enum{
 
 typedef enum{
     event_zero = 0,                             // (zero)
-    event_ready,                                // (ready)
-    event_initializing,                         // (initializing)
-    event_standby0,                             // (standby0手动)
-    event_standby1,                             // (standby1自动)
+    event_ready,                                // (ready->手动)
+    event_initializing,                         // (initializing->手动)
+    event_success,                              // (success->手动)
+    event_standby0,                             // (standby0->手动)
+    event_standby1,                             // (standby1)
 
-    event_torque_increasing = 11,               // (torque_increasing)
+    event_torque_hold = 11,                     // (torque_hold)
+    event_torque_increasing,                    // (torque_increasing)
     event_torque_decreasing,                    // (torque_decreasing)
-    event_torque_hold,                          // (torque_hold)
 
-    event_velocity_increasing = 21,             // (velocity_increasing)
+    event_velocity_hold = 21,                   // (velocity_hold)
+    event_velocity_increasing,                  // (velocity_increasing)
     event_velocity_decreasing,                  // (velocity_decreasing)
-    event_velocity_hold,                        // (velocity_hold)
 
-    event_position_increasing = 31,             // (position_increasing)
+    event_position_hold = 31,                   // (position_hold)
+    event_position_increasing,                  // (position_increasing)
     event_position_decreasing,                  // (position_decreasing)
-    event_position_hold,                        // (position_hold)
 
     event_overvoltage = 81,                     // (overvoltage)
     event_undervoltage,                         // (undervoltage)
@@ -77,122 +77,73 @@ typedef enum{
     event_undertemp_pcb,                        // (undertemp_pcb)
 
     event_stuck = 91,                           // (stuck)
-    event_fault                                 // (fault)
+    event_fault                                 // (fault->手动)
 }HandleEvent;
 
-typedef enum{
-    action_null = 0,                            // ()
-
-    action_standby_init,                        // ()
-    action_ready_init,                          // ()
-    action_initializing_init,                   // ()
-    action_goinit0_angle_init,                  // ()
-    action_goinit1_current_init,                // ()
-
-    action_idle_init,                           // ()
-
-    action_overvoltage_init,                    // ()
-    action_undervoltage_init,                   // ()
-    action_overcurrent_init,                    // ()
-    action_overtemp_motor_init,                 // ()
-    action_undertemp_motor_init,                // ()
-    action_overtemp_driver_init,                // ()
-    action_undertemp_driver_init,               // ()
-    action_overtemp_pcb_init,                   // ()
-    action_undertemp_pcb_init,                  // ()
-    action_stuck_init,                          // ()
-    action_fault_init,                          // ()
-}HandleActionInit;
-
-typedef enum{
-    action_null = 0,                            // ()
-
-    action_standby_loop,                        // ()
-    action_ready_loop,                          // ()
-    action_initial_loop,                        // ()
-    
-    action_increasing_loop,                     // ()
-    action_decreasing_loop,                     // ()
-    action_hold_loop,                           // ()
-
-    action_overvoltage_loop,                    // ()
-    action_undervoltage_loop,                   // ()
-    action_overcurrent_loop,                    // ()
-    action_overtemp_motor_loop,                 // ()
-    action_undertemp_motor_loop,                // ()
-    action_overtemp_driver_loop,                // ()
-    action_undertemp_driver_loop,               // ()
-    action_overtemp_pcb_loop,                   // ()
-    action_undertemp_pcb_loop,                  // ()
-    action_stuck_loop,                          // ()
-    action_fault_loop,                          // ()
-}HandleActionLoop;
-
 typedef struct{
-    SguanQ tor_real;                            // ()
-    SguanQ tor_target;                          // ()
-    SguanQ tor_scope;                           // ()
+    SguanQ tor_real;                            // (实时输入数据)
+    SguanQ tor_target;                          // (实时输入数据)
+    SguanQ tor_scope;                           // (参数)
     
-    SguanQ vel_real;                            // ()
-    SguanQ vel_target;                          // ()
-    SguanQ vel_scope;                           // ()
+    SguanQ vel_real;                            // (实时输入数据)
+    SguanQ vel_target;                          // (实时输入数据)
+    SguanQ vel_scope;                           // (参数)
     
-    SguanQ pos_real;                            // ()
-    SguanQ pos_target;                          // ()
-    SguanQ pos_scope;                           // ()
+    SguanQ pos_real;                            // (实时输入数据)
+    SguanQ pos_target;                          // (实时输入数据)
+    SguanQ pos_scope;                           // (参数)
 
-    SguanQ vbus_real;                           // ()
-    SguanQ vbus_max;                            // ()
-    SguanQ vbus_min;                            // ()
+    SguanQ vbus_real;                           // (实时输入数据)
+    SguanQ vbus_max;                            // (参数)
+    SguanQ vbus_min;                            // (参数)
 
-    SguanQ ibus_real;                           // ()
-    SguanQ ibus_instant_max;                    // ()
-    SguanQ ibus_stable_max;                     // ()
-    SguanQ ibus_stable_time;                    // ()
+    SguanQ ibus_real;                           // (实时输入数据)
+    SguanQ ibus_instant_max;                    // (参数)
+    SguanQ ibus_stable_max;                     // (参数)
+    uint32_t ibus_tick_delay;                   // (参数)
+    uint32_t ibus_tick_run;                     // (临时数据)
 
-    SguanQ temp_motor_real;                     // ()
-    SguanQ temp_motor_max;                      // ()
-    SguanQ temp_motor_min;                      // ()
+    SguanQ temp_motor_real;                     // (实时输入数据)
+    SguanQ temp_motor_max;                      // (参数)
+    SguanQ temp_motor_min;                      // (参数)
     
-    SguanQ temp_driver_real;                    // ()
-    SguanQ temp_driver_max;                     // ()
-    SguanQ temp_driver_min;                     // ()
+    SguanQ temp_driver_real;                    // (实时输入数据)
+    SguanQ temp_driver_max;                     // (参数)
+    SguanQ temp_driver_min;                     // (参数)
     
-    SguanQ temp_pcb_real;                       // ()
-    SguanQ temp_pcb_max;                        // ()
-    SguanQ temp_pcb_min;                        // ()
+    SguanQ temp_pcb_real;                       // (实时输入数据)
+    SguanQ temp_pcb_max;                        // (参数)
+    SguanQ temp_pcb_min;                        // (参数)
 
-    uint8_t fault_flag;                         // ()
+    uint8_t fault_flag;                         // (意外输入数据)
 
-    SguanQ fault_delay_time;                    // ()
-    SguanQ stuck_delay_time;                    // ()
+    uint32_t fault_tick_delay;                  // (参数)
+
+    uint32_t stuck_tick_delay;                  // (参数)
+    uint32_t stuck_tick_run;                    // (临时数据)
 
     // ======================================================
-    uint8_t mode_flag;                          // ()
-    SguanQ run_time;                            // ()
-    SguanQ error_code;                          // ()
+    uint8_t error_code;                         // (被动输出数据)
+    uint32_t tick_run;                          // (实时输入数据)
+    uint32_t tick_last;                         // (临时数据)
+    
+    uint8_t mode_flag;                          // (固定输入参数)
 }HandleData;
 
 typedef struct{
-    HandleStatus status_now;                    // ()
-    HandleState state_now;                      // ()
-    HandleEvent event_now;                      // ()
-    void (*action_init)(void *);                // ()
-    void (*action_loop)(void);                  // ()
-    HandleStatus status_future;                 // ()
+    uint8_t status_now;                         // ()
+    uint8_t event_now;                          // ()
+    uint8_t status_future;                      // ()
 }MotorTab;
 
 typedef struct{
     HandleStatus status;                        // ()
-    HandleState state;                          // ()
     HandleStatus last;                          // ()
-    HandleEvent event;                          // ()
+    HandleState state;                          // ()
     HandleData data;                            // ()
 }MotorStatus;
 
-void motorstatus_action_init11(MotorStatus *motorstatus);
-void motorstatus_high_loop(MotorStatus *motorstatus);
-void motorstatus_low_loop(MotorStatus *motorstatus);
+void motorstatus_loop(void *sguan);
 
 
 #endif // SGUAN_MOTORSTATUS_H

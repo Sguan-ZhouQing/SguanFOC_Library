@@ -7,13 +7,30 @@
 #include "Sguan_Printf.h"
 #include "Sguan_Transfer.h"
 
+#define RUN_READY           0x01
+#define RUN_INITIALIZING    0x02
+#define RUN_STANDBY         0x03
+#define RUN_FAULT           0x04
+#define RUN_SUCCESS         0x05
+
+#define MOTOR_ONE           0X00
+#define MOTOR_TWO           0X01
+#define MOTOR_THREE         0X02
+#define MOTOR_FOUR          0X03
+#define MOTOR_FIVE          0X04
+#define MOTOR_SIX           0X05
+
+#define CONTROL_TORUE       0x00
+#define CONTROL_VELOCITY    0x01
+#define CONTROL_POSITION    0x02
+
 typedef struct{
-    SguanQ target_Speed;                        // (期望速度)Target期望机械角速度
-    SguanQ target_Pos;                          // (期望角度)Target期望机械角度
-    SguanQ target_Id;                           // (期望电流)期望D轴电流
-    SguanQ target_Iq;                           // (期望电流)期望Q轴电流
-    SguanQ target_Ud;                           // (期望电压)期望D轴电压
-    SguanQ target_Uq;                           // (期望电压)期望Q轴电压
+    SguanQ target_speed;                        // (期望速度)Target期望机械角速度
+    SguanQ target_pos;                          // (期望角度)Target期望机械角度
+    SguanQ target_id;                           // (期望电流)期望D轴电流
+    SguanQ target_iq;                           // (期望电流)期望Q轴电流
+    SguanQ target_ud;                           // (期望电压)期望D轴电压
+    SguanQ target_uq;                           // (期望电压)期望Q轴电压
 
     SguanQ speed_in;                            // (输入量end)速度环输入值
     SguanQ ud_in;                               // (输入量end)D轴电压输入
@@ -37,7 +54,7 @@ typedef struct{
 
 typedef struct{
     SguanQ real_position;
-    SguanQ real_velocity;
+    SguanQ real_speed;
     SguanQ real_We;
     SguanQ real_Re;
 
@@ -87,6 +104,9 @@ typedef struct{
     uint8_t id_flag;
     uint8_t run_flag;
     uint8_t uart_flag;
+
+    uint32_t tick_run;
+    uint32_t tick_last;
     
     Method method;
     MotorStatus motorstatus;

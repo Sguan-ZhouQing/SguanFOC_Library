@@ -17,7 +17,7 @@
 
 // 电机实例数量（板卡上的电机个数，必须和 SguanFOC.c 里 MOTOR_LIST 的行数一致）
 // Max 10
-#define CONFIG_MOTOR 6
+#define CONFIG_MOTOR 1
 // #define CONFIG_MOTOR DTAT
 
 
