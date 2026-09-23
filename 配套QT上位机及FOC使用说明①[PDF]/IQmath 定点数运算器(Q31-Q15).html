@@ -128,7 +128,7 @@
 
   <header>
     <h1>IQmath 定点数运算器</h1>
-    <p>Q31 / Q15 / float 数值互转 · 基数换算 · 定点四则运算</p>
+    <p>Q31 / Q15 / float 数值互转 · 基数换算 · 定点四则运算 · 串口还原增益</p>
   </header>
 
   <!-- ================= 全局基数 ================= -->
@@ -151,6 +151,29 @@
           <button class="chip" data-base="24">24</button>
           <button class="chip" data-base="100">100</button>
         </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= 串口还原增益 ================= -->
+  <section class="card">
+    <div class="card-head">
+      <h2>串口还原增益</h2>
+      <span class="hint">float = Q整数 × 增益</span>
+    </div>
+    <p class="tip" style="margin-top:-6px;margin-bottom:14px;">
+      串口软件将接收到的定点整数乘以以下增益，即可还原为真实 float 值。
+    </p>
+    <div class="grid grid-2">
+      <div class="result">
+        <div class="label">Q31 增益</div>
+        <div class="value accent" id="gainQ31">—</div>
+        <div class="meta" id="gainQ31Meta"></div>
+      </div>
+      <div class="result">
+        <div class="label">Q15 增益</div>
+        <div class="value accent" id="gainQ15">—</div>
+        <div class="meta" id="gainQ15Meta"></div>
       </div>
     </div>
   </section>
@@ -366,7 +389,7 @@ function q31Sub(a, b){
 
 function q31Mul(a, b){
   let r = BigInt(a) * BigInt(b) + (1n << 30n);
-  r >>= 31n;                       // BigInt 的 >> 对负数即为算术右移
+  r >>= 31n;
   if (r > 2147483647n) return Q31_MAX;
   if (r < -2147483648n) return Q31_MIN;
   return Number(r);
@@ -376,8 +399,8 @@ function q31Div(a, b){
   if (b === 0) return a >= 0 ? Q31_MAX : Q31_MIN;
   const num = BigInt(a) << 31n;
   const bb  = BigInt(b);
-  let res = num / bb;              // BigInt 除法向零截断
-  const rem = num % bb;            // 余数符号跟随被除数
+  let res = num / bb;
+  const rem = num % bb;
   if (rem !== 0n){
     const remAbs = rem < 0n ? -rem : rem;
     const bAbs   = bb  < 0n ? -bb  : bb;
@@ -477,7 +500,7 @@ function q15ConvertBase(q, oldBase, newBase){
 function getBase(){
   const s = el('baseInput').value.trim();
   if (s === '') return 1;
-  return Number(s);           // 可能是 NaN
+  return Number(s);
 }
 
 function readNumber(id){
@@ -485,6 +508,31 @@ function readNumber(id){
   if (s === '') return null;
   const v = Number(s);
   return Number.isFinite(v) ? v : null;
+}
+
+/* =====================================================================
+   渲染：串口还原增益
+   ===================================================================== */
+function renderGains(base){
+  const g31 = el('gainQ31'), m31 = el('gainQ31Meta');
+  const g15 = el('gainQ15'), m15 = el('gainQ15Meta');
+
+  if (!(base > 0) || !Number.isFinite(base)){
+    g31.textContent = '—'; m31.textContent = 'base 无效（需 > 0）';
+    g15.textContent = '—'; m15.textContent = 'base 无效（需 > 0）';
+    m31.className = 'meta warn'; m15.className = 'meta warn';
+    return;
+  }
+
+  const gain31 = base / 2147483648;
+  const gain15 = base / 32768;
+
+  g31.textContent = fmtFloat(gain31);
+  g15.textContent = fmtFloat(gain15);
+
+  m31.textContent = `= base / 2^31 = ${fmtFloat(base)} / 2147483648`;
+  m15.textContent = `= base / 2^15 = ${fmtFloat(base)} / 32768`;
+  m31.className = 'meta'; m15.className = 'meta';
 }
 
 /* =====================================================================
@@ -663,6 +711,7 @@ function renderOp(base){
    ===================================================================== */
 function renderAll(){
   const base = getBase();
+  renderGains(base);          // 新增：串口还原增益
   renderFloatToQ(base);
   renderQToFloat(base);
   renderBaseConv();
