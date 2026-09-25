@@ -1,0 +1,1112 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PFC 功率因数校正 —— 交互式学习演示</title>
+<style>
+:root{
+  --bg:#eef0f3; --panel:#f4f5f7; --panel2:#ffffff; --border:#e0e4ea; --border2:#d5dbe4;
+  --text:#2a3343; --dim:#7d8794; --accent:#0284c7;
+}
+*{box-sizing:border-box; margin:0; padding:0;}
+body{
+  background:#eef0f3; color:#2a3343;
+  font-family:"Microsoft YaHei","PingFang SC",system-ui,sans-serif;
+  font-size:14px; line-height:1.5;
+}
+header{
+  padding:14px 18px 10px; border-bottom:1px solid #e3e7ee;
+  background:#fafbfc;
+}
+header h1{font-size:19px; font-weight:600; color:#1f2937;}
+header .sub{font-size:12px; color:#7d8794; margin-top:2px;}
+#metricBar{
+  display:flex; flex-wrap:wrap; gap:8px; margin-top:10px;
+}
+.chip{
+  background:#ffffff; border:1px solid #e0e4ea; border-radius:8px;
+  padding:6px 12px; font-size:12px;
+}
+.chip b{display:block; font-size:16px; color:#1f2937; font-weight:600;}
+.chip .k{color:var(--dim);}
+.chip.np{border-color:#f0cfc2;}
+main{
+  display:grid; grid-template-columns:520px minmax(0,1fr); gap:12px; padding:12px;
+  max-width:1720px; margin:0 auto;
+}
+.col{display:flex; flex-direction:column; gap:12px; min-width:0;}
+.card{
+  background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:12px;
+  color:var(--text);
+}
+.card h3{font-size:14px; color:#1f2937; margin-bottom:8px; font-weight:600;}
+.card h3 .hint{font-size:11px; color:var(--dim); font-weight:400; margin-left:6px;}
+svg text{user-select:none;}
+#svgMain, #svgNopfc{width:100%; height:auto; display:block;}
+.probe{cursor:pointer;}
+.probe:hover{filter:brightness(1.12);}
+.probeLbl{cursor:pointer;}
+.legendRow{display:flex; flex-wrap:wrap; gap:6px 14px; margin-top:8px; font-size:11px; color:var(--dim);}
+.legendRow span{display:inline-flex; align-items:center; gap:5px;}
+.dot{width:9px; height:9px; border-radius:50%; display:inline-block;}
+/* 示波器 */
+.scopes{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+.pane{
+  background:var(--panel2); border:1px solid var(--border); border-radius:10px;
+  padding:8px 8px 4px; cursor:default;
+}
+.pane.focus{border-color:var(--accent);}
+.paneHead{
+  display:flex; align-items:center; gap:6px; margin-bottom:4px; flex-wrap:wrap;
+}
+.paneTitle{font-size:12px; color:#1f2937; margin-right:auto; font-weight:600;}
+.paneHead select{
+  background:#ffffff; color:var(--text); border:1px solid var(--border2);
+  border-radius:6px; font-size:11px; padding:2px 4px; max-width:150px;
+}
+.pane canvas{width:100%; height:170px; display:block; border-radius:6px; border:1px solid #e6e9ef;}
+.pane .readout{font-size:11px; color:var(--dim); min-height:16px; padding:1px 2px; font-family:Consolas,monospace;}
+/* 控制条 */
+#playBar{display:flex; align-items:center; gap:10px; flex-wrap:wrap;}
+#playBar button{
+  background:#ffffff; color:var(--text); border:1px solid var(--border2);
+  border-radius:7px; padding:4px 12px; cursor:pointer; font-size:13px;
+}
+#playBar button:hover{background:#e9edf3;}
+#playBar label{font-size:12px; color:var(--dim); display:inline-flex; align-items:center; gap:4px;}
+#playBar select{
+  background:#ffffff; color:var(--text); border:1px solid var(--border2); border-radius:6px; padding:3px 4px;
+}
+#scrub{flex:1; min-width:220px; accent-color:var(--accent);}
+#tReadout{font-size:12px; color:#1f2937; font-family:Consolas,monospace; min-width:110px; text-align:right;}
+/* 参数 */
+.sliders{display:grid; grid-template-columns:1fr 1fr; gap:6px 18px;}
+.sliderRow{display:flex; align-items:center; gap:8px;}
+.sliderRow label{font-size:12px; color:var(--dim); min-width:74px;}
+.sliderRow input[type=range]{flex:1; accent-color:var(--accent);}
+.sliderRow .val{font-size:12px; color:#1f2937; min-width:64px; text-align:right; font-family:Consolas,monospace;}
+.pidBox{
+  margin-top:8px; padding:8px 10px; border:1px dashed #cbd3df; border-radius:8px;
+  background:#eef0f4;
+}
+.pidBox .pidTitle{font-size:12px; color:var(--dim); margin-bottom:6px; display:flex; align-items:center; gap:8px;}
+.badge{
+  font-size:11px; padding:2px 8px; border-radius:10px; background:#e0f2e7; color:#15803d;
+  border:1px solid #b9e0c8;
+}
+.badge.manual{background:#fdeed3; color:#b45309; border-color:#ecd3a4;}
+.ctlRow{display:flex; align-items:center; gap:12px; margin-top:10px; flex-wrap:wrap;}
+.switchLbl{display:inline-flex; align-items:center; gap:6px; font-size:13px; color:var(--text); cursor:pointer;}
+.switchLbl input{accent-color:#16a34a; width:16px; height:16px;}
+.ctlRow button{
+  background:#ffffff; color:var(--text); border:1px solid var(--border2);
+  border-radius:7px; padding:5px 14px; cursor:pointer; font-size:12px;
+}
+.ctlRow button:hover{background:#e9edf3;}
+.ctlRow button.primary{border-color:#7fb6dc; color:#0369a1;}
+/* 场景 */
+.scenRow{display:flex; flex-wrap:wrap; gap:8px;}
+.scenRow button{
+  background:#ffffff; color:var(--text); border:1px solid var(--border2);
+  border-radius:8px; padding:6px 14px; cursor:pointer; font-size:12px;
+}
+.scenRow button:hover{background:#e9edf3;}
+.scenRow button.active{border-color:var(--accent); color:#0369a1; background:#e3f0fa;}
+/* 对比表 */
+table.cmp{width:100%; border-collapse:collapse; font-size:12px;}
+table.cmp th, table.cmp td{
+  border:1px solid #dbe0e8; padding:5px 8px; text-align:center;
+}
+table.cmp th{background:#e9ecf1; color:#1f2937; font-weight:600;}
+table.cmp td.k{color:var(--dim); text-align:left;}
+table.cmp .good{color:#16a34a; font-weight:600;}
+table.cmp .bad{color:#dc2626; font-weight:600;}
+/* 公式 */
+details.card{cursor:pointer;}
+details.card summary{font-size:14px; color:#1f2937; font-weight:600; list-style:none;}
+details.card summary::before{content:"▸ "; color:var(--accent);}
+details.card[open] summary::before{content:"▾ ";}
+.formulaBox{
+  margin-top:10px; font-size:12.5px; line-height:1.9; color:var(--text);
+  background:#ffffff; border:1px solid var(--border); border-radius:8px; padding:10px 14px;
+}
+.formulaBox .fml{
+  font-family:Consolas,"Courier New",monospace; color:#d97706; white-space:nowrap;
+  overflow-x:auto; display:block; padding:2px 0;
+}
+.formulaBox .note{color:var(--dim); font-size:12px;}
+.formulaBox h4{color:#0369a1; font-size:13px; margin:10px 0 2px;}
+.formulaBox h4:first-child{margin-top:0;}
+.explain{font-size:12.5px; color:var(--text); line-height:1.9;}
+.explain p{margin:6px 0;}
+.explain .q{color:#d97706; font-weight:600;}
+/* 加载 */
+#loading{
+  position:fixed; inset:0; background:rgba(238,240,243,.93); display:none;
+  align-items:center; justify-content:center; z-index:99; flex-direction:column; gap:14px;
+}
+#loading .txt{color:#1f2937; font-size:15px;}
+#loading .bar{width:300px; height:8px; background:#dfe3ea; border-radius:4px; overflow:hidden;}
+#loading .bar i{display:block; height:100%; width:0%; background:var(--accent); transition:width .1s;}
+@media (max-width:1180px){ main{grid-template-columns:1fr;} }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>PFC 功率因数校正 —— 交互式学习演示</h1>
+  <div class="sub">平均电流模式 Boost PFC · 220V/50Hz 市电 → 380V 直流母线 · 开关频率 50kHz · 真实开关级仿真</div>
+  <div id="metricBar">
+    <div class="chip"><span class="k">有PFC · 功率因数</span><b id="mPf">—</b></div>
+    <div class="chip"><span class="k">有PFC · 电流THD</span><b id="mThd">—</b></div>
+    <div class="chip"><span class="k">母线电压</span><b id="mVo">—</b></div>
+    <div class="chip"><span class="k">母线纹波(峰峰值)</span><b id="mRip">—</b></div>
+    <div class="chip np"><span class="k">无PFC电路 · 功率因数</span><b id="mNpPf" style="color:#dc2626">—</b></div>
+    <div class="chip np"><span class="k">无PFC电路 · 电流THD</span><b id="mNpThd" style="color:#dc2626">—</b></div>
+  </div>
+</header>
+
+<main>
+  <!-- ============ 左列：电路图 ============ -->
+  <div class="col">
+    <div class="card">
+      <h3>有源 PFC 升压电路<span class="hint">点击带编号的彩色圆点，把对应波形切到右侧示波器</span></h3>
+      <svg id="svgMain" viewBox="0 0 700 545">
+        <defs>
+          <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="#7a8698"/>
+          </marker>
+        </defs>
+        <g id="gMain"></g>
+      </svg>
+      <div class="legendRow" id="legendMain"></div>
+    </div>
+
+    <div class="card">
+      <h3>对照：无 PFC 的传统电路（整流桥 + 大电容）</h3>
+      <svg id="svgNopfc" viewBox="0 0 480 200">
+        <defs>
+          <marker id="arr2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="#dc2626"/>
+          </marker>
+        </defs>
+        <g id="gNopfc"></g>
+      </svg>
+    </div>
+
+    <div class="card">
+      <h3>电路特性对比<span class="hint">同一 220V 电网、同一负载电阻</span></h3>
+      <table class="cmp">
+        <tr><th>指标</th><th>有源 PFC（当前状态）</th><th>无 PFC 电路</th><th>说明</th></tr>
+        <tr><td class="k">功率因数 PF</td><td class="good" id="cPf">—</td><td class="bad" id="cNpPf">—</td><td style="text-align:left;font-size:11px;color:var(--dim)">PF 越接近 1，电网“白费”的无功和畸变越少</td></tr>
+        <tr><td class="k">电流谐波 THD</td><td class="good" id="cThd">—</td><td class="bad" id="cNpThd">—</td><td style="text-align:left;font-size:11px;color:var(--dim)">THD 越大，电流波形离正弦越远</td></tr>
+        <tr><td class="k">输出电压</td><td id="cVo">—</td><td id="cNpVo">—</td><td style="text-align:left;font-size:11px;color:var(--dim)">无 PFC 电路输出电压≈311V 峰值附近，且随负载跌落</td></tr>
+        <tr><td class="k">电流波形</td><td class="good" id="cShape1">正弦、与电压同相</td><td class="bad" id="cShape2">窄尖峰脉冲</td><td style="text-align:left;font-size:11px;color:var(--dim)">尖峰只在电压峰值附近“猛吸”电流</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- ============ 右列：示波器与控制 ============ -->
+  <div class="col">
+    <div class="card">
+      <div id="playBar">
+        <button id="btnRewind" title="回到开头">⏮</button>
+        <button id="btnPlay" title="播放/暂停">⏸</button>
+        <label>速度 <select id="selSpeed">
+          <option value="0.1">0.1×</option><option value="0.25">0.25×</option>
+          <option value="0.5">0.5×</option><option value="1" selected>1×</option>
+          <option value="2">2×</option><option value="4">4×</option><option value="8">8×</option>
+        </select></label>
+        <label>波形窗口 <select id="selSpan">
+          <option value="0.02">20ms（1个工频周期）</option>
+          <option value="0.04">40ms（2个周期）</option>
+          <option value="0.1" selected>100ms（5个周期）</option>
+          <option value="0.2">200ms（10个周期）</option>
+          <option value="0.4">400ms（20个周期）</option>
+        </select></label>
+        <input type="range" id="scrub" min="0" max="1000" step="1" value="0">
+        <span id="tReadout">t = 0ms</span>
+      </div>
+    </div>
+
+    <div class="scopes" id="scopes">
+      <div class="pane" data-pane="0">
+        <div class="paneHead"><span class="paneTitle">① 电网侧 · 看电压电流是否同相</span>
+          <select class="ch1"></select><select class="ch2"></select></div>
+        <canvas></canvas><div class="readout"></div>
+      </div>
+      <div class="pane" data-pane="1">
+        <div class="paneHead"><span class="paneTitle">② 电流环 · 期望电流 vs 实际电流</span>
+          <select class="ch1"></select><select class="ch2"></select></div>
+        <canvas></canvas><div class="readout"></div>
+      </div>
+      <div class="pane" data-pane="2">
+        <div class="paneHead"><span class="paneTitle">③ 母线电压 · 稳不稳在 380V</span>
+          <select class="ch1"></select><select class="ch2"></select></div>
+        <canvas></canvas><div class="readout"></div>
+      </div>
+      <div class="pane" data-pane="3">
+        <div class="paneHead"><span class="paneTitle">④ 慢动作 200µs · 看 PWM 开关细节</span>
+          <select class="ch1"></select><select class="ch2"></select></div>
+        <canvas></canvas><div class="readout"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>参数设置<span class="hint">默认即为“调好的 PFC”，可直接观看；改硬件/负载会自动按公式重新整定 PID</span></h3>
+      <div class="sliders" id="sliders"></div>
+      <div class="pidBox">
+        <div class="pidTitle">双环 PID 参数（工程上一般只用 PI，微分项放大噪声，这里固定 Kd=0）
+          <span id="tuneBadge" class="badge">公式自动整定</span></div>
+        <div class="sliders" id="pidSliders"></div>
+      </div>
+      <div class="ctlRow">
+        <label class="switchLbl"><input type="checkbox" id="pfcOn" checked> <span>PFC 使能（关闭后 MOS 不再动作，看看会发生什么）</span></label>
+        <button id="btnRetune" class="primary">按公式重算 PID</button>
+        <button id="btnDefault">恢复默认参数</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>演示场景</h3>
+      <div class="scenRow" id="scenRow"></div>
+    </div>
+
+    <details class="card">
+      <summary>PI 调参公式（当前默认参数就是这么算出来的）</summary>
+      <div class="formulaBox" id="formulaBody"></div>
+    </details>
+
+    <details class="card">
+      <summary>原理讲解（配合电路图理解）</summary>
+      <div class="explain">
+        <p><span class="q">什么是功率因数？</span> PF = 有功功率 ÷ 视在功率。电网只对“与电压同相的正弦基波电流”做有用功。电流越不像正弦、相位越偏，PF 越低，电网和线路要为这些“废电流”白白发热。</p>
+        <p><span class="q">为什么整流桥+大电容的 PF 只有 0.4~0.6？</span> 电容电压被充到接近 311V 峰值，只有电网电压高于电容电压的短暂瞬间二极管才导通——电流变成又窄又高的尖峰（THD &gt; 100%）。</p>
+        <p><span class="q">PFC 的思路？</span> 强迫输入电流时时刻刻跟随电网电压的形状：正弦、同相。所以把 380V 母线电流的平均值塑形成“馒头波”的形状，经过整流桥“翻转”回电网后就是正弦。</p>
+        <p><span class="q">为什么用双闭环？</span> 电压外环决定<b>取多少功率</b>（母线 380V 掉了一点 → 电压 PID 输出 ve 变大 → 电流整体变大）；电流内环决定<b>电流长什么样</b>（ve × 幅值为 1 的馒头波 = 期望电流，电流 PID 让实际电流死咬期望电流）。这样功率和形状互不干扰。</p>
+        <p><span class="q">为什么必须升压到 380V？</span> Boost 拓扑的电感串在输入回路上，电感电流就是输入电流——直接可控；且 380V 高于 311V 电压峰值，MOS 才能随时调节电感电流，实现全周期塑形。</p>
+        <p><span class="q">为什么电流环比电压环快很多？</span> 母线电压上天生有 100Hz 纹波，如果电压环太快，这个纹波会串进电流指令，把电流波形“污染”出 3 次谐波。所以电压环带宽取 10Hz 左右，慢悠悠地只关心平均值；塑形这种“快活”交给电流环。</p>
+      </div>
+    </details>
+  </div>
+</main>
+
+<div id="loading"><div class="txt">仿真计算中…</div><div class="bar"><i id="progBar"></i></div><div class="txt" id="progTxt" style="font-size:12px;color:#7a8698">0%</div></div>
+
+<script>
+'use strict';
+/* =====================================================================
+ * 一、全局参数与调参公式
+ * ===================================================================*/
+const FLINE = 50, W_LINE = 2*Math.PI*FLINE, DT = 1e-7, TSAVE = 1e-6;
+const DEF = { Vrms:220, Vref:380, Pload:300, L:1.5e-3, C:1.5e-3, fsw:50e3, fcv:10, pfcOn:true };
+
+let P = Object.assign({}, DEF);
+let pidManual = false;
+let scenario = 'steady';
+let sim = null;          // {main, np, dur}
+let tPlay = 0, playing = true, speed = 1, span = 0.1, focusPane = 0;
+let simToken = 0;
+
+/* 调参公式：电流环 Gid(s)=Vout/(sL)，穿越频率 fci=fsw/10，零点放穿越频率；
+ * 电压环功率级 [Vrms/(√2·Vout)]/(sC+2/R)，穿越频率 fcv=10Hz（远低于100Hz纹波），零点放 fcv/5 */
+function formulaPID(p){
+  const fci = p.fsw/10;
+  const Kpi = 2*Math.PI*fci*p.L/p.Vref;
+  const Kii = 2*Math.PI*fci*Kpi;
+  const Kpv = 2*Math.PI*p.fcv*p.C*Math.SQRT2*p.Vref/p.Vrms;
+  const Kiv = 2*Math.PI*(p.fcv/5)*Kpv;
+  return { fci, Kpi, Kii, Kpv, Kiv };
+}
+
+function applyFormulaPID(){
+  const f = formulaPID(P);
+  P.Kpi = f.Kpi; P.Kii = f.Kii; P.Kpv = f.Kpv; P.Kiv = f.Kiv;
+}
+
+/* =====================================================================
+ * 二、演示场景
+ * ===================================================================*/
+const SCEN = {
+  steady:  {label:'稳定工作（轻载300W）', dur:0.4},
+  loadStep:{label:'负载阶跃 300→800W', dur:0.6, loadSteps:[{t:0.2, p:800}]},
+  vinDrop: {label:'电网电压跌落再恢复', dur:0.7, vinSteps:[{t:0.2, v:190}, {t:0.45, v:220}]},
+  startup: {label:'上电启动过程', dur:0.6, softStart:true},
+  pfcOff:  {label:'PFC 关闭对比', dur:0.6, pfcOn:false},
+};
+
+function buildCfg(){
+  const s = SCEN[scenario];
+  return {
+    Vrms:P.Vrms, Vref:P.Vref, Pload:P.Pload, L:P.L, C:P.C, fsw:P.fsw, fcv:P.fcv,
+    Kpi:P.Kpi, Kii:P.Kii, Kpv:P.Kpv, Kiv:P.Kiv,
+    pfcOn:P.pfcOn,
+    dur:s.dur, softStart:!!s.softStart,
+    loadSteps:s.loadSteps || null, vinSteps:s.vinSteps || null,
+  };
+}
+
+/* =====================================================================
+ * 三、仿真引擎（开关级，与 Python 验证版一致）
+ * ===================================================================*/
+function runSimAsync(cfg, onProg, onDone){
+  const w = W_LINE, Ts = 1/cfg.fsw, per = Math.round(Ts/DT);
+  const nSteps = Math.round(cfg.dur/DT);
+  const nSave = Math.floor(nSteps/10) + 2;
+  const d = {
+    t:new Float32Array(nSave), vin:new Float32Array(nSave), iin:new Float32Array(nSave),
+    il:new Float32Array(nSave), iref:new Float32Array(nSave), vo:new Float32Array(nSave),
+    ve:new Float32Array(nSave), m:new Float32Array(nSave), gate:new Float32Array(nSave),
+    len:0,
+  };
+  let vp = cfg.Vrms*Math.SQRT2, vp0 = vp, curVrms = cfg.Vrms, Pload = cfg.Pload;
+  let vo = cfg.softStart ? vp : cfg.Vref;
+  let iL = 0;
+  const veSS = cfg.Pload*Math.SQRT2/cfg.Vrms;
+  let vInt = cfg.softStart ? 0 : veSS;
+  let ve  = cfg.softStart ? 0.5 : veSS;
+  let iInt = cfg.softStart ? 0 : 0.5;
+  let dty = 0.2;
+  let ls = 0, vs = 0, k = 0, si = 0;
+  const CHUNK = 500000;
+
+  function step(kk){
+    const t = kk*DT;
+    if(cfg.loadSteps && ls < cfg.loadSteps.length && t >= cfg.loadSteps[ls].t){
+      Pload = cfg.loadSteps[ls].p; ls++;
+    }
+    if(cfg.vinSteps && vs < cfg.vinSteps.length && t >= cfg.vinSteps[vs].t){
+      curVrms = cfg.vinSteps[vs].v; vp = curVrms*Math.SQRT2; vs++;
+    }
+    const vin = vp*Math.sin(w*t);
+    const vinAbs = Math.abs(vin);
+    let gateOn = false, iref = 0, m = vinAbs/vp;
+    if(cfg.pfcOn){
+      const vRef = (cfg.softStart && t < 0.1) ? (vp0 + 1 + (cfg.Vref - vp0 - 1)*(t/0.1)) : cfg.Vref;
+      const vErr = vRef - vo;
+      vInt += cfg.Kiv*vErr*DT; if(vInt < 0) vInt = 0; else if(vInt > 12) vInt = 12;
+      ve = cfg.Kpv*vErr + vInt; if(ve < 0) ve = 0; else if(ve > 12) ve = 12;
+      iref = ve*m;
+      const iErr = iref - iL;
+      iInt += cfg.Kii*iErr*DT; if(iInt < 0) iInt = 0; else if(iInt > 0.95) iInt = 0.95;
+      let vc = cfg.Kpi*iErr + iInt; if(vc < 0) vc = 0; else if(vc > 0.95) vc = 0.95;
+      dty = vc;
+      gateOn = (kk % per) < dty*per;
+    }
+    const R = cfg.Vref*cfg.Vref/Pload;
+    if(gateOn){
+      iL += vinAbs/cfg.L*DT;
+      vo += -vo/(R*cfg.C)*DT;
+    } else if(iL > 0 || vinAbs > vo + 0.7){
+      iL += (vinAbs - vo)/cfg.L*DT;
+      if(iL < 0) iL = 0;
+      vo += (iL - vo/R)/cfg.C*DT;
+    } else {
+      iL = 0;
+      vo += (-vo/R)/cfg.C*DT;
+    }
+    if(kk % 10 === 0){
+      d.t[si] = t; d.vin[si] = vin; d.iin[si] = (vin >= 0 ? iL : -iL);
+      d.il[si] = iL; d.iref[si] = iref; d.vo[si] = vo;
+      d.ve[si] = cfg.pfcOn ? ve : 0; d.m[si] = m;
+      d.gate[si] = gateOn ? 1 : 0;
+      si++;
+    }
+  }
+
+  function chunk(){
+    const end = Math.min(k + CHUNK, nSteps);
+    for(; k < end; k++) step(k);
+    d.len = si;
+    if(onProg) onProg(k/nSteps);
+    if(k < nSteps) setTimeout(chunk, 0); else onDone(d);
+  }
+  chunk();
+}
+
+/* 无PFC电路：整流桥+大电容（串联等效电阻 0.5Ω），与主电路同一电网、同一负载 */
+function runNoPfcAsync(cfg, onProg, onDone){
+  const w = W_LINE, dt = 1e-6, n = Math.round(cfg.dur/dt);
+  const d = { t:new Float32Array(n+2), vin:new Float32Array(n+2), iin:new Float32Array(n+2), vo:new Float32Array(n+2), len:n };
+  let vp = cfg.Vrms*Math.SQRT2, curVrms = cfg.Vrms, Pload = cfg.Pload;
+  let vo = vp, t = 0;
+  let ls = 0, vs = 0, k = 0;
+  const Rs = 0.5;
+  const CHUNK = 400000;
+  function chunk(){
+    const end = Math.min(k + CHUNK, n);
+    for(; k < end; k++){
+      t = k*dt;
+      if(cfg.loadSteps && ls < cfg.loadSteps.length && t >= cfg.loadSteps[ls].t){
+        Pload = cfg.loadSteps[ls].p; ls++;
+      }
+      if(cfg.vinSteps && vs < cfg.vinSteps.length && t >= cfg.vinSteps[vs].t){
+        curVrms = cfg.vinSteps[vs].v; vp = curVrms*Math.SQRT2; vs++;
+      }
+      const vin = vp*Math.sin(w*t);
+      const vinAbs = Math.abs(vin);
+      let ii = (vinAbs > vo + 0.7) ? (vinAbs - vo - 0.7)/Rs : 0;
+      const R = cfg.Vref*cfg.Vref/Pload;
+      vo += (ii - vo/R)/cfg.C*dt;
+      d.t[k] = t; d.vin[k] = vin; d.iin[k] = (vin >= 0 ? ii : -ii); d.vo[k] = vo;
+    }
+    if(onProg) onProg(k/n);
+    if(k < n) setTimeout(chunk, 0); else onDone(d);
+  }
+  chunk();
+}
+
+/* 2kHz 一阶低通：模拟电网仪表的谐波测量带宽，滤掉 50kHz 开关纹波 */
+function lp2k(x){
+  const y = new Float32Array(x.length);
+  const a = 2*Math.PI*2000*TSAVE, kk = a/(1 + a);
+  let s = 0;
+  for(let i = 0; i < x.length; i++){ s += (x[i] - s)*kk; y[i] = s; }
+  return y;
+}
+
+/* 指标：取仿真末尾 100ms（5 个工频周期）稳态窗口 */
+function metrics(d, tStart, filt){
+  const iinF = filt ? lp2k(d.iin) : d.iin;
+  const i0 = Math.max(0, Math.floor(tStart/TSAVE));
+  const n = d.len - i0;
+  if(n < 100) return null;
+  let Psum = 0, Vsum2 = 0, Isum2 = 0, Vosum = 0, vomin = Infinity, vomax = -Infinity;
+  let s = 0, c = 0;
+  for(let i = i0; i < d.len; i++){
+    const vin = d.vin[i], ii = iinF[i], tt = d.t[i];
+    Psum += vin*ii; Vsum2 += vin*vin; Isum2 += ii*ii;
+    s += ii*Math.sin(W_LINE*tt); c += ii*Math.cos(W_LINE*tt);
+    const v = d.vo[i]; Vosum += v;
+    if(v < vomin) vomin = v; if(v > vomax) vomax = v;
+  }
+  const Pavg = Psum/n;
+  const Vrms = Math.sqrt(Vsum2/n), Irms = Math.sqrt(Isum2/n);
+  const I1amp = 2*Math.sqrt(s*s + c*c)/n;
+  const I1rms = I1amp/Math.SQRT2;
+  const thd = Math.sqrt(Math.max(Irms*Irms - I1rms*I1rms, 0))/I1rms;
+  return { pf:Pavg/(Vrms*Irms), thd, voAvg:Vosum/n, voRip:vomax - vomin, Irms };
+}
+
+/* =====================================================================
+ * 四、波形通道
+ * ===================================================================*/
+const CH = {
+  vin:  {name:'电网电压 vin',        unit:'V',  color:'#0284c7'},
+  iin:  {name:'电网电流 iin',        unit:'A',  color:'#d97706'},
+  bun:  {name:'馒头波 |vin|（整流后）', unit:'V', color:'#7c3aed'},
+  m:    {name:'调制波形 m（幅值为1）', unit:'',   color:'#a855f7'},
+  il:   {name:'实际电流 iL',         unit:'A',  color:'#16a34a'},
+  iref: {name:'期望电流 iref',       unit:'A',  color:'#db2777'},
+  vo:   {name:'母线电压 Vo',         unit:'V',  color:'#ea580c'},
+  ve:   {name:'电压PID输出 ve',      unit:'V',  color:'#0d9488'},
+  vref: {name:'期望电压参考线 380V',  unit:'V',  color:'#ea580c', dash:true},
+  gate: {name:'PWM门极信号',         unit:'',   color:'#374151', digital:true},
+};
+function chVal(d, key, i){
+  if(key === 'bun') return Math.abs(d.vin[i]);
+  return d[key][i];
+}
+
+/* =====================================================================
+ * 五、电路图 SVG
+ * ===================================================================*/
+function lineS(x1,y1,x2,y2,color,width,arrow){
+  let s = '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+color+'" stroke-width="'+(width||1.4)+'"';
+  if(arrow) s += ' marker-end="url(#arr)"';
+  return s + '/>';
+}
+function polyS(pts, color, width, arrow){
+  return '<polyline points="'+pts.join(' ')+'" fill="none" stroke="'+color+'" stroke-width="'+(width||1.4)+'"' + (arrow ? ' marker-end="url(#arr)"' : '') + '/>';
+}
+function diodeS(x1,y1,x2,y2){
+  /* 二极管：线段+三角+横杠，由 x1,y1 指向 x2,y2 */
+  const dx = x2-x1, dy = y2-y1;
+  const L = Math.sqrt(dx*dx+dy*dy);
+  if(L < 1) return '';
+  const ux = dx/L, uy = dy/L, px = -uy, py = ux;
+  const bx = x2-ux*11, by = y2-uy*11;
+  const t1x = bx+px*5.5, t1y = by+py*5.5;
+  const t2x = bx-px*5.5, t2y = by-py*5.5;
+  const c1x = x2+ux*5,  c1y = y2+uy*5;
+  return '<line x1="'+x1+'" y1="'+y1+'" x2="'+bx+'" y2="'+by+'" stroke="#4a5a75" stroke-width="1.6"/>'
+    + '<polygon points="'+t1x+','+t1y+' '+t2x+','+t2y+' '+x2+','+y2+'" fill="none" stroke="#4a5a75" stroke-width="1.6"/>'
+    + '<line x1="'+(c1x+px*5.5)+'" y1="'+(c1y+py*5.5)+'" x2="'+(c1x-px*5.5)+'" y2="'+(c1y-py*5.5)+'" stroke="#4a5a75" stroke-width="1.6"/>';
+}
+function boxS(x,y,w,h,txt,sub){
+  let s = '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" rx="8" fill="#ffffff" stroke="#c3cbda" stroke-width="1.4"/>';
+  s += '<text x="'+(x+w/2)+'" y="'+(y+h/2-1)+'" text-anchor="middle" font-size="13" fill="#33415a">'+txt+'</text>';
+  if(sub) s += '<text x="'+(x+w/2)+'" y="'+(y+h/2+13)+'" text-anchor="middle" font-size="10" fill="#7a8698">'+sub+'</text>';
+  return s;
+}
+function probeS(cx,cy,num,color,chans,label){
+  return '<circle class="probe" data-ch="'+chans+'" cx="'+cx+'" cy="'+cy+'" r="8" fill="'+color+'" stroke="#fff" stroke-width="1.5">'
+    + '<title>'+label+' —— 点击查看波形</title></circle>'
+    + '<text class="probeLbl" data-ch="'+chans+'" x="'+cx+'" y="'+(cy+3.5)+'" text-anchor="middle" font-size="9.5" fill="#0b0e14" font-weight="bold" pointer-events="none">'+num+'</text>';
+}
+const PW = '#4a5a75';   // 功率回路
+const CW = '#7a8698';   // 控制信号
+
+function buildMainSvg(){
+  let s = '';
+  /* ---- 功率主回路 ---- */
+  // 交流源
+  s += '<circle cx="45" cy="455" r="20" fill="none" stroke="'+PW+'" stroke-width="1.6"/>';
+  s += '<path d="M35,455 q5,-10 10,0 q5,10 10,0" fill="none" stroke="'+PW+'" stroke-width="1.6"/>';
+  s += '<text x="45" y="492" text-anchor="middle" font-size="11" fill="#7a8698">电网 220V/50Hz</text>';
+  // 交流线
+  s += lineS(65,445,95,445,PW); s += lineS(65,465,95,465,PW);
+  s += '<text x="16" y="420" font-size="10" fill="#0284c7">① 电网电压/电流</text>';
+  // 整流桥
+  s += diodeS(95,445,130,420); s += diodeS(130,490,95,445);
+  s += diodeS(95,465,130,420); s += diodeS(130,490,95,465);
+  s += '<text x="112" y="512" text-anchor="middle" font-size="11" fill="#7a8698">整流桥</text>';
+  // 直流母线 +/−
+  s += lineS(130,420,130,395,PW); s += lineS(130,395,410,395,PW);
+  s += lineS(130,490,130,475,PW); s += lineS(130,475,410,475,PW);
+  // 升压电感
+  s += '<path d="M175,395 l6,0 l8,-13 l8,13 l8,-13 l8,13 l8,-13 l8,13 l6,0" fill="none" stroke="'+PW+'" stroke-width="1.6"/>';
+  s += '<text x="205" y="380" text-anchor="middle" font-size="11" fill="#7a8698">L 升压电感</text>';
+  // 二极管 D
+  s += diodeS(250,395,320,395);
+  s += '<text x="285" y="380" text-anchor="middle" font-size="11" fill="#7a8698">D</text>';
+  // MOS
+  s += lineS(250,395,250,475,PW,1.8);
+  s += '<line x1="243" y1="410" x2="250" y2="410" stroke="'+PW+'" stroke-width="1.6"/>';
+  s += '<text x="258" y="445" font-size="11" fill="#7a8698">MOS</text>';
+  // 输出电容 C
+  s += lineS(320,395,320,425,PW); s += lineS(320,452,320,475,PW);
+  s += lineS(312,425,328,425,PW,1.8); s += lineS(312,452,328,452,PW,1.8);
+  s += '<text x="320" y="512" text-anchor="middle" font-size="11" fill="#7a8698">C 输出电容</text>';
+  // 负载 R
+  s += lineS(395,395,395,430,PW); s += lineS(395,452,395,475,PW);
+  s += '<rect x="383" y="430" width="24" height="22" fill="none" stroke="'+PW+'" stroke-width="1.6"/>';
+  s += '<text x="405" y="512" text-anchor="middle" font-size="11" fill="#7a8698">负载 R（默认300W）</text>';
+  // 采样电阻 Rs
+  s += '<rect x="150" y="471" width="30" height="8" fill="#ffffff" stroke="'+PW+'" stroke-width="1.4"/>';
+  s += '<text x="165" y="468" text-anchor="middle" font-size="10" fill="#7a8698">Rs</text>';
+  // 运放（电流采样）
+  s += polyS([[200,470],[162,441]],PW,1.2);
+  s += '<polygon points="162,430 162,452 140,441" fill="none" stroke="#16a34a" stroke-width="1.6"/>';
+  s += '<text x="100" y="412" font-size="10" fill="#16a34a">运放采集</text>';
+
+  /* ---- 控制信号流（与“个人理解的控制框图”术语一致） ---- */
+  // 期望电压 → 做差 → 电压PID
+  s += boxS(480,30,120,55,'期望电压','（比如 380V）');
+  s += polyS([[540,85],[540,100],[560,100],[560,106]],CW,1.4,true);
+  s += '<circle cx="560" cy="122" r="16" fill="#ffffff" stroke="#ea580c" stroke-width="1.6"/>';
+  s += '<text x="560" y="119" text-anchor="middle" font-size="15" fill="#ea580c">+</text>';
+  s += '<text x="560" y="145" text-anchor="middle" font-size="15" fill="#ea580c">−</text>';
+  s += polyS([[560,138],[560,160]],CW,1.4,true);
+  s += boxS(480,160,120,45,'电压 PID','（外环·慢）');
+  // ve → ×
+  s += polyS([[560,205],[560,238],[378,238],[378,283]],CW,1.4,true);
+  s += '<text x="566" y="228" font-size="10" fill="#7a8698">ve</text>';
+  // 调制波形（采样自 PFC 之前的馒头波）
+  s += boxS(40,160,150,50,'调制波形','（分压电阻采集·幅值为1）');
+  s += polyS([[170,395],[170,210],[120,210]],CW,1.4,true);
+  s += '<text x="60" y="232" font-size="9.5" fill="#7a8698">采集位置：PFC 电路之前</text>';
+  s += polyS([[190,185],[361,290]],CW,1.4,true);
+  // × 相乘
+  s += '<circle cx="378" cy="300" r="17" fill="#ffffff" stroke="#db2777" stroke-width="1.6"/>';
+  s += '<text x="378" y="305" text-anchor="middle" font-size="15" fill="#db2777">×</text>';
+  s += '<text x="318" y="276" font-size="10" fill="#7a8698">(输入信号相乘)</text>';
+  // 期望电流 → 做差 → 电流PID
+  s += polyS([[378,317],[430,330],[464,352]],CW,1.4,true);
+  s += '<text x="438" y="320" font-size="10" fill="#db2777">期望电流</text>';
+  s += '<circle cx="480" cy="352" r="16" fill="#ffffff" stroke="#16a34a" stroke-width="1.6"/>';
+  s += '<text x="480" y="349" text-anchor="middle" font-size="15" fill="#16a34a">+</text>';
+  s += '<text x="480" y="375" text-anchor="middle" font-size="15" fill="#16a34a">−</text>';
+  s += polyS([[496,352],[500,352]],CW,1.4,true);
+  s += boxS(500,325,100,53,'电流 PID','（内环·快）');
+  s += polyS([[600,352],[624,352]],CW,1.4,true);
+  // 输出PWM → MOS门极
+  s += polyS([[630,352],[630,485],[242,485],[242,410]],'#374151',1.6,true);
+  s += '<text x="630" y="505" font-size="9.5" fill="#374151">输出PWM信号</text>';
+  s += '<text x="330" y="480" font-size="10" fill="#7a8698">（boost升压信号·控制MOS开断）</text>';
+  // 实际电流（采样自 PFC 之前的母线电流）
+  s += polyS([[140,441],[140,505],[40,505],[40,368],[480,368]],CW,1.4,true);
+  s += '<text x="45" y="345" font-size="9.5" fill="#16a34a">实际电流（运放+采样电阻·母线电流）</text>';
+  s += '<text x="45" y="388" font-size="9.5" fill="#7a8698">采集位置：PFC 电路之前</text>';
+  // 实际电压（采样自 PFC 之后）
+  s += polyS([[370,395],[370,52],[560,52],[560,138]],CW,1.4,true);
+  s += '<text x="375" y="95" font-size="9.5" fill="#ea580c">实际电压（分压电阻采集）</text>';
+  s += '<text x="375" y="108" font-size="9.5" fill="#7a8698">采集位置：PFC 电路之后！</text>';
+
+  /* ---- 探测点 ---- */
+  s += probeS(80,448,'1',CH.vin.color,'vin,iin','电网电压/电流');
+  s += probeS(170,395,'2',CH.bun.color,'bun','馒头波');
+  s += probeS(140,441,'3',CH.il.color,'il','实际电流 iL');
+  s += probeS(430,330,'4',CH.iref.color,'iref','期望电流 iref');
+  s += probeS(320,395,'5',CH.vo.color,'vo','母线电压 Vo');
+  s += probeS(630,352,'6',CH.gate.color,'gate','PWM门极信号');
+  s += probeS(250,222,'7',CH.m.color,'m','调制波形');
+  return s;
+}
+
+function buildNopfcSvg(){
+  const C1 = '#b45309';
+  let s = '';
+  s += '<circle cx="40" cy="110" r="16" fill="none" stroke="'+C1+'" stroke-width="1.6"/>';
+  s += '<path d="M32,110 q4,-8 8,0 q4,8 8,0" fill="none" stroke="'+C1+'" stroke-width="1.6"/>';
+  s += lineS(56,105,95,105,C1); s += lineS(56,115,95,115,C1);
+  s += diodeS(95,105,125,80); s += diodeS(125,140,95,105);
+  s += diodeS(95,115,125,80); s += diodeS(125,140,95,115);
+  s += lineS(125,80,390,80,C1); s += lineS(125,140,390,140,C1);
+  s += lineS(240,80,240,112,C1); s += lineS(240,132,240,140,C1);
+  s += lineS(232,112,248,112,C1,1.8); s += lineS(232,132,248,132,C1,1.8);
+  s += lineS(320,80,320,95,C1); s += lineS(320,125,320,140,C1);
+  s += '<rect x="308" y="95" width="24" height="30" fill="none" stroke="'+C1+'" stroke-width="1.6"/>';
+  s += '<text x="185" y="168" text-anchor="middle" font-size="11" fill="#7a8698">大电解电容 C（与主电路同值）</text>';
+  s += '<text x="320" y="168" text-anchor="middle" font-size="11" fill="#7a8698">负载 R</text>';
+  // 尖峰电流标注
+  s += '<path d="M70,86 q4,-10 8,0 q4,10 8,0" fill="none" stroke="#dc2626" stroke-width="2"/>';
+  s += '<path d="M71,100 q4,-8 8,0 q4,8 8,0" fill="none" stroke="#dc2626" stroke-width="2"/>';
+  s += polyS([[86,92],[170,30]],'#dc2626',1.2,true);
+  s += '<text x="175" y="32" font-size="11" fill="#dc2626">电网电流：窄尖峰脉冲，只在电压峰值附近猛吸电流</text>';
+  return s;
+}
+
+/* =====================================================================
+ * 六、示波器绘制
+ * ===================================================================*/
+function niceStep(rng, target){
+  const raw = rng/target, p = Math.pow(10, Math.floor(Math.log10(raw)));
+  const m = raw/p, f = (m < 1.5) ? 1 : (m < 3) ? 2 : (m < 7) ? 5 : 10;
+  return f*p;
+}
+function fmtVal(v){
+  if(Math.abs(v) >= 100) return v.toFixed(0);
+  if(Math.abs(v) >= 10) return v.toFixed(1);
+  return v.toFixed(2);
+}
+
+function paneWindow(pane, tPlay){
+  const dur = sim.dur;
+  if(pane.zoom){
+    const t0 = Math.max(0, Math.min(tPlay - 1e-4, dur - 2e-4));
+    return { t0, t1: Math.min(t0 + 2e-4, dur) };
+  }
+  const t0 = Math.max(0, Math.min(tPlay, dur - span));
+  return { t0, t1: t0 + span };
+}
+
+function drawPane(pane, tPlay){
+  if(!sim) return;
+  const d = sim.main;
+  const cv = pane.cv, ctx = pane.ctx;
+  const dpr = window.devicePixelRatio || 1;
+  const w = cv.width/dpr, h = cv.height/dpr;
+  ctx.save(); ctx.scale(dpr, dpr);
+  ctx.fillStyle = '#f7f8fa'; ctx.fillRect(0, 0, w, h);
+  const { t0, t1 } = paneWindow(pane, tPlay);
+  const i0 = Math.max(0, Math.floor(t0/TSAVE));
+  const i1 = Math.min(d.len - 1, Math.ceil(t1/TSAVE));
+  const nPts = i1 - i0;
+  if(nPts < 2){ ctx.restore(); return; }
+  const stride = Math.max(1, Math.floor(nPts/1400));
+
+  // 时间网格
+  ctx.strokeStyle = '#e2e6ed'; ctx.lineWidth = 1;
+  ctx.fillStyle = '#8a93a2'; ctx.font = '10px Consolas, monospace';
+  for(let gi = 0; gi <= 5; gi++){
+    const x = 6 + gi*(w - 12)/5;
+    ctx.beginPath(); ctx.moveTo(x, 8); ctx.lineTo(x, h - 16); ctx.stroke();
+    const tt = t0 + (t1 - t0)*gi/5;
+    const lbl = pane.zoom ? (tt*1e6).toFixed(0) + 'µs' : (tt*1e3).toFixed(0) + 'ms';
+    ctx.textAlign = gi === 0 ? 'left' : (gi === 5 ? 'right' : 'center');
+    ctx.fillText(lbl, x, h - 5);
+  }
+
+  const chans = pane.chans;
+  for(let ci = 0; ci < 2; ci++){
+    const key = chans[ci];
+    if(!key) continue;
+    const ch = CH[key];
+    // 量程
+    let ymin, ymax;
+    if(ch.digital){ ymin = -0.15; ymax = 1.25; }
+    else if(key === 'vref'){ ymin = P.Vref - 8; ymax = P.Vref + 8; }
+    else {
+      ymin = Infinity; ymax = -Infinity;
+      for(let i = i0; i <= i1; i += stride){
+        const v = chVal(d, key, i);
+        if(v < ymin) ymin = v; if(v > ymax) ymax = v;
+      }
+      if(ymin === ymax){ ymin -= 1; ymax += 1; }
+      const pad = (ymax - ymin)*0.08;
+      ymin -= pad; ymax += pad;
+      // 对齐到整数刻度
+      const st = niceStep(ymax - ymin, 4);
+      ymin = Math.floor(ymin/st)*st; ymax = Math.ceil(ymax/st)*st;
+    }
+    const yOf = v => 8 + (h - 24)*(1 - (v - ymin)/(ymax - ymin));
+    // 水平刻度（ci=0 画左侧，ci=1 画右侧）
+    ctx.strokeStyle = '#e2e6ed'; ctx.fillStyle = ch.color;
+    const st2 = niceStep(ymax - ymin, 4);
+    for(let v = Math.ceil(ymin/st2)*st2; v <= ymax - st2*0.5; v += st2){
+      const y = yOf(v);
+      ctx.beginPath();
+      if(ci === 0){ ctx.moveTo(6, y); ctx.lineTo(w - 6, y); }
+      else { ctx.moveTo(6, y); ctx.lineTo(w - 6, y); }
+      ctx.stroke();
+      ctx.textAlign = (ci === 0) ? 'left' : 'right';
+      const lx = (ci === 0) ? 8 : w - 8;
+      ctx.fillText(fmtVal(v), lx, y - 3);
+    }
+    // 波形
+    ctx.strokeStyle = ch.color; ctx.lineWidth = ch.digital ? 2 : 1.7;
+    if(ch.dash) ctx.setLineDash([5, 4]); else ctx.setLineDash([]);
+    ctx.beginPath();
+    for(let i = i0; i <= i1; i += stride){
+      const v = (key === 'vref') ? P.Vref : chVal(d, key, i);
+      const x = 6 + (d.t[i] - t0)/(t1 - t0)*(w - 12);
+      const y = yOf(v);
+      if(i === i0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+    ctx.setLineDash([]);
+  }
+  // 游标竖线
+  if(!pane.zoom){
+    const cx = 6 + (tPlay - t0)/(t1 - t0)*(w - 12);
+    ctx.strokeStyle = 'rgba(30,41,59,.45)'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(cx, 8); ctx.lineTo(cx, h - 16); ctx.stroke();
+  }
+  // 图例
+  const hov = pane.hoverT;
+  let lg = '';
+  for(let ci = 0; ci < 2; ci++){
+    const key = chans[ci];
+    if(!key) continue;
+    const ch = CH[key];
+    lg += '<span style="color:' + ch.color + '">━ ' + ch.name;
+    if(hov !== null){
+      const hi = Math.max(0, Math.min(d.len - 1, Math.round(hov/TSAVE)));
+      const v = (key === 'vref') ? P.Vref : chVal(d, key, hi);
+      lg += ' = ' + fmtVal(v) + (ch.unit ? ' ' + ch.unit : '');
+    }
+    lg += '</span>　';
+  }
+  pane.readout.innerHTML = lg;
+  ctx.restore();
+}
+
+function drawAll(){
+  for(const pane of PANES) drawPane(pane, tPlay);
+}
+
+/* =====================================================================
+ * 七、UI 构建与交互
+ * ===================================================================*/
+const PANES = [];
+(function initPanes(){
+  const opts = Object.keys(CH).map(k => '<option value="' + k + '">' + CH[k].name + '</option>').join('');
+  const defs = [ ['vin','iin'], ['iref','il'], ['vo','vref'], ['gate','il'] ];
+  document.querySelectorAll('.pane').forEach(el => {
+    const idx = +el.dataset.pane;
+    const s1 = el.querySelector('.ch1'), s2 = el.querySelector('.ch2');
+    s1.innerHTML = '<option value="">（无）</option>' + opts;
+    s2.innerHTML = '<option value="">（无）</option>' + opts;
+    s1.value = defs[idx][0]; s2.value = defs[idx][1];
+    const pane = {
+      el, idx, cv: el.querySelector('canvas'), readout: el.querySelector('.readout'),
+      chans: defs[idx].slice(), zoom: (idx === 3), hoverT: null,
+    };
+    pane.ctx = pane.cv.getContext('2d');
+    s1.onchange = () => { pane.chans[0] = s1.value || null; };
+    s2.onchange = () => { pane.chans[1] = s2.value || null; };
+    el.addEventListener('click', () => {
+      focusPane = idx;
+      PANES.forEach(p => p.el.classList.toggle('focus', p.idx === idx));
+    });
+    el.addEventListener('mousemove', ev => {
+      if(!sim) return;
+      const r = pane.cv.getBoundingClientRect();
+      const fx = (ev.clientX - r.left)/r.width;
+      const { t0, t1 } = paneWindow(pane, tPlay);
+      pane.hoverT = t0 + fx*(t1 - t0);
+    });
+    el.addEventListener('mouseleave', () => { pane.hoverT = null; });
+    PANES.push(pane);
+  });
+  PANES[0].el.classList.add('focus');
+  PANES[3].el.classList.add('focus');
+})();
+
+function resizeCanvases(){
+  for(const p of PANES){
+    const dpr = window.devicePixelRatio || 1;
+    const r = p.cv.getBoundingClientRect();
+    p.cv.width = Math.max(50, Math.round(r.width*dpr));
+    p.cv.height = Math.max(50, Math.round(170*dpr));
+  }
+}
+window.addEventListener('resize', resizeCanvases);
+
+/* ---- 滑块 ---- */
+const SLIDERS = [
+  {id:'sPload', key:'Pload', min:100,  max:1500, step:10,   fmt:v => v + ' W',    hw:true,  label:'负载功率'},
+  {id:'sVref',  key:'Vref',  min:360,  max:400,  step:2,    fmt:v => v + ' V',    hw:true,  label:'目标电压'},
+  {id:'sVin',   key:'Vrms',  min:180,  max:240,  step:2,    fmt:v => v + ' V',    hw:true,  label:'电网电压'},
+  {id:'sL',     key:'L',     min:0.2,  max:5,    step:0.05, fmt:v => v.toFixed(2) + ' mH', hw:true, label:'电感 L', scale:1e-3},
+  {id:'sC',     key:'C',     min:470,  max:3300, step:10,   fmt:v => v + ' µF',   hw:true,  label:'电容 C', scale:1e-6},
+  {id:'sKpi',   key:'Kpi',   min:0.01, max:0.6,  step:0.001, fmt:v => v.toFixed(3), pid:true, label:'电流环 Kp'},
+  {id:'sKii',   key:'Kii',   min:100,  max:20000,step:10,   fmt:v => Math.round(v) + '', pid:true, label:'电流环 Ki'},
+  {id:'sKpv',   key:'Kpv',   min:0.02, max:1.5,  step:0.005, fmt:v => v.toFixed(3), pid:true, label:'电压环 Kp'},
+  {id:'sKiv',   key:'Kiv',   min:0.1,  max:30,   step:0.05,  fmt:v => v.toFixed(2), pid:true, label:'电压环 Ki'},
+];
+const sliderEls = {};
+(function buildSliders(){
+  const box1 = document.getElementById('sliders');
+  const box2 = document.getElementById('pidSliders');
+  for(const sl of SLIDERS){
+    const row = document.createElement('div');
+    row.className = 'sliderRow';
+    row.innerHTML = '<label>' + sl.label + '</label>'
+      + '<input type="range" min="' + sl.min + '" max="' + sl.max + '" step="' + sl.step + '">'
+      + '<span class="val"></span>';
+    const inp = row.querySelector('input');
+    const val = row.querySelector('.val');
+    const valOf = () => P[sl.key]/(sl.scale || 1);
+    inp.value = valOf();
+    val.textContent = sl.fmt(valOf());
+    inp.addEventListener('input', () => {
+      val.textContent = sl.fmt(+inp.value);
+      P[sl.key] = (+inp.value)*(sl.scale || 1);
+      if(sl.pid) setPidManual(true);
+      scheduleReSim();
+    });
+    sliderEls[sl.id] = { inp, val };
+    (sl.pid ? box2 : box1).appendChild(row);
+  }
+})();
+
+function syncSliderUI(){
+  for(const sl of SLIDERS){
+    const v = P[sl.key]/(sl.scale || 1);
+    sliderEls[sl.id].inp.value = v;
+    sliderEls[sl.id].val.textContent = sl.fmt(v);
+  }
+}
+function setPidManual(m){
+  pidManual = m;
+  document.getElementById('tuneBadge').textContent = m ? '手动调参中' : '公式自动整定';
+  document.getElementById('tuneBadge').classList.toggle('manual', m);
+}
+
+/* ---- 场景按钮 ---- */
+(function buildScenButtons(){
+  const row = document.getElementById('scenRow');
+  for(const key of Object.keys(SCEN)){
+    const b = document.createElement('button');
+    b.textContent = SCEN[key].label;
+    b.dataset.scen = key;
+    b.onclick = () => setScenario(key);
+    row.appendChild(b);
+  }
+})();
+function setScenario(key){
+  scenario = key;
+  const s = SCEN[key];
+  P = Object.assign({}, DEF);
+  P.pfcOn = (s.pfcOn !== undefined) ? s.pfcOn : true;
+  setPidManual(false);
+  applyFormulaPID();
+  syncSliderUI();
+  document.getElementById('pfcOn').checked = P.pfcOn;
+  document.querySelectorAll('#scenRow button').forEach(b => b.classList.toggle('active', b.dataset.scen === key));
+  updateFormulaPanel();
+  reSim();
+}
+
+/* ---- 重仿真 ---- */
+let debounceTimer = null;
+function scheduleReSim(){
+  if(debounceTimer) clearTimeout(debounceTimer);
+  debounceTimer = setTimeout(() => {
+    if(!pidManual){
+      applyFormulaPID();
+      syncSliderUI();
+    }
+    updateFormulaPanel();
+    reSim();
+  }, 350);
+}
+
+function reSim(){
+  const token = ++simToken;
+  const loading = document.getElementById('loading');
+  const bar = document.getElementById('progBar');
+  const txt = document.getElementById('progTxt');
+  loading.style.display = 'flex';
+  const cfg = buildCfg();
+  let npDone = false, mDone = false, npData = null;
+  const finish = () => {
+    if(token !== simToken || !npDone || !mDone) return;
+    sim.np = npData;
+    tPlay = 0; playing = true;
+    document.getElementById('btnPlay').textContent = '⏸';
+    document.getElementById('scrub').max = Math.round(sim.dur*1000);
+    updateMetricsUI(); updateCompareCard(); updateLegend();
+    loading.style.display = 'none';
+  };
+  runSimAsync(cfg,
+    p => { bar.style.width = (p*80).toFixed(0) + '%'; txt.textContent = '主电路 ' + (p*100).toFixed(0) + '%'; },
+    d => {
+      if(token !== simToken) return;
+      sim = { main:d, np:null, dur:cfg.dur, cfg };
+      mDone = true; finish();
+    });
+  runNoPfcAsync(cfg,
+    p => { if(mDone){ bar.style.width = (80 + p*20).toFixed(0) + '%'; txt.textContent = '无PFC对照 ' + (p*100).toFixed(0) + '%'; } },
+    d => {
+      if(token !== simToken) return;
+      npData = d;
+      npDone = true; finish();
+    });
+}
+
+/* ---- 指标显示 ---- */
+function updateMetricsUI(){
+  if(!sim) return;
+  const tStart = sim.dur - 0.1;
+  const m = metrics(sim.main, tStart, true);
+  const n = metrics(sim.np, tStart, false);
+  if(!m || !n) return;
+  const $ = id => document.getElementById(id);
+  $('mPf').textContent = m.pf.toFixed(3);
+  $('mThd').textContent = (m.thd*100).toFixed(1) + '%';
+  $('mVo').textContent = m.voAvg.toFixed(1) + ' V';
+  $('mRip').textContent = m.voRip.toFixed(2) + ' V';
+  $('mNpPf').textContent = n.pf.toFixed(3);
+  $('mNpThd').textContent = (n.thd*100).toFixed(1) + '%';
+}
+function updateCompareCard(){
+  if(!sim) return;
+  const tStart = sim.dur - 0.1;
+  const m = metrics(sim.main, tStart, true);
+  const n = metrics(sim.np, tStart, false);
+  if(!m || !n) return;
+  const $ = id => document.getElementById(id);
+  $('cPf').textContent = m.pf.toFixed(3);
+  $('cThd').textContent = (m.thd*100).toFixed(1) + '%';
+  $('cVo').textContent = m.voAvg.toFixed(1) + ' V';
+  $('cNpPf').textContent = n.pf.toFixed(3);
+  $('cNpThd').textContent = (n.thd*100).toFixed(1) + '%';
+  $('cNpVo').textContent = n.voAvg.toFixed(1) + ' V';
+  $('cShape1').textContent = sim.cfg.pfcOn ? '正弦、与电压同相' : '尖峰脉冲（PFC已关）';
+}
+
+function updateLegend(){
+  const rows = [
+    ['1', CH.vin.color, '电网电压'], ['1', CH.iin.color, '电网电流'],
+    ['2', CH.bun.color, '馒头波'], ['7', CH.m.color, '调制波形'],
+    ['3', CH.il.color, '实际电流'], ['4', CH.iref.color, '期望电流'],
+    ['5', CH.vo.color, '母线电压'], ['6', CH.gate.color, 'PWM信号'],
+  ];
+  document.getElementById('legendMain').innerHTML = rows.map(r =>
+    '<span><span class="dot" style="background:' + r[1] + '"></span>'+ r[0] + ' ' + r[2] + '</span>').join('');
+}
+
+/* ---- 调参公式面板 ---- */
+function updateFormulaPanel(){
+  const f = formulaPID(P);
+  const p = P;
+  const s = '<h4>电流环（内环）—— 决定电流波形</h4>'
+    + '被控对象（Boost 电感）：<span class="fml">Gid(s) = Vout / (s·L)</span>'
+    + '穿越频率：<span class="fml">fci = fsw/10 = ' + (p.fsw/10/1000).toFixed(1) + ' kHz</span>'
+    + '比例增益（保证穿越频率）：<span class="fml">Kp_i = 2π·fci·L / Vout = 2π × ' + (p.fsw/10/1000).toFixed(1) + 'kHz × ' + (p.L*1000).toFixed(2) + 'mH ÷ ' + p.Vref + 'V = ' + f.Kpi.toFixed(4) + '</span>'
+    + '积分增益（零点放穿越频率，提供相位裕度）：<span class="fml">Ki_i = 2π·fci·Kp_i = ' + f.Kii.toFixed(0) + '</span>'
+    + '<span class="note">含义：电流环闭环带宽 ≈ 5kHz，对 50Hz 的“塑形”指令跟踪得又快又准，误差小到可以忽略。</span>'
+    + '<h4>电压环（外环）—— 决定取多少功率</h4>'
+    + '被控对象（功率级小信号）：<span class="fml">Gv(s) = [Vrms/(√2·Vout)] / (s·C + 2/R)</span>'
+    + '穿越频率：<span class="fml">fcv = ' + p.fcv + ' Hz</span>（必须远低于 100Hz 纹波！否则 2 倍频纹波串入电流环，把电流波形污染出 3 次谐波）'
+    + '比例增益：<span class="fml">Kp_v = 2π·fcv·C·√2·Vout / Vrms = 2π × ' + p.fcv + 'Hz × ' + (p.C*1e6).toFixed(0) + 'µF × √2 × ' + p.Vref + 'V ÷ ' + p.Vrms + 'V = ' + f.Kpv.toFixed(4) + '</span>'
+    + '积分增益（零点放 fcv/5 = ' + (p.fcv/5).toFixed(0) + 'Hz）：<span class="fml">Ki_v = 2π·(fcv/5)·Kp_v = ' + f.Kiv.toFixed(3) + '</span>'
+    + '<span class="note">含义：电压环慢悠悠地只看母线平均值，把功率需求悄悄写进 ve；ve × 馒头波 = 期望电流。</span>'
+    + '<h4>备注</h4>'
+    + '<span class="note">① 工程上微分项 Kd 放大高频噪声，一般不用，故实际为 PI 控制（框图中写成 PID 是习惯叫法）。<br>'
+    + '② 修改电感 L / 电容 C / 目标电压 / 电网电压 / 负载后，若处于“公式自动整定”模式，PID 会立即按上述公式重算，保证 PFC 始终处于调好状态；动了 PID 滑块则进入手动模式，可点“按公式重算 PID”恢复。</span>';
+  document.getElementById('formulaBody').innerHTML = s;
+}
+
+/* ---- 电路图节点点击 ---- */
+function initSvgClicks(){
+  for(const id of ['svgMain', 'svgNopfc']){
+    const svg = document.getElementById(id);
+    svg.addEventListener('click', ev => {
+      const el = ev.target.closest('.probe');
+      if(!el || !el.dataset.ch) return;
+      const keys = el.dataset.ch.split(',');
+      const pane = PANES[focusPane] || PANES[0];
+      keys.forEach((k, i) => { if(i < 2) pane.chans[i] = k; });
+      const sel1 = pane.el.querySelector('.ch1'), sel2 = pane.el.querySelector('.ch2');
+      sel1.value = pane.chans[0] || ''; sel2.value = pane.chans[1] || '';
+      pane.el.classList.add('flash');
+      setTimeout(() => pane.el.classList.remove('flash'), 900);
+    });
+  }
+}
+
+/* ---- 播放控制 ---- */
+function initPlayback(){
+  document.getElementById('btnPlay').onclick = () => {
+    playing = !playing;
+    document.getElementById('btnPlay').textContent = playing ? '⏸' : '▶';
+  };
+  document.getElementById('btnRewind').onclick = () => { tPlay = 0; };
+  document.getElementById('selSpeed').onchange = ev => { speed = +ev.target.value; };
+  document.getElementById('selSpan').onchange = ev => {
+    span = +ev.target.value;
+    const dur = sim ? sim.dur : 0.4;
+    if(tPlay > dur - span) tPlay = Math.max(0, dur - span);
+  };
+  document.getElementById('scrub').oninput = ev => { tPlay = (+ev.target.value)/1000; };
+  document.getElementById('pfcOn').onchange = ev => {
+    P.pfcOn = ev.target.checked;
+    reSim();
+  };
+  document.getElementById('btnRetune').onclick = () => {
+    setPidManual(false);
+    applyFormulaPID(); syncSliderUI(); updateFormulaPanel();
+    reSim();
+  };
+  document.getElementById('btnDefault').onclick = () => setScenario('steady');
+}
+
+/* ---- 主循环 ---- */
+let lastTs = null;
+function frame(ts){
+  if(lastTs !== null && sim){
+    const dtms = Math.min(ts - lastTs, 100);
+    if(playing){
+      tPlay += dtms/1000*speed;
+      const maxT = Math.max(0, sim.dur - span);
+      if(tPlay >= maxT) tPlay = 0;
+    }
+    drawAll();
+    document.getElementById('scrub').value = Math.round(tPlay*1000);
+    document.getElementById('tReadout').textContent = 't = ' + (tPlay*1000).toFixed(0) + ' ms';
+  }
+  lastTs = ts;
+  requestAnimationFrame(frame);
+}
+
+/* ---- 启动 ---- */
+document.getElementById('gMain').innerHTML = buildMainSvg();
+document.getElementById('gNopfc').innerHTML = buildNopfcSvg();
+initSvgClicks();
+initPlayback();
+applyFormulaPID();
+syncSliderUI();
+updateFormulaPanel();
+updateLegend();
+resizeCanvases();
+document.querySelectorAll('#scenRow button').forEach(b => b.classList.toggle('active', b.dataset.scen === 'steady'));
+reSim();
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>
