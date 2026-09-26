@@ -2133,19 +2133,11 @@ static void Sguan_Calculate_main_Loop(SguanFOC_System_STRUCT *sguan){
 
         // 1.电机强拖到D轴零位
         sguan->foc.Ud_in = 0.0f;
-        #if CONFIG_MOTOR==0x01 // 4006电机
-        sguan->foc.Uq_in = 0.4f;
-        #elif CONFIG_MOTOR==0x00 
         sguan->foc.Uq_in = 1.0f;
-        #endif
         User_Delay(800); 
         float Uq_offset = User_Encoder_ReadRad();
         
-        #if CONFIG_MOTOR==0x01 // 4006电机
-        sguan->foc.Ud_in = 0.4f;
-        #elif CONFIG_MOTOR==0x00 
         sguan->foc.Ud_in = 1.0f;
-        #endif
         sguan->foc.Uq_in = 0.0f;
         User_Delay(800);
 
