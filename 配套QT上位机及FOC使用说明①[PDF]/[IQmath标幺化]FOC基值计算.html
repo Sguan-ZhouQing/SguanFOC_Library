@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FOC 基值计算器 · 标幺化参数</title>
+<style>
+  :root{
+    --bg:#f7f8fa;
+    --card:#ffffff;
+    --border:#e8eaed;
+    --line:#eef0f3;
+    --text:#1f2430;
+    --muted:#8a92a6;
+    --faint:#9aa1b1;
+    --accent:#3b6ef6;
+    --accent-soft:#eef3ff;
+    --warn:#c2410c;
+    --warn-soft:#fff7ed;
+    --green:#0f766e;
+    --green-soft:#ecfdf5;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    font-family:system-ui,-apple-system,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+    font-size:14px;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  .page{max-width:980px;margin:0 auto;padding:44px 20px 90px;}
+  header h1{font-size:22px;font-weight:600;margin:0 0 6px;letter-spacing:.2px;}
+  header p{margin:0 0 26px;color:var(--muted);font-size:13px;}
+
+  .card{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:20px 22px;
+    margin-bottom:16px;
+    box-shadow:0 1px 2px rgba(16,24,40,.03);
+  }
+  .card-head{display:flex;align-items:baseline;gap:10px;margin-bottom:16px;flex-wrap:wrap;}
+  .card-head h2{font-size:14px;font-weight:600;margin:0;letter-spacing:.3px;}
+  .card-head .hint{font-size:12px;color:var(--faint);font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;}
+
+  .grid{display:grid;gap:12px;}
+  .grid-2{grid-template-columns:1fr 1fr;}
+  .grid-3{grid-template-columns:1fr 1fr 1fr;}
+  .grid-4{grid-template-columns:1fr 1fr 1fr 1fr;}
+  @media (max-width:780px){
+    .grid-3,.grid-4{grid-template-columns:1fr 1fr;}
+  }
+  @media (max-width:520px){
+    .grid-2,.grid-3,.grid-4{grid-template-columns:1fr;}
+  }
+
+  .field{display:flex;flex-direction:column;gap:6px;min-width:0;}
+  .field label{font-size:12px;color:var(--muted);}
+  .field .unit{font-size:11px;color:var(--faint);}
+
+  input[type=number]{
+    font:inherit;
+    font-variant-numeric:tabular-nums;
+    padding:9px 12px;
+    border:1px solid #e2e5ea;
+    border-radius:9px;
+    background:#fff;
+    color:var(--text);
+    outline:none;
+    width:100%;
+    transition:border-color .15s,box-shadow .15s;
+  }
+  input[type=number]:focus{
+    border-color:#9db6f8;
+    box-shadow:0 0 0 3px rgba(59,110,246,.10);
+  }
+
+  .result{
+    background:#fafbfc;
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:12px 14px;
+    min-width:0;
+  }
+  .result .label{
+    font-size:11px;letter-spacing:.5px;color:var(--faint);
+    display:flex;justify-content:space-between;align-items:baseline;gap:6px;
+    flex-wrap:wrap;
+  }
+  .result .label .unit{color:#b6bcc9;font-size:10px;}
+  .result .value{
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    font-size:17px;font-weight:600;color:var(--text);
+    word-break:break-all;margin:4px 0 2px;line-height:1.35;
+  }
+  .result .value.accent{color:var(--accent);}
+  .result .value.green{color:var(--green);}
+  .result .meta{
+    font-size:11px;color:var(--muted);
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    word-break:break-all;line-height:1.5;
+  }
+  .result .meta.warn{color:var(--warn);}
+
+  .subhead{
+    font-size:12px;font-weight:600;color:#5b6474;
+    margin:18px 0 10px;padding-bottom:6px;
+    border-bottom:1px dashed var(--line);
+    display:flex;align-items:baseline;gap:8px;
+  }
+  .subhead .en{font-size:11px;color:var(--faint);font-weight:400;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;}
+
+  .code-block{
+    background:#fafbfc;
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:14px 16px;
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    font-size:12.5px;
+    line-height:1.75;
+    color:#334155;
+    white-space:pre;
+    overflow-x:auto;
+    margin-top:10px;
+  }
+
+  .tip{margin:10px 0 0;font-size:12px;color:var(--faint);}
+  .warnbox{
+    background:var(--warn-soft);
+    border:1px solid #fed7aa;
+    color:var(--warn);
+    border-radius:9px;
+    padding:9px 12px;
+    font-size:12.5px;
+    margin-bottom:14px;
+  }
+  .hidden{display:none;}
+
+  .modebar{display:inline-flex;background:#f1f3f6;border-radius:9px;padding:3px;gap:2px;margin-bottom:14px;}
+  .modebar button{
+    border:none;background:transparent;padding:6px 16px;border-radius:7px;
+    font:inherit;font-size:13px;color:#69707f;cursor:pointer;transition:all .15s;
+  }
+  .modebar button.active{background:#fff;color:var(--text);font-weight:500;box-shadow:0 1px 2px rgba(16,24,40,.08);}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header>
+    <h1>FOC 基值计算器</h1>
+    <p>输入基础基值 · 自动推导被动基值 · PI 控制器 / PLL / NLFO 参数 · 串口定点增益</p>
+  </header>
+
+  <!-- ================= 分区1：基础基值 ================= -->
+  <section class="card">
+    <div class="card-head">
+      <h2>分区 1 · 基础基值</h2>
+      <span class="hint">BASE_Time / BASE_Rad / BASE_Current / BASE_Voltage / BASE_Temperature</span>
+    </div>
+
+    <div class="grid grid-3 mb14">
+      <div class="field">
+        <label>BASE_Time <span class="unit">(s)</span></label>
+        <input id="baseTime" type="number" step="any" value="0.0078125">
+      </div>
+      <div class="field">
+        <label>BASE_Rad <span class="unit">(rad)</span></label>
+        <input id="baseRad" type="number" step="any" value="512">
+      </div>
+      <div class="field">
+        <label>BASE_Current <span class="unit">(A)</span></label>
+        <input id="baseCurrent" type="number" step="any" value="64">
+      </div>
+    </div>
+    <div class="grid grid-2">
+      <div class="field">
+        <label>BASE_Voltage <span class="unit">(V)</span></label>
+        <input id="baseVoltage" type="number" step="any" value="128">
+      </div>
+      <div class="field">
+        <label>BASE_Temperature <span class="unit">(℃)</span></label>
+        <input id="baseTemp" type="number" step="any" value="256">
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= 分区2：被动基值 ================= -->
+  <section class="card">
+    <div class="card-head">
+      <h2>分区 2 · 被动基值</h2>
+      <span class="hint">由基础基值自动推导</span>
+    </div>
+    <div id="warnBase" class="warnbox hidden"></div>
+
+    <div class="grid grid-3">
+      <div class="result">
+        <div class="label"><span>BASE_Speed</span><span class="unit">rad/s</span></div>
+        <div class="value accent" id="baseSpeed">—</div>
+        <div class="meta" id="baseSpeedMeta"></div>
+      </div>
+      <div class="result">
+        <div class="label"><span>BASE_Hz</span><span class="unit">1/s</span></div>
+        <div class="value accent" id="baseHz">—</div>
+        <div class="meta" id="baseHzMeta"></div>
+      </div>
+      <div class="result">
+        <div class="label"><span>BASE_Inductor</span><span class="unit">H</span></div>
+        <div class="value accent" id="baseInductor">—</div>
+        <div class="meta" id="baseInductorMeta"></div>
+      </div>
+      <div class="result">
+        <div class="label"><span>BASE_Flux</span><span class="unit">Wb</span></div>
+        <div class="value accent" id="baseFlux">—</div>
+        <div class="meta" id="baseFluxMeta"></div>
+      </div>
+      <div class="result">
+        <div class="label"><span>BASE_Resistor</span><span class="unit">Ω</span></div>
+        <div class="value accent" id="baseResistor">—</div>
+        <div class="meta" id="baseResistorMeta"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= 分区3：实用场景 ================= -->
+  <section class="card">
+    <div class="card-head">
+      <h2>分区 3 · 实用场景</h2>
+      <span class="hint">PI 控制器 / PLL / NLFO</span>
+    </div>
+
+    <!-- 3.1 电流环（修正：只保留 6 个基值） -->
+    <div class="subhead"><span>3.1 电流环 PI 控制器</span><span class="en">Current Loop</span></div>
+    <div class="grid grid-3">
+      <div class="result">
+        <div class="label"><span>Kp 基值</span><span class="unit">BASE_Resistor</span></div>
+        <div class="value green" id="ccKp">—</div>
+        <div class="meta" id="ccKpMeta"></div>
+      </div>
+      <div class="result">
+        <div class="label"><span>Ki 基值</span><span class="unit">BASE_Resistor/BASE_Time</span></div>
+        <div class="value green" id="ccKi">—</div>
+        <div class="meta" id="ccKiMeta"></div>
+      </div>
+      <div class="result">
+        <div class="label"><span>OutMax 基值</span><span class="unit">BASE_Voltage</span></div>
+        <div class="value green" id="ccOutMax">—</div>
+        <div class="meta" id="ccOutMaxMeta"></div>
+      </div>
+      <div class="result">
+        <div class="label"><span>OutMin 基值</span><span class="unit">BASE_Voltage</span></div>
+        <div class="value green" id="ccOutMin">—</div>
+        <div class="meta" id="ccOutMinMeta"></div>
+      </div>
+      <div class="result">
+        <div class="label"><span>IntMax 基值</span><span class="unit">BASE_Current·BASE_Time</span></div>
+        <div class="value green" id="ccIntMax">—</div>
+        <div class="meta" id="ccIntMaxMeta"></div>
+      </div>
+      <div class="result">
+        <div class="label"><span>IntMin 基值</span><span class="unit">BASE_Current·BASE_Time</span></div>
+        <div class="value green" id="ccIntMin">—</div>
+        <div class="meta" id="ccIntMinMeta"></div>
+      </div>
+    </div>
+
+    <!-- 3.2 速度环 -->
+    <div class="subhead"><span>3.2 速度环 PI 控制器</span><span class="en">Speed Loop</span></div>
+    <div class="grid grid-3">
+      <div class="result">
+        <div class="label"><span>Kp 基值</span><span class="unit">BASE_Current/BASE_Speed</span></div>
+        <div class="value green" id="scKp">—</div>
+        <div class="meta" id="scKpMeta"></div>
+      </div>
+      <div class="result">
+        <div class="label"><span>Ki 基值</span><span class="unit">BASE_Current/BASE_Rad</span></div>
+        <div class="value green" id="scKi">—</div>
+        <div class="meta" id="scKiMeta"></div>
+      </div>
+      <div class="result">
+        <div class="label"><span>OutMax 基值</span><span class="unit">BASE_Current</span></div>
+        <div class="value green" id="scOutMax">—</div>
+        <div class="meta" id="scOutMaxMeta"></div>
+      </div>
+      <div class="result">
+        <div class="label"><span>OutMin 基值</span><span class="unit">BASE_Current</span></div>
+        <div class="value green" id="scOutMin">—</div>
+        <div class="meta" id="scOutMinMeta"></div>
+      </div>
+      <div class="result">
+        <div class="label"><span>IntMax 基值</span><span class="unit">BASE_Rad</span></div>
+        <div class="value green" id="scIntMax">—</div>
+        <div class="meta" id="scIntMaxMeta"></div>
+      </div>
+      <div class="result">
+        <div class="label"><span>IntMin 基值</span><span class="unit">BASE_Rad</span></div>
+        <div class="value green" id="scIntMin">—</div>
+        <div class="meta" id="scIntMinMeta"></div>
+      </div>
+    </div>
+
+    <!-- 3.3 PLL -->
+    <div class="subhead"><span>3.3 PLL 锁相环</span><span class="en">Phase Locked Loop</span></div>
+    <div class="grid grid-2">
+      <div class="result">
+        <div class="label"><span>Kp 基值</span><span class="unit">BASE_Speed</span></div>
+        <div class="value green" id="pllKp">—</div>
+        <div class="meta" id="pllKpMeta"></div>
+      </div>
+      <div class="result">
+        <div class="label"><span>Ki 基值</span><span class="unit">BASE_Speed/BASE_Time</span></div>
+        <div class="value green" id="pllKi">—</div>
+        <div class="meta" id="pllKiMeta"></div>
+      </div>
+    </div>
+
+    <!-- 3.4 NLFO -->
+    <div class="subhead"><span>3.4 NLFO 磁链观测器</span><span class="en">Nonlinear Flux Observer</span></div>
+    <div class="grid grid-3">
+      <div class="result">
+        <div class="label"><span>输入电压</span><span class="unit">BASE_Voltage</span></div>
+        <div class="value green" id="nlfoV">—</div>
+        <div class="meta" id="nlfoVMeta"></div>
+      </div>
+      <div class="result">
+        <div class="label"><span>输入电流</span><span class="unit">BASE_Current</span></div>
+        <div class="value green" id="nlfoI">—</div>
+        <div class="meta" id="nlfoIMeta"></div>
+      </div>
+      <div class="result">
+        <div class="label"><span>电机 Rs</span><span class="unit">BASE_Resistor</span></div>
+        <div class="value green" id="nlfoRs">—</div>
+        <div class="meta" id="nlfoRsMeta"></div>
+      </div>
+      <div class="result">
+        <div class="label"><span>电机 Ls</span><span class="unit">BASE_Inductor</span></div>
+        <div class="value green" id="nlfoLs">—</div>
+        <div class="meta" id="nlfoLsMeta"></div>
+      </div>
+      <div class="result">
+        <div class="label"><span>电机 Flux</span><span class="unit">BASE_Flux</span></div>
+        <div class="value green" id="nlfoFlux">—</div>
+        <div class="meta" id="nlfoFluxMeta"></div>
+      </div>
+      <div class="result">
+        <div class="label"><span>磁链平方</span><span class="unit">BASE_Flux²</span></div>
+        <div class="value green" id="nlfoFluxSq">—</div>
+        <div class="meta" id="nlfoFluxSqMeta"></div>
+      </div>
+      <div class="result">
+        <div class="label"><span>磁链倒数</span><span class="unit">1/BASE_Flux</span></div>
+        <div class="value green" id="nlfoFluxInv">—</div>
+        <div class="meta" id="nlfoFluxInvMeta"></div>
+      </div>
+      <div class="result">
+        <div class="label"><span>磁链增益</span><span class="unit">1/(T³·V²)</span></div>
+        <div class="value green" id="nlfoGain">—</div>
+        <div class="meta" id="nlfoGainMeta"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= 定点增益 ================= -->
+  <section class="card">
+    <div class="card-head">
+      <h2>串口定点增益</h2>
+      <span class="hint">float = Q整数 × 增益</span>
+    </div>
+    <p class="tip" style="margin-top:-6px;margin-bottom:14px;">
+      每个基值对应一个 Q31 / Q15 增益，串口软件将定点整数乘以该增益即可还原为真实物理值。
+    </p>
+
+    <div class="modebar" id="gainSeg">
+      <button class="active" data-g="q31">Q31</button>
+      <button data-g="q15">Q15</button>
+    </div>
+
+    <div id="gainTable" class="code-block"></div>
+  </section>
+
+</div>
+
+<script>
+/* =====================================================================
+   常量与工具
+   ===================================================================== */
+const el = id => document.getElementById(id);
+
+const Q31_SCALE = 2147483648;   // 2^31
+const Q15_SCALE = 32768;        // 2^15
+
+function fmt(x, digits){
+  if (!Number.isFinite(x)) return '—';
+  if (x === 0) return '0';
+  const a = Math.abs(x);
+  if (a >= 1e12 || a < 1e-9){
+    return x.toExponential(6).replace(/\.?0+e/, 'e');
+  }
+  let s;
+  if (digits !== undefined){
+    s = x.toFixed(digits);
+    s = s.replace(/\.?0+$/, '');
+  } else {
+    s = x.toPrecision(12);
+    if (s.includes('e')) return s;
+    if (s.includes('.')) s = s.replace(/0+$/, '').replace(/\.$/, '');
+  }
+  return s;
+}
+
+function readNum(id){
+  const s = el(id).value.trim();
+  if (s === '') return NaN;
+  const v = Number(s);
+  return Number.isFinite(v) ? v : NaN;
+}
+
+/* =====================================================================
+   核心：计算所有基值与场景参数
+   ===================================================================== */
+function computeAll(){
+  const T  = readNum('baseTime');
+  const R  = readNum('baseRad');
+  const I  = readNum('baseCurrent');
+  const V  = readNum('baseVoltage');
+  const Tp = readNum('baseTemp');
+
+  /* ---------- 被动基值 ---------- */
+  const Speed    = R / T;
+  const Hz       = 1 / T;
+  const Inductor = (V * T) / I;
+  const Flux     = V * T;
+  const Resistor = V / I;
+
+  /* ---------- 3.1 电流环（仅 6 个基值） ---------- */
+  const cc_Kp     = Resistor;
+  const cc_Ki     = Resistor / T;
+  const cc_OutMax = V;
+  const cc_OutMin = V;
+  const cc_IntMax = I * T;
+  const cc_IntMin = I * T;
+
+  /* ---------- 3.2 速度环 ---------- */
+  const sc_Kp     = I / Speed;
+  const sc_Ki     = I / R;
+  const sc_OutMax = I;
+  const sc_OutMin = I;
+  const sc_IntMax = R;
+  const sc_IntMin = R;
+
+  /* ---------- 3.3 PLL ---------- */
+  const pll_Kp = Speed;
+  const pll_Ki = Speed / T;
+
+  /* ---------- 3.4 NLFO ---------- */
+  const nlfo_V       = V;
+  const nlfo_I       = I;
+  const nlfo_Rs      = Resistor;
+  const nlfo_Ls      = Inductor;
+  const nlfo_Flux    = Flux;
+  const nlfo_FluxSq  = Flux * Flux;
+  const nlfo_FluxInv = 1 / Flux;
+  const nlfo_Gain    = 1 / (T * T * T * V * V);
+
+  return {
+    T, R, I, V, Tp,
+    Speed, Hz, Inductor, Flux, Resistor,
+    cc_Kp, cc_Ki, cc_OutMax, cc_OutMin, cc_IntMax, cc_IntMin,
+    sc_Kp, sc_Ki, sc_OutMax, sc_OutMin, sc_IntMax, sc_IntMin,
+    pll_Kp, pll_Ki,
+    nlfo_V, nlfo_I, nlfo_Rs, nlfo_Ls, nlfo_Flux,
+    nlfo_FluxSq, nlfo_FluxInv, nlfo_Gain
+  };
+}
+
+/* =====================================================================
+   渲染：被动基值
+   ===================================================================== */
+function renderPassive(d){
+  const warn = el('warnBase');
+  const issues = [];
+  if (!Number.isFinite(d.T) || d.T === 0) issues.push('BASE_Time 无效或为 0（会除零）');
+  if (!Number.isFinite(d.R) || d.R === 0) issues.push('BASE_Rad 无效或为 0（会除零）');
+  if (!Number.isFinite(d.I) || d.I === 0) issues.push('BASE_Current 无效或为 0（会除零）');
+  if (!Number.isFinite(d.V) || d.V === 0) issues.push('BASE_Voltage 无效或为 0（会除零）');
+
+  if (issues.length){
+    warn.classList.remove('hidden');
+    warn.textContent = '⚠ ' + issues.join('；');
+  } else {
+    warn.classList.add('hidden');
+  }
+
+  el('baseSpeed').textContent    = fmt(d.Speed);
+  el('baseHz').textContent       = fmt(d.Hz);
+  el('baseInductor').textContent = fmt(d.Inductor);
+  el('baseFlux').textContent     = fmt(d.Flux);
+  el('baseResistor').textContent = fmt(d.Resistor);
+
+  el('baseSpeedMeta').textContent    = `BASE_Rad / BASE_Time = ${fmt(d.R)} / ${fmt(d.T)}`;
+  el('baseHzMeta').textContent       = `1 / BASE_Time = 1 / ${fmt(d.T)}`;
+  el('baseInductorMeta').textContent = `(V·T)/I = (${fmt(d.V)}×${fmt(d.T)})/${fmt(d.I)}`;
+  el('baseFluxMeta').textContent     = `V·T = ${fmt(d.V)}×${fmt(d.T)}`;
+  el('baseResistorMeta').textContent = `V/I = ${fmt(d.V)}/${fmt(d.I)}`;
+}
+
+/* =====================================================================
+   渲染：实用场景
+   ===================================================================== */
+function renderScenarios(d){
+  /* 3.1 电流环（6 个） */
+  el('ccKp').textContent     = fmt(d.cc_Kp);
+  el('ccKi').textContent     = fmt(d.cc_Ki);
+  el('ccOutMax').textContent = fmt(d.cc_OutMax);
+  el('ccOutMin').textContent = fmt(d.cc_OutMin);
+  el('ccIntMax').textContent = fmt(d.cc_IntMax);
+  el('ccIntMin').textContent = fmt(d.cc_IntMin);
+
+  el('ccKpMeta').textContent     = '= BASE_Resistor';
+  el('ccKiMeta').textContent     = `= BASE_Resistor / BASE_Time = ${fmt(d.Resistor)} / ${fmt(d.T)}`;
+  el('ccOutMaxMeta').textContent = `= BASE_Voltage = ${fmt(d.V)}`;
+  el('ccOutMinMeta').textContent = `= BASE_Voltage = ${fmt(d.V)}`;
+  el('ccIntMaxMeta').textContent = `= BASE_Current·BASE_Time = ${fmt(d.I)}×${fmt(d.T)}`;
+  el('ccIntMinMeta').textContent = `= BASE_Current·BASE_Time = ${fmt(d.I)}×${fmt(d.T)}`;
+
+  /* 3.2 速度环 */
+  el('scKp').textContent     = fmt(d.sc_Kp);
+  el('scKi').textContent     = fmt(d.sc_Ki);
+  el('scOutMax').textContent = fmt(d.sc_OutMax);
+  el('scOutMin').textContent = fmt(d.sc_OutMin);
+  el('scIntMax').textContent = fmt(d.sc_IntMax);
+  el('scIntMin').textContent = fmt(d.sc_IntMin);
+
+  el('scKpMeta').textContent     = `= BASE_Current / BASE_Speed = ${fmt(d.I)} / ${fmt(d.Speed)}`;
+  el('scKiMeta').textContent     = `= BASE_Current / BASE_Rad = ${fmt(d.I)} / ${fmt(d.R)}`;
+  el('scOutMaxMeta').textContent = `= BASE_Current = ${fmt(d.I)}`;
+  el('scOutMinMeta').textContent = `= BASE_Current = ${fmt(d.I)}`;
+  el('scIntMaxMeta').textContent = `= BASE_Rad = ${fmt(d.R)}`;
+  el('scIntMinMeta').textContent = `= BASE_Rad = ${fmt(d.R)}`;
+
+  /* 3.3 PLL */
+  el('pllKp').textContent = fmt(d.pll_Kp);
+  el('pllKi').textContent = fmt(d.pll_Ki);
+  el('pllKpMeta').textContent = `= BASE_Speed = ${fmt(d.Speed)}`;
+  el('pllKiMeta').textContent = `= BASE_Speed / BASE_Time = ${fmt(d.Speed)} / ${fmt(d.T)}`;
+
+  /* 3.4 NLFO */
+  el('nlfoV').textContent       = fmt(d.nlfo_V);
+  el('nlfoI').textContent       = fmt(d.nlfo_I);
+  el('nlfoRs').textContent      = fmt(d.nlfo_Rs);
+  el('nlfoLs').textContent      = fmt(d.nlfo_Ls);
+  el('nlfoFlux').textContent    = fmt(d.nlfo_Flux);
+  el('nlfoFluxSq').textContent  = fmt(d.nlfo_FluxSq);
+  el('nlfoFluxInv').textContent = fmt(d.nlfo_FluxInv);
+  el('nlfoGain').textContent    = fmt(d.nlfo_Gain);
+
+  el('nlfoVMeta').textContent       = '= BASE_Voltage';
+  el('nlfoIMeta').textContent       = '= BASE_Current';
+  el('nlfoRsMeta').textContent      = '= BASE_Resistor';
+  el('nlfoLsMeta').textContent      = '= BASE_Inductor';
+  el('nlfoFluxMeta').textContent    = '= BASE_Flux';
+  el('nlfoFluxSqMeta').textContent  = `= BASE_Flux² = ${fmt(d.Flux)}²`;
+  el('nlfoFluxInvMeta').textContent = `= 1/BASE_Flux = 1/${fmt(d.Flux)}`;
+  el('nlfoGainMeta').textContent    = `= 1/(T³·V²)`;
+}
+
+/* =====================================================================
+   渲染：串口定点增益表
+   ===================================================================== */
+let gainFmt = 'q31';
+
+function gainEntries(d){
+  return [
+    ['BASE_Time',        d.T,           's'],
+    ['BASE_Rad',         d.R,           'rad'],
+    ['BASE_Current',     d.I,           'A'],
+    ['BASE_Voltage',     d.V,           'V'],
+    ['BASE_Temperature', d.Tp,          '℃'],
+    ['BASE_Speed',       d.Speed,       'rad/s'],
+    ['BASE_Hz',          d.Hz,          '1/s'],
+    ['BASE_Inductor',    d.Inductor,    'H'],
+    ['BASE_Flux',        d.Flux,        'Wb'],
+    ['BASE_Resistor',    d.Resistor,    'Ω'],
+    ['CC.Kp',            d.cc_Kp,       'Ω'],
+    ['CC.Ki',            d.cc_Ki,       'Ω/s'],
+    ['CC.OutMax',        d.cc_OutMax,   'V'],
+    ['CC.OutMin',        d.cc_OutMin,   'V'],
+    ['CC.IntMax',        d.cc_IntMax,   'A·s'],
+    ['CC.IntMin',        d.cc_IntMin,   'A·s'],
+    ['SC.Kp',            d.sc_Kp,       'A·s/rad'],
+    ['SC.Ki',            d.sc_Ki,       'A/rad'],
+    ['SC.OutMax',        d.sc_OutMax,   'A'],
+    ['SC.OutMin',        d.sc_OutMin,   'A'],
+    ['SC.IntMax',        d.sc_IntMax,   'rad'],
+    ['SC.IntMin',        d.sc_IntMin,   'rad'],
+    ['PLL.Kp',           d.pll_Kp,      'rad/s'],
+    ['PLL.Ki',           d.pll_Ki,      'rad/s²'],
+    ['NLFO.V',           d.nlfo_V,      'V'],
+    ['NLFO.I',           d.nlfo_I,      'A'],
+    ['NLFO.Rs',          d.nlfo_Rs,     'Ω'],
+    ['NLFO.Ls',          d.nlfo_Ls,     'H'],
+    ['NLFO.Flux',        d.nlfo_Flux,   'Wb'],
+    ['NLFO.Flux²',       d.nlfo_FluxSq, 'Wb²'],
+    ['NLFO.1/Flux',      d.nlfo_FluxInv,'1/Wb'],
+    ['NLFO.Gain',        d.nlfo_Gain,   '1/(s³·V²)'],
+  ];
+}
+
+function renderGainTable(d){
+  const scale = (gainFmt === 'q31') ? Q31_SCALE : Q15_SCALE;
+  const lines = [];
+  const pad = (s, n) => (s + ' '.repeat(n)).slice(0, n);
+
+  lines.push(`/* ${gainFmt.toUpperCase()} 增益：float = Q整数 × gain */`);
+  lines.push(`/* gain = base / ${gainFmt === 'q31' ? '2^31' : '2^15'} = base / ${scale} */`);
+  lines.push('');
+
+  const entries = gainEntries(d);
+
+  lines.push(
+    pad('基值名称', 20) + ' | ' +
+    pad('基值', 16) + ' | ' +
+    pad('增益 (' + gainFmt.toUpperCase() + ')', 26) + ' | ' +
+    '单位'
+  );
+  lines.push('-'.repeat(20) + '-+-' + '-'.repeat(16) + '-+-' + '-'.repeat(26) + '-+-' + '-'.repeat(10));
+
+  for (const [name, val, unit] of entries){
+    const gain = Number.isFinite(val) ? val / scale : NaN;
+    lines.push(
+      pad(name, 20) + ' | ' +
+      pad(fmt(val), 16) + ' | ' +
+      pad(fmt(gain), 26) + ' | ' +
+      unit
+    );
+  }
+
+  el('gainTable').textContent = lines.join('\n');
+}
+
+/* =====================================================================
+   总渲染
+   ===================================================================== */
+function renderAll(){
+  const d = computeAll();
+  renderPassive(d);
+  renderScenarios(d);
+  renderGainTable(d);
+}
+
+/* =====================================================================
+   事件绑定
+   ===================================================================== */
+document.querySelectorAll('input[type=number]').forEach(n => {
+  n.addEventListener('input', renderAll);
+});
+
+document.querySelectorAll('#gainSeg button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('#gainSeg button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    gainFmt = btn.dataset.g;
+    renderAll();
+  });
+});
+
+/* 首次渲染 */
+renderAll();
+</script>
+</body>
+</html>
