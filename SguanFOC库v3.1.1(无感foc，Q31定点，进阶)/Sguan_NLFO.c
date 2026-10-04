@@ -14,7 +14,7 @@
 // NLFO非线性磁链观测器的参数初始化
 void NLFO_Init(NLFO_STRUCT *nlfo){
     // 1.自动计算好需要的参数数值
-    nlfo->go.T = PMSM_RUN_T_q31;
+    nlfo->go.T = iqmath_from_float(nlfo->T, BASE_Time);
 
     nlfo->go.Rs = iqmath_from_float(nlfo->Rs, BASE_Resistor);
     nlfo->go.Ls = iqmath_from_float(nlfo->Ls, BASE_Inductor);
@@ -57,13 +57,6 @@ void NLFO_Loop(NLFO_STRUCT *nlfo){
     flux_error_end = iqmath_sub(
         nlfo->go.Flux_pow, 
         flux_error0);
-
-    float alpha = nlfo->Gain*gain0*flux_error_end + 
-                nlfo->go.Input_Ualpha - 
-                nlfo->go.Input_Ialpha*nlfo->Rs;
-    float beta = nlfo->Gain*gain1*flux_error_end + 
-                nlfo->go.Input_Ubeta - 
-                nlfo->go.Input_Ibeta*nlfo->Rs;
 
     Q31_t alpha_temp = iqmath_mul(
         iqmath_mul(nlfo->go.Gain, gain0), 

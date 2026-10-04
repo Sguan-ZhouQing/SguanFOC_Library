@@ -59,7 +59,7 @@ void PID_Init(PID_STRUCT *pid){
         // 范围计算IntMax   实际值：10.0/6.85   单位范围：BASE_Rad
         // 范围计算IntMin   实际值：10.0/6.85   单位范围：BASE_Rad
     }
-    pid->go.T = PMSM_RUN_T_q31;
+    pid->go.T = iqmath_from_float(pid->T, BASE_Time);;
 
     // 2.初始化为零
     pid->go.Input = 0;

@@ -11,5 +11,13 @@
 #define STATUS_Initializing1        0x03    // (Initializing1)初始化
 #define STATUS_COM                  0x04    // (COM)正常运行
 
+// 错误状态记录
+#define ERROR_Zreo                  0x00    // (Zreo)正常运行，无错误
+#define ERROR_OverVoltage           0x01    // (OverVoltage)过压
+#define ERROR_UnderVoltage          0x02    // (UnderVoltage)欠压
+#define ERROR_OverTemp              0x03    // (OverTemp)过温
+#define ERROR_UnderTemp             0x04    // (UnderTemp)低温
+#define ERROR_OverCurrent           0x05    // (OverCurrent)过流
+
 
 #endif // SGUAN_MOTORSTATUS_H

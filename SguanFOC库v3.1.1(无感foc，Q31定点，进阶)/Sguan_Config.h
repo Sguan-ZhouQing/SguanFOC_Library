@@ -7,6 +7,8 @@
 // ============================ 系统配置 宏定义 ============================
 #define CONFIG_MODE         Define_Run_Mode
 #define CONFIG_CUR          Current_Offset_Open
+#define CONFIG_Float        Q31_Float_Open
+#define CONFIG_SingleRs     Read_SingleRs_Open
 
 // ============================ Q31标幺化 宏定义 ===========================
 // 标幺化基准值(Config)

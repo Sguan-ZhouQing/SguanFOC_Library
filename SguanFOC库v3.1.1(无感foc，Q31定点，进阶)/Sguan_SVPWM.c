@@ -18,10 +18,10 @@
 uint8_t sector_SVPWM = 0;
 
 // 这里输入的alpha和beta轴的数据都是归一化的Q31数值
-// (使用前可以调用iqmath_convert_base，new->BASE_Voltage，old->VBUS)
+// (使用前可以调用iqmath_div得到归一化数值)
 void SVPWM(Q31_t u_alpha, Q31_t u_beta, 
         Q31_t *d_u, Q31_t *d_v, Q31_t *d_w){
-    const Q31_t ts = Q31_MAX;
+    static const Q31_t ts = Q31_MAX;
 
     Q31_t u1 = u_beta;
     Q31_t u2 = iqmath_mul(-Value_SQRT3_2_q31,u_alpha) - iqmath_mul(Q31_HALF,u_beta);

@@ -196,6 +196,10 @@ Q31_t iqmath_current_raw_to_q31(uint16_t raw){
     return iqmath_q31_mul(raw_scaled, Current_Gain_q31);
 }
 
+void iqmath_rad_loop(Q31_t *Rad, Q31_t Speed, Q31_t T){
+    (*Rad) = iqmath_q31_add(iqmath_q31_mul(Speed, T), (*Rad));
+}
+
 #define POLES_K      209715
 #define POLES_SHIFT  20
 Q31_t iqmath_speed_div5_fast(Q31_t x){

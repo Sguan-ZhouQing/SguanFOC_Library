@@ -29,6 +29,7 @@ static void Transfer_NLFO_Loop(SguanFOC_System_STRUCT *sguan,
                             PLL_STRUCT *pll);
 static Q31_t Feedforward_CurrentD(Q31_t We,Q31_t Lq,Q31_t Iq);
 static Q31_t Feedforward_CurrentQ(Q31_t We,Q31_t Ld,Q31_t Id,Q31_t Flux);
+static void Float_DataSwitch_Loop(SguanFOC_System_STRUCT *sguan);
 static void High_Current_Loop(SguanFOC_System_STRUCT *sguan);
 static void High_Encoder_Loop(SguanFOC_System_STRUCT *sguan);
 static void High_Control_Loop(SguanFOC_System_STRUCT *sguan);
@@ -36,7 +37,7 @@ static void High_PWM_Loop(SguanFOC_System_STRUCT *sguan);
 static void Low_DataRead_Loop(SguanFOC_System_STRUCT *sguan);
 static void Low_StatusSwitch_Loop(SguanFOC_System_STRUCT *sguan);
 static void main_Transfer_Init(SguanFOC_System_STRUCT *sguan);
-static main_Current_Init(SguanFOC_System_STRUCT *sguan);
+static void main_Current_Init(SguanFOC_System_STRUCT *sguan);
 static void main_loop(SguanFOC_System_STRUCT *sguan);
 // =============================== (Transfer/Feedforward) ===========================
 static Q31_t Transfer_LPF_Loop(LPF_STRUCT *lpf, Q31_t Input){
@@ -79,25 +80,60 @@ static Q31_t Feedforward_CurrentQ(Q31_t We,Q31_t Ld,Q31_t Id,Q31_t Flux){
     return iqmath_mul(iqmath_add(temp,Flux), We);
 }
 
+static void Float_DataSwitch_Loop(SguanFOC_System_STRUCT *sguan){
+    // 1.浮点数自动转定点
+    sguan->Foc.Target_Speed = iqmath_from_float(sguan->Float.Target_Speed, BASE_Speed);
+    sguan->Foc.Target_Uq = iqmath_from_float(sguan->Float.Target_Uq, BASE_Voltage);
+    sguan->Foc.Target_VF_Uq = iqmath_from_float(sguan->Float.Target_VF_Uq, BASE_Voltage);
+    sguan->Foc.Target_IF_Iq = iqmath_from_float(sguan->Float.Target_IF_Iq, BASE_Current);
+    sguan->Foc.Target_Id = iqmath_from_float(sguan->Float.Target_Id, BASE_Current);
+    sguan->Foc.Target_Iq = iqmath_from_float(sguan->Float.Target_Iq, BASE_Current);
+
+    // 2.定点数自动转浮点
+    sguan->Float.Real_Speed = iqmath_to_float(sguan->Motor.Real_Speed, BASE_Speed);
+    sguan->Float.Real_Uq = iqmath_to_float(sguan->Foc.Uq_in, BASE_Voltage);
+    sguan->Float.Real_Re = iqmath_to_float(sguan->Motor.Real_Re, BASE_Rad);
+    sguan->Float.Real_Id = iqmath_to_float(sguan->Motor.Real_Id, BASE_Current);
+    sguan->Float.Real_Iq = iqmath_to_float(sguan->Motor.Real_Iq, BASE_Current);
+}
+
 // ================================= (High) ===================================
 static void High_Current_Loop(SguanFOC_System_STRUCT *sguan){
     // 1.读取三相原始数值
     #if CONFIG_CUR
-    sguan->Motor.Real_Ia = iqmath_current_raw_to_q31(
-        User_ReadADC_Raw(0) - sguan->Motor.Current_Offset0);
-    sguan->Motor.Real_Ib = iqmath_current_raw_to_q31(
-        User_ReadADC_Raw(0) - sguan->Motor.Current_Offset0);
-    // sguan->Motor.Real_Ic = iqmath_current_raw_to_q31(
-    //     User_ReadADC_Raw(0) - sguan->Motor.Current_Offset0);
-    // (注释掉Ic电流的读取，是为了节省运算)
+    // 带入电流偏置计算
+    if (sguan->Motor.Current_Dir == 1){        
+        sguan->Motor.Real_Ia = iqmath_current_raw_to_q31(
+            User_ReadADC_Raw(0) - sguan->Motor.Current_Offset0);
+        sguan->Motor.Real_Ib = iqmath_current_raw_to_q31(
+            User_ReadADC_Raw(0) - sguan->Motor.Current_Offset0);
+        // sguan->Motor.Real_Ic = iqmath_current_raw_to_q31(
+        //     User_ReadADC_Raw(0) - sguan->Motor.Current_Offset0);
+        // (注释掉Ic电流的读取，是为了节省运算)
+    }
+    else{
+        sguan->Motor.Real_Ia = -iqmath_current_raw_to_q31(
+            User_ReadADC_Raw(0) - sguan->Motor.Current_Offset0);
+        sguan->Motor.Real_Ib = -iqmath_current_raw_to_q31(
+            User_ReadADC_Raw(0) - sguan->Motor.Current_Offset0);
+    }
     #else // CONFIG_CUR
-    sguan->Motor.Real_Ia = iqmath_current_raw_to_q31(
-        User_ReadADC_Raw(0));
-    sguan->Motor.Real_Ib = iqmath_current_raw_to_q31(
-        User_ReadADC_Raw(0));
-    // sguan->Motor.Real_Ic = iqmath_current_raw_to_q31(
-    //     User_ReadADC_Raw(0));
-    // (注释掉Ic电流的读取，是为了节省运算)
+    // 不带入电流偏置计算
+    if (sguan->Motor.Current_Dir == 1){
+        sguan->Motor.Real_Ia = iqmath_current_raw_to_q31(
+            User_ReadADC_Raw(0));
+        sguan->Motor.Real_Ib = iqmath_current_raw_to_q31(
+            User_ReadADC_Raw(0));
+        // sguan->Motor.Real_Ic = iqmath_current_raw_to_q31(
+        //     User_ReadADC_Raw(0));
+        // (注释掉Ic电流的读取，是为了节省运算)
+    }
+    else{
+        sguan->Motor.Real_Ia = -iqmath_current_raw_to_q31(
+            User_ReadADC_Raw(0));
+        sguan->Motor.Real_Ib = -iqmath_current_raw_to_q31(
+            User_ReadADC_Raw(0));
+    }
     #endif // CONFIG_CUR
 
     // 2.坐标变换计算
@@ -122,23 +158,7 @@ static void High_Current_Loop(SguanFOC_System_STRUCT *sguan){
 }
 
 static void High_Encoder_Loop(SguanFOC_System_STRUCT *sguan){
-    // 1.运行无感NLFO磁链观测器
-    Transfer_NLFO_Loop(sguan, &sguan->Transfer.PLL);
-
-    // 2.电机角速度滤波
-    sguan->Motor.Real_We = Transfer_LPF_Loop(
-        &sguan->Transfer.LPF_Speed, 
-        sguan->Transfer.PLL.go.OutWe);
-    sguan->Motor.Real_Speed = iqmath_speed_div5_fast(sguan->Motor.Real_We);
-
-    // 3.刷新电机角度相关信息
-    sguan->Motor.Real_Re = sguan->Transfer.PLL.go.OutRe;
-    fast_sin_cos(
-        sguan->Motor.Real_Re, 
-        &sguan->Foc.Sine, 
-        &sguan->Foc.Cosine);
-
-    // 4.期望数值更新
+    // 1.期望数值更新
     #if CONFIG_MODE==MODE_NLFO_Voltag
     sguan->Foc.Uq_in = Transfer_LPF_Loop(
         &sguan->Transfer.LPF_Ltd, 
@@ -148,16 +168,69 @@ static void High_Encoder_Loop(SguanFOC_System_STRUCT *sguan){
         &sguan->Transfer.LPF_Ltd, 
         sguan->Foc.Target_Speed);
     #endif // CONFIG_MODE
+
+    // 2.运行开环强拖角度生成
+    #if CONFIG_MODE<=MODE_IF_Only
+    sguan->Motor.Real_Speed = sguan->Foc.Speed_in;
+    sguan->Motor.Real_We = 
+        sguan->Motor.Real_Speed*
+        sguan->Motor.Poles;
+
+    iqmath_rad_loop(
+        &sguan->Motor.Real_Re, 
+        sguan->Motor.Real_We, 
+        PMSM_RUN_T_q31);
+    #else // CONFIG_MODE
+    
+    // 2.运行无感foc控制算法
+    // (运行无感NLFO磁链观测器)
+    Transfer_NLFO_Loop(sguan, &sguan->Transfer.PLL);
+
+    // (电机角速度滤波)
+    sguan->Motor.Real_We = Transfer_LPF_Loop(
+        &sguan->Transfer.LPF_Speed, 
+        sguan->Transfer.PLL.go.OutWe);
+    sguan->Motor.Real_Speed = iqmath_speed_div5_fast(sguan->Motor.Real_We);
+
+    // (刷新电机角度相关信息)
+    sguan->Motor.Real_Re = sguan->Transfer.PLL.go.OutRe;
+    #endif // CONFIG_MODE
+
+    // 3.电机三角函数求解
+    fast_sin_cos(
+        sguan->Motor.Real_Re, 
+        &sguan->Foc.Sine, 
+        &sguan->Foc.Cosine);
 }
 
 static void High_Control_Loop(SguanFOC_System_STRUCT *sguan){
     #if CONFIG_MODE==MODE_VF_Only
-
+    sguan->Foc.Uq_in = sguan->Foc.Target_VF_Uq;
     #elif CONFIG_MODE==MODE_IF_Only
+    // 1.更新IF控制的控制量
+    sguan->Foc.Target_Iq = sguan->Foc.Target_IF_Iq;
 
-    #elif CONFIG_MODE==MODE_NLFO_Voltag
+    // 2.电流环控制器求解
+    sguan->Foc.Ud_in = Transfer_PID_Loop(
+        &sguan->Transfer.PID_D, 
+        sguan->Foc.Target_Id, 
+        sguan->Motor.Real_Id);
+    sguan->Foc.Uq_in = Transfer_PID_Loop(
+        &sguan->Transfer.PID_Q, 
+        sguan->Foc.Target_Iq, 
+        sguan->Motor.Real_Iq);
 
-    #else // CONGIG_MODE
+    // 3.电流前馈计算
+    sguan->Foc.Ud_in += Feedforward_CurrentD(
+        sguan->Motor.Real_We, 
+        sguan->Motor.Lq, 
+        sguan->Motor.Real_Iq);
+    sguan->Foc.Uq_in += Feedforward_CurrentQ(
+        sguan->Motor.Real_We, 
+        sguan->Motor.Ld, 
+        sguan->Motor.Real_Id, 
+        sguan->Motor.Flux);
+    #elif CONFIG_MODE>=MODE_NLFO_Vel
     // 1.转速环控制器求解
     if (sguan->Status == STATUS_COM){
         static uint8_t count = 0;
@@ -196,16 +269,68 @@ static void High_Control_Loop(SguanFOC_System_STRUCT *sguan){
 }
 
 static void High_PWM_Loop(SguanFOC_System_STRUCT *sguan){
+    // 1.Park逆变换
+    ipark(&sguan->Foc.Ualpha,
+        &sguan->Foc.Ubeta,
+        sguan->Foc.Ud_in,
+        sguan->Foc.Uq_in, 
+        sguan->Foc.Sine, 
+        sguan->Foc.Cosine);
 
+
+    // 2.运行SVPWM函数
+    SVPWM(iqmath_div(sguan->Foc.Ualpha, sguan->Foc.VBUS), 
+        iqmath_div(sguan->Foc.Ubeta, sguan->Foc.VBUS), 
+        &sguan->Foc.Du, 
+        &sguan->Foc.Dv, 
+        &sguan->Foc.Dw);
+
+    // 3.计算比较器数值并执行
+    sguan->Foc.Duty_u = (uint16_t)(iqmath_mul(sguan->Foc.Du,(Q31_t)sguan->Motor.Duty));
+    sguan->Foc.Duty_v = (uint16_t)(iqmath_mul(sguan->Foc.Dv,(Q31_t)sguan->Motor.Duty));
+    sguan->Foc.Duty_w = (uint16_t)(iqmath_mul(sguan->Foc.Dw,(Q31_t)sguan->Motor.Duty));
+    User_PwmDuty_Set(sguan->Foc.Duty_u,sguan->Foc.Duty_v,sguan->Foc.Duty_w);
 }
 
 // ================================= (Low) ===================================
 static void Low_DataRead_Loop(SguanFOC_System_STRUCT *sguan){
-
+    sguan->Safe.Vbus_Real = User_VBUS_DataGet();
+    sguan->Safe.Temp_Real = User_Temperature_DataGet();
+    sguan->Safe.Ibus_Real = User_ReadADC_Raw(0); // 象征性Ibus读取
 }
 
 static void Low_StatusSwitch_Loop(SguanFOC_System_STRUCT *sguan){
+    if (sguan->Status == STATUS_COM){
+        // 1.过压保护
+        if (sguan->Safe.Vbus_Real >= sguan->Safe.Vbus_Max){
+            sguan->Status = STATUS_Standby;
+            sguan->Error_Code = ERROR_OverVoltage;
+        }
 
+        // 2.欠压保护
+        if (sguan->Safe.Vbus_Real <= sguan->Safe.Vbus_Min){
+            sguan->Status = STATUS_Standby;
+            sguan->Error_Code = ERROR_UnderVoltage;
+        }
+
+        // 3.过温保护
+        if (sguan->Safe.Temp_Real >= sguan->Safe.Temp_Max){
+            sguan->Status = STATUS_Standby;
+            sguan->Error_Code = ERROR_OverTemp;
+        }
+
+        // 4.低温保护
+        if (sguan->Safe.Temp_Real <= sguan->Safe.Temp_Min){
+            sguan->Status = STATUS_Standby;
+            sguan->Error_Code = ERROR_UnderTemp;
+        }
+
+        // 5.过流保护
+        if (sguan->Safe.Ibus_Real >= sguan->Safe.Ibus_Max){
+            sguan->Status = STATUS_Standby;
+            sguan->Error_Code = ERROR_OverCurrent;
+        }
+    }
 }
 
 // ================================= (main) ===================================
@@ -264,9 +389,14 @@ static void main_Transfer_Init(SguanFOC_System_STRUCT *sguan){
     sguan->Transfer.NLFO.Ls = (sguan->Motor.Ld + sguan->Motor.Lq)/2.0f;
     sguan->Transfer.NLFO.Flux = sguan->Motor.Flux;
     NLFO_Init(&sguan->Transfer.NLFO);
+
+    // 3.消除编译警告
+    (void)Transfer_PID_Loop;
+    (void)Feedforward_CurrentD;
+    (void)Feedforward_CurrentQ;
 }
 
-static main_Current_Init(SguanFOC_System_STRUCT *sguan){
+static void main_Current_Init(SguanFOC_System_STRUCT *sguan){
     #if CONFIG_CUR
     // 1.读取电流偏置
     uint32_t sum0 = 0, sum1 = 0, sum2 = 0;
@@ -313,6 +443,7 @@ static void main_loop(SguanFOC_System_STRUCT *sguan){
         
         // 5.所有控制器全部启动，电机正常工作
         sguan->Status = STATUS_COM;
+        sguan->Error_Code = ERROR_Zreo;
     }
     Printf_TX_Loop(&sguan->Printf);
 }
@@ -321,28 +452,37 @@ static void main_loop(SguanFOC_System_STRUCT *sguan){
 // ================================= (SguanFOC) ===================================
 void SguanFOC_High_Loop(void){
     if (Sguan.Status >= STATUS_Initializing1){
-        // 1.电流计算任务
+        // 1.Q31/Flaot数据实时转换
+        #if CONFIG_Float
+        Float_DataSwitch_Loop(&Sguan);
+        #endif // CONFIG_Float
+
+        // 2.电流计算任务
         High_Current_Loop(&Sguan);
 
-        // 2.角度计算任务
+        // 3.角度计算任务
         High_Encoder_Loop(&Sguan);
-    }
 
-    if (Sguan.Status >= STATUS_COM){
+        // 4.控制器计算任务
         High_Control_Loop(&Sguan);
-    }
-
-    if (Sguan.Status >= STATUS_Initializing1){
+        
+        // 5.占空比计算任务
         High_PWM_Loop(&Sguan);
     }
 }
 
 void SguanFOC_Low_Loop(void){
+    // 1.读取实时数据
+    Low_DataRead_Loop(&Sguan);
 
+    // 2.状态机切换做保护
+    Low_StatusSwitch_Loop(&Sguan);
 }
 
 void SguanFOC_Printf_Loop(uint8_t *data, uint16_t length){
-
+    // 微控制器接收来自上位机的消息
+    // 解析数据的格式like：AO=16.8?
+    Printf_RX_Loop(data,length);
 }
 
 void SguanFOC_main_Loop(void){
@@ -350,7 +490,7 @@ void SguanFOC_main_Loop(void){
     if (count == 0){
         User_InitialInit();
         Printf_TX_Init(&Sguan.Printf);
-        Printf_RX_Init(&Sguan.Printf);
+        Printf_RX_Init();
 
         count = 1;
     }

@@ -3,7 +3,7 @@
 /* 电机控制User用户设置·数据计算 */
 
 /**
- * @description: 宏定义0-5决定“电机的控制模式”(默认使用“速度-电流串级闭环控制”模式)
+ * @description: 宏定义0-5决定“电机的控制模式”(默认使用“NLFO零速双闭环”模式)
  * @reminder: 0->MODE_VF_Only           VF控制              (无感电压幅频控制开环)yes
  * @reminder: 1->MODE_IF_Only           IF控制              (无感电流幅频控制开环)yes
  * @reminder: 2->MODE_NLFO_Voltag       NLFO单电压开环       (单电压开环：直接启动)yes
@@ -12,15 +12,31 @@
  * @reminder: 5->MODE_NLFO_Speed1       磁链速度-电流闭环    (速度-电流闭环“IF切磁链”)
  * @return {*}
  */
-#define Define_Run_Mode 3
+#define Define_Run_Mode 1
 
 /**
- * @description: 宏定义0-1决定“电机的控制模式”(默认使用“速度-电流串级闭环控制”模式)
+ * @description: 宏定义0-1决定“电机是否开启电流偏置读取”(默认开启)
  * @reminder: 0->不开启读取电流偏置任务
  * @reminder: 1->开启电流偏置的Tick读取
  * @return {*}
  */
 #define Current_Offset_Open 1
+
+/**
+ * @description: 宏定义0-1决定“电机是否实时更新Q31/Float之间数据的转换”(默认开启)
+ * @reminder: 0->不开启数据转换
+ * @reminder: 1->开启Q31/Float数据之间的转换
+ * @return {*}
+ */
+#define Q31_Float_Open 1
+
+/**
+ * @description: 宏定义0-1决定“电机采用单电阻采样”(默认关闭)
+ * @reminder: 0->不开启单电阻采样程序
+ * @reminder: 1->开启电机单电阻采样功能
+ * @return {*}
+ */
+#define Read_SingleRs_Open 0
 
 /**
  * @description: Q31定点化运算的数据标幺(基值设计)

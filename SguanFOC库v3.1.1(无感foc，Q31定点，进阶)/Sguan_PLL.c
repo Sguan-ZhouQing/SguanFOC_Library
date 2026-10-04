@@ -22,7 +22,7 @@ void PLL_Init(PLL_STRUCT *pll){
     pll->go.Kp = iqmath_from_float(pll->Kp, BASE_Speed);
     pll->go.Ki = iqmath_from_float(pll->Kp, (BASE_Speed/BASE_Time));
     
-    pll->go.T = PMSM_RUN_T_q31;
+    pll->go.T = iqmath_from_float(pll->T, BASE_Time);;
 
     // .....................................................................
     // 范围计算Kp       实际值：650.0       单位范围：BASE_Speed

@@ -7,7 +7,7 @@ static inline void User_ParameterSet(void){
     // 1.低通滤波LPF参数
     Sguan.Transfer.LPF_D.Wc = 31415.96f;        // (float)截止频率
     Sguan.Transfer.LPF_Q.Wc = 31415.96f;        // (float)截止频率
-    Sguan.Transfer.LPF_Speed.Wc = 2000.0f;      // (float)截止频率
+    Sguan.Transfer.LPF_Speed.Wc = 10000.0f;      // (float)截止频率
 
     // 2.最速控制LTD参数
     Sguan.Transfer.LPF_Ltd.Wc = 5.0f;           // (float)截止频率

@@ -28,6 +28,7 @@ Q31_t iqmath_abs(Q31_t x);
 void iqmath_limit(Q31_t *val, Q31_t max, Q31_t min);
 Q31_t iqmath_normalize(Q31_t angle);
 Q31_t iqmath_current_raw_to_q31(uint16_t raw);
+void iqmath_rad_loop(Q31_t *Rad, Q31_t Speed, Q31_t T);
 Q31_t iqmath_speed_div5_fast(Q31_t x);
 Q31_t iqmath_shift5_left(Q31_t q);
 // ============================================================

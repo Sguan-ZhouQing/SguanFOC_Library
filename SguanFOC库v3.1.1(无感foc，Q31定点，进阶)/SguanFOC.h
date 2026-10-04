@@ -67,9 +67,9 @@ typedef struct{
     Q31_t Real_Ibeta;                           // (Current)beta轴电流
 
     uint8_t Current_Dir;                        // (Current)电流方向
-    uint16_t Current_Offset0;                      // (Current)电流偏置
-    uint16_t Current_Offset1;                      // (Current)电流偏置
-    uint16_t Current_Offset2;                      // (Current)电流偏置
+    uint16_t Current_Offset0;                   // (Current)电流偏置
+    uint16_t Current_Offset1;                   // (Current)电流偏置
+    uint16_t Current_Offset2;                   // (Current)电流偏置
 
     // ....................... [MOTOR电机本体相关] ...................
     uint8_t Poles;                              // (MOTOR)电机极对数
@@ -103,11 +103,35 @@ typedef struct{
     Q31_t Dv;                                   // (Real)归一化占空比数值
     Q31_t Dw;                                   // (Real)归一化占空比数值
 
+    uint16_t Duty_u;                            // (Real)PWM比较器数值
+    uint16_t Duty_v;                            // (Real)PWM比较器数值
+    uint16_t Duty_w;                            // (Real)PWM比较器数值
+
     Q31_t Sine;                                 // (Real)正弦数值
     Q31_t Cosine;                               // (Real)余弦数值
 
     Q31_t VBUS;                                 // (Real)电机当前电压
 }Foc_STRUCT;
+
+typedef struct{
+    // ...................... [float->Foc] .........................
+    float Target_Speed;                         // (float->Foc)输入测试
+    float Target_Uq;                            // (float->Foc)输入测试
+
+    float Target_VF_Uq;                         // (float->Foc)输入测试
+    float Target_IF_Iq;                         // (float->Foc)输入测试
+
+    float Target_Id;                            // (float->Foc)输入测试
+    float Target_Iq;                            // (float->Foc)输入测试
+
+    // ...................... [float->Motor] .........................
+    float Real_Speed;                           // (float->Foc)输出测试
+    float Real_Uq;                              // (float->Foc)输出测试
+    float Real_Re;                              // (float->Foc)输出测试
+
+    float Real_Id;                              // (float->Foc)输出测试
+    float Real_Iq;                              // (float->Foc)输出测试
+}Float_STRUCT;
 
 typedef struct{
     // ....................... [Safe实际数据获取] .....................
@@ -123,15 +147,16 @@ typedef struct{
     uint16_t Temp_Min;                          // (Limit)Temp阈值
 
     uint16_t Ibus_Max;                          // (Limit)Ibus阈值
-    uint16_t Ibus_Min;                          // (Limit)Ibus阈值
 }Safe_STRUCT;
 
 typedef struct{
     uint8_t Status;                             // [数据]status存储电机运行状态
+    uint8_t Error_Code;                         // [数据]Error_Code存储电机错误状态
 
     Transfer_STRUCT Transfer;                   // [嵌套结构体]传递函数模块
     Motor_STRUCT Motor;                         // [嵌套结构体]电机参数
     Foc_STRUCT Foc;                             // [嵌套结构体]FOC运行参数
+    Float_STRUCT Float;                         // [嵌套结构体]Float便捷浮点
     Safe_STRUCT Safe;                           // [嵌套结构体]电机保护
 
     PRINTF_STRUCT Printf;                       // [嵌套结构体]调参和波形打印
