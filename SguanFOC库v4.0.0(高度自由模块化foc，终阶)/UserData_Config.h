@@ -2,7 +2,7 @@
 #define __USERDATA_CONFIG_H
 
 // 0->float 1->Q31 2->Q15
-#define DATA_DEFINE_IQMATH 0
+#define DATA_DEFINE_IQMATH 1
 
 #define MODE 0
 

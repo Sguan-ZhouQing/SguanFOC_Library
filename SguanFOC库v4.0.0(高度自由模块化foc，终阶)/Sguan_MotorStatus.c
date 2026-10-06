@@ -24,6 +24,7 @@ static void motorstatus_undertemp_driver_init(SguanFoc *sguan);
 static void motorstatus_overtemp_pcb_init(SguanFoc *sguan);
 static void motorstatus_undertemp_pcb_init(SguanFoc *sguan);
 static void motorstatus_stuck_init(SguanFoc *sguan);
+static void motorstatus_phase_loss_init(SguanFoc *sguan);
 static void motorstatus_fault_init(SguanFoc *sguan);
 static HandleEvent motorstatus_event_get(uint8_t run);
 // ===================================================
@@ -90,12 +91,17 @@ static void motorstatus_stuck_init(SguanFoc *sguan){
     main_standby_init(sguan);
 }
 
-static void motorstatus_fault_init(SguanFoc *sguan){
+static void motorstatus_phase_loss_init(SguanFoc *sguan){
     sguan->motorstatus.data.error_code = 0x0B;
     main_standby_init(sguan);
 }
 
-static const MotorTab motor_tab[184] = {
+static void motorstatus_fault_init(SguanFoc *sguan){
+    sguan->motorstatus.data.error_code = 0x0C;
+    main_standby_init(sguan);
+}
+
+static const MotorTab motor_tab[196] = {
     // 1.当前的状态机                    2.当前状态机可触发的事件              3.如果触发此事件，下一时刻的状态机
     {STATUS(status_standby),            EVENT(event_ready),                 STATUS(status_ready)},
 
@@ -104,9 +110,9 @@ static const MotorTab motor_tab[184] = {
     {STATUS(status_ready),              EVENT(event_standby0),              STATUS(status_standby)},
 
     // ======================================================================================
-    {STATUS(status_initializing),       EVENT(event_success),                STATUS(status_gotoinit0_angle)},
-    {STATUS(status_gotoinit0_angle),    EVENT(event_success),                STATUS(status_gotoinit1_current)},
-    {STATUS(status_gotoinit1_current),  EVENT(event_success),                STATUS(status_idle)},
+    {STATUS(status_initializing),       EVENT(event_success),               STATUS(status_gotoinit0_angle)},
+    {STATUS(status_gotoinit0_angle),    EVENT(event_success),               STATUS(status_gotoinit1_current)},
+    {STATUS(status_gotoinit1_current),  EVENT(event_success),               STATUS(status_idle)},
     
     // =======================================================================================
     {STATUS(status_idle),               EVENT(event_torque_hold),           STATUS(status_torque_hold)},
@@ -134,6 +140,7 @@ static const MotorTab motor_tab[184] = {
     {STATUS(status_idle),               EVENT(event_overtemp_pcb),          STATUS(status_overtemp_pcb)},
     {STATUS(status_idle),               EVENT(event_undertemp_pcb),         STATUS(status_undertemp_pcb)},
 
+    {STATUS(status_idle),               EVENT(event_phase_loss),            STATUS(status_phase_loss)},
     {STATUS(status_idle),               EVENT(event_fault),                 STATUS(status_fault)},
     
     // =======================================================================================
@@ -154,6 +161,7 @@ static const MotorTab motor_tab[184] = {
     {STATUS(status_torque_increasing),  EVENT(event_undertemp_pcb),         STATUS(status_undertemp_pcb)},
 
     {STATUS(status_torque_increasing),  EVENT(event_stuck),                 STATUS(status_stuck)},
+    {STATUS(status_torque_increasing),  EVENT(event_phase_loss),            STATUS(status_phase_loss)},
     {STATUS(status_torque_increasing),  EVENT(event_fault),                 STATUS(status_fault)},
 
     // =======================================================================================
@@ -174,6 +182,7 @@ static const MotorTab motor_tab[184] = {
     {STATUS(status_torque_decreasing),  EVENT(event_undertemp_pcb),         STATUS(status_undertemp_pcb)},
 
     {STATUS(status_torque_decreasing),  EVENT(event_stuck),                 STATUS(status_stuck)},
+    {STATUS(status_torque_decreasing),  EVENT(event_phase_loss),            STATUS(status_phase_loss)},
     {STATUS(status_torque_decreasing),  EVENT(event_fault),                 STATUS(status_fault)},
 
     // =======================================================================================
@@ -194,6 +203,7 @@ static const MotorTab motor_tab[184] = {
     {STATUS(status_torque_hold),        EVENT(event_undertemp_pcb),         STATUS(status_undertemp_pcb)},
 
     {STATUS(status_torque_hold),        EVENT(event_stuck),                 STATUS(status_stuck)},
+    {STATUS(status_torque_hold),        EVENT(event_phase_loss),            STATUS(status_phase_loss)},
     {STATUS(status_torque_hold),        EVENT(event_fault),                 STATUS(status_fault)},
 
     // =======================================================================================
@@ -214,6 +224,7 @@ static const MotorTab motor_tab[184] = {
     {STATUS(status_velocity_increasing),EVENT(event_undertemp_pcb),         STATUS(status_undertemp_pcb)},
 
     {STATUS(status_velocity_increasing),EVENT(event_stuck),                 STATUS(status_stuck)},
+    {STATUS(status_velocity_increasing),EVENT(event_phase_loss),            STATUS(status_phase_loss)},
     {STATUS(status_velocity_increasing),EVENT(event_fault),                 STATUS(status_fault)},
 
     // =======================================================================================
@@ -234,6 +245,7 @@ static const MotorTab motor_tab[184] = {
     {STATUS(status_velocity_decreasing),EVENT(event_undertemp_pcb),         STATUS(status_undertemp_pcb)},
 
     {STATUS(status_velocity_decreasing),EVENT(event_stuck),                 STATUS(status_stuck)},
+    {STATUS(status_velocity_decreasing),EVENT(event_phase_loss),            STATUS(status_phase_loss)},
     {STATUS(status_velocity_decreasing),EVENT(event_fault),                 STATUS(status_fault)},
 
     // =======================================================================================
@@ -254,6 +266,7 @@ static const MotorTab motor_tab[184] = {
     {STATUS(status_velocity_hold),      EVENT(event_undertemp_pcb),         STATUS(status_undertemp_pcb)},
 
     {STATUS(status_velocity_hold),      EVENT(event_stuck),                 STATUS(status_stuck)},
+    {STATUS(status_velocity_hold),      EVENT(event_phase_loss),            STATUS(status_phase_loss)},
     {STATUS(status_velocity_hold),      EVENT(event_fault),                 STATUS(status_fault)},
 
     // =======================================================================================
@@ -274,6 +287,7 @@ static const MotorTab motor_tab[184] = {
     {STATUS(status_position_increasing),EVENT(event_undertemp_pcb),         STATUS(status_undertemp_pcb)},
 
     {STATUS(status_position_increasing),EVENT(event_stuck),                 STATUS(status_stuck)},
+    {STATUS(status_position_increasing),EVENT(event_phase_loss),            STATUS(status_phase_loss)},
     {STATUS(status_position_increasing),EVENT(event_fault),                 STATUS(status_fault)},
 
     // =======================================================================================
@@ -294,6 +308,7 @@ static const MotorTab motor_tab[184] = {
     {STATUS(status_position_decreasing),EVENT(event_undertemp_pcb),         STATUS(status_undertemp_pcb)},
 
     {STATUS(status_position_decreasing),EVENT(event_stuck),                 STATUS(status_stuck)},
+    {STATUS(status_position_decreasing),EVENT(event_phase_loss),            STATUS(status_phase_loss)},
     {STATUS(status_position_decreasing),EVENT(event_fault),                 STATUS(status_fault)},
 
     // =======================================================================================
@@ -314,6 +329,7 @@ static const MotorTab motor_tab[184] = {
     {STATUS(status_position_hold),      EVENT(event_undertemp_pcb),         STATUS(status_undertemp_pcb)},
 
     {STATUS(status_position_hold),      EVENT(event_stuck),                 STATUS(status_stuck)},
+    {STATUS(status_position_hold),      EVENT(event_phase_loss),            STATUS(status_phase_loss)},
     {STATUS(status_position_hold),      EVENT(event_fault),                 STATUS(status_fault)},
 
     // =======================================================================================
@@ -346,6 +362,9 @@ static const MotorTab motor_tab[184] = {
 
     {STATUS(status_stuck),              EVENT(event_standby0),              STATUS(status_standby)},
     {STATUS(status_stuck),              EVENT(event_standby1),              STATUS(status_standby)},
+
+    {STATUS(status_phase_loss),         EVENT(event_standby0),              STATUS(status_standby)},
+    {STATUS(status_phase_loss),         EVENT(event_standby1),              STATUS(status_standby)},
 
     {STATUS(status_fault),              EVENT(event_standby0),              STATUS(status_standby)},
     {STATUS(status_fault),              EVENT(event_standby1),              STATUS(status_standby)}
@@ -380,6 +399,7 @@ static void (*const motorstatus_initial_init[])(SguanFoc *) = {
     motorstatus_overtemp_pcb_init,
     motorstatus_undertemp_pcb_init,
     motorstatus_stuck_init,
+    motorstatus_phase_loss_init,
     motorstatus_fault_init
 };
 
@@ -412,6 +432,7 @@ static void (*const motorstatus_action_loop[])(void) = {
     status_overtemp_pcb_loop,
     status_undertemp_pcb_loop,
     status_stuck_loop,
+    status_phase_loss_loop,
     status_fault_loop
 };
 
@@ -785,6 +806,16 @@ void motorstatus_loop(void *sguan){
                         p->motorstatus.data.stuck_tick_run;
 
                     if (tick >= p->motorstatus.data.stuck_tick_delay){ // 自动触发
+                            
+                        p->motorstatus.status = 
+                            (HandleStatus)motor_tab[i].status_future;
+                    }
+                    break;
+                }
+                case event_phase_loss:{
+                    // 此处有触发event的代码
+
+                    if (0){ // 自动触发
                             
                         p->motorstatus.status = 
                             (HandleStatus)motor_tab[i].status_future;

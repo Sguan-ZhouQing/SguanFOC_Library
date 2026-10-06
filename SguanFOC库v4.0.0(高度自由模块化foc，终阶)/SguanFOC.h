@@ -24,6 +24,14 @@
 #define CONTROL_VELOCITY    0x01
 #define CONTROL_POSITION    0x02
 
+#define CURRENT_U           0x00
+#define CURRENT_V           0x01
+#define CURRENT_W           0x02
+
+#define HALL_A              0x00
+#define HALL_B              0x01
+#define HALL_C              0x02
+
 typedef struct{
     SguanQ target_speed;                        // (期望速度)Target期望机械角速度
     SguanQ target_pos;                          // (期望角度)Target期望机械角度
@@ -101,27 +109,27 @@ typedef struct{
 }Master;
 
 typedef struct{
-    uint8_t id_flag;
-    uint8_t run_flag;
-    uint8_t uart_flag;
+    uint8_t id_flag;                            // []
+    uint8_t run_flag;                           // []
+    uint8_t uart_flag;                          // []
 
-    uint32_t tick_run;
-    uint32_t tick_last;
+    uint32_t tick_run;                          // []
+    uint32_t tick_last;                         // []
     
-    Method method;
-    MotorStatus motorstatus;
-    Printf printf;
-    Transfer transfer;
+    Method method;                              // []
+    MotorStatus motorstatus;                    // []
+    Printf printf;                              // []
+    Transfer transfer;                          // []
 
-    Foc foc;
-    Encoder encoder;
-    Current current;
-    Master master;
+    Foc foc;                                    // []
+    Encoder encoder;                            // []
+    Current current;                            // []
+    Master master;                              // []
 
-    void (*func_high_loop)(void);
-    void (*func_low_loop)(void);
-    void (*func_printf_loop)(uint8_t *,uint16_t);
-    void (*func_main_loop)(void);
+    void (*func_high_loop)(void);               // []
+    void (*func_low_loop)(void);                // []
+    void (*func_printf_loop)(uint8_t *,uint16_t);//[]
+    void (*func_main_loop)(void);               // []
 }SguanFoc;
 
 extern SguanFoc sguanfoc[CONFIG_MOTOR];

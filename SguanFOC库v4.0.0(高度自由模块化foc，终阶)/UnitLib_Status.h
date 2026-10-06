@@ -21,6 +21,7 @@ void status_undertemp_driver_loop(void);
 void status_overtemp_pcb_loop(void);
 void status_undertemp_pcb_loop(void);
 void status_stuck_loop(void);
+void status_phase_loss_loop(void);
 void status_fault_loop(void);
 
 
