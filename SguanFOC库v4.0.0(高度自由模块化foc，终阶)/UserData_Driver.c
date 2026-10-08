@@ -2,12 +2,12 @@
 
 
 
-uint32_t driver_read_tick(void){
+uint32_t userdata_driver_read_tick(void){
     // 此处放置您的tick函数
     return 0;
 }
 
-SguanQ driver_read_encoder(uint8_t motor){
+SguanQ userdata_driver_read_encoder(uint8_t motor){
     SguanQ encoder_raw = iqmath_zero();
     switch (motor){
     case MOTOR_ONE:
@@ -41,7 +41,7 @@ SguanQ driver_read_encoder(uint8_t motor){
     return encoder_raw;
 }
 
-uint8_t driver_read_hall(uint8_t motor, uint8_t ch){
+uint8_t userdata_driver_read_hall(uint8_t motor, uint8_t ch){
     uint8_t hall_raw = 0;
     switch (motor){
     case MOTOR_ONE:
@@ -152,7 +152,7 @@ uint8_t driver_read_hall(uint8_t motor, uint8_t ch){
     }
 }
 
-uint16_t driver_read_iabc(uint8_t motor, uint8_t ch){
+uint16_t userdata_driver_read_iabc(uint8_t motor, uint8_t ch){
     uint16_t iabc_raw = 0;
     switch (motor){
     case MOTOR_ONE:
@@ -264,7 +264,7 @@ uint16_t driver_read_iabc(uint8_t motor, uint8_t ch){
     return iabc_raw;
 }
 
-SguanQ driver_read_vbus(uint8_t motor){
+SguanQ userdata_driver_read_vbus(uint8_t motor){
     SguanQ vbus_raw = iqmath_zero();
     switch (motor){
     case MOTOR_ONE:
@@ -298,7 +298,7 @@ SguanQ driver_read_vbus(uint8_t motor){
     return vbus_raw;
 }
 
-SguanQ driver_read_ibus(uint8_t motor){
+SguanQ userdata_driver_read_ibus(uint8_t motor){
     SguanQ ibus_raw = iqmath_zero();
     switch (motor){
     case MOTOR_ONE:
@@ -332,7 +332,7 @@ SguanQ driver_read_ibus(uint8_t motor){
     return ibus_raw;
 }
 
-SguanQ driver_read_temp_motor(uint8_t motor){
+SguanQ userdata_driver_read_temp_motor(uint8_t motor){
     SguanQ temp_motor = iqmath_zero();
     switch (motor){
     case MOTOR_ONE:
@@ -366,7 +366,7 @@ SguanQ driver_read_temp_motor(uint8_t motor){
     return temp_motor;
 }
 
-SguanQ driver_read_temp_driver(uint8_t motor){
+SguanQ userdata_driver_read_temp_driver(uint8_t motor){
     SguanQ temp_driver = iqmath_zero();
     switch (motor){
     case MOTOR_ONE:
@@ -400,7 +400,7 @@ SguanQ driver_read_temp_driver(uint8_t motor){
     return temp_driver;
 }
 
-SguanQ driver_read_temp_pcb(uint8_t motor){
+SguanQ userdata_driver_read_temp_pcb(uint8_t motor){
     SguanQ temp_pcb_raw = iqmath_zero();
     switch (motor){
     case MOTOR_ONE:
@@ -434,17 +434,14 @@ SguanQ driver_read_temp_pcb(uint8_t motor){
     return temp_pcb_raw;
 }
 
-void driver_set_uart(uint8_t *ch, uint16_t size){
+void userdata_driver_set_uart(uint8_t *ch, uint16_t size){
     
 }
 
-void driver_set_pwm(uint8_t motor, 
-    uint16_t du_0, 
-    uint16_t du_1, 
-    uint16_t dv_0, 
-    uint16_t dv_1, 
-    uint16_t dw_0, 
-    uint16_t dw_1){
+void userdata_driver_set_pwm(uint8_t motor, 
+    uint16_t du_0, uint16_t du_1, 
+    uint16_t dv_0, uint16_t dv_1, 
+    uint16_t dw_0, uint16_t dw_1){
     switch (motor){
     // 此处放置您的UserData函数
     case MOTOR_ONE:
@@ -470,4 +467,8 @@ void driver_set_pwm(uint8_t motor,
         break;
     }
 }
-void driver_set_adc(uint8_t motor, uint16_t)
+
+void userdata_driver_set_adc(uint8_t motor, uint16_t x){
+
+}
+

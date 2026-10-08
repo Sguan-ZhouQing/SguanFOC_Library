@@ -32,9 +32,9 @@ typedef enum{
     status_undertemp_driver,                    // (undertemp_driver)错误状态->功率器件过冷
     status_overtemp_pcb,                        // (overtemp_pcb)错误状态->驱动器过温
     status_undertemp_pcb,                       // (undertemp_pcb)错误状态->驱动器过冷
-    status_phase_loss,                          // (stuck)错误状态->缺相保护[暂无处理]
-    status_phase_loss,                          // (stuck)错误状态->短路保护[暂未处理]
     status_stuck,                               // (stuck)错误状态->运行卡死
+    status_phase_loss,                          // (phase_loss)错误状态->缺相保护[暂无处理]
+    status_circuit_short,                       // (circuit_short)错误状态->短路保护[暂未处理]
     status_fault                                // (fault)错误状态->未知错误
 }HandleStatus;
 
@@ -80,7 +80,7 @@ typedef enum{
 
     event_stuck = 91,                           // (stuck)
     event_phase_loss,                           // (phase_loss)
-    event_phase_loss,                           // (phase_loss)
+    event_circuit_short,                        // (circuit_short)
     event_fault                                 // (fault->手动)
 }HandleEvent;
 

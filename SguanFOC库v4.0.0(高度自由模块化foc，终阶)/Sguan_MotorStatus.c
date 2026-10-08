@@ -38,67 +38,67 @@ static void motorstatus_null1(void){
 
 static void motorstatus_idle_init(SguanFoc *sguan){
     sguan->motorstatus.data.error_code = 0x00;
-    main_standby_init(sguan);
+    unitlib_main_standby_init(sguan);
 }
 
 static void motorstatus_overvoltage_init(SguanFoc *sguan){
     sguan->motorstatus.data.error_code = 0x01;
-    main_standby_init(sguan);
+    unitlib_main_standby_init(sguan);
 }
 
 static void motorstatus_undervoltage_init(SguanFoc *sguan){
     sguan->motorstatus.data.error_code = 0x02;
-    main_standby_init(sguan);
+    unitlib_main_standby_init(sguan);
 }
 
 static void motorstatus_overcurrent_init(SguanFoc *sguan){
     sguan->motorstatus.data.error_code = 0x03;
-    main_standby_init(sguan);
+    unitlib_main_standby_init(sguan);
 }
 
 static void motorstatus_overtemp_motor_init(SguanFoc *sguan){
     sguan->motorstatus.data.error_code = 0x04;
-    main_standby_init(sguan);
+    unitlib_main_standby_init(sguan);
 }
 
 static void motorstatus_undertemp_motor_init(SguanFoc *sguan){
     sguan->motorstatus.data.error_code = 0x05;
-    main_standby_init(sguan);
+    unitlib_main_standby_init(sguan);
 }
 
 static void motorstatus_overtemp_driver_init(SguanFoc *sguan){
     sguan->motorstatus.data.error_code = 0x06;
-    main_standby_init(sguan);
+    unitlib_main_standby_init(sguan);
 }
 
 static void motorstatus_undertemp_driver_init(SguanFoc *sguan){
     sguan->motorstatus.data.error_code = 0x07;
-    main_standby_init(sguan);
+    unitlib_main_standby_init(sguan);
 }
 
 static void motorstatus_overtemp_pcb_init(SguanFoc *sguan){
     sguan->motorstatus.data.error_code = 0x08;
-    main_standby_init(sguan);
+    unitlib_main_standby_init(sguan);
 }
 
 static void motorstatus_undertemp_pcb_init(SguanFoc *sguan){
     sguan->motorstatus.data.error_code = 0x09;
-    main_standby_init(sguan);
+    unitlib_main_standby_init(sguan);
 }
 
 static void motorstatus_stuck_init(SguanFoc *sguan){
     sguan->motorstatus.data.error_code = 0x0A;
-    main_standby_init(sguan);
+    unitlib_main_standby_init(sguan);
 }
 
 static void motorstatus_phase_loss_init(SguanFoc *sguan){
     sguan->motorstatus.data.error_code = 0x0B;
-    main_standby_init(sguan);
+    unitlib_main_standby_init(sguan);
 }
 
 static void motorstatus_fault_init(SguanFoc *sguan){
     sguan->motorstatus.data.error_code = 0x0C;
-    main_standby_init(sguan);
+    unitlib_main_standby_init(sguan);
 }
 
 static const MotorTab motor_tab[196] = {
@@ -371,12 +371,12 @@ static const MotorTab motor_tab[196] = {
 };
 
 static void (*const motorstatus_initial_init[])(SguanFoc *) = {
-    main_standby_init,
+    unitlib_main_standby_init,
 
-    main_ready_init,
-    main_initializing_init,
-    main_goinit0_angle_init,
-    main_goinit1_current_init,
+    unitlib_main_ready_init,
+    unitlib_main_initializing_init,
+    unitlib_main_goinit0_angle_init,
+    unitlib_main_goinit1_current_init,
     
     motorstatus_idle_init,
     motorstatus_null0,
@@ -404,36 +404,36 @@ static void (*const motorstatus_initial_init[])(SguanFoc *) = {
 };
 
 static void (*const motorstatus_action_loop[])(void) = {
-    status_standby_loop,
+    unitlib_status_standby_loop,
 
-    status_ready_loop,
-    status_initial_loop,
-    status_initial_loop,
-    status_initial_loop,
+    unitlib_status_ready_loop,
+    unitlib_status_initial_loop,
+    unitlib_status_initial_loop,
+    unitlib_status_initial_loop,
 
     motorstatus_null1,
-    status_increasing_loop,
-    status_decreasing_loop,
-    status_hold_loop,
-    status_increasing_loop,
-    status_decreasing_loop,
-    status_hold_loop,
-    status_increasing_loop,
-    status_decreasing_loop,
-    status_hold_loop,
+    unitlib_status_increasing_loop,
+    unitlib_status_decreasing_loop,
+    unitlib_status_hold_loop,
+    unitlib_status_increasing_loop,
+    unitlib_status_decreasing_loop,
+    unitlib_status_hold_loop,
+    unitlib_status_increasing_loop,
+    unitlib_status_decreasing_loop,
+    unitlib_status_hold_loop,
 
-    status_overvoltage_loop,
-    status_undervoltage_loop,
-    status_overcurrent_loop,
-    status_overtemp_motor_loop,
-    status_undertemp_motor_loop,
-    status_overtemp_driver_loop,
-    status_undertemp_driver_loop,
-    status_overtemp_pcb_loop,
-    status_undertemp_pcb_loop,
-    status_stuck_loop,
-    status_phase_loss_loop,
-    status_fault_loop
+    unitlib_status_overvoltage_loop,
+    unitlib_status_undervoltage_loop,
+    unitlib_status_overcurrent_loop,
+    unitlib_status_overtemp_motor_loop,
+    unitlib_status_undertemp_motor_loop,
+    unitlib_status_overtemp_driver_loop,
+    unitlib_status_undertemp_driver_loop,
+    unitlib_status_overtemp_pcb_loop,
+    unitlib_status_undertemp_pcb_loop,
+    unitlib_status_stuck_loop,
+    unitlib_status_phase_loss_loop,
+    unitlib_status_fault_loop
 };
 
 static HandleEvent motorstatus_event_get(uint8_t run){

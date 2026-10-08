@@ -3,6 +3,7 @@
 Sguan_Transfer.c/.h提供以下工程模块(用户可随便使用):
 
 (以下的yes是仅对于float运算，对于IQmath后面再讨论)
+// 多(有patch)
 Transfer1   典型一阶传递函数 yes
 Transfer2   典型二阶传递函数 yes
 Transfer3   典型三阶传递函数 yes
@@ -38,11 +39,14 @@ Hfi         (无感)高频正弦波注入
 Rolo        (无感)降阶龙伯格观测器
 Mars        (无感)模型参考自适应观测器
 Ekf         (无感)扩展卡尔曼滤波
-Delay1      延时函数(延时一拍) yes
-Delay2      延时函数(延时两拍) yes
-Delay3      延时函数(延时三拍) yes
 
-Sine        正弦发生器
+// 多(无patch)
+<!-- Delay1      延时函数(延时一拍) yes
+Delay2      延时函数(延时两拍) yes
+Delay3      延时函数(延时三拍) yes -->
+
+// 单(无patch)
+<!-- Sine        正弦发生器
 Cosine      余弦发生器
 SinCos      正余弦发生器
 Tan         正切求解器
@@ -56,4 +60,4 @@ Spwm0       零序注入的SPWM模块
 Spwm        普通SPWM模块
 Svpwm       七段式SVPWM模块
 Swpwm       电调PWM无感方波
-SingleRs    单电阻采样函数
+SingleRs    单电阻采样函数 -->

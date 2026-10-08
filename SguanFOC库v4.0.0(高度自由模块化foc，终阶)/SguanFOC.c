@@ -65,34 +65,34 @@ static void sguanfoc_high_loop(SguanFoc *sguan){
     #if CONFIG_MOTOR >= 0x02
     switch (sguan->id_flag){
     case MOTOR_ONE:
-        main_high_loop_one(sguan);
+        unitlib_main_high_loop_one(sguan);
         break;
     case MOTOR_TWO:
-        main_high_loop_two(sguan);
+        unitlib_main_high_loop_two(sguan);
         break;
     case MOTOR_THREE:
-        main_high_loop_three(sguan);
+        unitlib_main_high_loop_three(sguan);
         break;
     case MOTOR_FOUR:
-        main_high_loop_four(sguan);
+        unitlib_main_high_loop_four(sguan);
         break;
     case MOTOR_FIVE:
-        main_high_loop_five(sguan);
+        unitlib_main_high_loop_five(sguan);
         break;
     case MOTOR_SIX:
-        main_high_loop_six(sguan);
+        unitlib_main_high_loop_six(sguan);
         break;
     
     default:
         break;
     }
     #else // CONFIG_MOTOR
-    main_high_loop(sguan);
+    unitlib_main_high_loop(sguan);
     #endif // CONFIG_MOTOR
 }
 
 static void sguanfoc_low_loop(SguanFoc *sguan){
-    main_low_loop(sguan);
+    unitlib_main_low_loop(sguan);
 }
 
 static void sguanfoc_printf_loop(uint8_t *data, uint16_t length){
@@ -108,29 +108,29 @@ static void sguanfoc_main_loop(SguanFoc *sguan){
     #if CONFIG_MOTOR >= 0x02
     switch (sguan->id_flag){
     case MOTOR_ONE:
-        main_main_loop_one(sguan);
+        unitlib_main_main_loop_one(sguan);
         break;
     case MOTOR_TWO:
-        main_main_loop_two(sguan);
+        unitlib_main_main_loop_two(sguan);
         break;
     case MOTOR_THREE:
-        main_main_loop_three(sguan);
+        unitlib_main_main_loop_three(sguan);
         break;
     case MOTOR_FOUR:
-        main_main_loop_four(sguan);
+        unitlib_main_main_loop_four(sguan);
         break;
     case MOTOR_FIVE:
-        main_main_loop_five(sguan);
+        unitlib_main_main_loop_five(sguan);
         break;
     case MOTOR_SIX:
-        main_main_loop_six(sguan);
+        unitlib_main_main_loop_six(sguan);
         break;
     
     default:
         break;
     }
     #else // CONFIG_MOTOR
-    main_main_loop(sguan);
+    unitlib_main_main_loop(sguan);
     #endif // CONFIG_MOTOR
 }
 

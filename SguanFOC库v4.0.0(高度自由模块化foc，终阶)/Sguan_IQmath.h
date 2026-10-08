@@ -3,21 +3,6 @@
 
 /* SguanFOC配置文件声明 */
 #include "Sguan_Value.h"
-#include "UserData_Config.h"
-
-#define CONFIG_IQMATH       DATA_DEFINE_IQMATH
-
-// 定点化计算格式
-typedef int32_t Q31;      // 1位符号+0位整数+31位小数
-typedef int16_t Q15;      // 1位符号+0位整数+15位小数
-
-#if DATA_DEFINE_IQMATH==0x01
-typedef Q31                 SguanQ;
-#elif DATA_DEFINE_IQMATH==0x02
-typedef Q15                 SguanQ;
-#else // CONFIG_IQMATH
-typedef float               SguanQ;
-#endif // CONFIG_IQMATH
 
 // ===================== Q31 常量定义 =====================
 #define Q31_MAX         0x7FFFFFFF      // 表示最大值0.9999999995
@@ -29,13 +14,13 @@ typedef float               SguanQ;
 #define Q15_HALF        0x4000          // 表示0.5(特殊场景会用到)
 
 // Q的定点化公式计算
-SguanQ iqmath_from_float(float f, float base_value);
-float iqmath_to_float(SguanQ q, float base_value);
+SguanQ iqmath_from_float(SguanF f, SguanF base_value);
+SguanF iqmath_to_float(SguanQ q, SguanF base_value);
 SguanQ iqmath_add(SguanQ a, SguanQ b);
 SguanQ iqmath_sub(SguanQ a, SguanQ b);
 SguanQ iqmath_mul(SguanQ a, SguanQ b);
 SguanQ iqmath_div(SguanQ a, SguanQ b);
-SguanQ iqmath_convert_base(SguanQ q, float old_base, float new_base);
+SguanQ iqmath_convert_base(SguanQ q, SguanF old_base, SguanF new_base);
 SguanQ iqmath_abs(SguanQ x);
 SguanQ iqmath_zero(void);
 

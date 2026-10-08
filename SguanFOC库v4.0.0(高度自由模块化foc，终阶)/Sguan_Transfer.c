@@ -14,7 +14,7 @@ struct Transfer1Data {
 
 void transfer_transfer1_init(Transfer1 *transfer){
     #if CONFIG_IQMATH
-    patch_transfer1_init(transfer);
+    unitlib_unitlib_patch_transfer1_init(transfer);
     #else // CONFIG_IQMATH
     // 传递函数运算系数固定计算
     transfer->data->data_num[0] = 2.0f*transfer->params.num1 + transfer->params.num0*transfer->params.t;
@@ -34,7 +34,7 @@ void transfer_transfer1_init(Transfer1 *transfer){
 
 void transfer_transfer1_loop(Transfer1 *transfer){
     #if CONFIG_IQMATH
-    patch_transfer1_loop(transfer);
+    unitlib_unitlib_patch_transfer1_loop(transfer);
     #else // CONFIG_IQMATH
     // 1.传递函数运算系数动态计算
     if (transfer->params.recalculate_total_flag){
@@ -65,7 +65,7 @@ struct Transfer2Data {
 
 void transfer_transfer2_init(Transfer2 *transfer){
     #if CONFIG_IQMATH
-    patch_transfer2_init(transfer);
+    unitlib_unitlib_patch_transfer2_init(transfer);
     #else // CONFIG_IQMATH
     // 传递函数运算系数固定计算
     transfer->data->data_num[0] = 4.0f*transfer->params.num2 + 2.0f*transfer->params.num1*transfer->params.t + transfer->params.num0*transfer->params.t*transfer->params.t;
@@ -90,7 +90,7 @@ void transfer_transfer2_init(Transfer2 *transfer){
 
 void transfer_transfer2_loop(Transfer2 *transfer){
     #if CONFIG_IQMATH
-    patch_transfer2_loop(transfer);
+    unitlib_unitlib_patch_transfer2_loop(transfer);
     #else // CONFIG_IQMATH
     // 1.传递函数运算系数动态计算
     if (transfer->params.recalculate_total_flag){
@@ -126,7 +126,7 @@ struct Transfer3Data {
 
 void transfer_transfer3_init(Transfer3 *transfer){
     #if CONFIG_IQMATH
-    patch_transfer3_init(transfer);
+    unitlib_unitlib_patch_transfer3_init(transfer);
     #else // CONFIG_IQMATH
     // 传递函数运算系数固定计算
     transfer->data->data_num[0] = 8.0f*transfer->params.num3 + 4.0f*transfer->params.num2*transfer->params.t + 2.0f*transfer->params.num1*transfer->params.t*transfer->params.t + transfer->params.num0*transfer->params.t*transfer->params.t*transfer->params.t;
@@ -155,7 +155,7 @@ void transfer_transfer3_init(Transfer3 *transfer){
 
 void transfer_transfer3_loop(Transfer3 *transfer){
     #if CONFIG_IQMATH
-    patch_transfer3_loop(transfer);
+    unitlib_unitlib_patch_transfer3_loop(transfer);
     #else // CONFIG_IQMATH
     // 1.传递函数运算系数动态计算
     if (transfer->params.recalculate_total_flag){
@@ -195,7 +195,7 @@ struct Transfer4Data {
 
 void transfer_transfer4_init(Transfer4 *transfer){
     #if CONFIG_IQMATH
-    patch_transfer4_init(transfer);
+    unitlib_patch_transfer4_init(transfer);
     #else // CONFIG_IQMATH
     // 传递函数运算系数固定计算
     transfer->data->data_num[0] = 16.0f*transfer->params.num4 + 8.0f*transfer->params.num3*transfer->params.t + 4.0f*transfer->params.num2*transfer->params.t*transfer->params.t + 2.0f*transfer->params.num1*transfer->params.t*transfer->params.t*transfer->params.t + transfer->params.num0*transfer->params.t*transfer->params.t*transfer->params.t*transfer->params.t;
@@ -228,7 +228,7 @@ void transfer_transfer4_init(Transfer4 *transfer){
 
 void transfer_transfer4_loop(Transfer4 *transfer){
     #if CONFIG_IQMATH
-    patch_transfer4_loop(transfer);
+    unitlib_patch_transfer4_loop(transfer);
     #else // CONFIG_IQMATH
     // 1.传递函数运算系数动态计算
     if (transfer->params.recalculate_total_flag){
@@ -272,7 +272,7 @@ struct Transfer5Data {
 
 void transfer_transfer5_init(Transfer5 *transfer){
     #if CONFIG_IQMATH
-    patch_transfer5_init(transfer);
+    unitlib_patch_transfer5_init(transfer);
     #else // CONFIG_IQMATH
     // 传递函数运算系数固定计算
     transfer->data->data_num[0] = 32.0f*transfer->params.num5 + 16.0f*transfer->params.num4*transfer->params.t + 8.0f*transfer->params.num3*transfer->params.t*transfer->params.t + 4.0f*transfer->params.num2*transfer->params.t*transfer->params.t*transfer->params.t + 2.0f*transfer->params.num1*transfer->params.t*transfer->params.t*transfer->params.t*transfer->params.t + transfer->params.num0*transfer->params.t*transfer->params.t*transfer->params.t*transfer->params.t*transfer->params.t;
@@ -309,7 +309,7 @@ void transfer_transfer5_init(Transfer5 *transfer){
 
 void transfer_transfer5_loop(Transfer5 *transfer){
     #if CONFIG_IQMATH
-    patch_transfer5_loop(transfer);
+    unitlib_patch_transfer5_loop(transfer);
     #else // CONFIG_IQMATH
     // 1.传递函数运算系数动态计算
     if (transfer->params.recalculate_total_flag){
@@ -355,7 +355,7 @@ struct IntegratorData {
 
 void transfer_integrator_init(Integrator *integrator){
     #if CONFIG_IQMATH
-    patch_integrator_init(integrator);
+    unitlib_patch_integrator_init(integrator);
     #else // CONFIG_IQMATH
     // 传递函数运算系数固定计算
     integrator->data->data_num = integrator->params.t/2.0f;
@@ -370,7 +370,7 @@ void transfer_integrator_init(Integrator *integrator){
 
 void transfer_integrator_loop(Integrator *integrator){
     #if CONFIG_IQMATH
-    patch_integrator_loop(integrator);
+    unitlib_patch_integrator_loop(integrator);
     #else // CONFIG_IQMATH
     // 1.运算传递函数
     integrator->out.output += (integrator->in.input + integrator->data->i)*integrator->data->data_num;
@@ -391,7 +391,7 @@ struct DerivativeData {
 
 void transfer_derivative_init(Derivative *derivative){
     #if CONFIG_IQMATH
-    patch_derivative_init(derivative);
+    unitlib_patch_derivative_init(derivative);
     #else // CONFIG_IQMATH
     // 传递函数运算系数固定计算
     derivative->data->data_num[0] = 2.0f*derivative->params.wc;
@@ -411,7 +411,7 @@ void transfer_derivative_init(Derivative *derivative){
 
 void transfer_derivative_loop(Derivative *derivative){
     #if CONFIG_IQMATH
-    patch_derivative_loop(derivative);
+    unitlib_patch_derivative_loop(derivative);
     #else // CONFIG_IQMATH
     // 1.传递函数运算系数动态计算
     if (derivative->params.recalculate_total_flag){
@@ -470,15 +470,15 @@ struct CurveData {
 
 void transfer_curve_init(Curve *curve){
     #if CONFIG_IQMATH
-    patch_curve_init(curve);
+    unitlib_patch_curve_init(curve);
     #else // CONFIG_IQMATH
-    // TODO: 浮点实现
+    
     #endif // CONFIG_IQMATH
 }
 
 void transfer_curve_loop(Curve *curve){
     #if CONFIG_IQMATH
-    patch_curve_loop(curve);
+    unitlib_patch_curve_loop(curve);
     #else // CONFIG_IQMATH
     
     #endif // CONFIG_IQMATH
@@ -497,7 +497,7 @@ struct DftData {
 
 void transfer_dft_init(Dft *dft){
     #if CONFIG_IQMATH
-    patch_dft_init(dft);
+    unitlib_patch_dft_init(dft);
     #else // CONFIG_IQMATH
     
     #endif // CONFIG_IQMATH
@@ -506,7 +506,7 @@ void transfer_dft_init(Dft *dft){
 
 void transfer_dft_loop(Dft *dft){
     #if CONFIG_IQMATH
-    patch_dft_loop(dft);
+    unitlib_patch_dft_loop(dft);
     #else // CONFIG_IQMATH
     
     #endif // CONFIG_IQMATH
@@ -524,7 +524,7 @@ struct HallData {
 
 void transfer_hall_init(Hall *hall){
     #if CONFIG_IQMATH
-    patch_hall_init(hall);
+    unitlib_patch_hall_init(hall);
     #else // CONFIG_IQMATH
     // 传递函数运算系数固定计算
 
@@ -538,7 +538,7 @@ void transfer_hall_init(Hall *hall){
 
 void transfer_hall_loop(Hall *hall){
     #if CONFIG_IQMATH
-    patch_hall_loop(hall);
+    unitlib_patch_hall_loop(hall);
     #else // CONFIG_IQMATH
 
 
@@ -559,7 +559,7 @@ struct Ladrc1Data {
 
 void transfer_ladrc1_init(Ladrc1 *ladrc){
     #if CONFIG_IQMATH
-    patch_ladrc1_init(ladrc);
+    unitlib_patch_ladrc1_init(ladrc);
     #else // CONFIG_IQMATH
     // 传递函数运算系数固定计算
 
@@ -573,7 +573,7 @@ void transfer_ladrc1_init(Ladrc1 *ladrc){
 
 void transfer_ladrc1_loop(Ladrc1 *ladrc){
     #if CONFIG_IQMATH
-    patch_ladrc1_loop(ladrc);
+    unitlib_patch_ladrc1_loop(ladrc);
     #else // CONFIG_IQMATH
 
 
@@ -594,7 +594,7 @@ struct Ladrc2Data {
 
 void transfer_ladrc2_init(Ladrc2 *ladrc){
     #if CONFIG_IQMATH
-    patch_ladrc2_init(ladrc);
+    unitlib_patch_ladrc2_init(ladrc);
     #else // CONFIG_IQMATH
 
 
@@ -604,7 +604,7 @@ void transfer_ladrc2_init(Ladrc2 *ladrc){
 
 void transfer_ladrc2_loop(Ladrc2 *ladrc){
     #if CONFIG_IQMATH
-    patch_ladrc2_loop(ladrc);
+    unitlib_patch_ladrc2_loop(ladrc);
     #else // CONFIG_IQMATH
 
 
@@ -625,7 +625,7 @@ struct SmcData {
 
 void transfer_smc_init(Smc *smc){
     #if CONFIG_IQMATH
-    patch_smc_init(smc);
+    unitlib_patch_smc_init(smc);
     #else // CONFIG_IQMATH
 
 
@@ -635,7 +635,7 @@ void transfer_smc_init(Smc *smc){
 
 void transfer_smc_loop(Smc *smc){
     #if CONFIG_IQMATH
-    patch_smc_loop(smc);
+    unitlib_patch_smc_loop(smc);
     #else // CONFIG_IQMATH
 
 
@@ -656,7 +656,7 @@ struct DpccData {
 
 void transfer_dpcc_init(Dpcc *dpcc){
     #if CONFIG_IQMATH
-    patch_dpcc_init(dpcc);
+    unitlib_patch_dpcc_init(dpcc);
     #else // CONFIG_IQMATH
 
 
@@ -666,7 +666,7 @@ void transfer_dpcc_init(Dpcc *dpcc){
 
 void transfer_dpcc_loop(Dpcc *dpcc){
     #if CONFIG_IQMATH
-    patch_dpcc_loop(dpcc);
+    unitlib_patch_dpcc_loop(dpcc);
     #else // CONFIG_IQMATH
 
 
@@ -687,7 +687,7 @@ struct PirData {
 
 void transfer_pir_init(Pir *pir){
     #if CONFIG_IQMATH
-    patch_pir_init(pir);
+    unitlib_patch_pir_init(pir);
     #else // CONFIG_IQMATH
 
 
@@ -697,7 +697,7 @@ void transfer_pir_init(Pir *pir){
 
 void transfer_pir_loop(Pir *pir){
     #if CONFIG_IQMATH
-    patch_pir_loop(pir);
+    unitlib_patch_pir_loop(pir);
     #else // CONFIG_IQMATH
 
 
@@ -718,7 +718,7 @@ struct PidData {
 
 void transfer_pid_init(Pid *pid){
     #if CONFIG_IQMATH
-    patch_pid_init(pid);
+    unitlib_patch_pid_init(pid);
     #else // CONFIG_IQMATH
 
 
@@ -728,7 +728,7 @@ void transfer_pid_init(Pid *pid){
 
 void transfer_pid_loop(Pid *pid){
     #if CONFIG_IQMATH
-    patch_pid_loop(pid);
+    unitlib_patch_pid_loop(pid);
     #else // CONFIG_IQMATH
 
 
@@ -749,7 +749,7 @@ struct PllData {
 
 void transfer_pll_init(Pll *pll){
     #if CONFIG_IQMATH
-    patch_pll_init(pll);
+    unitlib_patch_pll_init(pll);
     #else // CONFIG_IQMATH
 
 
@@ -759,7 +759,7 @@ void transfer_pll_init(Pll *pll){
 
 void transfer_pll_loop(Pll *pll){
     #if CONFIG_IQMATH
-    patch_pll_loop(pll);
+    unitlib_patch_pll_loop(pll);
     #else // CONFIG_IQMATH
 
 
@@ -783,7 +783,7 @@ struct Lpf1Data {
 
 void transfer_lpf1_init(Lpf1 *lpf){
     #if CONFIG_IQMATH
-    patch_lpf1_init(lpf);
+    unitlib_patch_lpf1_init(lpf);
     #else // CONFIG_IQMATH
     // 传递函数运算系数固定计算
     lpf->data->data_num = lpf->params.t*lpf->params.wc;
@@ -802,7 +802,7 @@ void transfer_lpf1_init(Lpf1 *lpf){
 
 void transfer_lpf1_loop(Lpf1 *lpf){
     #if CONFIG_IQMATH
-    patch_lpf1_loop(lpf);
+    unitlib_patch_lpf1_loop(lpf);
     #else // CONFIG_IQMATH
     // 1.传递函数运算系数动态计算
     if (lpf->params.recalculate_total_flag){
@@ -839,7 +839,7 @@ struct Lpf2Data {
 
 void transfer_lpf2_init(Lpf2 *lpf){
     #if CONFIG_IQMATH
-    patch_lpf2_init(lpf);
+    unitlib_patch_lpf2_init(lpf);
     #else // CONFIG_IQMATH
     // 传递函数运算系数固定计算
     lpf->data->data_num[0] = lpf->params.t*lpf->params.wc*lpf->params.t*lpf->params.wc;
@@ -862,7 +862,7 @@ void transfer_lpf2_init(Lpf2 *lpf){
 
 void transfer_lpf2_loop(Lpf2 *lpf){
     #if CONFIG_IQMATH
-    patch_lpf2_loop(lpf);
+    unitlib_patch_lpf2_loop(lpf);
     #else // CONFIG_IQMATH
     // 1.传递函数运算系数动态计算
     if (lpf->params.recalculate_total_flag){
@@ -901,7 +901,7 @@ struct Hpf1Data {
 
 void transfer_hpf1_init(Hpf1 *hpf){
     #if CONFIG_IQMATH
-    patch_hpf1_init(hpf);
+    unitlib_patch_hpf1_init(hpf);
     #else // CONFIG_IQMATH
     // 传递函数运算系数固定计算
     hpf->data->data_num[0] = 2.0f;
@@ -921,7 +921,7 @@ void transfer_hpf1_init(Hpf1 *hpf){
 
 void transfer_hpf1_loop(Hpf1 *hpf){
     #if CONFIG_IQMATH
-    patch_hpf1_loop(hpf);
+    unitlib_patch_hpf1_loop(hpf);
     #else // CONFIG_IQMATH
     // 1.传递函数运算系数动态计算
     if (hpf->params.recalculate_total_flag){
@@ -959,7 +959,7 @@ struct Hpf2Data {
 
 void transfer_hpf2_init(Hpf2 *hpf){
     #if CONFIG_IQMATH
-    patch_hpf2_init(hpf);
+    unitlib_patch_hpf2_init(hpf);
     #else // CONFIG_IQMATH
     // 传递函数运算系数固定计算
     hpf->data->data_num[0] = 4.0f;
@@ -983,7 +983,7 @@ void transfer_hpf2_init(Hpf2 *hpf){
 
 void transfer_hpf2_loop(Hpf2 *hpf){
     #if CONFIG_IQMATH
-    patch_hpf2_loop(hpf);
+    unitlib_patch_hpf2_loop(hpf);
     #else // CONFIG_IQMATH
     // 1.传递函数运算系数动态计算
     if (hpf->params.recalculate_total_flag){
@@ -1025,7 +1025,7 @@ struct Bpf1Data {
 
 void transfer_bpf1_init(Bpf1 *bpf){
     #if CONFIG_IQMATH
-    patch_bpf1_init(bpf);
+    unitlib_patch_bpf1_init(bpf);
     #else // CONFIG_IQMATH
     // 传递函数运算系数固定计算
     bpf->data->data_num[0] = 2.0f*bpf->params.t*bpf->params.wc_low;
@@ -1049,7 +1049,7 @@ void transfer_bpf1_init(Bpf1 *bpf){
 
 void transfer_bpf1_loop(Bpf1 *bpf){
     #if CONFIG_IQMATH
-    patch_bpf1_loop(bpf);
+    unitlib_patch_bpf1_loop(bpf);
     #else // CONFIG_IQMATH
     // 1.传递函数运算系数动态计算
     if (bpf->params.recalculate_total_flag){
@@ -1091,7 +1091,7 @@ struct Bpf2Data {
 
 void transfer_bpf2_init(Bpf2 *bpf){
     #if CONFIG_IQMATH
-    patch_bpf2_init(bpf);
+    unitlib_patch_bpf2_init(bpf);
     #else // CONFIG_IQMATH
     // 传递函数运算系数固定计算
     bpf->data->data_num[0] = 4.0f*bpf->params.t*bpf->params.wo*bpf->params.zeta;
@@ -1115,7 +1115,7 @@ void transfer_bpf2_init(Bpf2 *bpf){
 
 void transfer_bpf2_loop(Bpf2 *bpf){
     #if CONFIG_IQMATH
-    patch_bpf2_loop(bpf);
+    unitlib_patch_bpf2_loop(bpf);
     #else // CONFIG_IQMATH
     // 1.传递函数运算系数动态计算
     if (bpf->params.recalculate_total_flag){
@@ -1156,7 +1156,7 @@ struct SogiData {
 
 void transfer_sogi_init(Sogi *sogi){
     #if CONFIG_IQMATH
-    patch_sogi_init(sogi);
+    unitlib_patch_sogi_init(sogi);
     #else // CONFIG_IQMATH
     // 传递函数运算系数固定计算
 
@@ -1168,7 +1168,7 @@ void transfer_sogi_init(Sogi *sogi){
 
 void transfer_sogi_loop(Sogi *sogi){
     #if CONFIG_IQMATH
-    patch_sogi_loop(sogi);
+    unitlib_patch_sogi_loop(sogi);
     #else // CONFIG_IQMATH
     // 1.传递函数运算系数动态计算
     if (1){
@@ -1198,7 +1198,7 @@ struct NfData {
 
 void transfer_nf_init(Nf *nf){
     #if CONFIG_IQMATH
-    patch_nf_init(nf);
+    unitlib_patch_nf_init(nf);
     #else // CONFIG_IQMATH
     // 传递函数运算系数固定计算
     nf->data->data_num[0] = 4.0f + nf->params.t*nf->params.wo*nf->params.t*nf->params.wo;
@@ -1222,7 +1222,7 @@ void transfer_nf_init(Nf *nf){
 
 void transfer_nf_loop(Nf *nf){
     #if CONFIG_IQMATH
-    patch_nf_loop(nf);
+    unitlib_patch_nf_loop(nf);
     #else // CONFIG_IQMATH
     // 1.传递函数运算系数动态计算
     if (nf->params.recalculate_total_flag){
@@ -1261,7 +1261,7 @@ struct TpnfData {
 
 void transfer_tpnf_init(Tpnf *tpnf){
     #if CONFIG_IQMATH
-    patch_tpnf_init(tpnf);
+    unitlib_patch_tpnf_init(tpnf);
     #else // CONFIG_IQMATH
     // 传递函数运算系数固定计算
     tpnf->data->data_num[0] = 4.0f + 4.0f*tpnf->params.k2*tpnf->params.t*tpnf->params.wo + tpnf->params.t*tpnf->params.wo*tpnf->params.t*tpnf->params.wo;
@@ -1286,7 +1286,7 @@ void transfer_tpnf_init(Tpnf *tpnf){
 
 void transfer_tpnf_loop(Tpnf *tpnf){
     #if CONFIG_IQMATH
-    patch_tpnf_loop(tpnf);
+    unitlib_patch_tpnf_loop(tpnf);
     #else // CONFIG_IQMATH
     // 1.传递函数运算系数动态计算
     if (tpnf->params.recalculate_total_flag){
@@ -1323,7 +1323,7 @@ struct DobData {
 
 void transfer_dob_init(Dob *dob){
     #if CONFIG_IQMATH
-    patch_dob_init(dob);
+    unitlib_patch_dob_init(dob);
     #else // CONFIG_IQMATH
 
 
@@ -1333,7 +1333,7 @@ void transfer_dob_init(Dob *dob){
 
 void transfer_dob_loop(Dob *dob){
     #if CONFIG_IQMATH
-    patch_dob_loop(dob);
+    unitlib_patch_dob_loop(dob);
     #else // CONFIG_IQMATH
 
 
@@ -1354,7 +1354,7 @@ struct RlsData {
 
 void transfer_rls_init(Rls *rls){
     #if CONFIG_IQMATH
-    patch_rls_init(rls);
+    unitlib_patch_rls_init(rls);
     #else // CONFIG_IQMATH
 
 
@@ -1364,7 +1364,7 @@ void transfer_rls_init(Rls *rls){
 
 void transfer_rls_loop(Rls *rls){
     #if CONFIG_IQMATH
-    patch_rls_loop(rls);
+    unitlib_patch_rls_loop(rls);
     #else // CONFIG_IQMATH
 
 
@@ -1385,7 +1385,7 @@ struct SmoData {
 
 void transfer_smo_init(Smo *smo){
     #if CONFIG_IQMATH
-    patch_smo_init(smo);
+    unitlib_patch_smo_init(smo);
     #else // CONFIG_IQMATH
 
 
@@ -1395,7 +1395,7 @@ void transfer_smo_init(Smo *smo){
 
 void transfer_smo_loop(Smo *smo){
     #if CONFIG_IQMATH
-    patch_smo_loop(smo);
+    unitlib_patch_smo_loop(smo);
     #else // CONFIG_IQMATH
 
 
@@ -1416,7 +1416,7 @@ struct NlfoData {
 
 void transfer_nlfo_init(Nlfo *nlfo){
     #if CONFIG_IQMATH
-    patch_nlfo_init(nlfo);
+    unitlib_patch_nlfo_init(nlfo);
     #else // CONFIG_IQMATH
 
 
@@ -1426,7 +1426,7 @@ void transfer_nlfo_init(Nlfo *nlfo){
 
 void transfer_nlfo_loop(Nlfo *nlfo){
     #if CONFIG_IQMATH
-    patch_nlfo_loop(nlfo);
+    unitlib_patch_nlfo_loop(nlfo);
     #else // CONFIG_IQMATH
 
 
@@ -1446,7 +1446,7 @@ struct VcfoData {
 
 void transfer_vcfo_init(Vcfo *vcfo){
     #if CONFIG_IQMATH
-    patch_vcfo_init(vcfo);
+    unitlib_patch_vcfo_init(vcfo);
     #else // CONFIG_IQMATH
 
 
@@ -1456,7 +1456,7 @@ void transfer_vcfo_init(Vcfo *vcfo){
 
 void transfer_vcfo_loop(Vcfo *vcfo){
     #if CONFIG_IQMATH
-    patch_vcfo_loop(vcfo);
+    unitlib_patch_vcfo_loop(vcfo);
     #else // CONFIG_IQMATH
 
 
@@ -1477,7 +1477,7 @@ struct HfiData {
 
 void transfer_hfi_init(Hfi *hfi){
     #if CONFIG_IQMATH
-    patch_hfi_init(hfi);
+    unitlib_patch_hfi_init(hfi);
     #else // CONFIG_IQMATH
 
 
@@ -1487,7 +1487,7 @@ void transfer_hfi_init(Hfi *hfi){
 
 void transfer_hfi_loop(Hfi *hfi){
     #if CONFIG_IQMATH
-    patch_hfi_loop(hfi);
+    unitlib_patch_hfi_loop(hfi);
     #else // CONFIG_IQMATH
 
 
@@ -1508,7 +1508,7 @@ struct RoloData {
 
 void transfer_rolo_init(Rolo *rolo){
     #if CONFIG_IQMATH
-    patch_rolo_init(rolo);
+    unitlib_patch_rolo_init(rolo);
     #else // CONFIG_IQMATH
 
 
@@ -1518,7 +1518,7 @@ void transfer_rolo_init(Rolo *rolo){
 
 void transfer_rolo_loop(Rolo *rolo){
     #if CONFIG_IQMATH
-    patch_rolo_loop(rolo);
+    unitlib_patch_rolo_loop(rolo);
     #else // CONFIG_IQMATH
 
 
@@ -1539,7 +1539,7 @@ struct MarsData {
 
 void transfer_mars_init(Mars *mars){
     #if CONFIG_IQMATH
-    patch_mars_init(mars);
+    unitlib_patch_mars_init(mars);
     #else // CONFIG_IQMATH
 
 
@@ -1549,7 +1549,7 @@ void transfer_mars_init(Mars *mars){
 
 void transfer_mars_loop(Mars *mars){
     #if CONFIG_IQMATH
-    patch_mars_loop(mars);
+    unitlib_patch_mars_loop(mars);
     #else // CONFIG_IQMATH
 
 
@@ -1570,7 +1570,7 @@ struct EkfData {
 
 void transfer_ekf_init(Ekf *ekf){
     #if CONFIG_IQMATH
-    patch_ekf_init(ekf);
+    unitlib_patch_ekf_init(ekf);
     #else // CONFIG_IQMATH
 
 
@@ -1580,7 +1580,7 @@ void transfer_ekf_init(Ekf *ekf){
 
 void transfer_ekf_loop(Ekf *ekf){
     #if CONFIG_IQMATH
-    patch_ekf_loop(ekf);
+    unitlib_patch_ekf_loop(ekf);
     #else // CONFIG_IQMATH
 
 
@@ -1595,7 +1595,7 @@ void transfer_ekf_loop(Ekf *ekf){
 
 void transfer_delay1_init(Delay1 *delay){
     #if CONFIG_IQMATH
-    patch_delay1_init(delay);
+
     #else // CONFIG_IQMATH
     // 初始化为零
     delay->in.input = 0.0f;
@@ -1605,7 +1605,7 @@ void transfer_delay1_init(Delay1 *delay){
 
 void transfer_delay1_loop(Delay1 *delay){
     #if CONFIG_IQMATH
-    patch_delay1_loop(delay);
+
     #else // CONFIG_IQMATH
     // 1.创建局部静态变量
     static SguanQ delay_num;
@@ -1624,7 +1624,7 @@ void transfer_delay1_loop(Delay1 *delay){
 
 void transfer_delay2_init(Delay2 *delay){
     #if CONFIG_IQMATH
-    patch_delay2_init(delay);
+
     #else // CONFIG_IQMATH
     // 初始化为零
     delay->in.input = 0.0f;
@@ -1634,7 +1634,7 @@ void transfer_delay2_init(Delay2 *delay){
 
 void transfer_delay2_loop(Delay2 *delay){
     #if CONFIG_IQMATH
-    patch_delay2_loop(delay);
+
     #else // CONFIG_IQMATH
     // 1.创建局部静态变量
     static SguanQ delay_num[2];
@@ -1654,7 +1654,7 @@ void transfer_delay2_loop(Delay2 *delay){
 
 void transfer_delay3_init(Delay3 *delay){
     #if CONFIG_IQMATH
-    patch_delay3_init(delay);
+
     #else // CONFIG_IQMATH
     // 初始化为零
     delay->in.input = 0.0f;
@@ -1664,7 +1664,7 @@ void transfer_delay3_init(Delay3 *delay){
 
 void transfer_delay3_loop(Delay3 *delay){
     #if CONFIG_IQMATH
-    patch_delay3_loop(delay);
+
     #else // CONFIG_IQMATH
     // 1.创建局部静态变量
     static SguanQ delay_num[3];
@@ -1685,7 +1685,7 @@ void transfer_delay3_loop(Delay3 *delay){
 
 void transfer_sine_loop(Sine *sine){
     #if CONFIG_IQMATH
-    patch_sine_loop(sine);
+
     #else // CONFIG_IQMATH
     sine->out.output = math_sin(sine->in.input);
     #endif // CONFIG_IQMATH
@@ -1697,7 +1697,7 @@ void transfer_sine_loop(Sine *sine){
 
 void transfer_cosine_loop(Cosine *cosine){
     #if CONFIG_IQMATH
-    patch_cosine_loop(cosine);
+
     #else // CONFIG_IQMATH
     cosine->out.output = math_cos(cosine->in.input);
     #endif // CONFIG_IQMATH
@@ -1709,7 +1709,7 @@ void transfer_cosine_loop(Cosine *cosine){
 
 void transfer_sincos_loop(SinCos *sincos){
     #if CONFIG_IQMATH
-    patch_sincos_loop(sincos);
+
     #else // CONFIG_IQMATH
     math_sin_cos(sincos->in.input, 
         &sincos->out.sine, 
@@ -1720,7 +1720,7 @@ void transfer_sincos_loop(SinCos *sincos){
 // ---------------------------工程模块Transfer---------------------------
 void transfer_tan_loop(Tan *tan){
     #if CONFIG_IQMATH
-    patch_tan_loop(tan);
+
     #else // CONFIG_IQMATH
 
 
@@ -1733,7 +1733,7 @@ void transfer_tan_loop(Tan *tan){
 // ---------------------------工程模块Transfer---------------------------
 void transfer_atan_loop(Atan *atan){
     #if CONFIG_IQMATH
-    patch_atan_loop(atan);
+
     #else // CONFIG_IQMATH
 
 
@@ -1747,7 +1747,7 @@ void transfer_atan_loop(Atan *atan){
 // ---------------------------工程模块Transfer---------------------------
 void transfer_limit_loop(Limit *limit){
     #if CONFIG_IQMATH
-    patch_limit_loop(limit);
+
     #else // CONFIG_IQMATH
 
 
@@ -1761,7 +1761,7 @@ void transfer_limit_loop(Limit *limit){
 // ---------------------------工程模块Transfer---------------------------
 void transfer_sign_loop(Sign *sign){
     #if CONFIG_IQMATH
-    patch_sign_loop(sign);
+
     #else // CONFIG_IQMATH
 
 
@@ -1777,7 +1777,7 @@ void transfer_sign_loop(Sign *sign){
 
 void transfer_clarke_loop(Clarke *clarke){
     #if CONFIG_IQMATH
-    patch_clarke_loop(clarke);
+
     #else // CONFIG_IQMATH
 
 
@@ -1792,7 +1792,7 @@ void transfer_clarke_loop(Clarke *clarke){
 
 void transfer_park_loop(Park *park){
     #if CONFIG_IQMATH
-    patch_park_loop(park);
+
     #else // CONFIG_IQMATH
 
 
@@ -1807,7 +1807,7 @@ void transfer_park_loop(Park *park){
 
 void transfer_ipark_loop(Ipark *ipark){
     #if CONFIG_IQMATH
-    patch_ipark_loop(ipark);
+
     #else // CONFIG_IQMATH
 
 
@@ -1822,7 +1822,7 @@ void transfer_ipark_loop(Ipark *ipark){
 
 void transfer_spwm0_loop(Spwm0 *spwm){
     #if CONFIG_IQMATH
-    patch_spwm0_loop(spwm);
+
     #else // CONFIG_IQMATH
 
 
@@ -1837,7 +1837,7 @@ void transfer_spwm0_loop(Spwm0 *spwm){
 
 void transfer_spwm_loop(Spwm *spwm){
     #if CONFIG_IQMATH
-    patch_spwm_loop(spwm);
+
     #else // CONFIG_IQMATH
 
 
@@ -1850,7 +1850,7 @@ void transfer_spwm_loop(Spwm *spwm){
 
 void transfer_svpwm_loop(Svpwm *svpwm){
     #if CONFIG_IQMATH
-    patch_svpwm_loop(svpwm);
+
     #else // CONFIG_IQMATH
 
 
@@ -1865,7 +1865,7 @@ void transfer_svpwm_loop(Svpwm *svpwm){
 
 void transfer_swpwm_loop(Swpwm *swpwm){
     #if CONFIG_IQMATH
-    patch_swpwm_loop(swpwm);
+
     #else // CONFIG_IQMATH
     // TODO: 浮点实现
     #endif // CONFIG_IQMATH
@@ -1875,7 +1875,7 @@ void transfer_swpwm_loop(Swpwm *swpwm){
 
 void transfer_singlers_loop(SingleRs *singlers){
     #if CONFIG_IQMATH
-    patch_singlers_loop(singlers);
+
     #else // CONFIG_IQMATH
 
 
@@ -1890,7 +1890,7 @@ void transfer_singlers_loop(SingleRs *singlers){
 // ---------------------------工程模块Transfer---------------------------
 void transfer_reset_integrator(void *p){
     #if CONFIG_IQMATH
-    patch_reset_integrator(p);
+
     #else // CONFIG_IQMATH
 
 
