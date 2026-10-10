@@ -18,19 +18,19 @@ static inline void User_Parameter_Init(SguanFOC_System_STRUCT *user){
     user->transfer.Current_D.Kp = 0.3082f;          // PID电流环D轴参数->Kp
     user->transfer.Current_D.Ki = 1131.54f;         // PID电流环D轴参数->Ki
     user->transfer.Current_D.Kd = 0.0f;             // PID电流环D轴参数->Kd
-    user->transfer.Current_D.OutMax = 10.0f;        // PID电流环D轴参数->最大限幅
-    user->transfer.Current_D.OutMin = -10.0f;       // PID电流环D轴参数->最小限幅
-    user->transfer.Current_D.IntMax = 150.0f;       // PID电流环D轴参数->积分项上限
-    user->transfer.Current_D.IntMin = -150.0f;      // PID电流环D轴参数->积分项下限
+    user->transfer.Current_D.OutMax = 13.5f;        // PID电流环D轴参数->最大限幅(原10,见上)
+    user->transfer.Current_D.OutMin = -13.5f;       // PID电流环D轴参数->最小限幅
+    user->transfer.Current_D.IntMax = 15.0f;        // PID电流环D轴参数->积分项上限(原150,见上)
+    user->transfer.Current_D.IntMin = -15.0f;       // PID电流环D轴参数->积分项下限
     /* =================================== 分割线 ================================= */
     user->transfer.Current_Q.Wc = 100.0f;           // PID电流环Q轴参数->微分滤波
     user->transfer.Current_Q.Kp = 0.3082f;          // PID电流环Q轴参数->Kp
     user->transfer.Current_Q.Ki = 1131.54f;         // PID电流环Q轴参数->Ki
     user->transfer.Current_Q.Kd = 0.0f;             // PID电流环Q轴参数->Kd
-    user->transfer.Current_Q.OutMax = 10.0f;        // PID电流环Q轴参数->最大限幅
-    user->transfer.Current_Q.OutMin = -10.0f;       // PID电流环Q轴参数->最小限幅
-    user->transfer.Current_Q.IntMax = 150.0f;       // PID电流环Q轴参数->积分项上限
-    user->transfer.Current_Q.IntMin = -150.0f;      // PID电流环Q轴参数->积分项下限
+    user->transfer.Current_Q.OutMax = 13.5f;        // PID电流环Q轴参数->最大限幅(原10,见D轴注释)
+    user->transfer.Current_Q.OutMin = -13.5f;       // PID电流环Q轴参数->最小限幅
+    user->transfer.Current_Q.IntMax = 15.0f;        // PID电流环Q轴参数->积分项上限(原150)
+    user->transfer.Current_Q.IntMin = -15.0f;       // PID电流环Q轴参数->积分项下限
 
     // 2.转速环参数
     #if CONFIG_CtrlVel==Control_LADRC
@@ -56,13 +56,13 @@ static inline void User_Parameter_Init(SguanFOC_System_STRUCT *user){
     user->transfer.Velocity.IntMin = -50.0f;        // 双环速度外环speed的STA->积分限幅
     #else // CONFIG_CtrlVel
     user->transfer.Velocity.Wc = 100.0f;            // 双环速度外环speed的PID->微分滤波
-    user->transfer.Velocity.Kp = 0.06f;             // 双环速度外环speed的PID->Kp
-    user->transfer.Velocity.Ki = 0.4f;              // 双环速度外环speed的PID->Ki
+    user->transfer.Velocity.Kp = 0.0030f;           // 双环速度外环speed的PID->Kp(0.0103->0.0030)
+    user->transfer.Velocity.Ki = 0.0200f;           // 双环速度外环speed的PID->Ki(0.0687->0.0200)
     user->transfer.Velocity.Kd = 0.0f;              // 双环速度外环speed的PID->Kd
     user->transfer.Velocity.OutMax = 10.5f;         // 双环速度外环speed的PID->最大限幅
     user->transfer.Velocity.OutMin = -10.5f;        // 双环速度外环speed的PID->最小限幅
-    user->transfer.Velocity.IntMax = 15000.0f;      // 双环速度外环speed的PID->积分项上限
-    user->transfer.Velocity.IntMin = -15000.0f;     // 双环速度外环speed的PID->积分项下限
+    user->transfer.Velocity.IntMax = 12.0f;         // 双环速度外环speed的PID->积分项上限(原15000)
+    user->transfer.Velocity.IntMin = -12.0f;        // 双环速度外环speed的PID->积分项下限(原-15000)
     #endif // CONFIG_Control
 
     // 3.位置环参数
@@ -104,7 +104,7 @@ static inline void User_Parameter_Init(SguanFOC_System_STRUCT *user){
     // 5.滤波器参数
     user->transfer.LPF_D.Wc = 31415.96f;            // 电机D轴电流滤波->截止频率
     user->transfer.LPF_Q.Wc = 31415.96f;            // 电机Q轴电流滤波->截止频率
-    user->transfer.LPF_encoder.Wc = 100.0f;         // 速度信号滤波->截止频率
+    user->transfer.LPF_encoder.Wc = 120.0f;         // 速度信号滤波->截止频率(500->120,见上)
 
     // 6.锁相环参数
     user->transfer.PLL_encoder.Kp = 650.0f;         // 锁相环->比例项增益
@@ -186,7 +186,7 @@ static inline void User_Parameter_Init(SguanFOC_System_STRUCT *user){
     
     // 16.霍尔有感结构体
     #if IS_HALL_MODE
-    user->transfer.Hall.Wc = 100.0f;                // 霍尔信号处理->滤波截止频率
+    user->transfer.Hall.Wc = 2000.0f;               // 霍尔信号处理->滤波截止频率(rad/s)
     user->transfer.Hall.Hall_High = 0.6f;           // 霍尔信号处理->信号上边界
     user->transfer.Hall.Hall_Low = 0.4f;            // 霍尔信号处理->信号下边界
     #endif // IS_HALL_MODE

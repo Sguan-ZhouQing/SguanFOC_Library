@@ -3,7 +3,7 @@
  * @GitHub: https://github.com/Sguan-ZhouQing
  * @Date: 2026-01-26 22:38:34
  * @LastEditors: 星必尘Sguan|3464647102@qq.com
- * @LastEditTime: 2026-06-05 04:29:01
+ * @LastEditTime: 2026-07-03 04:29:01
  * @FilePath: \SguanFOC_Debug\SguanFOC\SguanFOC.c
  * @Description: SguanFOC库的“核心代码”实现
  * 
@@ -415,7 +415,9 @@ static void Transfer_PLL_Loop(PLL_STRUCT *pll,
     }
     else{
         // 非位置环模式：PLL输出归一化到[0, 2π)
-        pll->go.Error = input_Rad - pll->go.OutRe*Poles;
+        // [补丁] 原为 `input_Rad - pll->go.OutRe*Poles`，缺 Value_normalize
+        //        ⇒ Poles≥2 时 OutRe*Poles 越出 2π 导致丢锁
+        pll->go.Error = input_Rad - Value_normalize(pll->go.OutRe*Poles);
     }
 
     // 计算角度误差,始终归一化到[-π, π)范围
@@ -434,11 +436,27 @@ static void Transfer_Hall_Loop(SguanFOC_System_STRUCT *sguan,
     sguan->transfer.Hall.go.Input_Ga = User_Encoder_ReadHall(0);
     sguan->transfer.Hall.go.Input_Gb = User_Encoder_ReadHall(1);
     sguan->transfer.Hall.go.Input_Gc = User_Encoder_ReadHall(2);
+	Hall_Loop(&sguan->transfer.Hall);
     float Hall_We = sguan->transfer.Hall.go.Output_Rad;
+    /* ------------------------------------------------------------------
+     * [移植补丁 · 2026-09-21，经用户授权，见 PORTING_CONTRACT.md §13]
+     *
+     * 这里**保留**传 `sguan->motor.Poles`（PLL 内部角仍为机械角，与
+     * Encoder_Sensor_Encoder 一致），但把零位项去掉多余的 ×Poles：
+     *   `Real_offset` 由 Offset_Rad_Hall() 赋值为 `Hall.go.Output_Rad`，
+     *   而 Hall_Loop 的输出是**电角度**（6 档 60° 解码角），
+     *   所以它本来就是电角度，不该再乘极对数。
+     *   Poles=1 时 `Value_normalize(Real_offset*1)` 与
+     *   `Value_normalize(Real_offset)` 完全相同 ⇒ **无行为变化**。
+     *
+     * 越界丢锁的真正修复在 Transfer_PLL_Loop() 内（见该函数注释）：
+     * 非位置环分支漏了 Value_normalize，Poles≥2 时 `OutRe*Poles` 会超过
+     * 2π 导致每个电周期丢锁。两处配合后本路径才对任意极对数成立。
+     * ------------------------------------------------------------------ */
     Transfer_PLL_Loop(pll, 
                     CONFIG_MODE, 
                     sguan->motor.Poles, 
-                    (Hall_We - sguan->encoder.Real_offset)*
+                    (Hall_We - Value_normalize(sguan->encoder.Real_offset))*
                     sguan->motor.Encoder_Dir);
     #endif // IS_HALL_MODE
 }
@@ -2113,8 +2131,6 @@ static void Sguan_Calculate_Low_Loop(SguanFOC_System_STRUCT *sguan){
     Status_RUN_Loop(sguan);
 }
 
-float e,n;
-
 // Sguan系统开始的核心文件，主任务初始化函数
 static void Sguan_Calculate_main_Loop(SguanFOC_System_STRUCT *sguan){
     if (sguan->status == MOTOR_STATUS_START){
@@ -2123,49 +2139,19 @@ static void Sguan_Calculate_main_Loop(SguanFOC_System_STRUCT *sguan){
         // (此时，用户无电机控制权)
         Transfer_Init(sguan);
         Offset_Current_Init(sguan);
-        // // (Offset需要电机零位)
-        // Offset_Rad_Init[Value_set(CONFIG_MODE, 
-        //     MODE_Debug_HN,0)](sguan);
-        // sguan->foc.Ud_in = 3.0f;
-        // User_Delay(1200);
-        // sguan->foc.Ud_in = 0.0f;
-        // User_Delay(800);
+        // (Offset需要电机零位)
+        Offset_Rad_Init[Value_set(CONFIG_MODE, 
+            MODE_Debug_HN,0)](sguan);
+		
 
-        // 1.电机强拖到D轴零位
+        #if (Switch_MOTOR_Start) && \
+            ((CONFIG_MODE == MODE_VF_OPENLOOP) || (CONFIG_MODE == MODE_IF_OPENLOOP))
+        // 如果强拖，这里定位零点
+        sguan->foc.Ud_in = 3.0f;
+        User_Delay(1200);
         sguan->foc.Ud_in = 0.0f;
-        sguan->foc.Uq_in = 1.0f;
-        User_Delay(800); 
-        float Uq_offset = User_Encoder_ReadRad();
-        
-        sguan->foc.Ud_in = 1.0f;
-        sguan->foc.Uq_in = 0.0f;
         User_Delay(800);
-
-        // 2.读取高精度编码器的偏置
-		sguan->encoder.Real_offset = 0.0f;
-        for (uint8_t i = 0; i < 10; i++){
-            sguan->encoder.Real_offset += User_Encoder_ReadRad();
-            User_Delay(2);
-        }
-        sguan->encoder.Real_offset = sguan->encoder.Real_offset/10.0f;
- 
-        // 3.释放电机电压并计算电机方向
-        sguan->foc.Ud_in = 0.0f;
-        float error = Uq_offset - sguan->encoder.Real_offset;
-        e = error;
-        Value_Correct(&error, error);
-        n = error;
-        if (error <= 0.0f){
-            sguan->motor.Motor_Dir = -1;
-            sguan->encoder.Real_offset -= Value_2PI/(sguan->motor.Poles*3.0f);
-        }
-        else {
-            sguan->motor.Motor_Dir = 1;
-        }              
-        User_Delay(600);
-
-        // // 我的电机的固定角度偏置
-        // sguan->encoder.Real_offset = 5.81071901f;
+        #endif // (Switch_MOTOR_Start) && (VF || IF)
 
         // 2.MOTOR_STATUS_INITIALIZING，部分权限开启
         // (SVPWM/SPWM使能，电流计算使能，编码器运算使能)

@@ -32,8 +32,10 @@ static void Handle_Uq(float value);
 
 /* ==================== 重定向设计 =================== */
 // 支持printf函数，而无需选择MicroLIB
-#if 1
+
+#if defined(__ARMCC_VERSION)
 #pragma import(__use_no_semihosting)
+
 struct __FILE { int handle; }; 
 FILE __stdout;
 void _sys_exit(int x) { x = x; } 

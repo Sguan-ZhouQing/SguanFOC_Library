@@ -26,7 +26,7 @@
  * @reminder: 18->MODE_Debug_HN         HFI切NLFO_转速环    (高精度编码器提供Rad)
  * @return {*}
  */
-#define Define_Run_Mode 0
+#define Define_Run_Mode 6
 
 /**
  * @description: 宏定义0-3决定“电机速度环”的控制方式(默认使用PI控制)
@@ -36,7 +36,7 @@
  * @reminder: 3->Control_STA            电流环“PI控制”，转速环“STA超螺旋滑模控制”
  * @return {*}
  */
-#define Switch_MOTOR_Control_Vel 1
+#define Switch_MOTOR_Control_Vel 0
 
 /**
  * @description: 宏定义0-3决定“电机位置环”的控制方式(默认使用PD控制)
@@ -87,7 +87,12 @@
  * @reminder: （比如SMO是IF启动，含高频注入HFI则是注入辨识启动）
  * @return {*}
  */
-#define Switch_MOTOR_Start 0
+#define Switch_MOTOR_Start 1
+//   1 且 模式为 VF(0)/IF(1)  → 执行 D 轴定位（转子对齐到电角度 0，“抽”一下）
+//   0                        → 跳过定位（电机不动，也不再有 2 秒控制台阻塞）
+//   其他模式                  → 跳过（有感/无感靠 Offset_Rad_* 标定零位）
+// 本工程当前 Define_Run_Mode = 1（IF 开环强拖），故置 1 以保留上游默认行为。
+// 若你希望上电启动时转子不要“抽”那一下，把它改回 0 即可。
 
 /**
  * @description: 宏定义0-2决定UART或者CAN发送数据的模式
@@ -128,7 +133,7 @@
  * @reminder: 1->开启电流的前馈解耦
  * @return {*}
  */
-#define Open_Current_Feedforward 1
+#define Open_Current_Feedforward 0
 
 /**
  * @description: 宏定义0或1决定“速度前馈”是否开启(开启最优)

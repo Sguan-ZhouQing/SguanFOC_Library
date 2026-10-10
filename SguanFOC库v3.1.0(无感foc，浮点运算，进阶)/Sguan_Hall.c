@@ -47,7 +47,10 @@ void Hall_Init(HALL_STRUCT *hall){
 void Hall_Loop(HALL_STRUCT *hall){
     // 1.创建函数局部变量
     static uint8_t v[6] = {5, 3, 4, 1, 0, 2};
-    uint8_t Signal_a,Signal_b,Signal_c,Sector;
+
+    static uint8_t Signal_a = 0, Signal_b = 0, Signal_c = 0;
+    static uint8_t seeded = 0;
+    uint8_t Sector;
 
     // 2.三相输入信号的低通滤波
     hall->go.Hall_A = hall->go.Gain*((float)hall->go.Input_Ga) + 
@@ -56,8 +59,17 @@ void Hall_Loop(HALL_STRUCT *hall){
                     hall->go.Normalized_Gain*hall->go.Hall_B;
     hall->go.Hall_C = hall->go.Gain*((float)hall->go.Input_Gc) + 
                     hall->go.Normalized_Gain*hall->go.Hall_C;
+
+    /* 首次调用用原始输入播种，避免 static 初值与实际电平不符
+     * （标定时 Gain=1.0 为直通，此处播种即等于真实电平） */
+    if (!seeded){
+        Signal_a = (hall->go.Input_Ga != 0u) ? 1u : 0u;
+        Signal_b = (hall->go.Input_Gb != 0u) ? 1u : 0u;
+        Signal_c = (hall->go.Input_Gc != 0u) ? 1u : 0u;
+        seeded = 1u;
+    }
     
-    // 3.信号边界判断(防抖动)
+    // 3.信号边界判断(防抖动) —— 落在迟滞带内则保持上一拍电平
     if (hall->go.Hall_A >= hall->Hall_High) Signal_a = 1;
     else if (hall->go.Hall_A <= hall->Hall_Low) Signal_a = 0;
     
@@ -68,7 +80,13 @@ void Hall_Loop(HALL_STRUCT *hall){
     else if (hall->go.Hall_C <= hall->Hall_Low) Signal_c = 0;
 
     // 4.霍尔数据处理并输出角度值
-    Sector = (Signal_a << 2) | (Signal_b << 1) | (Signal_c);
-    hall->go.Output_Rad = (v[Sector - 1]*(float)Value_2PI)/6.0f;
+    Sector = (uint8_t)(((uint32_t)Signal_a << 2) |
+                       ((uint32_t)Signal_b << 1) |
+                       (uint32_t)Signal_c);
+    if ((Sector >= 1u) && (Sector <= 6u)){
+        hall->go.Output_Rad = (v[Sector - 1]*(float)Value_2PI)/6.0f;
+    }
+    /* else: Sector = 0 或 7 属非法组合（正常 120° 排布不会出现），
+     *       保持上一拍的 Output_Rad，**不访问 v[]**（原实现会越界）。 */
 }
 
