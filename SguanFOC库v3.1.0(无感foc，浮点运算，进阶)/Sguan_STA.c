@@ -22,7 +22,10 @@ static float STA_SignFunction(STA_STRUCT *sta,float s_abs){
     }
     // 边界层外的符号区
     else{
-        return (sta->run.s > 0) ? 1.0f : -1.0f;
+        // 注意：这里必须是 s[0]（本次滑模面），不能写成 s。
+        // s 是 float[2]，写成 s 会退化成数组首地址与整数 0 比较（恒为真），
+        // 导致符号函数永远返回 +1.0f、负号分支失效。
+        return (sta->run.s[0] > 0) ? 1.0f : -1.0f;
     }
 }
 
