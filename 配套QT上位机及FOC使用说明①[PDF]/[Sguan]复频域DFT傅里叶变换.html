@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>复频域傅里叶变换演示 (DFT版)</title>
+    <style>
+        :root {
+            --bg-color: #f9f9fb;
+            --panel-bg: #ffffff;
+            --text-main: #333333;
+            --text-sub: #666666;
+            --accent: #3b82f6;
+            --accent-hover: #2563eb;
+            --border: #e5e7eb;
+            --curve-light: #bfdbfe;
+            --curve-dark: #2563eb;
+            --sum-color: #ef4444;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* 整体放大1.5倍 */
+        .scale-wrapper {
+            transform: scale(1.5);
+            transform-origin: center center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            display: flex;
+            gap: 30px;
+            background: var(--panel-bg);
+            padding: 25px;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+            width: 900px;
+            height: 580px;
+        }
+
+        .controls {
+            flex: 0 0 280px;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            padding-top: 5px;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .control-group label {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-sub);
+        }
+
+        .input-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .input-row input[type="range"] {
+            flex: 1;
+            accent-color: var(--accent);
+        }
+
+        .input-row input[type="number"], .input-row select {
+            padding: 4px 6px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 13px;
+            font-family: monospace;
+            outline: none;
+            color: var(--accent);
+            font-weight: bold;
+        }
+
+        .input-row input[type="number"] {
+            width: 60px;
+            text-align: center;
+        }
+
+        .input-row select {
+            width: 80px;
+            cursor: pointer;
+        }
+
+        .input-row input[type="number"]:focus, .input-row select:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+        }
+
+        .radio-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 5px;
+        }
+
+        .radio-group label {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 14px;
+            cursor: pointer;
+            color: var(--text-main);
+            font-weight: normal;
+        }
+
+        .radio-group input[type="radio"] {
+            accent-color: var(--accent);
+            cursor: pointer;
+        }
+
+        .btn-toggle {
+            padding: 12px 15px;
+            background-color: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-top: auto;
+        }
+
+        .btn-toggle:hover {
+            background-color: var(--accent-hover);
+        }
+
+        .btn-toggle.active {
+            background-color: #10b981;
+        }
+
+        .canvas-container {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            background: #ffffff;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            overflow: hidden;
+        }
+
+        /* 画布 CSS 尺寸固定，物理分辨率在 JS 中放大 */
+        canvas {
+            display: block;
+            width: 560px;
+            height: 520px;
+        }
+
+        .info-panel {
+            position: absolute;
+            bottom: 15px;
+            left: 15px;
+            right: 15px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 12px 15px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            font-size: 13px;
+            font-family: monospace;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .info-label {
+            color: var(--text-sub);
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .info-value {
+            color: var(--sum-color);
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .info-value.blue {
+            color: var(--curve-dark);
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="scale-wrapper">
+    <div class="container">
+        <!-- 控制面板 -->
+        <div class="controls">
+            <div class="control-group">
+                <label>采样点数 (N)</label>
+                <div class="input-row">
+                    <select id="numPointsSelect">
+                        <option value="100">100</option>
+                        <option value="200">200</option>
+                        <option value="300" selected>300</option>
+                        <option value="500">500</option>
+                        <option value="1000">1000</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label>欧拉转盘频率 (ω₀)</label>
+                <div class="input-row">
+                    <input type="range" id="freqW0" min="0" max="20" step="0.1" value="5">
+                    <input type="number" id="numW0" min="0" step="0.1" value="5">
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label>扫频 sin 频率 (ω)</label>
+                <div class="input-row">
+                    <input type="range" id="freqW" min="0" max="20" step="0.1" value="5">
+                    <input type="number" id="numW" min="0" step="0.1" value="5">
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label>X 取值 (0 - 2π)</label>
+                <div class="radio-group">
+                    <label><input type="radio" name="xMode" value="custom" checked> 自定义</label>
+                    <label><input type="radio" name="xMode" value="auto"> 自动扫频</label>
+                </div>
+                <input type="range" id="xSlider" min="0" max="6.283" step="0.01" value="0">
+                <div class="input-row" style="margin-top: 5px;">
+                    <span style="font-size:12px; color:#666;">当前 X 值:</span>
+                    <span id="valX" style="font-family:monospace; font-weight:bold; color:var(--accent);">0.00</span>
+                </div>
+            </div>
+
+            <button class="btn-toggle" id="btnAuto">开始自动扫频</button>
+        </div>
+
+        <!-- 画布区域 -->
+        <div class="canvas-container">
+            <canvas id="canvas"></canvas>
+            <div class="info-panel">
+                <div class="info-item">
+                    <span class="info-label">全周期复数和 (0 ~ 2π)</span>
+                    <span class="info-value" id="totalSumText">0.00 + 0.00i</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">当前 X 点复数</span>
+                    <span class="info-value blue" id="currentPointText">0.00 + 0.00i</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    
+    // 设置画布的 CSS 尺寸和实际物理尺寸，解决模糊问题
+    const cssWidth = 560;
+    const cssHeight = 520;
+    const dpr = window.devicePixelRatio || 1; // 获取设备像素比
+    
+    // 设置 CSS 尺寸
+    canvas.style.width = cssWidth + 'px';
+    canvas.style.height = cssHeight + 'px';
+    
+    // 设置物理像素尺寸 (放大 dpr 倍)
+    canvas.width = cssWidth * dpr;
+    canvas.height = cssHeight * dpr;
+    
+    // 将画布坐标系缩放到 CSS 尺寸的尺度
+    ctx.scale(dpr, dpr);
+
+    // 使用逻辑尺寸进行绘图
+    const width = cssWidth;
+    const height = cssHeight;
+    const cx = width / 2;
+    const cy = height / 2;
+    
+    // 【核心改动】复平面单位圆视觉放大 1.25 倍
+    // 原来是 110，现在变成 110 * 1.25 = 137.5
+    const scale = 137.5; 
+
+    // 状态变量
+    let N = 300; 
+    let w0 = 5;
+    let w = 5;
+    let x = 0;
+    let isAuto = false;
+    let animationId = null;
+
+    // DOM 元素
+    const numPointsSelect = document.getElementById('numPointsSelect');
+    const freqW0Input = document.getElementById('freqW0');
+    const numW0Input = document.getElementById('numW0');
+    const freqWInput = document.getElementById('freqW');
+    const numWInput = document.getElementById('numW');
+    const xSlider = document.getElementById('xSlider');
+    const valX = document.getElementById('valX');
+    const btnAuto = document.getElementById('btnAuto');
+    const totalSumText = document.getElementById('totalSumText');
+    const currentPointText = document.getElementById('currentPointText');
+    const radioXMode = document.querySelectorAll('input[name="xMode"]');
+
+    function init() {
+        numPointsSelect.addEventListener('change', (e) => {
+            N = parseInt(e.target.value);
+            update();
+        });
+
+        freqW0Input.addEventListener('input', (e) => {
+            w0 = parseFloat(e.target.value) || 0;
+            numW0Input.value = w0;
+            update();
+        });
+        numW0Input.addEventListener('input', (e) => {
+            let val = parseFloat(e.target.value);
+            if (isNaN(val)) val = 0;
+            w0 = val;
+            freqW0Input.value = Math.min(Math.max(val, 0), 20);
+            update();
+        });
+
+        freqWInput.addEventListener('input', (e) => {
+            w = parseFloat(e.target.value) || 0;
+            numWInput.value = w;
+            update();
+        });
+        numWInput.addEventListener('input', (e) => {
+            let val = parseFloat(e.target.value);
+            if (isNaN(val)) val = 0;
+            w = val;
+            freqWInput.value = Math.min(Math.max(val, 0), 20);
+            update();
+        });
+
+        xSlider.addEventListener('input', (e) => {
+            x = parseFloat(e.target.value) || 0;
+            valX.textContent = x.toFixed(2);
+            update();
+        });
+
+        radioXMode.forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                if (e.target.value === 'custom') {
+                    stopAuto();
+                } else {
+                    startAuto();
+                }
+            });
+        });
+
+        btnAuto.addEventListener('click', () => {
+            if (isAuto) {
+                stopAuto();
+            } else {
+                startAuto();
+            }
+        });
+
+        update();
+    }
+
+    function startAuto() {
+        isAuto = true;
+        btnAuto.textContent = '停止扫频';
+        btnAuto.classList.add('active');
+        radioXMode.forEach(r => {
+            if (r.value === 'auto') r.checked = true;
+        });
+        autoLoop();
+    }
+
+    function stopAuto() {
+        isAuto = false;
+        btnAuto.textContent = '开始自动扫频';
+        btnAuto.classList.remove('active');
+        radioXMode.forEach(r => {
+            if (r.value === 'custom') r.checked = true;
+        });
+        if (animationId) cancelAnimationFrame(animationId);
+    }
+
+    function autoLoop() {
+        if (!isAuto) return;
+
+        const speed = 0.03; 
+        x += speed;
+
+        if (x >= Math.PI * 2) {
+            x = 0; 
+        }
+
+        xSlider.value = x;
+        valX.textContent = x.toFixed(2);
+        update();
+
+        animationId = requestAnimationFrame(autoLoop);
+    }
+
+    function update() {
+        // 清空画布（使用逻辑尺寸）
+        ctx.clearRect(0, 0, width, height);
+        
+        // 因为放大了 scale，需要重新绘制更宽的网格
+        drawGrid();
+
+        const points = [];
+        let totalSumRe = 0;
+        let totalSumIm = 0;
+
+        // 1. 计算 N 个点
+        for (let i = 0; i < N; i++) {
+            const t = (i / N) * Math.PI * 2;
+            const eulerRe = Math.cos(w0 * t);
+            const eulerIm = -Math.sin(w0 * t); 
+            const sinVal = Math.sin(w * t);
+            const re = eulerRe * sinVal;
+            const im = eulerIm * sinVal;
+
+            points.push({ re, im });
+            totalSumRe += re;
+            totalSumIm += im;
+        }
+
+        // 2. 绘制单位圆参考线
+        ctx.beginPath();
+        ctx.arc(cx, cy, scale, 0, Math.PI * 2);
+        ctx.strokeStyle = '#e5e7eb';
+        ctx.setLineDash([5, 5]);
+        ctx.lineWidth = 1.5; // 稍微加粗一点适应放大
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        // 3. 绘制完整的曲线轮廓（浅蓝色）
+        if (points.length > 1) {
+            ctx.beginPath();
+            ctx.moveTo(cx + points[0].re * scale, cy - points[0].im * scale);
+            for (let i = 1; i < points.length; i++) {
+                ctx.lineTo(cx + points[i].re * scale, cy - points[i].im * scale);
+            }
+            ctx.strokeStyle = '#bfdbfe'; 
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+        }
+
+        // 4. 绘制当前 X 之前的轨迹（深蓝色高亮）
+        const currentIndex = Math.floor((x / (Math.PI * 2)) * N);
+        if (currentIndex > 0) {
+            ctx.beginPath();
+            ctx.moveTo(cx + points[0].re * scale, cy - points[0].im * scale);
+            for (let i = 1; i <= currentIndex; i++) {
+                if (i < points.length) {
+                    ctx.lineTo(cx + points[i].re * scale, cy - points[i].im * scale);
+                }
+            }
+            ctx.strokeStyle = '#2563eb'; 
+            ctx.lineWidth = 2.5;
+            ctx.stroke();
+        }
+
+        // 5. 绘制当前时刻的红点
+        const currentT = x;
+        const curEulerRe = Math.cos(w0 * currentT);
+        const curEulerIm = -Math.sin(w0 * currentT);
+        const curSinVal = Math.sin(w * currentT);
+        const curRe = curEulerRe * curSinVal;
+        const curIm = curEulerIm * curSinVal;
+
+        ctx.beginPath();
+        ctx.arc(cx + curRe * scale, cy - curIm * scale, 7, 0, Math.PI * 2); // 红点稍微放大
+        ctx.fillStyle = '#ef4444';
+        ctx.fill();
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 2.5;
+        ctx.stroke();
+
+        // 6. 绘制全周期复数和向量
+        const avgTotalRe = totalSumRe / N;
+        const avgTotalIm = totalSumIm / N;
+
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.lineTo(cx + avgTotalRe * scale, cy - avgTotalIm * scale);
+        ctx.strokeStyle = '#ef4444';
+        ctx.lineWidth = 3;
+        ctx.stroke();
+
+        // 画箭头
+        const angle = Math.atan2(-avgTotalIm, avgTotalRe);
+        ctx.beginPath();
+        ctx.moveTo(cx + avgTotalRe * scale, cy - avgTotalIm * scale);
+        ctx.lineTo(
+            cx + avgTotalRe * scale - 12 * Math.cos(angle - Math.PI / 6),
+            cy - avgTotalIm * scale - 12 * Math.sin(angle - Math.PI / 6)
+        );
+        ctx.lineTo(
+            cx + avgTotalRe * scale - 12 * Math.cos(angle + Math.PI / 6),
+            cy - avgTotalIm * scale - 12 * Math.sin(angle + Math.PI / 6)
+        );
+        ctx.closePath();
+        ctx.fillStyle = '#ef4444';
+        ctx.fill();
+
+        // 7. 更新文本显示
+        totalSumText.textContent = `${totalSumRe.toFixed(2)} + ${totalSumIm.toFixed(2)}i`;
+        currentPointText.textContent = `${curRe.toFixed(4)} + ${curIm.toFixed(4)}i`;
+    }
+
+    function drawGrid() {
+        ctx.strokeStyle = '#f3f4f6';
+        ctx.lineWidth = 1;
+
+        // 因为 scale 变大了，网格需要画得更密集一些才能覆盖全屏
+        // 我们画从 -3 到 3 的网格线
+        for (let i = -3; i <= 3; i++) {
+            if (i === 0) continue;
+            ctx.beginPath();
+            ctx.moveTo(cx + i * scale, 0);
+            ctx.lineTo(cx + i * scale, height);
+            ctx.stroke();
+        }
+        for (let i = -3; i <= 3; i++) {
+            if (i === 0) continue;
+            ctx.beginPath();
+            ctx.moveTo(0, cy + i * scale);
+            ctx.lineTo(width, cy + i * scale);
+            ctx.stroke();
+        }
+
+        ctx.strokeStyle = '#9ca3af';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.moveTo(0, cy); ctx.lineTo(width, cy); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(cx, 0); ctx.lineTo(cx, height); ctx.stroke();
+
+        ctx.fillStyle = '#6b7280';
+        ctx.font = '12px monospace';
+        ctx.fillText('Re', width - 25, cy - 10);
+        ctx.fillText('Im', cx + 10, 20);
+    }
+
+    init();
+</script>
+</body>
+</html>
