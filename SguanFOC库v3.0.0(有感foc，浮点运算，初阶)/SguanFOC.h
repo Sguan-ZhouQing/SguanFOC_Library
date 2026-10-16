@@ -57,7 +57,7 @@ typedef struct{
 }MOTOR_IDENTIFY_STRUCT;
 
 typedef struct{
-    uint8_t Poles;                  // (电机实体参数)电机极对极数
+    uint8_t Poles;                  // (电机实体参数)电机极对数
     float VBUS;                     // (电机实体参数)母线电压
 
     int8_t Motor_Dir;               // (参数设计)电机的运行方向设计
