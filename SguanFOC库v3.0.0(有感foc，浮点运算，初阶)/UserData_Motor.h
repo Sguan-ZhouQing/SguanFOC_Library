@@ -36,7 +36,7 @@ static inline void User_MotorSet(void){
     Sguan.motor.Sampling_Rs = 0.005f;   // (float)采样电阻大小
     // 5.电机安全设计
     Sguan.safe.VBUS_MAX = 14.0f;        // (float)母线电压值波动MAX阈值
-    Sguan.safe.VBUS_MIM = 10.0f;        // (float)母线电压值波动MIN阈值
+    Sguan.safe.VBUS_MIN = 10.0f;        // (float)母线电压值波动MIN阈值
     Sguan.safe.VBUS_watchdog_limit = 1000;
 
     Sguan.safe.Temp_MAX = 60.0f;        // (float)驱动器允许最大温度
