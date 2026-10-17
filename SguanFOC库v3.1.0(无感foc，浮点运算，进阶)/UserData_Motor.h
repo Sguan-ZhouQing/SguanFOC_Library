@@ -52,7 +52,7 @@ static inline void User_Motor_Init(SguanFOC_System_STRUCT *user){
 
     // 3.Sguan.safe参数设计(维护驱动器安全)
     user->safe.VBUS_MAX = 14.0f;                    // (float)母线电压值波动MAX阈值
-    user->safe.VBUS_MIM = 10.0f;                    // (float)母线电压值波动MIN阈值
+    user->safe.VBUS_MIN = 10.0f;                    // (float)母线电压值波动MIN阈值
     user->safe.VBUS_watchdog_limit = 1000;          // (uint32_t)看门狗
 
     user->safe.Temp_MAX = 60.0f;                    // (float)驱动器允许最大温度

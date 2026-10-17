@@ -439,7 +439,7 @@ typedef struct{
  */
 typedef struct{    
     float VBUS_MAX;                         // (参数设计)母线电压值波动MAX阈值
-    float VBUS_MIM;                         // (参数设计)母线电压值波动MIN阈值
+    float VBUS_MIN;                         // (参数设计)母线电压值波动MIN阈值
     uint32_t VBUS_watchdog_limit;           // (参数设计)电压异常的警告周期
     // 如果有电机电压预警，电机正常运行...经过Sguan_Low_Loop()的VBUS_watchdog_limit此运行周期
     // 若2-10次，中间有一次再触发电压警告，电机停转进待机
