@@ -12,7 +12,7 @@
  * @reminder: 5->MODE_NLFO_Speed1       磁链速度-电流闭环    (速度-电流闭环“IF切磁链”)
  * @return {*}
  */
-#define Define_Run_Mode 3
+#define Define_Run_Mode 2
 
 /**
  * @description: 宏定义0-1决定“电机是否开启电流偏置读取”(默认开启)
@@ -20,7 +20,7 @@
  * @reminder: 1->开启电流偏置的Tick读取
  * @return {*}
  */
-#define Current_Offset_Open 0
+#define Current_Offset_Open 1
 
 /**
  * @description: 宏定义0-1决定“电机是否实时更新Q31/Float之间数据的转换”(默认开启)
@@ -28,15 +28,15 @@
  * @reminder: 1->开启Q31/Float数据之间的转换
  * @return {*}
  */
-#define Q31_Float_Open 1
+#define Q31_Float_Open 0
 
 /**
- * @description: 宏定义0-1决定“电机采用单电阻采样”(默认关闭)
- * @reminder: 0->不开启单电阻采样程序
- * @reminder: 1->开启电机单电阻采样功能
+ * @description: 宏定义0-1决定“电机启动观测模式”(默认开启)
+ * @reminder: 0->不开启观测模式
+ * @reminder: 1->开启电机观测模式，需要额外运算资源
  * @return {*}
  */
-#define Read_SingleRs_Open 0
+#define Read_Observation_Open 1
 
 /**
  * @description: Q31定点化运算的数据标幺(基值设计)
@@ -53,22 +53,15 @@
 #define Q_Flux (Q_Voltage*Q_Time)           // 磁链大小(单位为Wb韦伯)
 #define Q_Resistor (Q_Voltage/Q_Current)    // 电阻数据设定(单位为Ω欧姆)
 
-// 电机一些宏定义设置
-// #define Current_Gain 0.0101725264f          // (电机参数)电流最后增益
-
 // 定时器中断参数设计
 // (5K)
 // #define TIM_T 2e-4f                         // 最大频率的控制周期
 // (4.5K)
-// #define TIM_T 2.222222222e-4f                   // 最大频率的控制周期
+// #define TIM_T 2.222222222e-4f            // 最大频率的控制周期
 // (4K)
-// #define TIM_T 2.5e-4f                       // 最大频率的控制周期
+#define TIM_T 2.5e-4f                    // 最大频率的控制周期
 // (2K)
-#define TIM_T 5e-4f                           // 最大频率的控制周期（FOC 2kHz，PWM 8kHz）
-// 单电阻采样考量
-// #define Dead_Time 4.2e-6f                // 死区及电流恢复时间
-// #define ADC_Time 5e-7f                   // ADC采样及转换时间
-// (这里的数值已经放置在了Sguan_Value.h中做Q31数值了)
+// #define TIM_T 5e-4f                      // 最大频率的控制周期
 
 
 #endif // USERDATA_CONFIG_H

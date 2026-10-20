@@ -62,7 +62,7 @@ static void Transfer_NLFO_Loop(SguanFOC_System_STRUCT *sguan,
     sguan->Transfer.NLFO.go.Input_Ubeta = sguan->Foc.Ubeta;
     NLFO_Loop(&sguan->Transfer.NLFO);
 
-    #if 1
+    #if CONFIG_Observation
     Q31_t Cosine,Sine;
     fast_sin_cos(pll->go.OutRe, &Sine, &Cosine);
 
@@ -70,11 +70,11 @@ static void Transfer_NLFO_Loop(SguanFOC_System_STRUCT *sguan,
     Q31_t Error = iqmath_sub(
         iqmath_mul(sguan->Transfer.NLFO.go.Output_Sine, Cosine),
         iqmath_mul(sguan->Transfer.NLFO.go.Output_Cosine, Sine));
-    #else
+    #else // CONFIG_Observation
     Q31_t Error = iqmath_sub(
         iqmath_mul(sguan->Transfer.NLFO.go.Output_Sine, sguan->Foc.Cosine),
         iqmath_mul(sguan->Transfer.NLFO.go.Output_Cosine, sguan->Foc.Sine));
-    #endif
+    #endif // CONFIG_Observation
 
     pll->go.Error = (Q31_t)((uint32_t)Error << 9); // Sguan_NLFO中有缩放9倍
 
@@ -185,6 +185,8 @@ static void High_Encoder_Loop(SguanFOC_System_STRUCT *sguan){
     sguan->Foc.Uq_in = Transfer_LPF_Loop(
         &sguan->Transfer.LPF_Ltd, 
         sguan->Foc.Target_Uq);
+
+    sguan->Foc.Ud_in = 2097152;
     #else // CONFIG_MODE
     sguan->Foc.Speed_in = Transfer_LPF_Loop(
         &sguan->Transfer.LPF_Ltd, 
@@ -203,14 +205,15 @@ static void High_Encoder_Loop(SguanFOC_System_STRUCT *sguan){
         sguan->Motor.Real_We, 
         PMSM_RUN_T_q31);
 
-    // // .........................................................
-    // Transfer_NLFO_Loop(sguan, &sguan->Transfer.PLL);
+    #if CONFIG_Observation
+    // (无感FOC观测)
+    Transfer_NLFO_Loop(sguan, &sguan->Transfer.PLL);
     
-    // // (电机角速度滤波)
-    // Transfer_LPF_Loop(
-    //     &sguan->Transfer.LPF_Speed, 
-    //     sguan->Transfer.PLL.go.OutWe);
-    // // .........................................................
+    // (电机角速度滤波)
+    Transfer_LPF_Loop(
+        &sguan->Transfer.LPF_Speed, 
+        sguan->Transfer.PLL.go.OutWe);
+    #endif // CONFIG_Observation
     #else // CONFIG_MODE
     
     // 2.运行无感foc控制算法
@@ -458,6 +461,7 @@ static void main_Current_Init(SguanFOC_System_STRUCT *sguan){
 }
 
 static void main_loop(SguanFOC_System_STRUCT *sguan){
+    static uint8_t status_last = 0;
     if (sguan->Status == STATUS_Ready){
         // 1.用户初始化程序运行
         // (并立马切换状态机到初始化位)
@@ -479,10 +483,16 @@ static void main_loop(SguanFOC_System_STRUCT *sguan){
         // 5.所有控制器全部启动，电机正常工作
         sguan->Status = STATUS_COM;
         sguan->Error_Code = ERROR_Zreo;
+        status_last = 1;
     }
     if (sguan->Status == STATUS_COM){
         Printf_TX_Loop(&sguan->Printf);
     }
+    if ((sguan->Status == STATUS_Standby) && (status_last == 1)){
+        User_DestartInit(); // 仅刚进入此状态使用一次
+        status_last = 0;    // 判断Destart的具体条件
+    }
+    
 }
 
 

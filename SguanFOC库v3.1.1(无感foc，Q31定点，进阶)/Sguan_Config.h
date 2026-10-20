@@ -8,7 +8,7 @@
 #define CONFIG_MODE         Define_Run_Mode
 #define CONFIG_CUR          Current_Offset_Open
 #define CONFIG_Float        Q31_Float_Open
-#define CONFIG_SingleRs     Read_SingleRs_Open
+#define CONFIG_Observation  Read_Observation_Open
 
 // ============================ Q31标幺化 宏定义 ===========================
 // 标幺化基准值(Config)
@@ -21,8 +21,6 @@
 #define BASE_Inductor       Q_Inductor
 #define BASE_Flux           Q_Flux
 #define BASE_Resistor       Q_Resistor
-
-#define BASE_SUB            32.0f
 
 // ======================== 控制系统离散周期 宏定义 =========================
 // 离散控制周期大小

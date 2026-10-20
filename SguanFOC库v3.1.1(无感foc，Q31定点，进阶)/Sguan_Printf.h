@@ -1,12 +1,10 @@
-#ifndef C595657C_D4CC_42CF_95C0_DA30423E701F
-#define C595657C_D4CC_42CF_95C0_DA30423E701F
 #ifndef __SGUAN_PRINTF_H
 #define __SGUAN_PRINTF_H
 
 #include "Sguan_Config.h"
 #include <stdint.h>
 
-#define CH_COUNT      4    // JustFloat 通道数
+#define CH_COUNT      6    // JustFloat 通道数
 #define CMD_MAX_LEN   20    // 最大支持的指令长度
 #define HASH_SIZE     32    // 哈希表大小
 typedef void (*CmdCallback)(float value);
@@ -42,6 +40,3 @@ void Printf_RX_Loop(uint8_t *data, uint16_t length);
 
 
 #endif // SGUAN_PRINTF_H
-
-
-#endif /* C595657C_D4CC_42CF_95C0_DA30423E701F */

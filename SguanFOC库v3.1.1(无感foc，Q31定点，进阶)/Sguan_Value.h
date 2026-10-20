@@ -25,26 +25,20 @@
 // #define Dead_T_q31       iqmath_from_float(Dead_Time,BASE_Time)
 // #define ADC_T_q31        iqmath_from_float(ADC_Time,BASE_Time)
 // (5K)
-// #define PMSM_RUN_T_q31   439804651
+// #define PMSM_RUN_T_q31      439804651
 // (4.5K)
-// #define PMSM_RUN_T_q31      274877907
+// #define PMSM_RUN_T_q31   274877907
 // (4K)
-// #define PMSM_RUN_T_q31      274877907
+#define PMSM_RUN_T_q31   274877907
 // (2K)
-#define PMSM_RUN_T_q31      549755814
-#define Dead_T_q31          4617949
-#define ADC_T_q31           549756
+// #define PMSM_RUN_T_q31   549755814
 // ....
 // Current_Gain_q31 = (Current_Gain/Q_Current)*2^62 / Current_RAW_SCALE
-// Current_Gain = 0.0101725264/2
+// Current_Gain = 0.0081382 (5V基准，0.015R采样电阻，4096采样精度)
 // Q_Current        = 64.0
 // 2^62             = 4611686018427387904
 #define Current_RAW_SCALE   500000
-// #define Current_Gain_q31    1465804000（原）
-#define Current_Gain_q31    732902000
-// 【待重标定·后面再做】2026-10-06：OPA 增益档已改为 32xIN（V006 实测该档
-// 实际增益 ≈4x，而原标定基于 8x）。此处 Current_Gain 数值暂保留旧值不动，
-// 等后面统一按 4x 实际增益重新标定电流换算系数。
+#define Current_Gain_q31    1172806000
 
 
 #endif // SGUAN_VALUE_H
