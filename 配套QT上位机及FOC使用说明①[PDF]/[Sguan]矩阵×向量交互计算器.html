@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>矩阵 × 向量 交互计算器（Z1 / Z2）</title>
+<style>
+:root{
+  --bg:#f7f7f8; --card:#ffffff; --line:#e4e4e7; --txt:#18181b;
+  --txt2:#52525b; --mut:#71717a; --acc:#dc2626; --soft:#f4f4f5;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:var(--bg);color:var(--txt);font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif}
+.wrap{max-width:1320px;margin:0 auto;padding:28px 20px 90px}
+.main-cols{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:18px;align-items:start}
+.left-col{min-width:0;display:flex;flex-direction:column}
+.m-card{position:sticky;top:12px;max-height:calc(100vh - 24px);overflow-y:auto;scrollbar-width:thin}
+.m-card::-webkit-scrollbar{width:8px}
+.m-card::-webkit-scrollbar-thumb{background:#d9d9de;border-radius:4px}
+@media (max-width:900px){
+  .main-cols{grid-template-columns:minmax(0,1fr)}
+  .m-card{position:static;max-height:none}
+}
+h1{font-size:21px;font-weight:600;margin:0 0 6px;letter-spacing:.5px}
+.sub{color:var(--mut);font-size:13px;margin:0 0 22px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin-bottom:18px;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.card h2{font-size:14px;font-weight:600;margin:0 0 14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.card h2.foldable{cursor:pointer}
+.card h2.foldable .ctl{cursor:default}
+.card-fold{width:16px;color:var(--mut);font-size:12px;user-select:none;flex:none}
+.card.collapsed{padding:9px 20px;margin-bottom:10px}
+.card.collapsed h2{margin:0}
+.dres{color:var(--acc);font-weight:600}
+.badge{display:inline-flex;align-items:center;justify-content:center;min-width:34px;height:22px;padding:0 8px;border-radius:6px;font-size:12px;font-weight:700;color:#fff;background:#8b8b93;flex:none}
+.badge.m{background:#4b5563}
+.spacer{flex:1}
+.dim-hint{color:var(--mut);font-weight:400;font-size:12px}
+.sub-hint{color:var(--mut);font-weight:400;font-size:12px;margin-left:auto}
+.ctl{font-size:13px;color:var(--mut)}
+select,input[type=number]{border:1px solid var(--line);border-radius:6px;background:#fff;color:var(--txt);font-size:13px;padding:3px 6px}
+select:focus,input:focus{outline:2px solid #c9c9cf;outline-offset:1px}
+.z-body{display:flex;gap:26px;flex-wrap:wrap;align-items:flex-start}
+.eq-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.op{color:var(--mut);font-size:20px;font-weight:300}
+.mat-wrap{border:1px solid var(--line);border-radius:10px;padding:10px;background:#fdfdfe}
+.mat-label{font-size:11px;color:var(--mut);text-align:center;margin-bottom:6px}
+.mat-grid{display:grid;gap:6px}
+.cell{width:64px;min-width:64px;min-height:54px;border:1px solid var(--line);border-radius:8px;background:#fafafb;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:6px 8px;cursor:pointer;transition:border-color .15s,background .15s,box-shadow .15s}
+.cell:hover{border-color:#c9c9cf;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.cell .val{font-size:14px;font-weight:500;color:var(--txt);text-align:center;word-break:break-all}
+.cell .formula{font-size:10.5px;color:var(--mut);text-align:center;word-break:break-all;margin-top:1px}
+.result-cell{cursor:default;background:#fff}
+.result-cell:hover{border-color:var(--line);box-shadow:none;background:#fff}
+.result-cell .rl{font-size:10px;color:var(--mut);margin-bottom:2px}
+.result-cell .val{color:var(--acc);font-weight:700;font-size:16px}
+.plot-box{display:flex;flex-direction:column;align-items:center;gap:8px;flex:1;min-width:300px;max-width:460px}
+canvas{background:#fff;border:1px solid var(--line);border-radius:10px;display:block}
+.plot-tools{font-size:12.5px;color:var(--mut);display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:center}
+.rng{color:#a1a1aa}
+.info{font-size:13px;line-height:1.8;background:var(--soft);border-radius:10px;padding:10px 14px;text-align:center;width:100%;max-width:430px;min-height:62px}
+.info b{color:var(--acc);font-weight:600}
+.note{color:#b45309;font-size:12px}
+/* ---------- m 控制区 ---------- */
+.m-item{border:1px solid var(--line);border-radius:10px;margin-bottom:8px;background:#fff;overflow:hidden}
+.m-head{display:flex;align-items:center;gap:10px;padding:7px 12px;cursor:pointer;flex-wrap:wrap;background:#fdfdfe}
+.m-head:hover{background:var(--soft)}
+.fold{width:14px;color:var(--mut);font-size:11px;user-select:none;flex:none}
+.m-name{font-weight:600;font-size:13px;min-width:36px;flex:none}
+.m-val{font-size:13px;color:var(--acc);font-weight:600;min-width:64px}
+.m-body{display:flex;flex-direction:column;gap:7px;padding:8px 14px 12px 38px;border-top:1px dashed var(--line)}
+.m-xrow{display:flex;align-items:center;gap:8px}
+.m-xlab{font-size:12.5px;color:var(--mut)}
+.m-slider{width:100%;accent-color:#52525b}
+.m-x{flex:1;min-width:0;width:120px}
+.m-unit{font-size:11.5px;color:#a1a1aa;white-space:nowrap}
+/* ---------- 格子编辑面板 ---------- */
+#overlay{position:fixed;z-index:60;background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.14);padding:14px;width:268px}
+#overlay[hidden]{display:none}
+.ov-head{display:flex;justify-content:space-between;align-items:center;font-size:13px;font-weight:600;margin-bottom:10px}
+#ov-close{border:none;background:transparent;color:var(--mut);cursor:pointer;font-size:14px;padding:2px 7px;border-radius:6px}
+#ov-close:hover{background:var(--soft)}
+.ov-row{display:flex;align-items:center;gap:8px;margin:8px 0;font-size:12.5px;color:var(--mut)}
+.ov-row select,.ov-row input{flex:1;min-width:0;padding:4px 8px}
+.slot-row{display:flex;align-items:center;gap:8px;margin:6px 0}
+.slot-row select{flex:1;min-width:0;padding:4px 8px;font-size:12.5px}
+.slot-val{color:var(--mut);font-size:11.5px;min-width:54px;text-align:right}
+.ov-hint{font-size:11px;color:#a1a1aa;margin:6px 0 2px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <h1>矩阵 × 向量 交互计算器</h1>
+    <p class="sub">Z1 = A(2×n1) × B(n1×1)　·　Z2 = C(3×n2) × D(n2×1)　·　点击矩阵格子编辑（数值 / m1~m20 表达式，最多 6 个 m 相乘）　·　结果用红色显示，滑条拖动实时联动刷新　·　点击 Z1 / Z2 标题可折叠区块</p>
+  </header>
+
+  <div class="main-cols">
+    <div class="left-col">
+
+  <!-- ================= Z1 ================= -->
+  <section class="card" id="z1-card">
+    <h2 class="foldable" id="z1-head" title="点击折叠 / 展开">
+      <span class="card-fold" id="fold-z1">▾</span>
+      <span class="badge">Z1</span>
+      <span>Z1 = A(2×n1) × B(n1×1)</span>
+      <span class="dim-hint" id="dim1"></span>
+      <span class="spacer"></span>
+      <label class="ctl">n1 = <select id="n1-sel"></select></label>
+    </h2>
+    <div class="z-body" id="z1-body">
+      <div class="eq-row">
+        <div class="mat-wrap"><div class="mat-grid" id="A-grid"></div></div>
+        <span class="op">×</span>
+        <div class="mat-wrap"><div class="mat-grid" id="B-grid"></div></div>
+        <span class="op">=</span>
+        <div class="mat-wrap">
+          <div class="mat-label">Z1（结果）</div>
+          <div class="mat-grid" id="Z1-grid"></div>
+        </div>
+      </div>
+      <div class="plot-box">
+        <canvas id="xy-cv"></canvas>
+        <div class="plot-tools">
+          <label>缩放数量级 <select id="scale1-sel"></select></label>
+          <span class="rng" id="rng1"></span>
+        </div>
+        <div class="info" id="z1-info"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= Z2 ================= -->
+  <section class="card" id="z2-card">
+    <h2 class="foldable" id="z2-head" title="点击折叠 / 展开">
+      <span class="card-fold" id="fold-z2">▾</span>
+      <span class="badge">Z2</span>
+      <span>Z2 = C(3×n2) × D(n2×1)</span>
+      <span class="dim-hint" id="dim2"></span>
+      <span class="spacer"></span>
+      <label class="ctl">n2 = <select id="n2-sel"></select></label>
+    </h2>
+    <div class="z-body" id="z2-body">
+      <div class="eq-row">
+        <div class="mat-wrap"><div class="mat-grid" id="C-grid"></div></div>
+        <span class="op">×</span>
+        <div class="mat-wrap"><div class="mat-grid" id="D-grid"></div></div>
+        <span class="op">=</span>
+        <div class="mat-wrap">
+          <div class="mat-label">Z2（结果）</div>
+          <div class="mat-grid" id="Z2-grid"></div>
+        </div>
+      </div>
+      <div class="plot-box">
+        <canvas id="xyz-cv"></canvas>
+        <div class="plot-tools">
+          <label>缩放数量级 <select id="scale2-sel"></select></label>
+          <span class="rng" id="rng2"></span>
+        </div>
+        <div class="info" id="z2-info"></div>
+      </div>
+    </div>
+  </section>
+
+    </div>
+
+  <!-- ================= m 控制区 ================= -->
+  <section class="card" id="m-card">
+    <h2>
+      <span class="badge m">m</span>
+      <span>自变量控制区（m1 ~ m20，Z1 / Z2 共用）</span>
+      <span class="sub-hint">y = x / 1/x / sin(x) / cos(x)　·　滑条 -4π ~ 4π，数值框可输范围外　·　点击 m 标题可折叠</span>
+    </h2>
+    <div id="m-list"></div>
+  </section>
+
+  </div>
+
+</div>
+
+<!-- ================= 格子编辑面板 ================= -->
+<div id="overlay" hidden>
+  <div class="ov-head"><span id="ov-title">编辑</span><button id="ov-close" title="关闭">✕</button></div>
+  <div class="ov-row"><label>模式</label>
+    <select id="ov-mode">
+      <option value="num">数值</option>
+      <option value="expr">表达式（m 相乘）</option>
+    </select>
+  </div>
+  <div class="ov-row" id="ov-num-box"><label>数值</label><input id="ov-num" type="number" step="any"></div>
+  <div id="ov-expr-box">
+    <div class="ov-hint">最多 6 个 m 相乘，空槽位忽略（全空按 1）</div>
+    <div id="ov-slots"></div>
+  </div>
+  <div class="ov-hint">点击空白处或按 Esc 收起</div>
+</div>
+
+<script>
+'use strict';
+/* ============ 基础 ============ */
+const PI = Math.PI, TAU = 2 * PI, FOUR_PI = 4 * PI;
+const $ = id => document.getElementById(id);
+
+const state = {
+  n1: 2, n2: 2,
+  z1Open: true, z2Open: true,
+  A: [], B: [], C: [], D: [],
+  scale1: 1, scale2: 1,
+  m: Array.from({ length: 20 }, () => ({ func: 'x', x: 1, open: true }))
+};
+const defCell = () => ({ mode: 'num', num: 1 });
+
+function rebuildAB() {
+  state.A = Array.from({ length: 2 }, () => Array.from({ length: state.n1 }, defCell));
+  state.B = Array.from({ length: state.n1 }, defCell);
+}
+function rebuildCD() {
+  state.C = Array.from({ length: 3 }, () => Array.from({ length: state.n2 }, defCell));
+  state.D = Array.from({ length: state.n2 }, defCell);
+}
+
+/* ============ m 取值 ============ */
+function mValue(i) {
+  const m = state.m[i], x = m.x;
+  switch (m.func) {
+    case 'x':   return x;
+    case 'inv': return x === 0 ? 0 : 1 / x;   // 1/x 在 x=0 时按 0 处理
+    case 'sin': return Math.sin(x);
+    case 'cos': return Math.cos(x);
+  }
+  return x;
+}
+
+/* ============ 格子取值 / 公式 ============ */
+function cellValue(c) {
+  if (c.mode === 'num') return c.num;
+  let p = 1;
+  for (const s of c.slots) if (s > 0) p *= mValue(s - 1);
+  return p;   // 全空 → 空乘积 1
+}
+function cellFormula(c) {
+  if (c.mode === 'num') return '';
+  return c.slots.filter(s => s > 0).map(s => 'm' + s).join('*');
+}
+
+/* ============ 数值格式化 ============ */
+function fmt(v) {
+  if (typeof v !== 'number' || !Number.isFinite(v)) return 'NaN';
+  if (v === 0) return '0';
+  const a = Math.abs(v);
+  if (a >= 1e6 || a < 1e-4) return v.toExponential(2);
+  return String(parseFloat(v.toPrecision(6)));
+}
+function clamp1(v) { return Math.max(-1, Math.min(1, v)); }
+
+/* ============ 矩阵乘法 ============ */
+function computeZ1() {
+  const z = [0, 0];
+  for (let j = 0; j < state.n1; j++) {
+    const b = cellValue(state.B[j]);
+    z[0] += cellValue(state.A[0][j]) * b;
+    z[1] += cellValue(state.A[1][j]) * b;
+  }
+  return z;
+}
+function computeZ2() {
+  const z = [0, 0, 0];
+  for (let j = 0; j < state.n2; j++) {
+    const d = cellValue(state.D[j]);
+    z[0] += cellValue(state.C[0][j]) * d;
+    z[1] += cellValue(state.C[1][j]) * d;
+    z[2] += cellValue(state.C[2][j]) * d;
+  }
+  return z;
+}
+
+/* ============ rAF 节流刷新 ============ */
+let pending = false;
+function scheduleRender() {
+  if (pending) return;
+  pending = true;
+  requestAnimationFrame(() => { pending = false; render(); });
+}
+
+/* ============ 矩阵格子 DOM ============ */
+const cellEls = { A: [], B: [], C: [], D: [] };
+const resultEls = { z1: [], z2: [] };
+
+function makeCellEl(m, r, c) {
+  const el = document.createElement('div');
+  el.className = 'cell';
+  el.dataset.m = m; el.dataset.r = r; el.dataset.c = c;
+  el.innerHTML = '<div class="val"></div><div class="formula"></div>';
+  return el;
+}
+function buildMatricesDOM() {
+  const gA = $('A-grid'); gA.innerHTML = ''; cellEls.A = [];
+  gA.style.gridTemplateColumns = `repeat(${state.n1}, 64px)`;
+  for (let r = 0; r < 2; r++) for (let c = 0; c < state.n1; c++) {
+    const el = makeCellEl('A', r, c); gA.appendChild(el); cellEls.A.push(el);
+  }
+  const gB = $('B-grid'); gB.innerHTML = ''; cellEls.B = [];
+  gB.style.gridTemplateColumns = '64px';
+  for (let r = 0; r < state.n1; r++) {
+    const el = makeCellEl('B', r, 0); gB.appendChild(el); cellEls.B.push(el);
+  }
+  const gC = $('C-grid'); gC.innerHTML = ''; cellEls.C = [];
+  gC.style.gridTemplateColumns = `repeat(${state.n2}, 64px)`;
+  for (let r = 0; r < 3; r++) for (let c = 0; c < state.n2; c++) {
+    const el = makeCellEl('C', r, c); gC.appendChild(el); cellEls.C.push(el);
+  }
+  const gD = $('D-grid'); gD.innerHTML = ''; cellEls.D = [];
+  gD.style.gridTemplateColumns = '64px';
+  for (let r = 0; r < state.n2; r++) {
+    const el = makeCellEl('D', r, 0); gD.appendChild(el); cellEls.D.push(el);
+  }
+}
+function buildResultDOM() {
+  const g1 = $('Z1-grid'), g2 = $('Z2-grid');
+  g1.innerHTML = ''; g2.innerHTML = ''; g1.style.gridTemplateColumns = '64px';
+  g2.style.gridTemplateColumns = '64px';
+  for (let i = 0; i < 2; i++) {
+    const el = document.createElement('div');
+    el.className = 'cell result-cell';
+    el.innerHTML = `<div class="rl">Z1<sub>${i + 1}</sub></div><div class="val"></div>`;
+    g1.appendChild(el); resultEls.z1.push(el);
+  }
+  for (let i = 0; i < 3; i++) {
+    const el = document.createElement('div');
+    el.className = 'cell result-cell';
+    el.innerHTML = `<div class="rl">Z2<sub>${i + 1}</sub></div><div class="val"></div>`;
+    g2.appendChild(el); resultEls.z2.push(el);
+  }
+}
+function updateCellEl(el, c) {
+  el.querySelector('.val').textContent = fmt(cellValue(c));
+  const f = cellFormula(c);
+  el.querySelector('.formula').textContent = f ? `(${f})` : '';
+}
+
+/* ============ 画布 ============ */
+function setupCanvas(cv, w, h) {
+  const dpr = window.devicePixelRatio || 1;
+  cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr);
+  cv.style.width = w + 'px'; cv.style.height = h + 'px';
+  const ctx = cv.getContext('2d');
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  return ctx;
+}
+const XY  = { w: 340, h: 340 };
+const XYZ = { w: 400, h: 360 };
+const xyCtx  = setupCanvas($('xy-cv'),  XY.w,  XY.h);
+const xyzCtx = setupCanvas($('xyz-cv'), XYZ.w, XYZ.h);
+
+function arrow(ctx, x1, y1, x2, y2, color, lw, aL) {
+  ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = lw;
+  ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+  const ang = Math.atan2(y2 - y1, x2 - x1);
+  const L = Math.min(aL, Math.hypot(x2 - x1, y2 - y1) * 0.35 + 4);
+  ctx.beginPath();
+  ctx.moveTo(x2, y2);
+  ctx.lineTo(x2 - L * Math.cos(ang - 0.5), y2 - L * Math.sin(ang - 0.5));
+  ctx.lineTo(x2 - L * Math.cos(ang + 0.5), y2 - L * Math.sin(ang + 0.5));
+  ctx.closePath(); ctx.fill();
+}
+
+/* ---------- XY 二维图 ---------- */
+function drawXY(zx, zy, s) {
+  const ctx = xyCtx, W = XY.w, H = XY.h;
+  ctx.clearRect(0, 0, W, H);
+  const cx = W / 2, cy = H / 2, m = 44;
+  const R = Math.min(cx, cy) - m;
+  const u = R / s;                       // 每单位像素
+  ctx.lineWidth = 1;
+  [-1, -0.5, 0.5, 1].forEach(k => {      // 网格线（±s, ±s/2）
+    const d = k * s;
+    ctx.strokeStyle = '#eaeaed';
+    ctx.beginPath(); ctx.moveTo(cx + d * u, cy - R); ctx.lineTo(cx + d * u, cy + R); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(cx - R, cy - d * u); ctx.lineTo(cx + R, cy - d * u); ctx.stroke();
+  });
+  ctx.strokeStyle = '#b9b9c0';           // 坐标轴
+  ctx.beginPath(); ctx.moveTo(cx - R, cy); ctx.lineTo(cx + R, cy); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(cx, cy - R); ctx.lineTo(cx, cy + R); ctx.stroke();
+  ctx.fillStyle = '#8a8a93'; ctx.font = '10px system-ui,sans-serif';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  [-1, -0.5, 0.5, 1].forEach(k => {      // 刻度标签
+    const d = k * s;
+    ctx.fillText(fmt(d), cx + d * u, cy + 11);
+    ctx.textAlign = 'right'; ctx.fillText(fmt(d), cx - 5, cy - d * u);
+    ctx.textAlign = 'center';
+  });
+  ctx.fillText('0', cx + 7, cy + 11);
+  arrow(ctx, cx, cy, cx + R + 2, cy, '#71717a', 1, 8);
+  arrow(ctx, cx, cy, cx, cy - R - 2, '#71717a', 1, 8);
+  ctx.fillStyle = '#52525b'; ctx.font = 'bold 12px system-ui,sans-serif';
+  ctx.textAlign = 'left'; ctx.fillText('X', cx + R + 6, cy + 4);
+  ctx.textAlign = 'center'; ctx.fillText('Y', cx + 10, cy - R - 8);
+  // 向量（真实比例，超出显示范围时截断到边缘）
+  const len = Math.hypot(zx, zy);
+  let clamped = false;
+  if (len > 1e-12) {
+    let ex = zx * u, ey = -zy * u;
+    const maxX = cx - 12, maxY = cy - 12;
+    let t = 1;
+    if (Math.abs(ex) > maxX) t = Math.min(t, maxX / Math.abs(ex));
+    if (Math.abs(ey) > maxY) t = Math.min(t, maxY / Math.abs(ey));
+    if (t < 1) { clamped = true; ex *= t; ey *= t; }
+    arrow(ctx, cx, cy, cx + ex, cy + ey, '#dc2626', 2.5, 10);
+  } else {
+    ctx.fillStyle = '#dc2626';
+    ctx.beginPath(); ctx.arc(cx, cy, 3.5, 0, TAU); ctx.fill();
+  }
+  return { clamped, len, ang: len > 1e-12 ? Math.atan2(zy, zx) : null };
+}
+
+/* ---------- XYZ 三维静态投影图 ---------- */
+const A3 = -20 * PI / 180, B3 = -135 * PI / 180;
+const CX3 = Math.cos(A3), SX3 = Math.sin(A3), CY3 = Math.cos(B3), SY3 = Math.sin(B3);
+const HX3 = Math.abs(CX3) + Math.abs(CY3), VY3 = Math.abs(SX3) + Math.abs(SY3) + 1;
+
+function drawXYZ(v, s) {
+  const ctx = xyzCtx, W = XYZ.w, H = XYZ.h;
+  ctx.clearRect(0, 0, W, H);
+  const cx = W / 2, cy = H / 2 + 10;
+  const vspace = Math.min(cy - 44, H - cy - 40);
+  const u = Math.min((W - 112) / (2 * HX3 * s), vspace / (VY3 * s));
+  const P = (x, y, z) => [
+    cx + (x * CX3 + y * CY3) * u,
+    cy + (x * SX3 + y * SY3 - z) * u
+  ];
+  const O = P(0, 0, 0);
+  // 底面网格（z=0 平面）
+  ctx.strokeStyle = '#f0f0f2'; ctx.lineWidth = 1;
+  [-1, -0.5, 0.5, 1].forEach(k => {
+    const d = k * s;
+    let p1 = P(-s, d, 0), p2 = P(s, d, 0);
+    ctx.beginPath(); ctx.moveTo(p1[0], p1[1]); ctx.lineTo(p2[0], p2[1]); ctx.stroke();
+    p1 = P(d, -s, 0); p2 = P(d, s, 0);
+    ctx.beginPath(); ctx.moveTo(p1[0], p1[1]); ctx.lineTo(p2[0], p2[1]); ctx.stroke();
+  });
+  // 负半轴（浅灰）
+  ctx.strokeStyle = '#d5d5da';
+  [[-s, 0, 0], [0, -s, 0], [0, 0, -s]].forEach(neg => {
+    const p = P(neg[0], neg[1], neg[2]);
+    ctx.beginPath(); ctx.moveTo(O[0], O[1]); ctx.lineTo(p[0], p[1]); ctx.stroke();
+  });
+  // 正半轴 + 刻度 + 箭头 + 轴标签
+  const axes = [[s, 0, 0, 'X'], [0, s, 0, 'Y'], [0, 0, s, 'Z']];
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  axes.forEach(a => {
+    const ax = a[0], ay = a[1], az = a[2], lb = a[3];
+    const tip = P(ax, ay, az);
+    arrow(ctx, O[0], O[1], tip[0], tip[1], '#71717a', 1, 8);
+    let dx = tip[0] - O[0], dy = tip[1] - O[1];
+    const L = Math.hypot(dx, dy) || 1; dx /= L; dy /= L;
+    const px = -dy * 3.5, py = dx * 3.5;
+    ctx.fillStyle = '#8a8a93'; ctx.font = '9px system-ui,sans-serif';
+    [0.5, 1].forEach(k => {
+      const p = P(ax * k, ay * k, az * k);
+      ctx.strokeStyle = '#b9b9c0'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(p[0] - px, p[1] - py); ctx.lineTo(p[0] + px, p[1] + py); ctx.stroke();
+      ctx.fillText(fmt(k * s), p[0] + px * 3, p[1] + py * 3);
+    });
+    const lp = P(ax * 1.14, ay * 1.14, az * 1.14);
+    ctx.fillStyle = '#52525b'; ctx.font = 'bold 12px system-ui,sans-serif';
+    ctx.fillText(lb, lp[0], lp[1]);
+  });
+  // 向量（真实比例，超出显示范围时截断到边缘）
+  const vx = v[0], vy = v[1], vz = v[2];
+  const len = Math.hypot(vx, vy, vz);
+  let clamped = false;
+  if (len > 1e-12) {
+    const tip = P(vx, vy, vz);
+    let ex = tip[0] - O[0], ey = tip[1] - O[1];
+    const maxX = cx - 14, maxYu = cy - 14, maxYd = H - cy - 14;
+    let t = 1;
+    if (Math.abs(ex) > maxX) t = Math.min(t, maxX / Math.abs(ex));
+    const lim = ey < 0 ? maxYu : maxYd;
+    if (Math.abs(ey) > lim) t = Math.min(t, lim / Math.abs(ey));
+    if (t < 1) {
+      clamped = true; ex *= t; ey *= t;
+      arrow(ctx, O[0], O[1], O[0] + ex, O[1] + ey, '#dc2626', 2.5, 10);
+    } else {
+      const F = P(vx, vy, 0);
+      ctx.strokeStyle = '#c9c9cf'; ctx.lineWidth = 1; ctx.setLineDash([3, 3]);
+      ctx.beginPath(); ctx.moveTo(tip[0], tip[1]); ctx.lineTo(F[0], F[1]); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(O[0], O[1]); ctx.lineTo(F[0], F[1]); ctx.stroke();
+      ctx.setLineDash([]);
+      arrow(ctx, O[0], O[1], tip[0], tip[1], '#dc2626', 2.5, 10);
+    }
+  } else {
+    ctx.fillStyle = '#dc2626';
+    ctx.beginPath(); ctx.arc(O[0], O[1], 3.5, 0, TAU); ctx.fill();
+  }
+  const angs = len > 1e-12
+    ? [Math.acos(clamp1(vx / len)), Math.acos(clamp1(vy / len)), Math.acos(clamp1(vz / len))]
+    : null;
+  return { clamped, len, angs };
+}
+
+/* ============ m 控制区 ============ */
+const mRows = [];
+function buildMControls() {
+  const host = $('m-list'); host.innerHTML = '';
+  for (let i = 0; i < 20; i++) {
+    const item = document.createElement('div'); item.className = 'm-item';
+    item.innerHTML = `
+      <div class="m-head">
+        <span class="fold"></span>
+        <span class="m-name">m${i + 1}</span>
+        <span class="m-val"></span>
+        <select class="m-func">
+          <option value="x">y = x</option>
+          <option value="inv">y = 1/x</option>
+          <option value="sin">y = sin(x)</option>
+          <option value="cos">y = cos(x)</option>
+        </select>
+      </div>
+      <div class="m-body">
+        <div class="m-xrow">
+          <span class="m-xlab">x =</span>
+          <input type="number" class="m-x" step="any">
+          <span class="m-unit">rad</span>
+        </div>
+        <input type="range" class="m-slider" step="0.001">
+      </div>`;
+    const head = item.querySelector('.m-head'), body = item.querySelector('.m-body'),
+      slider = item.querySelector('.m-slider'), xnum = item.querySelector('.m-x'),
+      funcSel = item.querySelector('.m-func'), fold = item.querySelector('.fold'),
+      val = item.querySelector('.m-val');
+    slider.min = (-FOUR_PI).toString(); slider.max = FOUR_PI.toString();
+    head.addEventListener('click', () => { state.m[i].open = !state.m[i].open; scheduleRender(); });
+    funcSel.addEventListener('click', e => e.stopPropagation());
+    funcSel.addEventListener('change', e => { state.m[i].func = e.target.value; scheduleRender(); });
+    slider.addEventListener('input', e => { state.m[i].x = parseFloat(e.target.value); scheduleRender(); });
+    xnum.addEventListener('input', e => {
+      const v = parseFloat(e.target.value);
+      if (Number.isFinite(v)) state.m[i].x = v;
+      scheduleRender();
+    });
+    host.appendChild(item);
+    mRows.push({ item, body, slider, xnum, funcSel, fold, val });
+  }
+}
+
+/* ============ 格子编辑面板 ============ */
+const overlay = $('overlay'), ovTitle = $('ov-title'), ovMode = $('ov-mode'),
+  ovNum = $('ov-num'), ovNumBox = $('ov-num-box'), ovExprBox = $('ov-expr-box');
+const slotSels = [], slotVals = [];
+let editCtx = null;
+
+function buildOverlay() {
+  const box = $('ov-slots'); box.innerHTML = '';
+  for (let i = 0; i < 6; i++) {
+    const row = document.createElement('div'); row.className = 'slot-row';
+    const sel = document.createElement('select');
+    sel.innerHTML = '<option value="0">（空）</option>' +
+      Array.from({ length: 20 }, (_, k) => `<option value="${k + 1}">m${k + 1}</option>`).join('');
+    const sp = document.createElement('span'); sp.className = 'slot-val';
+    row.appendChild(sel); row.appendChild(sp);
+    sel.addEventListener('change', () => {
+      if (!editCtx) return;
+      editCtx.cell.slots[slotSels.indexOf(sel)] = +sel.value || 0;
+      updateSlotLabels(); scheduleRender();
+    });
+    box.appendChild(row); slotSels.push(sel); slotVals.push(sp);
+  }
+  ovMode.addEventListener('change', () => {
+    if (!editCtx) return;
+    editCtx.cell.mode = ovMode.value;
+    if (editCtx.cell.mode === 'expr' && !editCtx.cell.slots) editCtx.cell.slots = [0, 0, 0, 0, 0, 0];
+    updateOverlayVis(); scheduleRender();
+  });
+  ovNum.addEventListener('input', () => {
+    if (!editCtx) return;
+    const v = parseFloat(ovNum.value);
+    if (Number.isFinite(v)) editCtx.cell.num = v;
+    scheduleRender();
+  });
+  $('ov-close').addEventListener('click', closeOverlay);
+}
+function updateOverlayVis() {
+  ovNumBox.style.display = ovMode.value === 'num' ? '' : 'none';
+  ovExprBox.style.display = ovMode.value === 'expr' ? '' : 'none';
+}
+function updateSlotLabels() {
+  slotSels.forEach((sel, k) => {
+    const v = +sel.value;
+    slotVals[k].textContent = v > 0 ? `= ${fmt(mValue(v - 1))}` : '空';
+  });
+}
+function getCellOf(el) {
+  const m = el.dataset.m, r = +el.dataset.r, c = +el.dataset.c;
+  if (m === 'A') return state.A[r][c];
+  if (m === 'B') return state.B[r];
+  if (m === 'C') return state.C[r][c];
+  return state.D[r];
+}
+function openOverlay(cellEl) {
+  if (editCtx && editCtx.el === cellEl && !overlay.hidden) return;
+  const m = cellEl.dataset.m, r = +cellEl.dataset.r, c = +cellEl.dataset.c;
+  const label = m === 'A' ? `A(${r + 1}, ${c + 1})`
+    : m === 'B' ? `B(${r + 1}, 1)`
+    : m === 'C' ? `C(${r + 1}, ${c + 1})`
+    : `D(${r + 1}, 1)`;
+  editCtx = { el: cellEl, cell: getCellOf(cellEl) };
+  ovTitle.textContent = `编辑 ${label}`;
+  ovMode.value = editCtx.cell.mode;
+  ovNum.value = editCtx.cell.mode === 'num' ? editCtx.cell.num : 1;
+  slotSels.forEach((sel, i) => sel.value = String(editCtx.cell.slots ? editCtx.cell.slots[i] : 0));
+  updateOverlayVis(); updateSlotLabels();
+  overlay.hidden = false;
+  const rect = cellEl.getBoundingClientRect();
+  const ow = overlay.offsetWidth, oh = overlay.offsetHeight;
+  let left = rect.left, top = rect.bottom + 6;
+  if (top + oh > window.innerHeight - 10) top = Math.max(10, rect.top - oh - 6);
+  left = Math.min(Math.max(12, left), window.innerWidth - ow - 12);
+  overlay.style.left = left + 'px'; overlay.style.top = top + 'px';
+}
+function closeOverlay() { overlay.hidden = true; editCtx = null; }
+
+/* ============ 全局事件 ============ */
+document.addEventListener('click', e => {
+  const el = e.target.closest('.cell');
+  if (!el || !el.dataset.m) return;
+  openOverlay(el);
+});
+document.addEventListener('mousedown', e => {
+  if (overlay.hidden) return;
+  if (overlay.contains(e.target)) return;
+  if (editCtx && editCtx.el.contains(e.target)) return;
+  closeOverlay();
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && !overlay.hidden) closeOverlay();
+});
+
+function fillSelect(sel, vals, def) {
+  sel.innerHTML = vals.map(v => `<option value="${v}">${v}</option>`).join('');
+  sel.value = String(def);
+}
+function wireEvents() {
+  $('n1-sel').addEventListener('change', e => {
+    closeOverlay();
+    state.n1 = +e.target.value;
+    rebuildAB(); buildMatricesDOM(); scheduleRender();
+  });
+  $('n2-sel').addEventListener('change', e => {
+    closeOverlay();
+    state.n2 = +e.target.value;
+    rebuildCD(); buildMatricesDOM(); scheduleRender();
+  });
+  $('scale1-sel').addEventListener('change', e => { state.scale1 = parseFloat(e.target.value); scheduleRender(); });
+  $('scale2-sel').addEventListener('change', e => { state.scale2 = parseFloat(e.target.value); scheduleRender(); });
+  $('z1-head').addEventListener('click', e => {
+    if (e.target.closest('.ctl')) return;
+    toggleCard('z1Open');
+  });
+  $('z2-head').addEventListener('click', e => {
+    if (e.target.closest('.ctl')) return;
+    toggleCard('z2Open');
+  });
+}
+
+function toggleCard(which) {
+  closeOverlay();
+  state[which] = !state[which];
+  const body = $(which === 'z1Open' ? 'z1-body' : 'z2-body');
+  const card = $(which === 'z1Open' ? 'z1-card' : 'z2-card');
+  const fold = $(which === 'z1Open' ? 'fold-z1' : 'fold-z2');
+  body.style.display = state[which] ? '' : 'none';
+  card.classList.toggle('collapsed', !state[which]);
+  fold.textContent = state[which] ? '▾' : '▸';
+  scheduleRender();
+}
+
+/* ============ 渲染 ============ */
+function render() {
+  cellEls.A.forEach(el => updateCellEl(el, state.A[+el.dataset.r][+el.dataset.c]));
+  cellEls.B.forEach(el => updateCellEl(el, state.B[+el.dataset.r]));
+  cellEls.C.forEach(el => updateCellEl(el, state.C[+el.dataset.r][+el.dataset.c]));
+  cellEls.D.forEach(el => updateCellEl(el, state.D[+el.dataset.r]));
+
+  const z1 = computeZ1(), z2 = computeZ2();
+  resultEls.z1.forEach((el, i) => { el.querySelector('.val').textContent = fmt(z1[i]); });
+  resultEls.z2.forEach((el, i) => { el.querySelector('.val').textContent = fmt(z2[i]); });
+
+  $('dim1').innerHTML = `当前：A(2×${state.n1}) · B(${state.n1}×1)` +
+    (state.z1Open ? '' : `　Z1 = <b class="dres">(${fmt(z1[0])}, ${fmt(z1[1])})</b>`);
+  $('dim2').innerHTML = `当前：C(3×${state.n2}) · D(${state.n2}×1)` +
+    (state.z2Open ? '' : `　Z2 = <b class="dres">(${fmt(z2[0])}, ${fmt(z2[1])}, ${fmt(z2[2])})</b>`);
+  $('rng1').textContent = `（轴范围 ±${fmt(state.scale1)}）`;
+  $('rng2').textContent = `（轴范围 ±${fmt(state.scale2)}）`;
+
+  if (state.z1Open) {
+    const r1 = drawXY(z1[0], z1[1], state.scale1);
+    let h1 = `|Z1| = <b>${fmt(r1.len)}</b>　θ（与 X 轴夹角） = <b>${r1.ang === null ? '—（零向量）' : fmt(r1.ang) + ' rad'}</b>`;
+    if (r1.clamped) h1 += `<div class="note">⚠ 向量超出当前显示范围，请增大缩放数量级</div>`;
+    $('z1-info').innerHTML = h1;
+  }
+
+  if (state.z2Open) {
+    const r2 = drawXYZ(z2, state.scale2);
+    let h2;
+    if (r2.angs === null) {
+      h2 = `|Z2| = <b>0</b>　（零向量，方向角未定义）`;
+    } else {
+      h2 = `|Z2| = <b>${fmt(r2.len)}</b>　α（与 X 轴）= <b>${fmt(r2.angs[0])} rad</b>　β（与 Y 轴）= <b>${fmt(r2.angs[1])} rad</b>　γ（与 Z 轴）= <b>${fmt(r2.angs[2])} rad</b>`;
+    }
+    if (r2.clamped) h2 += `<div class="note">⚠ 向量超出当前显示范围，请增大缩放数量级</div>`;
+    $('z2-info').innerHTML = h2;
+  }
+
+  mRows.forEach((row, i) => {
+    const m = state.m[i];
+    row.val.textContent = `= ${fmt(mValue(i))}`;
+    row.fold.textContent = m.open ? '▾' : '▸';
+    row.body.style.display = m.open ? '' : 'none';
+    if (document.activeElement !== row.slider) row.slider.value = m.x;
+    if (document.activeElement !== row.xnum) row.xnum.value = parseFloat(m.x.toPrecision(8));
+    row.funcSel.value = m.func;
+  });
+
+  if (editCtx) updateSlotLabels();
+}
+
+/* ============ 初始化 ============ */
+fillSelect($('n1-sel'), [1, 2, 3, 4, 5], 2);
+fillSelect($('n2-sel'), [1, 2, 3, 4, 5], 2);
+fillSelect($('scale1-sel'), [0.1, 1, 10, 100, 1000, 10000], 1);
+fillSelect($('scale2-sel'), [0.1, 1, 10, 100, 1000, 10000], 1);
+rebuildAB(); rebuildCD();
+buildResultDOM(); buildMatricesDOM();
+buildMControls(); buildOverlay();
+wireEvents();
+render();
+</script>
+</body>
+</html>
