@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FOC · PMSM 公式速查手册（离线单文件）</title>
+<style>
+:root{
+  --bg:#f7f7f8; --card:#ffffff; --line:#e4e4e7; --txt:#18181b;
+  --txt2:#52525b; --mut:#71717a; --acc:#dc2626; --soft:#f4f4f5;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:var(--bg);color:var(--txt);font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif}
+.wrap{max-width:1100px;margin:0 auto;padding:28px 20px 90px}
+h1{font-size:21px;font-weight:600;margin:0 0 6px;letter-spacing:.5px}
+.sub{color:var(--mut);font-size:13px;margin:0 0 18px}
+/* 目录 */
+.toc{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}
+.toc a{display:inline-block;padding:4px 12px;border:1px solid var(--line);border-radius:999px;background:#fff;color:var(--txt2);text-decoration:none;font-size:12.5px;transition:border-color .15s,background .15s}
+.toc a:hover{border-color:#c9c9cf;background:var(--soft)}
+/* 卡片 */
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin-bottom:18px;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.card h2{font-size:14px;font-weight:600;margin:0 0 14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.card h2.foldable{cursor:pointer}
+.card-fold{width:16px;color:var(--mut);font-size:12px;user-select:none;flex:none}
+.badge{display:inline-flex;align-items:center;justify-content:center;min-width:26px;height:22px;padding:0 8px;border-radius:6px;font-size:12px;font-weight:700;color:#fff;background:#8b8b93;flex:none}
+.spacer{flex:1}
+.sub-hint{color:var(--mut);font-weight:400;font-size:12px;margin-left:auto}
+.card.collapsed{padding:9px 20px;margin-bottom:10px}
+.card.collapsed h2{margin:0}
+/* 小节标题 */
+h3.sec{font-size:13.5px;font-weight:600;margin:18px 0 8px;color:var(--txt2)}
+h3.sec::before{content:"";display:inline-block;width:4px;height:13px;background:#a1a1aa;border-radius:2px;margin-right:8px;vertical-align:-2px}
+/* 公式排版 */
+.f{font-family:"Cambria Math",Cambria,Georgia,"Times New Roman",serif}
+.f sub,.f sup{font-size:.72em;line-height:0}
+.eq{display:block;font-size:15px;line-height:2.3;padding:4px 0 4px 20px;overflow-x:auto;white-space:nowrap;color:var(--txt2)}
+.eq.center{text-align:center;padding-left:0}
+.frac{display:inline-block;vertical-align:-.95em;text-align:center;margin:0 .14em}
+.frac .num{display:block;border-bottom:1px solid currentColor;padding:0 .32em;line-height:1.35}
+.frac .den{display:block;padding:0 .32em;line-height:1.35}
+.mtx{display:inline-grid;border-left:2px solid currentColor;border-right:2px solid currentColor;padding:.2em .55em;vertical-align:middle;column-gap:1em;row-gap:.18em;margin:0 .12em;white-space:nowrap}
+.hv{position:relative;display:inline-block}
+.hv::before{content:"^";position:absolute;left:0;right:0;top:-.92em;text-align:center;font-size:.72em;line-height:1}
+.tv{position:relative;display:inline-block}
+.tv::before{content:"~";position:absolute;left:0;right:0;top:-.74em;text-align:center;font-size:.68em;line-height:1}
+.dv{position:relative;display:inline-block}
+.dv::before{content:"˙";position:absolute;left:0;right:0;top:-.95em;text-align:center;font-size:1em;line-height:1}
+.sqrt{white-space:nowrap}
+.sqrt .rad{display:inline-block;border-top:1px solid currentColor;padding:.05em .28em 0}
+/* 提示框 */
+.tip{background:#eef3fb;border-left:3px solid #7aa3d4;border-radius:6px;padding:8px 12px;font-size:13px;line-height:1.8;margin:10px 0;color:#3b4a5c}
+.tip b{color:#2c4c7a}
+.hl{background:#fdf6e7;border-left:3px solid #d9a53c;border-radius:6px;padding:8px 12px;font-size:13px;line-height:1.8;margin:10px 0;color:#5c4a1e}
+.hl b{color:#8a6a12}
+/* 表格 */
+.tbl-wrap{display:flex;gap:14px;flex-wrap:wrap;margin:8px 0}
+.tbl-card{flex:1;min-width:260px}
+.tbl-card h4{font-size:12.5px;font-weight:600;margin:0 0 6px;color:var(--txt2)}
+table.tbl{border-collapse:collapse;font-size:12.5px;width:100%}
+.tbl th,.tbl td{border:1px solid var(--line);padding:4px 9px;text-align:center}
+.tbl th{background:#fafafb;font-weight:600}
+.tbl td.l{text-align:left}
+.tbl .f{font-size:13px}
+/* 计算器 */
+.calc{border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin:12px 0;background:#fdfdfe}
+.calc h4{font-size:13px;font-weight:600;margin:0 0 10px;color:var(--txt2)}
+.calc-form{display:flex;gap:14px 22px;flex-wrap:wrap;font-size:13px;color:var(--mut);align-items:center}
+.calc-form label{display:flex;align-items:center;gap:6px;white-space:nowrap}
+.calc-form .f{font-size:13.5px;color:var(--txt2)}
+input[type=number],select{border:1px solid var(--line);border-radius:6px;background:#fff;color:var(--txt);font-size:13px;padding:3px 6px}
+input[type=number]{width:92px}
+select:focus,input:focus{outline:2px solid #c9c9cf;outline-offset:1px}
+.calc-out{margin-top:10px;font-size:13.5px;background:var(--soft);border-radius:8px;padding:8px 12px;line-height:1.9}
+.calc-out b{color:var(--acc);font-weight:600}
+.calc-out .u{color:var(--mut);font-size:12px}
+@media (max-width:860px){
+  .eq{font-size:14px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <h1>FOC · PMSM 公式速查手册</h1>
+    <p class="sub">纯离线单文件 · 浅色简约 · 点击各区块标题可折叠　｜　三大方程（电压 / 转矩 / 机械）· 静止 αβ 坐标系 · 坐标变换 · 滑模观测器 SMO · 磁链观测器 · 高频注入 HFI · FOC 闭环结构 · 参数整定计算器</p>
+  </header>
+
+  <nav class="toc">
+    <a href="#sec1">① 符号速查</a>
+    <a href="#sec2">② 三大方程</a>
+    <a href="#sec3">③ 静止 αβ 系</a>
+    <a href="#sec4">④ 坐标变换</a>
+    <a href="#sec5">⑤ 滑模观测器</a>
+    <a href="#sec6">⑥ 磁链观测器</a>
+    <a href="#sec7">⑦ 高频注入</a>
+    <a href="#sec8">⑧ FOC 结构</a>
+    <a href="#sec9">⑨ 参数整定</a>
+    <a href="#sec10">⑩ 常用常数</a>
+  </nav>
+
+  <!-- ============ 1 符号速查 ============ -->
+  <section class="card" id="sec1">
+    <h2 class="foldable"><span class="card-fold">▾</span><span class="badge">1</span><span>符号速查表</span><span class="sub-hint">先分清电感与磁链，再往下看公式</span></h2>
+    <div class="sec-body">
+
+      <h3 class="sec">电感：Ld / Lq / Ls / L0 / ΔL 的区分</h3>
+      <div class="hl">
+        <b>表贴式 SPMSM：</b>气隙均匀，L<sub>d</sub> = L<sub>q</sub> ≜ L<sub>s</sub>（同步电感，一个值即可）<br>
+        <b>内嵌式 IPMSM：</b>L<sub>d</sub> ≠ L<sub>q</sub>（一般 L<sub>d</sub> &lt; L<sub>q</sub>）。αβ 静止坐标系一般式中没有单一 L<sub>s</sub>，改用：<br>
+        　平均电感 <span class="f">L<sub>0</sub> = (L<sub>d</sub> + L<sub>q</sub>)/2</span>　差模电感 <span class="f">ΔL = (L<sub>d</sub> − L<sub>q</sub>)/2</span>（产生 2θ<sub>e</sub> 项；SPMSM 时 ΔL = 0，一般式退化为 SPMSM 式）<br>
+        <b>电流环整定：</b>d 轴取 L<sub>d</sub>，q 轴取 L<sub>q</sub>；SMO（表贴式）中用 L<sub>s</sub>。
+      </div>
+
+      <h3 class="sec">磁链：ψf / ψd / ψq / ψs / ψαβ / ψrαβ 的区分</h3>
+      <div class="hl">
+        <span class="f">ψ<sub>f</sub></span>：<b>永磁体磁链</b>（转子磁场幅值，常数，单位 Wb）<br>
+        <span class="f">ψ<sub>d</sub> = L<sub>d</sub>·i<sub>d</sub> + ψ<sub>f</sub></span>、<span class="f">ψ<sub>q</sub> = L<sub>q</sub>·i<sub>q</sub></span>：<b>定子磁链 dq 分量</b>（注意 ψ<sub>d</sub> 里含 ψ<sub>f</sub>）<br>
+        <span class="f">ψ<sub>s</sub> = √(ψ<sub>d</sub>² + ψ<sub>q</sub>²)</span>：<b>定子磁链幅值</b><br>
+        <span class="f">ψ<sub>α</sub> / ψ<sub>β</sub></span>：<b>定子磁链 αβ 分量</b>（磁链观测器电压模型的输出）<br>
+        <span class="f">ψ<sub>rα</sub> = ψ<sub>α</sub> − L<sub>s</sub>·i<sub>α</sub></span>、<span class="f">ψ<sub>rβ</sub> = ψ<sub>β</sub> − L<sub>s</sub>·i<sub>β</sub></span>：<b>转子磁链 αβ 分量</b>（≈ ψ<sub>f</sub>·cosθ<sub>e</sub> / ψ<sub>f</sub>·sinθ<sub>e</sub>，用于提取 θ̂<sub>e</sub>）
+      </div>
+
+      <h3 class="sec">通用符号表</h3>
+      <div class="tbl-wrap">
+        <div class="tbl-card">
+          <h4>电气量</h4>
+          <table class="tbl">
+            <tr><th>符号</th><th>名称</th><th>单位</th></tr>
+            <tr><td class="f">u<sub>d</sub>, u<sub>q</sub></td><td>dq 轴定子电压</td><td>V</td></tr>
+            <tr><td class="f">i<sub>d</sub>, i<sub>q</sub></td><td>dq 轴定子电流</td><td>A</td></tr>
+            <tr><td class="f">u<sub>α</sub>, u<sub>β</sub> / i<sub>α</sub>, i<sub>β</sub></td><td>αβ 轴电压 / 电流</td><td>V / A</td></tr>
+            <tr><td class="f">u<sub>a,b,c</sub> / i<sub>a,b,c</sub></td><td>三相相电压 / 相电流</td><td>V / A</td></tr>
+            <tr><td class="f">e<sub>α</sub>, e<sub>β</sub></td><td>αβ 轴反电动势</td><td>V</td></tr>
+            <tr><td class="f">R<sub>s</sub></td><td>定子电阻</td><td>Ω</td></tr>
+            <tr><td class="f">U<sub>dc</sub></td><td>母线电压</td><td>V</td></tr>
+            <tr><td class="f">f<sub>sw</sub> / T<sub>s</sub></td><td>开关频率 / 采样周期</td><td>Hz / s</td></tr>
+          </table>
+        </div>
+        <div class="tbl-card">
+          <h4>电感与磁链（见上方区分说明）</h4>
+          <table class="tbl">
+            <tr><th>符号</th><th>名称</th><th>单位</th></tr>
+            <tr><td class="f">L<sub>d</sub>, L<sub>q</sub></td><td>d / q 轴电感</td><td>H</td></tr>
+            <tr><td class="f">L<sub>s</sub></td><td>同步电感（SPMSM：L<sub>d</sub>=L<sub>q</sub>）</td><td>H</td></tr>
+            <tr><td class="f">L<sub>0</sub>, ΔL</td><td>平均 / 差模电感（IPMSM αβ 式）</td><td>H</td></tr>
+            <tr><td class="f">ψ<sub>f</sub></td><td>永磁体磁链</td><td>Wb</td></tr>
+            <tr><td class="f">ψ<sub>d</sub>, ψ<sub>q</sub></td><td>定子磁链 dq 分量</td><td>Wb</td></tr>
+            <tr><td class="f">ψ<sub>s</sub></td><td>定子磁链幅值</td><td>Wb</td></tr>
+            <tr><td class="f">ψ<sub>α</sub>, ψ<sub>β</sub></td><td>定子磁链 αβ 分量</td><td>Wb</td></tr>
+            <tr><td class="f">ψ<sub>rα</sub>, ψ<sub>rβ</sub></td><td>转子磁链 αβ 分量</td><td>Wb</td></tr>
+          </table>
+        </div>
+        <div class="tbl-card">
+          <h4>机械量与记号</h4>
+          <table class="tbl">
+            <tr><th>符号</th><th>名称</th><th>单位</th></tr>
+            <tr><td class="f">p</td><td>极对数</td><td>—</td></tr>
+            <tr><td class="f">ω<sub>e</sub></td><td>电角速度（ω<sub>e</sub> = p·ω<sub>m</sub>）</td><td>rad/s</td></tr>
+            <tr><td class="f">ω<sub>m</sub></td><td>机械角速度</td><td>rad/s</td></tr>
+            <tr><td class="f">θ<sub>e</sub></td><td>电角度</td><td>rad</td></tr>
+            <tr><td class="f">T<sub>e</sub> / T<sub>L</sub></td><td>电磁 / 负载转矩</td><td>N·m</td></tr>
+            <tr><td class="f">J</td><td>转动惯量</td><td>kg·m²</td></tr>
+            <tr><td class="f">B</td><td>粘滞摩擦系数</td><td>N·m·s/rad</td></tr>
+            <tr><td class="f">v<sub>α</sub>, v<sub>β</sub></td><td>SMO 滑模控制量</td><td>V</td></tr>
+            <tr><td class="f">k / δ</td><td>滑模增益 / 边界层</td><td>—</td></tr>
+            <tr><td class="f">ω<sub>c</sub></td><td>带宽 / 截止频率</td><td>rad/s</td></tr>
+          </table>
+        </div>
+      </div>
+      <div class="tip"><b>记号约定：</b><span class="f"><span class="dv">x</span></span> = dx/dt（变量上点表示对时间求导）；
+        <span class="f"><span class="hv">x</span></span> = 估计值（变量上帽）；
+        <span class="f"><span class="tv">x</span></span> = 误差（估计值 − 实际值）；
+        <span class="f">s</span> = 拉普拉斯算子；
+        <span class="f">·</span> = 乘法；
+        <span class="f">atan2(y, x)</span> = 四象限反正切。</div>
+    </div>
+  </section>
+
+  <!-- ============ 2 三大方程 ============ -->
+  <section class="card" id="sec2">
+    <h2 class="foldable"><span class="card-fold">▾</span><span class="badge">2</span><span>PMSM 三大方程（dq 旋转坐标系）</span><span class="sub-hint">电压 · 磁链 · 转矩 · 机械</span></h2>
+    <div class="sec-body">
+
+      <h3 class="sec">2.1 电压方程</h3>
+      <div class="eq f">u<sub>d</sub> = R<sub>s</sub>·i<sub>d</sub> + L<sub>d</sub>·<span class="frac"><span class="num">d<i>i</i><sub>d</sub></span><span class="den">d<i>t</i></span></span> − ω<sub>e</sub>·L<sub>q</sub>·i<sub>q</sub></div>
+      <div class="eq f">u<sub>q</sub> = R<sub>s</sub>·i<sub>q</sub> + L<sub>q</sub>·<span class="frac"><span class="num">d<i>i</i><sub>q</sub></span><span class="den">d<i>t</i></span></span> + ω<sub>e</sub>·(L<sub>d</sub>·i<sub>d</sub> + ψ<sub>f</sub>)</div>
+      <div class="eq f"><span class="mtx" style="grid-template-columns:auto"><span>u<sub>d</sub></span><span>u<sub>q</sub></span></span>
+        = R<sub>s</sub><span class="mtx" style="grid-template-columns:auto"><span>i<sub>d</sub></span><span>i<sub>q</sub></span></span>
+        + <span class="mtx" style="grid-template-columns:auto auto"><span>L<sub>d</sub></span><span>0</span><span>0</span><span>L<sub>q</sub></span></span><span class="frac"><span class="num"><i>d</i></span><span class="den">d<i>t</i></span></span><span class="mtx" style="grid-template-columns:auto"><span>i<sub>d</sub></span><span>i<sub>q</sub></span></span>
+        + ω<sub>e</sub><span class="mtx" style="grid-template-columns:auto"><span>−L<sub>q</sub>·i<sub>q</sub></span><span>L<sub>d</sub>·i<sub>d</sub> + ψ<sub>f</sub></span></span></div>
+      <div class="tip">第三项为<b>旋转电动势（反电动势 + 耦合项）</b>：−ω<sub>e</sub>L<sub>q</sub>i<sub>q</sub> 是 q 轴电流在 d 轴产生的耦合电压，ω<sub>e</sub>(L<sub>d</sub>i<sub>d</sub>+ψ<sub>f</sub>) 含永磁体反电动势 ω<sub>e</sub>ψ<sub>f</sub>。FOC 前馈解耦即补偿这两项。</div>
+
+      <h3 class="sec">2.2 磁链方程</h3>
+      <div class="eq f">ψ<sub>d</sub> = L<sub>d</sub>·i<sub>d</sub> + ψ<sub>f</sub>　　ψ<sub>q</sub> = L<sub>q</sub>·i<sub>q</sub>　　ψ<sub>s</sub> = <span class="sqrt">√<span class="rad">ψ<sub>d</sub><sup>2</sup> + ψ<sub>q</sub><sup>2</sup></span></span></div>
+
+      <h3 class="sec">2.3 转矩方程</h3>
+      <div class="eq f">T<sub>e</sub> = <span class="frac"><span class="num">3</span><span class="den">2</span></span>·p·[ ψ<sub>f</sub>·i<sub>q</sub> + (L<sub>d</sub> − L<sub>q</sub>)·i<sub>d</sub>·i<sub>q</sub> ]　（IPMSM 通式，也写作 T<sub>e</sub> = <span class="frac"><span class="num">3</span><span class="den">2</span></span>·p·(ψ<sub>d</sub>·i<sub>q</sub> − ψ<sub>q</sub>·i<sub>d</sub>)）</div>
+      <div class="eq f">SPMSM（L<sub>d</sub> = L<sub>q</sub>）：　T<sub>e</sub> = <span class="frac"><span class="num">3</span><span class="den">2</span></span>·p·ψ<sub>f</sub>·i<sub>q</sub></div>
+      <div class="tip">第一项 <span class="f">(3/2)·p·ψ<sub>f</sub>·i<sub>q</sub></span> 为<b>永磁转矩</b>，第二项为<b>磁阻转矩</b>（IPMSM 特有，L<sub>d</sub> &lt; L<sub>q</sub> 时给负的 i<sub>d</sub> 可增转矩 → MTPA）。</div>
+
+      <h3 class="sec">2.4 机械运动方程</h3>
+      <div class="eq f">J·<span class="frac"><span class="num">dω<sub>m</sub></span><span class="den">d<i>t</i></span></span> = T<sub>e</sub> − T<sub>L</sub> − B·ω<sub>m</sub></div>
+      <div class="eq f">ω<sub>e</sub> = p·ω<sub>m</sub>　　<span class="frac"><span class="num">dθ<sub>e</sub></span><span class="den">d<i>t</i></span></span> = ω<sub>e</sub></div>
+      <div class="tip">以上 dq 方程用<b>电角速度 ω<sub>e</sub></b> 表示；部分文献用机械角速度 ω<sub>m</sub> 表示 dq 方程（此时系数中会多出 p），推导时注意统一约定。</div>
+    </div>
+  </section>
+
+  <!-- ============ 3 静止 αβ 系 ============ -->
+  <section class="card" id="sec3">
+    <h2 class="foldable"><span class="card-fold">▾</span><span class="badge">3</span><span>静止 αβ 坐标系方程</span><span class="sub-hint">SMO / 磁链观测器都在这个坐标系里做</span></h2>
+    <div class="sec-body">
+
+      <h3 class="sec">3.1 SPMSM αβ 电压方程（观测器常用式）</h3>
+      <div class="eq f">u<sub>α</sub> = R<sub>s</sub>·i<sub>α</sub> + L<sub>s</sub>·<span class="frac"><span class="num">d<i>i</i><sub>α</sub></span><span class="den">d<i>t</i></span></span> + e<sub>α</sub>　　u<sub>β</sub> = R<sub>s</sub>·i<sub>β</sub> + L<sub>s</sub>·<span class="frac"><span class="num">d<i>i</i><sub>β</sub></span><span class="den">d<i>t</i></span></span> + e<sub>β</sub></div>
+      <div class="eq f">e<sub>α</sub> = −ω<sub>e</sub>·ψ<sub>f</sub>·sin θ<sub>e</sub>　　e<sub>β</sub> = +ω<sub>e</sub>·ψ<sub>f</sub>·cos θ<sub>e</sub></div>
+      <div class="eq f"><span class="mtx" style="grid-template-columns:auto"><span>u<sub>α</sub></span><span>u<sub>β</sub></span></span>
+        = R<sub>s</sub><span class="mtx" style="grid-template-columns:auto"><span>i<sub>α</sub></span><span>i<sub>β</sub></span></span>
+        + L<sub>s</sub><span class="frac"><span class="num"><i>d</i></span><span class="den">d<i>t</i></span></span><span class="mtx" style="grid-template-columns:auto"><span>i<sub>α</sub></span><span>i<sub>β</sub></span></span>
+        + <span class="mtx" style="grid-template-columns:auto"><span>e<sub>α</sub></span><span>e<sub>β</sub></span></span></div>
+      <div class="tip">反电动势 <b>e<sub>α</sub>/e<sub>β</sub> 里藏着转子位置与速度</b>——SMO 正是把它当作扰动观测出来。</div>
+
+      <h3 class="sec">3.2 反电动势与转子位置 / 速度的关系</h3>
+      <div class="eq f">θ<sub>e</sub> = atan2( −e<sub>α</sub>, e<sub>β</sub> ) = −atan2( e<sub>α</sub>, e<sub>β</sub> )　　ω<sub>e</sub> = <span class="frac"><span class="sqrt">√<span class="rad">e<sub>α</sub><sup>2</sup> + e<sub>β</sub><sup>2</sup></span></span><span class="den">ψ<sub>f</sub></span></span></div>
+
+      <h3 class="sec">3.3 IPMSM αβ 一般式（进阶，含 2θ<sub>e</sub> 项）</h3>
+      <div class="eq f">ψ<sub>α</sub> = L<sub>0</sub>·i<sub>α</sub> + ΔL·( i<sub>α</sub>·cos 2θ<sub>e</sub> + i<sub>β</sub>·sin 2θ<sub>e</sub> ) + ψ<sub>f</sub>·cos θ<sub>e</sub></div>
+      <div class="eq f">ψ<sub>β</sub> = L<sub>0</sub>·i<sub>β</sub> + ΔL·( i<sub>α</sub>·sin 2θ<sub>e</sub> − i<sub>β</sub>·cos 2θ<sub>e</sub> ) + ψ<sub>f</sub>·sin θ<sub>e</sub></div>
+      <div class="eq f">u<sub>α</sub> = R<sub>s</sub>·i<sub>α</sub> + <span class="frac"><span class="num">dψ<sub>α</sub></span><span class="den">d<i>t</i></span></span>　　u<sub>β</sub> = R<sub>s</sub>·i<sub>β</sub> + <span class="frac"><span class="num">dψ<sub>β</sub></span><span class="den">d<i>t</i></span></span>　　<span class="f" style="color:var(--mut)">L<sub>0</sub> = <span class="frac"><span class="num">L<sub>d</sub>+L<sub>q</sub></span><span class="den">2</span></span>，ΔL = <span class="frac"><span class="num">L<sub>d</sub>−L<sub>q</sub></span><span class="den">2</span></span></span></div>
+      <div class="tip">ΔL = 0 时上式退化为 3.1 的 SPMSM 式。IPMSM 上 SMO 若仍用 3.1 的简化模型，会引入 2θ<sub>e</sub> 谐波误差——工程上凸极率不大时常用近似 + 补偿，精确观测需用一般式或 dq 系观测器。</div>
+    </div>
+  </section>
+
+  <!-- ============ 4 坐标变换 ============ -->
+  <section class="card" id="sec4">
+    <h2 class="foldable"><span class="card-fold">▾</span><span class="badge">4</span><span>坐标变换矩阵</span><span class="sub-hint">Clarke · Park · 反变换</span></h2>
+    <div class="sec-body">
+
+      <h3 class="sec">4.1 Clarke 变换（abc → αβ，等幅值）</h3>
+      <div class="eq f"><span class="mtx" style="grid-template-columns:auto"><span>i<sub>α</sub></span><span>i<sub>β</sub></span></span>
+        = <span class="frac"><span class="num">2</span><span class="den">3</span></span><span class="mtx" style="grid-template-columns:auto auto auto"><span>1</span><span>−1/2</span><span>−1/2</span><span>0</span><span>√3/2</span><span>−√3/2</span></span><span class="mtx" style="grid-template-columns:auto"><span>i<sub>a</sub></span><span>i<sub>b</sub></span><span>i<sub>c</sub></span></span></div>
+      <div class="eq f">i<sub>α</sub> = <span class="frac"><span class="num">2</span><span class="den">3</span></span>( i<sub>a</sub> − <span class="frac"><span class="num">1</span><span class="den">2</span></span>i<sub>b</sub> − <span class="frac"><span class="num">1</span><span class="den">2</span></span>i<sub>c</sub> )　　i<sub>β</sub> = <span class="frac"><span class="num">√3</span><span class="den">3</span></span>( i<sub>b</sub> − i<sub>c</sub> )　　（i<sub>a</sub>+i<sub>b</sub>+i<sub>c</sub>=0 时：i<sub>α</sub> = i<sub>a</sub>）</div>
+
+      <h3 class="sec">4.2 Clarke 逆变换（αβ → abc，等幅值）</h3>
+      <div class="eq f"><span class="mtx" style="grid-template-columns:auto"><span>i<sub>a</sub></span><span>i<sub>b</sub></span><span>i<sub>c</sub></span></span>
+        = <span class="mtx" style="grid-template-columns:auto auto"><span>1</span><span>0</span><span>−1/2</span><span>√3/2</span><span>−1/2</span><span>−√3/2</span></span><span class="mtx" style="grid-template-columns:auto"><span>i<sub>α</sub></span><span>i<sub>β</sub></span></span></div>
+
+      <h3 class="sec">4.3 Park 变换（αβ → dq）</h3>
+      <div class="eq f"><span class="mtx" style="grid-template-columns:auto"><span>i<sub>d</sub></span><span>i<sub>q</sub></span></span>
+        = <span class="mtx" style="grid-template-columns:auto auto"><span>cos θ<sub>e</sub></span><span>sin θ<sub>e</sub></span><span>−sin θ<sub>e</sub></span><span>cos θ<sub>e</sub></span></span><span class="mtx" style="grid-template-columns:auto"><span>i<sub>α</sub></span><span>i<sub>β</sub></span></span></div>
+
+      <h3 class="sec">4.4 Park 逆变换（dq → αβ，FOC 输出用）</h3>
+      <div class="eq f"><span class="mtx" style="grid-template-columns:auto"><span>u<sub>α</sub></span><span>u<sub>β</sub></span></span>
+        = <span class="mtx" style="grid-template-columns:auto auto"><span>cos θ<sub>e</sub></span><span>−sin θ<sub>e</sub></span><span>sin θ<sub>e</sub></span><span>cos θ<sub>e</sub></span></span><span class="mtx" style="grid-template-columns:auto"><span>u<sub>d</sub></span><span>u<sub>q</sub></span></span></div>
+
+      <div class="tip">以上均为<b>等幅值变换</b>（系数 2/3，变换前后相电流幅值不变）——FOC 控制代码中最常用。另有<b>等功率变换</b>（系数 √(2/3)，功率守恒，转矩公式中 3/2 系数会消失）。两套体系混用会差 √(2/3) 倍，工程文档务必统一。</div>
+    </div>
+  </section>
+
+  <!-- ============ 5 滑模观测器 ============ -->
+  <section class="card" id="sec5">
+    <h2 class="foldable"><span class="card-fold">▾</span><span class="badge">5</span><span>滑模观测器 SMO（静止坐标系经典式）</span><span class="sub-hint">无位置传感器 · 表贴式 SPMSM</span></h2>
+    <div class="sec-body">
+
+      <h3 class="sec">5.1 电流观测器方程</h3>
+      <div class="eq f"><span class="frac"><span class="num">d<span class="hv">i<sub>α</sub></span></span><span class="den">d<i>t</i></span></span> = −<span class="frac"><span class="num">R<sub>s</sub></span><span class="den">L<sub>s</sub></span></span>·<span class="hv">i<sub>α</sub></span> + <span class="frac"><span class="num">1</span><span class="den">L<sub>s</sub></span></span>·( u<sub>α</sub> − v<sub>α</sub> )　　<span class="frac"><span class="num">d<span class="hv">i<sub>β</sub></span></span><span class="den">d<i>t</i></span></span> = −<span class="frac"><span class="num">R<sub>s</sub></span><span class="den">L<sub>s</sub></span></span>·<span class="hv">i<sub>β</sub></span> + <span class="frac"><span class="num">1</span><span class="den">L<sub>s</sub></span></span>·( u<sub>β</sub> − v<sub>β</sub> )</div>
+      <div class="eq f"><span class="frac"><span class="num"><i>d</i></span><span class="den">d<i>t</i></span></span><span class="mtx" style="grid-template-columns:auto"><span><span class="hv">i<sub>α</sub></span></span><span><span class="hv">i<sub>β</sub></span></span></span>
+        = −<span class="frac"><span class="num">R<sub>s</sub></span><span class="den">L<sub>s</sub></span></span><span class="mtx" style="grid-template-columns:auto"><span><span class="hv">i<sub>α</sub></span></span><span><span class="hv">i<sub>β</sub></span></span></span>
+        + <span class="frac"><span class="num">1</span><span class="den">L<sub>s</sub></span></span><span class="mtx" style="grid-template-columns:auto"><span>u<sub>α</sub> − v<sub>α</sub></span><span>u<sub>β</sub> − v<sub>β</sub></span></span></div>
+
+      <h3 class="sec">5.2 滑模控制函数（三种形式，选其一）</h3>
+      <div class="eq f">符号函数：　v = k·sign( <span class="tv">i</span> )，即 v<sub>α</sub> = k·sign( <span class="hv">i<sub>α</sub></span> − i<sub>α</sub> )，v<sub>β</sub> = k·sign( <span class="hv">i<sub>β</sub></span> − i<sub>β</sub> )</div>
+      <div class="eq f">饱和函数（抑抖振）：　v = k·sat( <span class="tv">i</span> / δ )，sat(x) = x（|x| ≤ 1），sign(x)（|x| &gt; 1）</div>
+      <div class="eq f">Sigmoid 连续化：　v = k·[ <span class="frac"><span class="num">2</span><span class="den">1 + e<sup>−a·<span class="tv">i</span></sup></span></span> − 1 ]　　（a 越大越接近 sign，越平滑抖振越小但滞后越大）</div>
+
+      <h3 class="sec">5.3 电流误差状态方程（滑动模态分析用）</h3>
+      <div class="eq f"><span class="frac"><span class="num">d<span class="tv">i<sub>α</sub></span></span><span class="den">d<i>t</i></span></span> = −<span class="frac"><span class="num">R<sub>s</sub></span><span class="den">L<sub>s</sub></span></span>·<span class="tv">i<sub>α</sub></span> + <span class="frac"><span class="num">1</span><span class="den">L<sub>s</sub></span></span>·( e<sub>α</sub> − v<sub>α</sub> )　　<span class="frac"><span class="num">d<span class="tv">i<sub>β</sub></span></span><span class="den">d<i>t</i></span></span> = −<span class="frac"><span class="num">R<sub>s</sub></span><span class="den">L<sub>s</sub></span></span>·<span class="tv">i<sub>β</sub></span> + <span class="frac"><span class="num">1</span><span class="den">L<sub>s</sub></span></span>·( e<sub>β</sub> − v<sub>β</sub> )</div>
+
+      <h3 class="sec">5.4 等效控制提取：低通滤波得到反电动势</h3>
+      <div class="eq f"><span class="hv">z<sub>α</sub></span> = <span class="frac"><span class="num">ω<sub>c</sub></span><span class="den">s + ω<sub>c</sub></span></span>·v<sub>α</sub>　　<span class="hv">z<sub>β</sub></span> = <span class="frac"><span class="num">ω<sub>c</sub></span><span class="den">s + ω<sub>c</sub></span></span>·v<sub>β</sub>　　（时域：<span class="frac"><span class="num">d<span class="hv">z</span></span><span class="den">d<i>t</i></span></span> = ω<sub>c</sub>·( v − <span class="hv">z</span> )）</div>
+      <div class="eq f">滑动模态建立后：　<span class="hv">z<sub>α</sub></span> ≈ e<sub>α</sub> = −ω<sub>e</sub>·ψ<sub>f</sub>·sin θ<sub>e</sub>　　<span class="hv">z<sub>β</sub></span> ≈ e<sub>β</sub> = +ω<sub>e</sub>·ψ<sub>f</sub>·cos θ<sub>e</sub></div>
+
+      <h3 class="sec">5.5 转子位置与速度估计</h3>
+      <div class="eq f"><span class="hv">θ<sub>e</sub></span> = −atan2( <span class="hv">z<sub>α</sub></span>, <span class="hv">z<sub>β</sub></span> ) = atan2( −<span class="hv">z<sub>α</sub></span>, <span class="hv">z<sub>β</sub></span> )　　<span class="hv">ω<sub>e</sub></span> = <span class="frac"><span class="num">d<span class="hv">θ<sub>e</sub></span></span><span class="den">d<i>t</i></span></span>（工程上再经 LPF 或 PLL）</div>
+      <div class="eq f">低通滤波相位补偿：　θ<sub>e,c</sub> = <span class="hv">θ<sub>e</sub></span> + Δθ，　Δθ = arctan( <span class="hv">ω<sub>e</sub></span> / ω<sub>c</sub> )</div>
+
+      <h3 class="sec">5.6 稳定性条件（Lyapunov 可达性）</h3>
+      <div class="eq f">V = <span class="frac"><span class="num">1</span><span class="den">2</span></span>( <span class="tv">i<sub>α</sub></span><sup>2</sup> + <span class="tv">i<sub>β</sub></span><sup>2</sup> )　⇒　<span class="dv">V</span> &lt; 0　当　k &gt; max( |e<sub>α</sub>|, |e<sub>β</sub>| ) = ω<sub>e</sub>·ψ<sub>f</sub></div>
+      <div class="tip"><b>工程取值：</b>k ≥ ω<sub>e,max</sub>·ψ<sub>f</sub>（最大电角速度对应反电动势幅值）并留 1.2~1.5 倍裕量；k 过大会加剧抖振，配合 sat/sigmoid 与合理 ω<sub>c</sub>（一般取 ω<sub>c</sub> ≥ 2~4 倍 ω<sub>e,max</sub>，兼顾滤波滞后）。<br>
+      <b>符号约定提醒：</b>部分教材定义 v = −k·sign(<span class="tv">i</span>)（观测器方程中对应加号），与本文相反——使用前请与所引文献核对加减号，否则位置会差 π。</div>
+    </div>
+  </section>
+
+  <!-- ============ 6 磁链观测器 ============ -->
+  <section class="card" id="sec6">
+    <h2 class="foldable"><span class="card-fold">▾</span><span class="badge">6</span><span>磁链观测器</span><span class="sub-hint">电压模型 · 电流模型 · Gopinath 混合型</span></h2>
+    <div class="sec-body">
+
+      <h3 class="sec">6.1 电压模型（纯积分）</h3>
+      <div class="eq f"><span class="hv">ψ<sub>α</sub></span> = ∫( u<sub>α</sub> − R<sub>s</sub>·i<sub>α</sub> ) d<i>t</i>　　<span class="hv">ψ<sub>β</sub></span> = ∫( u<sub>β</sub> − R<sub>s</sub>·i<sub>β</sub> ) d<i>t</i></div>
+      <div class="tip"><b>问题：</b>纯积分对初始值、直流偏置、采样漂移敏感（输出漂移 / 饱和）。<b>工程替代：</b>一阶低通近似积分
+        <span class="f"><span class="hv">ψ</span> = (u − R<sub>s</sub>·i)/(s + ω<sub>c</sub>)</span>，ω<sub>c</sub> 取比最低运行频率更低的截止值（如额定电频率的 1/10），高速时近似积分。</div>
+
+      <h3 class="sec">6.2 电流模型（需要转子位置，SPMSM）</h3>
+      <div class="eq f">ψ<sub>α</sub> = L<sub>s</sub>·i<sub>α</sub> + ψ<sub>f</sub>·cos θ<sub>e</sub>　　ψ<sub>β</sub> = L<sub>s</sub>·i<sub>β</sub> + ψ<sub>f</sub>·sin θ<sub>e</sub></div>
+
+      <h3 class="sec">6.3 转子磁链提取与位置估计</h3>
+      <div class="eq f">ψ<sub>rα</sub> = <span class="hv">ψ<sub>α</sub></span> − L<sub>s</sub>·i<sub>α</sub> ≈ ψ<sub>f</sub>·cos θ<sub>e</sub>　　ψ<sub>rβ</sub> = <span class="hv">ψ<sub>β</sub></span> − L<sub>s</sub>·i<sub>β</sub> ≈ ψ<sub>f</sub>·sin θ<sub>e</sub></div>
+      <div class="eq f"><span class="hv">θ<sub>e</sub></span> = atan2( ψ<sub>rβ</sub>, ψ<sub>rα</sub> )　　<span class="hv">ω<sub>e</sub></span> = <span class="frac"><span class="num">d<span class="hv">θ<sub>e</sub></span></span><span class="den">d<i>t</i></span></span></div>
+
+      <h3 class="sec">6.4 Gopinath 混合型（电压模型 + PI 校正到电流模型）</h3>
+      <div class="eq f"><span class="frac"><span class="num">d<span class="hv">ψ<sub>α</sub></span></span><span class="den">d<i>t</i></span></span> = u<sub>α</sub> − R<sub>s</sub>·i<sub>α</sub> + K<sub>p</sub>·( ψ<sub>α,c</sub> − <span class="hv">ψ<sub>α</sub></span> ) + K<sub>i</sub>·∫( ψ<sub>α,c</sub> − <span class="hv">ψ<sub>α</sub></span> ) d<i>t</i></div>
+      <div class="eq f"><span class="frac"><span class="num">d<span class="hv">ψ<sub>β</sub></span></span><span class="den">d<i>t</i></span></span> = u<sub>β</sub> − R<sub>s</sub>·i<sub>β</sub> + K<sub>p</sub>·( ψ<sub>β,c</sub> − <span class="hv">ψ<sub>β</sub></span> ) + K<sub>i</sub>·∫( ψ<sub>β,c</sub> − <span class="hv">ψ<sub>β</sub></span> ) d<i>t</i></div>
+      <div class="eq f">s 域：　<span class="hv">ψ</span> = <span class="frac"><span class="num">1</span><span class="den">s</span></span>·[ u − R<sub>s</sub>·i + G(s)·( ψ<sub>c</sub> − <span class="hv">ψ</span> ) ]，　G(s) = K<sub>p</sub> + <span class="frac"><span class="num">K<sub>i</sub></span><span class="den">s</span></span></div>
+      <div class="eq f">电流模型给定（用估计位置）：　ψ<sub>α,c</sub> = L<sub>s</sub>·i<sub>α</sub> + ψ<sub>f</sub>·cos <span class="hv">θ<sub>e</sub></span>　　ψ<sub>β,c</sub> = L<sub>s</sub>·i<sub>β</sub> + ψ<sub>f</sub>·sin <span class="hv">θ<sub>e</sub></span></div>
+      <div class="tip"><b>原理：</b>稳态时 PI 校正迫使 <span class="f"><span class="hv">ψ</span> → ψ<sub>c</sub></span>（低速准），动态时电压模型主导（高速准）——取两者之长。位置提取仍用 6.3 式（θ̂<sub>e</sub> = atan2(ψ̂<sub>β</sub> − L<sub>s</sub>i<sub>β</sub>, ψ̂<sub>α</sub> − L<sub>s</sub>i<sub>α</sub>)）。</div>
+
+      <h3 class="sec">6.5 SMO 与磁链观测器对比（选型参考）</h3>
+      <table class="tbl">
+        <tr><th>特性</th><th>滑模观测器 SMO</th><th>磁链观测器（电压/混合型）</th></tr>
+        <tr><td>实现难度</td><td>结构简单，计算量小</td><td>混合型稍复杂（含 PI / 低通）</td></tr>
+        <tr><td>参数依赖</td><td>仅 R<sub>s</sub>、L<sub>s</sub>，鲁棒性强</td><td>电压模型仅 R<sub>s</sub>；电流模型需 L<sub>s</sub>、ψ<sub>f</sub>、θ<sub>e</sub></td></tr>
+        <tr><td>中高速</td><td>好（需补偿滤波相位滞后）</td><td>好（电压模型主导）</td></tr>
+        <tr><td>低速 / 零速</td><td>差（反电动势小，滤波滞后大）</td><td>混合型靠电流模型，低速好</td></tr>
+        <tr><td>固有缺陷</td><td>抖振（用 sat / sigmoid 抑制）</td><td>积分漂移（用低通替代 / PI 校正）</td></tr>
+        <tr><td>适用</td><td>风机、水泵、压缩机等中高速无感</td><td>宽速域无感，低速带载启动</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <!-- ============ 7 高频注入 ============ -->
+  <section class="card" id="sec7">
+    <h2 class="foldable"><span class="card-fold">▾</span><span class="badge">7</span><span>高频注入法 HFI（估计同步系 γδ）</span><span class="sub-hint">低速 / 零速无感 · IPMSM 凸极性</span></h2>
+    <div class="sec-body">
+
+      <h3 class="sec">7.1 原理与适用</h3>
+      <div class="tip">利用 IPMSM 的<b>凸极性（L<sub>q</sub> ≠ L<sub>d</sub>）</b>：向估计 d 轴（γ 轴）注入高频电压，δ 轴高频电流响应中携带位置误差
+        <span class="f"><span class="tv">θ</span> = θ<sub>e</sub> − <span class="hv">θ<sub>e</sub></span></span> 的信息，解调后由 PLL 跟踪使误差收敛。
+        适用于<b>低速 / 零速</b>无感启动（该区间反电动势法失效），常与 SMO 组合成全速域方案：低速 HFI → 中高速切换 SMO。
+        前提是电机有凸极——表贴式 SPMSM（L<sub>d</sub> = L<sub>q</sub>）经典 HFI 不适用（可借助饱和凸极或 αβ 系旋转注入等变体）。</div>
+
+      <h3 class="sec">7.2 估计同步系 γδ 与高频模型</h3>
+      <div class="eq f"><span class="mtx" style="grid-template-columns:auto"><span>x<sub>d</sub></span><span>x<sub>q</sub></span></span>
+        = R(<span class="tv">θ</span>)·<span class="mtx" style="grid-template-columns:auto"><span>x<sub>γ</sub></span><span>x<sub>δ</sub></span></span>，　R(<span class="tv">θ</span>) = <span class="mtx" style="grid-template-columns:auto auto"><span>cos<span class="tv">θ</span></span><span>−sin<span class="tv">θ</span></span><span>sin<span class="tv">θ</span></span><span>cos<span class="tv">θ</span></span></span>，　<span class="tv">θ</span> = θ<sub>e</sub> − <span class="hv">θ<sub>e</sub></span>（位置误差）</div>
+      <div class="eq f">高频模型（ω<sub>h</sub> ≫ ω<sub>e</sub>，忽略 R<sub>s</sub> 与反电动势）：　u<sub>dh</sub> ≈ L<sub>d</sub>·<span class="frac"><span class="num">d<i>i</i><sub>dh</sub></span><span class="den">d<i>t</i></span></span>　　u<sub>qh</sub> ≈ L<sub>q</sub>·<span class="frac"><span class="num">d<i>i</i><sub>qh</sub></span><span class="den">d<i>t</i></span></span></div>
+
+      <h3 class="sec">7.3 高频电压注入（旋转正弦注入）</h3>
+      <div class="eq f">u<sub>γh</sub> = U<sub>h</sub>·cos( ω<sub>h</sub>·t )　　u<sub>δh</sub> = 0　　（叠加在 FOC 输出电压上：u<sub>γ</sub>* = u<sub>γ,PI</sub> + u<sub>γh</sub>）</div>
+
+      <h3 class="sec">7.4 高频电流响应（γδ 系）</h3>
+      <div class="eq f">i<sub>γh</sub> = <span class="frac"><span class="num">U<sub>h</sub></span><span class="den">ω<sub>h</sub></span></span>·sin(ω<sub>h</sub>·t)·[ <span class="frac"><span class="num">cos²<span class="tv">θ</span></span><span class="den">L<sub>d</sub></span></span> + <span class="frac"><span class="num">sin²<span class="tv">θ</span></span><span class="den">L<sub>q</sub></span></span> ]</div>
+      <div class="eq f">i<sub>δh</sub> = <span class="frac"><span class="num">U<sub>h</sub></span><span class="den">2·ω<sub>h</sub></span></span>·( <span class="frac"><span class="num">1</span><span class="den">L<sub>q</sub></span></span> − <span class="frac"><span class="num">1</span><span class="den">L<sub>d</sub></span></span> )·sin( 2<span class="tv">θ</span> )·sin(ω<sub>h</sub>·t) = <span class="frac"><span class="num">U<sub>h</sub>·( L<sub>d</sub> − L<sub>q</sub> )</span><span class="den">2·ω<sub>h</sub>·L<sub>d</sub>·L<sub>q</sub></span></span>·sin( 2<span class="tv">θ</span> )·sin(ω<sub>h</sub>·t)</div>
+      <div class="tip">δ 轴高频电流幅值 ∝ (1/L<sub>q</sub> − 1/L<sub>d</sub>)·sin(2<span class="tv">θ</span>)——<b>凸极越强、误差信号越大</b>；θ̃ = 0 时 i<sub>δh</sub> = 0。</div>
+
+      <h3 class="sec">7.5 解调：乘法检波 + 低通滤波（外差法）</h3>
+      <div class="eq f">ε = LPF[ i<sub>δh</sub>·sin( ω<sub>h</sub>·t ) ] = <span class="frac"><span class="num">U<sub>h</sub></span><span class="den">4·ω<sub>h</sub></span></span>·( <span class="frac"><span class="num">1</span><span class="den">L<sub>q</sub></span></span> − <span class="frac"><span class="num">1</span><span class="den">L<sub>d</sub></span></span> )·sin( 2<span class="tv">θ</span> ) ∝ sin( 2<span class="tv">θ</span> )</div>
+      <div class="tip">流程：相电流采样 → Clarke → Park(θ̂<sub>e</sub>) → <b>BPF</b>（带通 ω<sub>h</sub>，滤基波）→ 取 δ 轴分量 × sin(ω<sub>h</sub>t) → <b>LPF</b> → 误差 ε。<br>
+      <b>方波注入变体：</b>u<sub>γh</sub> 每控制周期在 ±U<sub>h</sub> 间翻转（方波注入），用相邻周期电流差分直接解调，无需 BPF/LPF，动态更高、实现更简单，但注入频率受 PWM 周期约束。</div>
+
+      <h3 class="sec">7.6 位置 / 速度跟踪（PLL）</h3>
+      <div class="eq f"><span class="hv">ω<sub>e</sub></span> = K<sub>p</sub>·ε + K<sub>i</sub>·∫ ε d<i>t</i>　　<span class="hv">θ<sub>e</sub></span> = ∫ <span class="hv">ω<sub>e</sub></span> d<i>t</i>　　（闭环使 <span class="tv">θ</span> → 0 或 π）</div>
+      <div class="tip">PLL 带宽取速度环带宽的 5~10 倍（远低于 ω<sub>h</sub>）。<b>符号约定提醒：</b>ε 的符号随 θ̃ 定义、解调参考（sin/cos）而异，整定前必须验证误差符号，否则收敛到错误平衡点。</div>
+
+      <h3 class="sec">7.7 初始位置与磁极极性辨识</h3>
+      <div class="tip" style="line-height:2">
+        误差信号只含 sin(2θ̃)，θ̃ = 0 与 θ̃ = π 均为稳定点 → 分两步：<br>
+        ① <b>初始角度辨识</b>：静止时注入 HF 信号，PLL 收敛得 θ̂<sub>0</sub>（存在 0 / π 歧义）；<br>
+        ② <b>极性辨识</b>：沿 θ̂<sub>0</sub> 方向注入正、负 d 轴电压脉冲，利用 d 轴磁路饱和——与 ψ<sub>f</sub> 同向的脉冲电流响应幅值更大——判断转子磁极真实方向；若相反则 θ̂<sub>e</sub> 修正 +π。</div>
+
+      <h3 class="sec">7.8 注入参数选取经验</h3>
+      <div class="tip" style="line-height:2">
+        频率 ω<sub>h</sub>：一般 0.5 ~ 2 kHz（约 f<sub>sw</sub> 的 1/10 ~ 1/5）；需远高于基波频率、远低于电流环带宽，并避开机械谐振与噪声敏感区；<br>
+        幅值 U<sub>h</sub>：工程上约取额定电压的 5% ~ 10%，校核高频电流纹波（约额定电流 5% ~ 10%）与可闻噪声、附加损耗；<br>
+        解调 LPF 截止：远低于 2ω<sub>h</sub>，高于 PLL 带宽；<br>
+        交叉饱和：带载后凸极轴线发生偏移，位置误差增大，可离线标定误差补偿表。</div>
+    </div>
+  </section>
+
+  <!-- ============ 8 FOC 结构 ============ -->
+  <section class="card" id="sec8">
+    <h2 class="foldable"><span class="card-fold">▾</span><span class="badge">8</span><span>FOC 闭环控制结构</span><span class="sub-hint">解耦 · 双环 · SVPWM · 极限约束</span></h2>
+    <div class="sec-body">
+
+      <h3 class="sec">7.1 电流环：PI + 前馈解耦</h3>
+      <div class="eq f">u<sub>d</sub>* = K<sub>p,d</sub>·( i<sub>d</sub>* − i<sub>d</sub> ) + K<sub>i,d</sub>·∫( i<sub>d</sub>* − i<sub>d</sub> ) d<i>t</i> − ω<sub>e</sub>·L<sub>q</sub>·i<sub>q</sub></div>
+      <div class="eq f">u<sub>q</sub>* = K<sub>p,q</sub>·( i<sub>q</sub>* − i<sub>q</sub> ) + K<sub>i,q</sub>·∫( i<sub>q</sub>* − i<sub>q</sub> ) d<i>t</i> + ω<sub>e</sub>·( L<sub>d</sub>·i<sub>d</sub> + ψ<sub>f</sub> )</div>
+      <div class="tip">末项为<b>前馈解耦 / 反电动势补偿</b>（对应 2.1 旋转电动势项），可提高动态解耦性能；不加前馈、仅靠 PI 也可稳定，但高速耦合明显。</div>
+
+      <h3 class="sec">7.2 双环结构</h3>
+      <div class="tip" style="line-height:2">
+        速度环（外环）：ω<sub>m</sub>* − ω<sub>m</sub> → PI → i<sub>q</sub>*　；i<sub>d</sub>* 由 MTPA / 弱磁策略给定（SPMSM 常用 i<sub>d</sub>* = 0）<br>
+        电流环（内环）：i<sub>d,q</sub>* − i<sub>d,q</sub> → PI + 解耦 → u<sub>d,q</sub>* → <b>反 Park</b> → u<sub>α,β</sub> → <b>SVPWM</b> → 三相逆变器 → PMSM<br>
+        反馈支路：三相电流采样 → <b>Clarke / Park</b> → i<sub>d,q</sub>；位置与速度来自<b>编码器</b>或<b>观测器</b>（无感 FOC：低速 HFI、中高速 SMO / 磁链观测器，见 ⑤⑥⑦）</div>
+
+      <h3 class="sec">7.3 SVPWM 公式集（七段式）</h3>
+      <div class="eq f">定义：　X = <span class="frac"><span class="num">√3·T<sub>s</sub>·u<sub>β</sub></span><span class="den">U<sub>dc</sub></span></span>　　Y = <span class="frac"><span class="num">( 3u<sub>α</sub> + √3·u<sub>β</sub> )·T<sub>s</sub></span><span class="den">2·U<sub>dc</sub></span></span>　　Z = <span class="frac"><span class="num">( −3u<sub>α</sub> + √3·u<sub>β</sub> )·T<sub>s</sub></span><span class="den">2·U<sub>dc</sub></span></span></div>
+      <div class="eq f">扇区判定：　A = ( u<sub>β</sub> &gt; 0 )　B = ( √3·u<sub>α</sub> − u<sub>β</sub> &gt; 0 )　C = ( −√3·u<sub>α</sub> − u<sub>β</sub> &gt; 0 )　N = A + 2B + 4C</div>
+      <div class="eq f">扇区映射：　N = 3 → Ⅰ，N = 1 → Ⅱ，N = 5 → Ⅲ，N = 4 → Ⅳ，N = 6 → Ⅴ，N = 2 → Ⅵ</div>
+      <table class="tbl" style="max-width:480px">
+        <tr><th>扇区</th><th>Ⅰ</th><th>Ⅱ</th><th>Ⅲ</th><th>Ⅳ</th><th>Ⅴ</th><th>Ⅵ</th></tr>
+        <tr><td class="f">T<sub>1</sub></td><td class="f">−Z</td><td class="f">Z</td><td class="f">X</td><td class="f">−X</td><td class="f">−Y</td><td class="f">Y</td></tr>
+        <tr><td class="f">T<sub>2</sub></td><td class="f">X</td><td class="f">Y</td><td class="f">−Y</td><td class="f">Z</td><td class="f">−Z</td><td class="f">−X</td></tr>
+      </table>
+      <div class="eq f">过调制处理：　若 T<sub>1</sub> + T<sub>2</sub> &gt; T<sub>s</sub>，则 T<sub>1</sub> = <span class="frac"><span class="num">T<sub>1</sub>·T<sub>s</sub></span><span class="den">T<sub>1</sub>+T<sub>2</sub></span></span>，T<sub>2</sub> = <span class="frac"><span class="num">T<sub>2</sub>·T<sub>s</sub></span><span class="den">T<sub>1</sub>+T<sub>2</sub></span></span>；T<sub>0</sub> = T<sub>s</sub> − T<sub>1</sub> − T<sub>2</sub></div>
+      <div class="tip">线性调制区最大相电压幅值 = U<sub>dc</sub>/√3（电压利用率较 SPWM 提升约 15.5%）。不同教材对 X/Y/Z 的定义与作用时间映射写法略有差异，实现前请与所选教材/源码核对。</div>
+
+      <h3 class="sec">7.4 电流 / 电压极限约束</h3>
+      <div class="eq f">电流极限圆：　i<sub>d</sub><sup>2</sup> + i<sub>q</sub><sup>2</sup> ≤ i<sub>s,max</sub><sup>2</sup>（受逆变器 / 电机热约束）</div>
+      <div class="eq f">电压极限椭圆：　( L<sub>d</sub>·i<sub>d</sub> + ψ<sub>f</sub> )<sup>2</sup> + ( L<sub>q</sub>·i<sub>q</sub> )<sup>2</sup> ≤ ( u<sub>s,max</sub> / ω<sub>e</sub> )<sup>2</sup>，u<sub>s,max</sub> = U<sub>dc</sub>/√3</div>
+      <div class="tip">转速升高 → 电压椭圆收缩 → 进入<b>弱磁区</b>：i<sub>d</sub>* 向负方向调整以满足椭圆约束（弱磁），配合 MTPA（低速）/ MTPV（深弱磁）策略给定 i<sub>d</sub>*。</div>
+    </div>
+  </section>
+
+  <!-- ============ 9 参数整定 ============ -->
+  <section class="card" id="sec9">
+    <h2 class="foldable"><span class="card-fold">▾</span><span class="badge">9</span><span>参数整定 + 计算器</span><span class="sub-hint">电流环 · 速度环 · MTPA</span></h2>
+    <div class="sec-body">
+
+      <h3 class="sec">8.1 电流环 PI（带宽法 / 零极点对消）</h3>
+      <div class="eq f">ω<sub>c</sub> = 2π·f<sub>c</sub>　　K<sub>p</sub> = L·ω<sub>c</sub>　　K<sub>i</sub> = R<sub>s</sub>·ω<sub>c</sub>　　（d 轴取 L<sub>d</sub>，q 轴取 L<sub>q</sub>）</div>
+      <div class="tip">PI 零点 −R<sub>s</sub>/L 对消电机极点，闭环近似一阶惯性 ω<sub>c</sub>/(s+ω<sub>c</sub>)。工程取 f<sub>c</sub> ≈ f<sub>sw</sub>/10 ~ f<sub>sw</sub>/20（f<sub>sw</sub> 为开关频率）；K<sub>p</sub> 单位 V/A（Ω），K<sub>i</sub> 单位 V/(A·s)（Ω/s）。</div>
+      <div class="calc">
+        <h4>电流环 PI 计算器（带宽法）</h4>
+        <div class="calc-form">
+          <label><span class="f">L</span><input type="number" id="c1-L" value="200" step="any"><select id="c1-Lu"><option value="1e-6">μH</option><option value="1e-3" selected>mH</option><option value="1">H</option></select></label>
+          <label><span class="f">R<sub>s</sub></span><input type="number" id="c1-R" value="0.5" step="any"><select id="c1-Ru"><option value="1e-3">mΩ</option><option value="1" selected>Ω</option></select></label>
+          <label><span class="f">f<sub>c</sub></span><input type="number" id="c1-f" value="500" step="any">Hz</label>
+        </div>
+        <div class="calc-out" id="c1-out"></div>
+      </div>
+
+      <h3 class="sec">8.2 速度环 PI（对称最优近似）</h3>
+      <div class="eq f">ω<sub>sc</sub> = 2π·f<sub>sc</sub>　　K<sub>p</sub> = <span class="frac"><span class="num">2·J·ω<sub>sc</sub></span><span class="den">3·p·ψ<sub>f</sub></span></span>　　T<sub>i</sub> = <span class="frac"><span class="num">10</span><span class="den">ω<sub>sc</sub></span></span>（即 K<sub>i</sub> = K<sub>p</sub>/T<sub>i</sub>）</div>
+      <div class="tip">将电流环近似为一阶惯性（电流带宽远高于速度环），PI 零点放 ω<sub>sc</sub>/10。K<sub>p</sub> 单位 A·s/rad（即 A/(rad/s)），T<sub>i</sub> 单位 s；J 单位 kg·m²，ψ<sub>f</sub> 单位 Wb。工程取 f<sub>sc</sub> 约为电流环带宽的 1/10~1/5。</div>
+      <div class="calc">
+        <h4>速度环 PI 计算器（对称最优近似）</h4>
+        <div class="calc-form">
+          <label><span class="f">J</span><input type="number" id="c2-J" value="10" step="any"><select id="c2-Ju"><option value="1">kg·m²</option><option value="1e-4">kg·cm²</option><option value="1e-7" selected>g·cm²</option></select></label>
+          <label><span class="f">p</span><input type="number" id="c2-p" value="4" step="any"></label>
+          <label><span class="f">ψ<sub>f</sub></span><input type="number" id="c2-f" value="50" step="any"><select id="c2-fu"><option value="1e-3" selected>mWb</option><option value="1">Wb</option></select></label>
+          <label><span class="f">f<sub>sc</sub></span><input type="number" id="c2-fs" value="50" step="any">Hz</label>
+        </div>
+        <div class="calc-out" id="c2-out"></div>
+      </div>
+
+      <h3 class="sec">8.3 MTPA 给定（最大转矩电流比）</h3>
+      <div class="eq f">i<sub>d</sub>* = <span class="frac"><span class="num">ψ<sub>f</sub></span><span class="den">2·(L<sub>q</sub> − L<sub>d</sub>)</span></span> − <span class="sqrt">√<span class="rad">[ <span class="frac"><span class="num">ψ<sub>f</sub></span><span class="den">2·(L<sub>q</sub> − L<sub>d</sub>)</span></span> ]<sup>2</sup> + i<sub>q</sub><sup>2</sup></span></span>　（适用于 L<sub>d</sub> &lt; L<sub>q</sub> 的 IPMSM；给定 i<sub>q</sub>，求使转矩最大的 i<sub>d</sub>*）</div>
+      <div class="eq f">T<sub>e</sub> = <span class="frac"><span class="num">3</span><span class="den">2</span></span>·p·[ ψ<sub>f</sub>·i<sub>q</sub> + ( L<sub>d</sub> − L<sub>q</sub> )·i<sub>d</sub>*·i<sub>q</sub> ]　　SPMSM（L<sub>d</sub> = L<sub>q</sub>）：i<sub>d</sub>* = 0</div>
+      <div class="calc">
+        <h4>MTPA 计算器</h4>
+        <div class="calc-form">
+          <label><span class="f">L<sub>d</sub></span><input type="number" id="c3-Ld" value="0.5" step="any">mH</label>
+          <label><span class="f">L<sub>q</sub></span><input type="number" id="c3-Lq" value="0.8" step="any">mH</label>
+          <label><span class="f">ψ<sub>f</sub></span><input type="number" id="c3-f" value="50" step="any"><select id="c3-fu"><option value="1e-3" selected>mWb</option><option value="1">Wb</option></select></label>
+          <label><span class="f">p</span><input type="number" id="c3-p" value="4" step="any"></label>
+          <label><span class="f">i<sub>q</sub></span><input type="number" id="c3-iq" value="10" step="any">A</label>
+        </div>
+        <div class="calc-out" id="c3-out"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 10 常用常数 ============ -->
+  <section class="card" id="sec10">
+    <h2 class="foldable"><span class="card-fold">▾</span><span class="badge">10</span><span>常用常数与关系式</span><span class="sub-hint">Kt · Ke · 功率 · 稳态</span></h2>
+    <div class="sec-body">
+
+      <h3 class="sec">9.1 转矩 / 反电势常数</h3>
+      <div class="eq f">转矩常数：　K<sub>t</sub> = <span class="frac"><span class="num">3</span><span class="den">2</span></span>·p·ψ<sub>f</sub>　[N·m/A]　　（T<sub>e</sub> = K<sub>t</sub>·i<sub>q</sub>，SPMSM）</div>
+      <div class="eq f">反电势系数（相幅值）：　K<sub>e</sub> = p·ψ<sub>f</sub>　[V·s/rad]　　（e<sub>phase,peak</sub> = K<sub>e</sub>·ω<sub>m</sub>；K<sub>t</sub> = 1.5·K<sub>e</sub>）</div>
+      <div class="eq f">线电压有效值反电势：　E<sub>line,rms</sub> = <span class="sqrt">√<span class="rad">3/2</span></span>·p·ψ<sub>f</sub>·ω<sub>m</sub> ≈ 1.225·p·ψ<sub>f</sub>·ω<sub>m</sub></div>
+
+      <h3 class="sec">9.2 功率与稳态关系</h3>
+      <div class="eq f">电磁功率：　P<sub>e</sub> = T<sub>e</sub>·ω<sub>m</sub> = <span class="frac"><span class="num">3</span><span class="den">2</span></span>·( u<sub>d</sub>·i<sub>d</sub> + u<sub>q</sub>·i<sub>q</sub> )（忽略损耗）</div>
+      <div class="eq f">稳态 dq 电压方程（忽略微分项）：　u<sub>d</sub> = R<sub>s</sub>·i<sub>d</sub> − ω<sub>e</sub>·L<sub>q</sub>·i<sub>q</sub>　　u<sub>q</sub> = R<sub>s</sub>·i<sub>q</sub> + ω<sub>e</sub>·( L<sub>d</sub>·i<sub>d</sub> + ψ<sub>f</sub> )</div>
+      <div class="eq f">相电流幅值：　I<sub>s</sub> = <span class="sqrt">√<span class="rad">i<sub>d</sub><sup>2</sup> + i<sub>q</sub><sup>2</sup></span></span>　　i<sub>d</sub> = 0 控制时：u<sub>s</sub> = <span class="sqrt">√<span class="rad">( R<sub>s</sub>·i<sub>q</sub> )<sup>2</sup> + ω<sub>e</sub><sup>2</sup>·( L<sub>q</sub><sup>2</sup>·i<sub>q</sub><sup>2</sup> + ψ<sub>f</sub><sup>2</sup> )</span></span></div>
+
+      <h3 class="sec">9.3 采样与控制周期经验值</h3>
+      <div class="tip" style="line-height:2">
+        电流环采样周期 T<sub>s</sub> = 1/f<sub>sw</sub>（与 PWM 同步，可双采样双更新）；<br>
+        电流环带宽 f<sub>c</sub> ≈ f<sub>sw</sub>/10 ~ f<sub>sw</sub>/20；速度环带宽 f<sub>sc</sub> ≈ f<sub>c</sub>/10 ~ f<sub>c</sub>/5；<br>
+        观测器 LPF 截止 ω<sub>c</sub> ≥ 2~4 倍 ω<sub>e,max</sub>；SMO 增益 k ≥ ω<sub>e,max</sub>·ψ<sub>f</sub> × (1.2~1.5)。</div>
+    </div>
+  </section>
+
+</div>
+
+<script>
+'use strict';
+/* ============ 折叠 ============ */
+document.querySelectorAll('.card h2.foldable').forEach(function (h) {
+  h.addEventListener('click', function (e) {
+    const card = h.closest('.card');
+    const body = card.querySelector('.sec-body');
+    const open = body.style.display !== 'none';
+    body.style.display = open ? 'none' : '';
+    card.classList.toggle('collapsed', open);
+    h.querySelector('.card-fold').textContent = open ? '▸' : '▾';
+  });
+});
+
+/* ============ 数值格式化 ============ */
+function fmt(v) {
+  if (typeof v !== 'number' || !Number.isFinite(v)) return '—';
+  if (v === 0) return '0';
+  const a = Math.abs(v);
+  if (a >= 1e6 || a < 1e-4) return v.toExponential(2);
+  return String(parseFloat(v.toPrecision(6)));
+}
+const $ = function (id) { return document.getElementById(id); };
+function bindCalc(ids, fn) {
+  ids.forEach(function (id) {
+    var el = $(id);
+    el.addEventListener('input', fn);
+    el.addEventListener('change', fn);
+  });
+}
+
+/* ---------- 计算器 1：电流环 PI ---------- */
+function calc1() {
+  const L = parseFloat($('c1-L').value) * parseFloat($('c1-Lu').value);
+  const R = parseFloat($('c1-R').value) * parseFloat($('c1-Ru').value);
+  const fc = parseFloat($('c1-f').value);
+  const out = $('c1-out');
+  if (!(L > 0 && R >= 0 && fc > 0)) { out.innerHTML = '请输入有效的正数（L &gt; 0，R<sub>s</sub> ≥ 0，f<sub>c</sub> &gt; 0）'; return; }
+  const wc = 2 * Math.PI * fc;
+  const Kp = L * wc, Ki = R * wc;
+  out.innerHTML =
+    'ω<sub>c</sub> = 2π·f<sub>c</sub> = <b>' + fmt(wc) + '</b> rad/s　·　' +
+    'K<sub>p</sub> = L·ω<sub>c</sub> = <b>' + fmt(Kp) + '</b> V/A（Ω）　·　' +
+    'K<sub>i</sub> = R<sub>s</sub>·ω<sub>c</sub> = <b>' + fmt(Ki) + '</b> V/(A·s)（Ω/s）' +
+    '<div class="u">提示：f<sub>c</sub> 建议取开关频率 f<sub>sw</sub> 的 1/10 ~ 1/20（如 f<sub>sw</sub> = 10 kHz → f<sub>c</sub> = 500~1000 Hz）；d 轴用 L<sub>d</sub>、q 轴用 L<sub>q</sub> 各算一次。</div>';
+}
+
+/* ---------- 计算器 2：速度环 PI ---------- */
+function calc2() {
+  const J = parseFloat($('c2-J').value) * parseFloat($('c2-Ju').value);
+  const p = parseFloat($('c2-p').value);
+  const psif = parseFloat($('c2-f').value) * parseFloat($('c2-fu').value);
+  const fsc = parseFloat($('c2-fs').value);
+  const out = $('c2-out');
+  if (!(J > 0 && p > 0 && psif > 0 && fsc > 0)) { out.innerHTML = '请输入有效的正数（J、p、ψ<sub>f</sub>、f<sub>sc</sub> 均需大于 0）'; return; }
+  const wsc = 2 * Math.PI * fsc;
+  const Kp = 2 * J * wsc / (3 * p * psif);
+  const Ti = 10 / wsc;
+  const Ki = Kp / Ti;
+  out.innerHTML =
+    'ω<sub>sc</sub> = 2π·f<sub>sc</sub> = <b>' + fmt(wsc) + '</b> rad/s　·　' +
+    'K<sub>p</sub> = 2Jω<sub>sc</sub>/(3pψ<sub>f</sub>) = <b>' + fmt(Kp) + '</b> A·s/rad　·　' +
+    'T<sub>i</sub> = 10/ω<sub>sc</sub> = <b>' + fmt(Ti) + '</b> s（K<sub>i</sub> = K<sub>p</sub>/T<sub>i</sub> = <b>' + fmt(Ki) + '</b> A/rad）' +
+    '<div class="u">提示：f<sub>sc</sub> 约为电流环带宽的 1/10 ~ 1/5；整定后请按实际系统调节（T<sub>i</sub> 可取 4~20/ω<sub>sc</sub> 之间折衷）。</div>';
+}
+
+/* ---------- 计算器 3：MTPA ---------- */
+function calc3() {
+  const Ld = parseFloat($('c3-Ld').value) * 1e-3;
+  const Lq = parseFloat($('c3-Lq').value) * 1e-3;
+  const psif = parseFloat($('c3-f').value) * parseFloat($('c3-fu').value);
+  const p = parseFloat($('c3-p').value);
+  const iq = parseFloat($('c3-iq').value);
+  const out = $('c3-out');
+  if (!(Ld > 0 && Lq > 0 && psif > 0 && p > 0)) { out.innerHTML = '请输入有效的正数（L<sub>d</sub>、L<sub>q</sub>、ψ<sub>f</sub>、p 均需大于 0）'; return; }
+  const dL = Lq - Ld;
+  if (dL <= 1e-9) {
+    const Te = 1.5 * p * psif * iq;
+    out.innerHTML = 'L<sub>q</sub> ≤ L<sub>d</sub>（SPMSM 或 L<sub>d</sub> ≥ L<sub>q</sub>）：MTPA 退化为 <b>i<sub>d</sub>* = 0</b>，T<sub>e</sub> = 1.5·p·ψ<sub>f</sub>·i<sub>q</sub> = <b>' + fmt(Te) + '</b> N·m';
+    return;
+  }
+  const a = psif / (2 * dL);
+  const id = a - Math.sqrt(a * a + iq * iq);
+  const Te = 1.5 * p * (psif * iq + (Ld - Lq) * id * iq);
+  out.innerHTML =
+    'ψ<sub>f</sub>/(2(L<sub>q</sub>−L<sub>d</sub>)) = <b>' + fmt(a) + '</b> A　·　' +
+    'i<sub>d</sub>* = <b>' + fmt(id) + '</b> A　·　' +
+    'T<sub>e</sub> = <b>' + fmt(Te) + '</b> N·m' +
+    '<div class="u">提示：i<sub>d</sub>* 为负值（去磁方向）即正常；L<sub>d</sub> &lt; L<sub>q</sub> 才有磁阻转矩可利用。</div>';
+}
+
+bindCalc(['c1-L', 'c1-Lu', 'c1-R', 'c1-Ru', 'c1-f'], calc1);
+bindCalc(['c2-J', 'c2-Ju', 'c2-p', 'c2-f', 'c2-fu', 'c2-fs'], calc2);
+bindCalc(['c3-Ld', 'c3-Lq', 'c3-f', 'c3-fu', 'c3-p', 'c3-iq'], calc3);
+calc1(); calc2(); calc3();
+</script>
+</body>
+</html>

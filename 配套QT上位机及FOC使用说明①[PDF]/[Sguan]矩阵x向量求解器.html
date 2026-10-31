@@ -69,7 +69,9 @@ canvas{background:#fff;border:1px solid var(--line);border-radius:10px;display:b
 .m-name{font-weight:600;font-size:13px;min-width:36px;flex:none}
 .m-val{font-size:13px;color:var(--acc);font-weight:600;min-width:64px}
 .m-body{display:flex;flex-direction:column;gap:7px;padding:8px 14px 12px 38px;border-top:1px dashed var(--line)}
-.m-xrow{display:flex;align-items:center;gap:8px}
+.m-xrow{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.m-follow{font-size:12px;padding:2px 4px;max-width:118px}
+input:disabled,select:disabled{background:#f4f4f5;color:#a1a1aa;cursor:not-allowed}
 .m-xlab{font-size:12.5px;color:var(--mut)}
 .m-slider{width:100%;accent-color:#52525b}
 .m-x{flex:1;min-width:0;width:120px}
@@ -170,7 +172,7 @@ canvas{background:#fff;border:1px solid var(--line);border-radius:10px;display:b
     <h2>
       <span class="badge m">m</span>
       <span>自变量控制区（m1 ~ m20，Z1 / Z2 共用）</span>
-      <span class="sub-hint">y = x / 1/x / sin(x) / cos(x)　·　滑条 -4π ~ 4π，数值框可输范围外　·　点击 m 标题可折叠</span>
+      <span class="sub-hint">y = x / 1/x / sin(x) / cos(x)　·　滑条 -4π ~ 4π，数值框可输范围外　·　x 可跟随其他 m　·　点击 m 标题可折叠</span>
     </h2>
     <div id="m-list"></div>
   </section>
@@ -207,7 +209,7 @@ const state = {
   z1Open: true, z2Open: true,
   A: [], B: [], C: [], D: [],
   scale1: 1, scale2: 1,
-  m: Array.from({ length: 20 }, () => ({ func: 'x', x: 1, open: true }))
+  m: Array.from({ length: 20 }, () => ({ func: 'x', x: 1, open: true, follow: 0 }))
 };
 const defCell = () => ({ mode: 'num', num: 1 });
 
@@ -221,8 +223,18 @@ function rebuildCD() {
 }
 
 /* ============ m 取值 ============ */
+function mX(i) {
+  // 有效 x：可跟随其他 m 的滑条（链式解析；成环时回退到环起点自身的 x）
+  let cur = i;
+  const seen = new Set();
+  while (state.m[cur].follow > 0 && !seen.has(cur)) {
+    seen.add(cur);
+    cur = state.m[cur].follow - 1;
+  }
+  return state.m[cur].x;
+}
 function mValue(i) {
-  const m = state.m[i], x = m.x;
+  const m = state.m[i], x = mX(i);
   switch (m.func) {
     case 'x':   return x;
     case 'inv': return x === 0 ? 0 : 1 / x;   // 1/x 在 x=0 时按 0 处理
@@ -522,17 +534,23 @@ function buildMControls() {
           <span class="m-xlab">x =</span>
           <input type="number" class="m-x" step="any">
           <span class="m-unit">rad</span>
+          <select class="m-follow" title="本 m 的 x 由哪个滑条驱动"></select>
         </div>
         <input type="range" class="m-slider" step="0.001">
       </div>`;
     const head = item.querySelector('.m-head'), body = item.querySelector('.m-body'),
       slider = item.querySelector('.m-slider'), xnum = item.querySelector('.m-x'),
       funcSel = item.querySelector('.m-func'), fold = item.querySelector('.fold'),
-      val = item.querySelector('.m-val');
+      val = item.querySelector('.m-val'), followSel = item.querySelector('.m-follow');
     slider.min = (-FOUR_PI).toString(); slider.max = FOUR_PI.toString();
+    let fopts = '<option value="0">自身滑条</option>';
+    for (let k = 1; k <= 20; k++) if (k !== i + 1) fopts += `<option value="${k}">跟随 m${k}</option>`;
+    followSel.innerHTML = fopts;
     head.addEventListener('click', () => { state.m[i].open = !state.m[i].open; scheduleRender(); });
     funcSel.addEventListener('click', e => e.stopPropagation());
     funcSel.addEventListener('change', e => { state.m[i].func = e.target.value; scheduleRender(); });
+    followSel.addEventListener('click', e => e.stopPropagation());
+    followSel.addEventListener('change', e => { state.m[i].follow = +e.target.value || 0; scheduleRender(); });
     slider.addEventListener('input', e => { state.m[i].x = parseFloat(e.target.value); scheduleRender(); });
     xnum.addEventListener('input', e => {
       const v = parseFloat(e.target.value);
@@ -540,7 +558,7 @@ function buildMControls() {
       scheduleRender();
     });
     host.appendChild(item);
-    mRows.push({ item, body, slider, xnum, funcSel, fold, val });
+    mRows.push({ item, body, slider, xnum, funcSel, fold, val, followSel });
   }
 }
 
@@ -714,11 +732,16 @@ function render() {
 
   mRows.forEach((row, i) => {
     const m = state.m[i];
+    const fx = mX(i);                    // 有效 x（跟随他人时即他人的 x）
+    const isFollow = m.follow > 0;
     row.val.textContent = `= ${fmt(mValue(i))}`;
     row.fold.textContent = m.open ? '▾' : '▸';
     row.body.style.display = m.open ? '' : 'none';
-    if (document.activeElement !== row.slider) row.slider.value = m.x;
-    if (document.activeElement !== row.xnum) row.xnum.value = parseFloat(m.x.toPrecision(8));
+    row.followSel.value = String(m.follow);
+    row.slider.disabled = isFollow;
+    row.xnum.disabled = isFollow;
+    if (document.activeElement !== row.slider) row.slider.value = fx;
+    if (document.activeElement !== row.xnum) row.xnum.value = parseFloat(fx.toPrecision(8));
     row.funcSel.value = m.func;
   });
 
