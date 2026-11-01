@@ -3,50 +3,104 @@
 
 /* SguanFOC配置文件声明 */
 #include <stdint.h>
-#include "UnitLib_Config.h"
-#include "UserData_Config.h"
+#include "UnitLib_Design.h"
+#include "UserData_Define.h"
 
-// 定点化计算格式
-typedef int32_t Q31;        // 1位符号+0位整数+31位小数
-typedef int16_t Q15;        // 1位符号+0位整数+15位小数
+// ================================================================================
+// 1.局部定点化计算格式
+typedef int32_t Q31;    // 1位符号+0位整数+31位小数
+typedef int16_t Q15;    // 1位符号+0位整数+15位小数
 
-// 数据格式宏定义
-#define VALUE_MATH          UNITLIB_CONFIG_MATH
-#define VALUE_FLOAT         0x00
-#define VALUE_DOUBLE        0x01
-#define VALUE_Q15           0x02
-#define VALUE_Q31           0x03
+// ================================================================================
+// 2.数据格式宏定义
+#define VALUE_MODE_FLOAT        0x00
+#define VALUE_MODE_DOUBLE       0x01
+#define VALUE_MODE_Q15          0x02
+#define VALUE_MODE_Q31          0x03
 
-// Value数值分类(若是定点，Rad例程代码按照8.0归一化)
+#if !((DESIGN_MODE_MATH>=VALUE_MODE_FLOAT) && (DESIGN_MODE_MATH<=VALUE_MODE_Q31))
+#define VALUE_MODE_MATH        VALUE_MODE_FLOAT
+#else // DESIGN_COUNT_MOTOR
+#define VALUE_MODE_MATH        DESIGN_MODE_MATH
+#endif // DESIGN_COUNT_MOTOR
+
+// ================================================================================
+// 3.Value数值分类
 // (SguanF必然是浮点数)
-// (只出现在Sguan_IQmath.c中)
+// (只出现在Sguan_IQmath.c和少数其他函数中)
 // (SguanQ看格式，一般情况是浮点数，定点代码是整数)
 // (全代码都出现)
-#if VALUE_MATH==VALUE_DOUBLE
-typedef double              SguanQ;
-typedef double              SguanF;
-#define VALUE_2PI           6.283185307179586f      // 2pi的数值
-#define VALUE_PI_2          1.570796326794896f      // 二分之pi
-#define VALUE_2_SQRT2       2.8284271247461903f     // 二倍根号二
-#elif VALUE_MATH==VALUE_Q15
-typedef Q15                 SguanQ;
-typedef float               SguanF;
-#define VALUE_2PI           6.283185307179586f      // 2pi的数值
-#define VALUE_PI_2          1.570796326794896f      // 二分之pi
-#define VALUE_2_SQRT2       2.8284271247461903f     // 二倍根号二
-#elif VALUE_MATH==VALUE_Q31
-typedef Q31                 SguanQ;
-typedef float               SguanF;
-#define VALUE_2PI           6.283185307179586f      // 2pi的数值
-#define VALUE_PI_2          1.570796326794896f      // 二分之pi
-#define VALUE_2_SQRT2       2.8284271247461903f     // 二倍根号二
-#else // CONFIG_IQMATH->VALUE_FLOAT
-typedef float               SguanQ;
-typedef float               SguanF;
-#define VALUE_2PI           6.283185307179586f      // 2pi的数值
-#define VALUE_PI_2          1.570796326794896f      // 二分之pi
-#define VALUE_2_SQRT2       2.8284271247461903f     // 二倍根号二
+#if VALUE_MODE_MATH==VALUE_MODE_DOUBLE
+typedef double                  SguanQ;
+typedef double                  SguanF;
+#elif VALUE_MODE_MATH==VALUE_MODE_Q15
+typedef Q15                     SguanQ;
+typedef float                   SguanF;
+#elif VALUE_MODE_MATH==VALUE_MODE_Q31
+typedef Q31                     SguanQ;
+typedef float                   SguanF;
+#else // VALUE_MODE_MATH->VALUE_MODE_FLOAT
+typedef float                   SguanQ;
+typedef float                   SguanF;
 #endif // CONFIG_IQMATH
+
+// ================================================================================
+// 4.常用数值宏定义
+// (若是定点，Rad例程代码按照8.0归一化)
+/* 以下定义分别是浮点的：
+(2pi的数值)
+(二分之pi)
+(二倍根号二)
+定点Q15的数值：
+()
+定点Q31的数值：
+()
+()*/
+#define VALUE_F_2PI             (SguanF)6.283185307179586
+#define VALUE_F_PI              (SguanF)3.141592653589793
+#define VALUE_F_PI_2            (SguanF)1.570796326794896
+#define VALUE_F_2_SQRT2         (SguanF)2.8284271247461903
+
+#define VALUE_Q15_2PI           (Q15)25736
+#define VALUE_Q15_PI            (Q15)12868
+#define VALUE_Q15_PI_2          (Q15)6434
+
+#define VALUE_Q31_2PI           (Q31)1686629713
+#define VALUE_Q31_PI            (Q31)843314857
+#define VALUE_Q31_PI_2          (Q31)421657428
+
+// ================================================================================
+// 4.基值设计Q15或者Q31
+// (前面时间、弧度角度、电压和电流自变量)
+// (后面频率、角速度、电阻、电感和磁链是因变量)
+// VALUE_BASE_RAD这个固定设定为8.0
+// RAD=8.0覆盖所有速度控制场景
+// 所有用到定点的场景都是速度控制
+// 位置控制精度要求高，不用定点
+#ifdef DESIGN_BASE_TIME
+#define VALUE_BASE_TIME         (float)DESIGN_BASE_TIME
+#else // DESIGN_BASE_TIME
+#define VALUE_BASE_TIME         0.001953125f
+#endif // DESIGN_BASE_TIME
+
+#ifdef DESIGN_BASE_VOLTAGE
+#define VALUE_BASE_VOLTAGE      (float)DESIGN_BASE_VOLTAGE
+#else // DESIGN_BASE_VOLTAGE
+#define VALUE_BASE_VOLTAGE      1024.0f
+#endif // DESIGN_BASE_VOLTAGE
+
+#ifdef DESIGN_BASE_CURRENT
+#define VALUE_BASE_CURRENT      (float)DESIGN_BASE_CURRENT
+#else // DESIGN_BASE_CURRENT
+#define VALUE_BASE_CURRENT      64.0f
+#endif // DESIGN_BASE_CURRENT
+
+#define VALUE_BASE_RAD          8.0f    // 固定BASE基值设计
+#define VALUE_BASE_HZ           1.0f/VALUE_BASE_TIME
+#define VALUE_BASE_SPEED        VALUE_BASE_RAD/VALUE_BASE_TIME
+#define VALUE_BSAE_RESISTOR     VALUE_BASE_VOLTAGE/VALUE_BASE_CURRENT
+#define VALUE_BASE_INDUCTOR     VALUE_BSAE_RESISTOR*VALUE_BASE_TIME
+#define VALUE_BASE_FLUX         VALUE_BASE_VOLTAGE*VALUE_BASE_TIME
 
 
 #endif // SGUAN_VALUE_H

@@ -8,14 +8,14 @@
 
 /* 内部私有变量与函数 */
 uint8_t sguan_printfbuff[64];
-static uint32_t hash_compute(const char *str, uint8_t len);
-static float get_data_fast(uint8_t start_idx);
-static void printf_adjust(void);
+static uint32_t local_hash_compute(const char *str, uint8_t len);
+static float local_get_data(uint8_t start_idx);
+static void local_adjust(void);
 
 
 /* ==================== 哈希/字典映射实现 =================== */
 // 轻量级字符串哈希函数 (DJB2算法)
-static uint32_t hash_compute(const char *str, uint8_t len){
+static uint32_t local_hash_compute(const char *str, uint8_t len){
     uint32_t hash = 5381;
     for (uint8_t i = 0; i < len; i++) {
         hash = ((hash << 5) + hash) + str[i]; 
@@ -23,12 +23,12 @@ static uint32_t hash_compute(const char *str, uint8_t len){
     return hash;
 }
 
-#define DICT_COUNT (sizeof(cmd_dict) / sizeof(CmdMap))
+#define PRINTF_DICT_COUNT (sizeof(cmd_dict) / sizeof(CmdMap))
 
 /**
  * @description: 极速浮点解析 (单遍扫描 + 异常数据熔断截断)
  */
-static float get_data_fast(uint8_t start_idx){
+static float local_get_data(uint8_t start_idx){
     float result = 0.0f;
     float frac_weight = 0.1f;
     uint8_t i = start_idx;
@@ -64,7 +64,7 @@ static float get_data_fast(uint8_t start_idx){
 /**
  * @description: [接收]实时参数调整函数 - 真·哈希查表
  */
-static void printf_adjust(void){
+static void local_adjust(void){
     uint8_t eq_pos = 0;
     
     // 1. 寻找等号，确定指令 Key 的长度
@@ -74,13 +74,13 @@ static void printf_adjust(void){
     }
 
     // 2. 提取数值
-    float data_val = get_data_fast(eq_pos + 1);
+    float data_val = local_get_data(eq_pos + 1);
 
     // 3. 计算当前收到指令的哈希值
-    uint32_t rx_hash = hash_compute((const char*)sguan_printfbuff, eq_pos);
+    uint32_t rx_hash = local_hash_compute((const char*)sguan_printfbuff, eq_pos);
 
     // 4. 哈希查表匹配 (纯整数比较，速度极快)
-    for (uint8_t i = 0; i < DICT_COUNT; i++){
+    for (uint8_t i = 0; i < PRINTF_DICT_COUNT; i++){
         if (cmd_dict[i].hash_val == rx_hash){
             // 严谨起见：发生哈希碰撞时，二次确认字符串内容
             if (strncmp((char*)sguan_printfbuff, cmd_dict[i].name, eq_pos) == 0){
@@ -110,9 +110,9 @@ void printf_tx_loop(Printf *str){
 }
 
 void printf_rx_init(void){
-    for (uint8_t i = 0; i < DICT_COUNT; i++){
+    for (uint8_t i = 0; i < PRINTF_DICT_COUNT; i++){
         uint8_t len = strlen(cmd_dict[i].name);
-        cmd_dict[i].hash_val = hash_compute(cmd_dict[i].name, len);
+        cmd_dict[i].hash_val = local_hash_compute(cmd_dict[i].name, len);
     }
 }
 
@@ -131,7 +131,7 @@ void printf_rx_loop(uint8_t *data, uint16_t length){
         
         // 2. 遇到帧尾 '?' 触发解析
         if (ch == '?') {
-            printf_adjust();
+            local_adjust();
             buff_ptr = 0; // 重置索引
             continue;
         }

@@ -13,9 +13,9 @@ struct Transfer1Data {
 };
 
 void transfer_transfer1_init(Transfer1 *transfer){
-    #if CONFIG_IQMATH
+    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
     unitlib_unitlib_patch_transfer1_init(transfer);
-    #else // CONFIG_IQMATH
+    #else // VALUE_MODE_MATH
     // 传递函数运算系数固定计算
     transfer->data->data_num[0] = 2.0f*transfer->params.num1 + transfer->params.num0*transfer->params.t;
     transfer->data->data_num[1] = -2.0f*transfer->params.num1 + transfer->params.num0*transfer->params.t;
@@ -29,13 +29,13 @@ void transfer_transfer1_init(Transfer1 *transfer){
 
     transfer->in.input = 0.0f;
     transfer->out.output = 0.0f;
-    #endif // CONFIG_IQMATH
+    #endif // VALUE_MODE_MATH
 }
 
 void transfer_transfer1_loop(Transfer1 *transfer){
-    #if CONFIG_IQMATH
+    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
     unitlib_unitlib_patch_transfer1_loop(transfer);
-    #else // CONFIG_IQMATH
+    #else // VALUE_MODE_MATH
     // 1.传递函数运算系数动态计算
     if (transfer->params.recalculate_total_flag){
         transfer->data->data_num[0] = 2.0f*transfer->params.num1 + transfer->params.num0*transfer->params.t;
@@ -51,7 +51,7 @@ void transfer_transfer1_loop(Transfer1 *transfer){
     // 3.更新历史数值
     transfer->data->i = transfer->in.input;
     transfer->data->o = transfer->out.output;
-    #endif // CONFIG_IQMATH
+    #endif // VALUE_MODE_MATH
 }
 
 // ---------------------------工程模块Transfer---------------------------
@@ -64,9 +64,9 @@ struct Transfer2Data {
 };
 
 void transfer_transfer2_init(Transfer2 *transfer){
-    #if CONFIG_IQMATH
+    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
     unitlib_unitlib_patch_transfer2_init(transfer);
-    #else // CONFIG_IQMATH
+    #else // VALUE_MODE_MATH
     // 传递函数运算系数固定计算
     transfer->data->data_num[0] = 4.0f*transfer->params.num2 + 2.0f*transfer->params.num1*transfer->params.t + transfer->params.num0*transfer->params.t*transfer->params.t;
     transfer->data->data_num[1] = -8.0f*transfer->params.num2 + 2.0f*transfer->params.num0*transfer->params.t*transfer->params.t;
@@ -85,13 +85,13 @@ void transfer_transfer2_init(Transfer2 *transfer){
 
     transfer->in.input = 0.0f;
     transfer->out.output = 0.0f;
-    #endif // CONFIG_IQMATH
+    #endif // VALUE_MODE_MATH
 }
 
 void transfer_transfer2_loop(Transfer2 *transfer){
-    #if CONFIG_IQMATH
+    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
     unitlib_unitlib_patch_transfer2_loop(transfer);
-    #else // CONFIG_IQMATH
+    #else // VALUE_MODE_MATH
     // 1.传递函数运算系数动态计算
     if (transfer->params.recalculate_total_flag){
         transfer->data->data_num[0] = 4.0f*transfer->params.num2 + 2.0f*transfer->params.num1*transfer->params.t + transfer->params.num0*transfer->params.t*transfer->params.t;
@@ -112,7 +112,7 @@ void transfer_transfer2_loop(Transfer2 *transfer){
 
     transfer->data->o[1] = transfer->data->o[0];
     transfer->data->o[0] = transfer->out.output;
-    #endif // CONFIG_IQMATH
+    #endif // VALUE_MODE_MATH
 }
 
 // ---------------------------工程模块Transfer---------------------------
@@ -125,9 +125,9 @@ struct Transfer3Data {
 };
 
 void transfer_transfer3_init(Transfer3 *transfer){
-    #if CONFIG_IQMATH
+    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
     unitlib_unitlib_patch_transfer3_init(transfer);
-    #else // CONFIG_IQMATH
+    #else // VALUE_MODE_MATH
     // 传递函数运算系数固定计算
     transfer->data->data_num[0] = 8.0f*transfer->params.num3 + 4.0f*transfer->params.num2*transfer->params.t + 2.0f*transfer->params.num1*transfer->params.t*transfer->params.t + transfer->params.num0*transfer->params.t*transfer->params.t*transfer->params.t;
     transfer->data->data_num[1] = -24.0f*transfer->params.num3 - 4.0f*transfer->params.num2*transfer->params.t + 2.0f*transfer->params.num1*transfer->params.t*transfer->params.t + 3.0f*transfer->params.num0*transfer->params.t*transfer->params.t*transfer->params.t;
@@ -150,13 +150,13 @@ void transfer_transfer3_init(Transfer3 *transfer){
 
     transfer->in.input = 0.0f;
     transfer->out.output = 0.0f;
-    #endif // CONFIG_IQMATH
+    #endif // VALUE_MODE_MATH
 }
 
 void transfer_transfer3_loop(Transfer3 *transfer){
-    #if CONFIG_IQMATH
+    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
     unitlib_unitlib_patch_transfer3_loop(transfer);
-    #else // CONFIG_IQMATH
+    #else // VALUE_MODE_MATH
     // 1.传递函数运算系数动态计算
     if (transfer->params.recalculate_total_flag){
         transfer->data->data_num[0] = 8.0f*transfer->params.num3 + 4.0f*transfer->params.num2*transfer->params.t + 2.0f*transfer->params.num1*transfer->params.t*transfer->params.t + transfer->params.num0*transfer->params.t*transfer->params.t*transfer->params.t;
@@ -181,7 +181,7 @@ void transfer_transfer3_loop(Transfer3 *transfer){
     transfer->data->o[2] = transfer->data->o[1];
     transfer->data->o[1] = transfer->data->o[0];
     transfer->data->o[0] = transfer->out.output;
-    #endif // CONFIG_IQMATH
+    #endif // VALUE_MODE_MATH
 }
 
 // ---------------------------工程模块Transfer---------------------------
@@ -194,9 +194,9 @@ struct Transfer4Data {
 };
 
 void transfer_transfer4_init(Transfer4 *transfer){
-    #if CONFIG_IQMATH
+    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
     unitlib_patch_transfer4_init(transfer);
-    #else // CONFIG_IQMATH
+    #else // VALUE_MODE_MATH
     // 传递函数运算系数固定计算
     transfer->data->data_num[0] = 16.0f*transfer->params.num4 + 8.0f*transfer->params.num3*transfer->params.t + 4.0f*transfer->params.num2*transfer->params.t*transfer->params.t + 2.0f*transfer->params.num1*transfer->params.t*transfer->params.t*transfer->params.t + transfer->params.num0*transfer->params.t*transfer->params.t*transfer->params.t*transfer->params.t;
     transfer->data->data_num[1] = -64.0f*transfer->params.num4 - 16.0f*transfer->params.num3*transfer->params.t + 4.0f*transfer->params.num1*transfer->params.t*transfer->params.t*transfer->params.t + 4.0f*transfer->params.num0*transfer->params.t*transfer->params.t*transfer->params.t*transfer->params.t;
@@ -223,13 +223,13 @@ void transfer_transfer4_init(Transfer4 *transfer){
 
     transfer->in.input = 0.0f;
     transfer->out.output = 0.0f;
-    #endif // CONFIG_IQMATH
+    #endif // VALUE_MODE_MATH
 }
 
 void transfer_transfer4_loop(Transfer4 *transfer){
-    #if CONFIG_IQMATH
+    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
     unitlib_patch_transfer4_loop(transfer);
-    #else // CONFIG_IQMATH
+    #else // VALUE_MODE_MATH
     // 1.传递函数运算系数动态计算
     if (transfer->params.recalculate_total_flag){
         transfer->data->data_num[0] = 16.0f*transfer->params.num4 + 8.0f*transfer->params.num3*transfer->params.t + 4.0f*transfer->params.num2*transfer->params.t*transfer->params.t + 2.0f*transfer->params.num1*transfer->params.t*transfer->params.t*transfer->params.t + transfer->params.num0*transfer->params.t*transfer->params.t*transfer->params.t*transfer->params.t;
@@ -258,7 +258,7 @@ void transfer_transfer4_loop(Transfer4 *transfer){
     transfer->data->o[2] = transfer->data->o[1];
     transfer->data->o[1] = transfer->data->o[0];
     transfer->data->o[0] = transfer->out.output;
-    #endif // CONFIG_IQMATH
+    #endif // VALUE_MODE_MATH
 }
 
 // ---------------------------工程模块Transfer---------------------------
@@ -271,9 +271,9 @@ struct Transfer5Data {
 };
 
 void transfer_transfer5_init(Transfer5 *transfer){
-    #if CONFIG_IQMATH
+    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
     unitlib_patch_transfer5_init(transfer);
-    #else // CONFIG_IQMATH
+    #else // VALUE_MODE_MATH
     // 传递函数运算系数固定计算
     transfer->data->data_num[0] = 32.0f*transfer->params.num5 + 16.0f*transfer->params.num4*transfer->params.t + 8.0f*transfer->params.num3*transfer->params.t*transfer->params.t + 4.0f*transfer->params.num2*transfer->params.t*transfer->params.t*transfer->params.t + 2.0f*transfer->params.num1*transfer->params.t*transfer->params.t*transfer->params.t*transfer->params.t + transfer->params.num0*transfer->params.t*transfer->params.t*transfer->params.t*transfer->params.t*transfer->params.t;
     transfer->data->data_num[1] = -160.0f*transfer->params.num5 - 48.0f*transfer->params.num4*transfer->params.t - 8.0f*transfer->params.num3*transfer->params.t*transfer->params.t + 4.0f*transfer->params.num2*transfer->params.t*transfer->params.t*transfer->params.t + 6.0f*transfer->params.num1*transfer->params.t*transfer->params.t*transfer->params.t*transfer->params.t + 5.0f*transfer->params.num0*transfer->params.t*transfer->params.t*transfer->params.t*transfer->params.t*transfer->params.t;
@@ -304,13 +304,13 @@ void transfer_transfer5_init(Transfer5 *transfer){
 
     transfer->in.input = 0.0f;
     transfer->out.output = 0.0f;
-    #endif // CONFIG_IQMATH
+    #endif // VALUE_MODE_MATH
 }
 
 void transfer_transfer5_loop(Transfer5 *transfer){
-    #if CONFIG_IQMATH
+    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
     unitlib_patch_transfer5_loop(transfer);
-    #else // CONFIG_IQMATH
+    #else // VALUE_MODE_MATH
     // 1.传递函数运算系数动态计算
     if (transfer->params.recalculate_total_flag){
         transfer->data->data_num[0] = 32.0f*transfer->params.num5 + 16.0f*transfer->params.num4*transfer->params.t + 8.0f*transfer->params.num3*transfer->params.t*transfer->params.t + 4.0f*transfer->params.num2*transfer->params.t*transfer->params.t*transfer->params.t + 2.0f*transfer->params.num1*transfer->params.t*transfer->params.t*transfer->params.t*transfer->params.t + transfer->params.num0*transfer->params.t*transfer->params.t*transfer->params.t*transfer->params.t*transfer->params.t;
@@ -343,7 +343,7 @@ void transfer_transfer5_loop(Transfer5 *transfer){
     transfer->data->o[2] = transfer->data->o[1];
     transfer->data->o[1] = transfer->data->o[0];
     transfer->data->o[0] = transfer->out.output;
-    #endif // CONFIG_IQMATH
+    #endif // VALUE_MODE_MATH
 }
 
 // ---------------------------工程模块Transfer---------------------------
@@ -354,9 +354,9 @@ struct IntegratorData {
 };
 
 void transfer_integrator_init(Integrator *integrator){
-    #if CONFIG_IQMATH
+    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
     unitlib_patch_integrator_init(integrator);
-    #else // CONFIG_IQMATH
+    #else // VALUE_MODE_MATH
     // 传递函数运算系数固定计算
     integrator->data->data_num = integrator->params.t/2.0f;
 
@@ -365,19 +365,19 @@ void transfer_integrator_init(Integrator *integrator){
 
     integrator->in.input = 0.0f;
     integrator->out.output = 0.0f;
-    #endif // CONFIG_IQMATH
+    #endif // VALUE_MODE_MATH
 }
 
 void transfer_integrator_loop(Integrator *integrator){
-    #if CONFIG_IQMATH
+    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
     unitlib_patch_integrator_loop(integrator);
-    #else // CONFIG_IQMATH
+    #else // VALUE_MODE_MATH
     // 1.运算传递函数
     integrator->out.output += (integrator->in.input + integrator->data->i)*integrator->data->data_num;
 
     // 2.更新历史数值
     integrator->data->i = integrator->in.input;
-    #endif // CONFIG_IQMATH
+    #endif // VALUE_MODE_MATH
 }
 
 // ---------------------------工程模块Transfer---------------------------
@@ -390,9 +390,9 @@ struct DerivativeData {
 };
 
 void transfer_derivative_init(Derivative *derivative){
-    #if CONFIG_IQMATH
+    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
     unitlib_patch_derivative_init(derivative);
-    #else // CONFIG_IQMATH
+    #else // VALUE_MODE_MATH
     // 传递函数运算系数固定计算
     derivative->data->data_num[0] = 2.0f*derivative->params.wc;
     derivative->data->data_num[1] = -2.0f*derivative->params.wc;
@@ -406,13 +406,13 @@ void transfer_derivative_init(Derivative *derivative){
 
     derivative->in.input = 0.0f;
     derivative->out.output = 0.0f;
-    #endif // CONFIG_IQMATH
+    #endif // VALUE_MODE_MATH
 }
 
 void transfer_derivative_loop(Derivative *derivative){
-    #if CONFIG_IQMATH
+    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
     unitlib_patch_derivative_loop(derivative);
-    #else // CONFIG_IQMATH
+    #else // VALUE_MODE_MATH
     // 1.传递函数运算系数动态计算
     if (derivative->params.recalculate_total_flag){
         derivative->data->data_num[0] = 2.0f*derivative->params.wc;
@@ -428,7 +428,7 @@ void transfer_derivative_loop(Derivative *derivative){
     // 3.更新历史数值
     derivative->data->i = derivative->in.input;
     derivative->data->o = derivative->out.output;
-    #endif // CONFIG_IQMATH
+    #endif // VALUE_MODE_MATH
 }
 
 // ---------------------------工程模块Transfer---------------------------
@@ -469,19 +469,19 @@ struct CurveData {
 };
 
 void transfer_curve_init(Curve *curve){
-    #if CONFIG_IQMATH
+    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
     unitlib_patch_curve_init(curve);
-    #else // CONFIG_IQMATH
+    #else // VALUE_MODE_MATH
     
-    #endif // CONFIG_IQMATH
+    #endif // VALUE_MODE_MATH
 }
 
 void transfer_curve_loop(Curve *curve){
-    #if CONFIG_IQMATH
+    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
     unitlib_patch_curve_loop(curve);
-    #else // CONFIG_IQMATH
+    #else // VALUE_MODE_MATH
     
-    #endif // CONFIG_IQMATH
+    #endif // VALUE_MODE_MATH
 }
 
 
@@ -496,20 +496,20 @@ struct DftData {
 
 
 void transfer_dft_init(Dft *dft){
-    #if CONFIG_IQMATH
+    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
     unitlib_patch_dft_init(dft);
-    #else // CONFIG_IQMATH
+    #else // VALUE_MODE_MATH
     
-    #endif // CONFIG_IQMATH
+    #endif // VALUE_MODE_MATH
 }
 
 
 void transfer_dft_loop(Dft *dft){
-    #if CONFIG_IQMATH
+    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
     unitlib_patch_dft_loop(dft);
-    #else // CONFIG_IQMATH
+    #else // VALUE_MODE_MATH
     
-    #endif // CONFIG_IQMATH
+    #endif // VALUE_MODE_MATH
 }
 
 // ---------------------------工程模块Transfer---------------------------
@@ -523,9 +523,9 @@ struct HallData {
 
 
 void transfer_hall_init(Hall *hall){
-    #if CONFIG_IQMATH
+    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
     unitlib_patch_hall_init(hall);
-    #else // CONFIG_IQMATH
+    #else // VALUE_MODE_MATH
     // 传递函数运算系数固定计算
 
 
@@ -533,18 +533,18 @@ void transfer_hall_init(Hall *hall){
     // 初始化为零
 
     
-    #endif // CONFIG_IQMATH
+    #endif // VALUE_MODE_MATH
 }
 
 void transfer_hall_loop(Hall *hall){
-    #if CONFIG_IQMATH
+    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
     unitlib_patch_hall_loop(hall);
-    #else // CONFIG_IQMATH
+    #else // VALUE_MODE_MATH
 
 
 
 
-    #endif // CONFIG_IQMATH
+    #endif // VALUE_MODE_MATH
 }
 
 // ---------------------------工程模块Transfer---------------------------
@@ -558,9 +558,9 @@ struct Ladrc1Data {
 
 
 void transfer_ladrc1_init(Ladrc1 *ladrc){
-    #if CONFIG_IQMATH
+    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
     unitlib_patch_ladrc1_init(ladrc);
-    #else // CONFIG_IQMATH
+    #else // VALUE_MODE_MATH
     // 传递函数运算系数固定计算
 
 
@@ -568,18 +568,18 @@ void transfer_ladrc1_init(Ladrc1 *ladrc){
     // 初始化为零
 
     
-    #endif // CONFIG_IQMATH
+    #endif // VALUE_MODE_MATH
 }
 
 void transfer_ladrc1_loop(Ladrc1 *ladrc){
-    #if CONFIG_IQMATH
+    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
     unitlib_patch_ladrc1_loop(ladrc);
-    #else // CONFIG_IQMATH
+    #else // VALUE_MODE_MATH
 
 
     
 
-    #endif // CONFIG_IQMATH
+    #endif // VALUE_MODE_MATH
 }
 
 // ---------------------------工程模块Transfer---------------------------
@@ -593,24 +593,24 @@ struct Ladrc2Data {
 
 
 void transfer_ladrc2_init(Ladrc2 *ladrc){
-    #if CONFIG_IQMATH
+    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
     unitlib_patch_ladrc2_init(ladrc);
-    #else // CONFIG_IQMATH
+    #else // VALUE_MODE_MATH
 
 
     
-    #endif // CONFIG_IQMATH
+    #endif // VALUE_MODE_MATH
 }
 
 void transfer_ladrc2_loop(Ladrc2 *ladrc){
-    #if CONFIG_IQMATH
+    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
     unitlib_patch_ladrc2_loop(ladrc);
-    #else // CONFIG_IQMATH
+    #else // VALUE_MODE_MATH
 
 
     
 
-    #endif // CONFIG_IQMATH
+    #endif // VALUE_MODE_MATH
 }
 
 // ---------------------------工程模块Transfer---------------------------
@@ -624,24 +624,24 @@ struct SmcData {
 
 
 void transfer_smc_init(Smc *smc){
-    #if CONFIG_IQMATH
+    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
     unitlib_patch_smc_init(smc);
-    #else // CONFIG_IQMATH
+    #else // VALUE_MODE_MATH
 
 
     
-    #endif // CONFIG_IQMATH
+    #endif // VALUE_MODE_MATH
 }
 
 void transfer_smc_loop(Smc *smc){
-    #if CONFIG_IQMATH
+    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
     unitlib_patch_smc_loop(smc);
-    #else // CONFIG_IQMATH
+    #else // VALUE_MODE_MATH
 
 
     
 
-    #endif // CONFIG_IQMATH
+    #endif // VALUE_MODE_MATH
 }
 
 // ---------------------------工程模块Transfer---------------------------
@@ -655,24 +655,24 @@ struct DpccData {
 
 
 void transfer_dpcc_init(Dpcc *dpcc){
-    #if CONFIG_IQMATH
+    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
     unitlib_patch_dpcc_init(dpcc);
-    #else // CONFIG_IQMATH
+    #else // VALUE_MODE_MATH
 
 
     
-    #endif // CONFIG_IQMATH
+    #endif // VALUE_MODE_MATH
 }
 
 void transfer_dpcc_loop(Dpcc *dpcc){
-    #if CONFIG_IQMATH
+    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
     unitlib_patch_dpcc_loop(dpcc);
-    #else // CONFIG_IQMATH
+    #else // VALUE_MODE_MATH
 
 
     
 
-    #endif // CONFIG_IQMATH
+    #endif // VALUE_MODE_MATH
 }
 
 // ---------------------------工程模块Transfer---------------------------
@@ -686,24 +686,24 @@ struct PirData {
 
 
 void transfer_pir_init(Pir *pir){
-    #if CONFIG_IQMATH
+    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
     unitlib_patch_pir_init(pir);
-    #else // CONFIG_IQMATH
+    #else // VALUE_MODE_MATH
 
 
     
-    #endif // CONFIG_IQMATH
+    #endif // VALUE_MODE_MATH
 }
 
 void transfer_pir_loop(Pir *pir){
-    #if CONFIG_IQMATH
+    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
     unitlib_patch_pir_loop(pir);
-    #else // CONFIG_IQMATH
+    #else // VALUE_MODE_MATH
 
 
     
 
-    #endif // CONFIG_IQMATH
+    #endif // VALUE_MODE_MATH
 }
 
 // ---------------------------工程模块Transfer---------------------------
@@ -717,24 +717,24 @@ struct PidData {
 
 
 void transfer_pid_init(Pid *pid){
-    #if CONFIG_IQMATH
+    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
     unitlib_patch_pid_init(pid);
-    #else // CONFIG_IQMATH
+    #else // VALUE_MODE_MATH
 
 
     
-    #endif // CONFIG_IQMATH
+    #endif // VALUE_MODE_MATH
 }
 
 void transfer_pid_loop(Pid *pid){
-    #if CONFIG_IQMATH
+    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
     unitlib_patch_pid_loop(pid);
-    #else // CONFIG_IQMATH
+    #else // VALUE_MODE_MATH
 
 
     
 
-    #endif // CONFIG_IQMATH
+    #endif // VALUE_MODE_MATH
 }
 
 // ---------------------------工程模块Transfer---------------------------
@@ -748,24 +748,24 @@ struct PllData {
 
 
 void transfer_pll_init(Pll *pll){
-    #if CONFIG_IQMATH
+    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
     unitlib_patch_pll_init(pll);
-    #else // CONFIG_IQMATH
+    #else // VALUE_MODE_MATH
 
 
     
-    #endif // CONFIG_IQMATH
+    #endif // VALUE_MODE_MATH
 }
 
 void transfer_pll_loop(Pll *pll){
-    #if CONFIG_IQMATH
+    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
     unitlib_patch_pll_loop(pll);
-    #else // CONFIG_IQMATH
+    #else // VALUE_MODE_MATH
 
 
     
 
-    #endif // CONFIG_IQMATH
+    #endif // VALUE_MODE_MATH
 }
 
 // ---------------------------工程模块Transfer---------------------------
@@ -782,9 +782,9 @@ struct Lpf1Data {
 
 
 void transfer_lpf1_init(Lpf1 *lpf){
-    #if CONFIG_IQMATH
+    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
     unitlib_patch_lpf1_init(lpf);
-    #else // CONFIG_IQMATH
+    #else // VALUE_MODE_MATH
     // 传递函数运算系数固定计算
     lpf->data->data_num = lpf->params.t*lpf->params.wc;
 
@@ -797,13 +797,13 @@ void transfer_lpf1_init(Lpf1 *lpf){
 
     lpf->in.input = 0.0f;
     lpf->out.output = 0.0f;
-    #endif // CONFIG_IQMATH
+    #endif // VALUE_MODE_MATH
 }
 
 void transfer_lpf1_loop(Lpf1 *lpf){
-    #if CONFIG_IQMATH
+    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
     unitlib_patch_lpf1_loop(lpf);
-    #else // CONFIG_IQMATH
+    #else // VALUE_MODE_MATH
     // 1.传递函数运算系数动态计算
     if (lpf->params.recalculate_total_flag){
         lpf->data->data_num = lpf->params.t*lpf->params.wc;
@@ -818,7 +818,7 @@ void transfer_lpf1_loop(Lpf1 *lpf){
     // 3.更新历史数值
     lpf->data->i = lpf->in.input;
     lpf->data->o = lpf->out.output;
-    #endif // CONFIG_IQMATH
+    #endif // VALUE_MODE_MATH
 }
 
 // ---------------------------工程模块Transfer---------------------------
@@ -838,16 +838,16 @@ struct Lpf2Data {
 
 
 void transfer_lpf2_init(Lpf2 *lpf){
-    #if CONFIG_IQMATH
+    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
     unitlib_patch_lpf2_init(lpf);
-    #else // CONFIG_IQMATH
+    #else // VALUE_MODE_MATH
     // 传递函数运算系数固定计算
     lpf->data->data_num[0] = lpf->params.t*lpf->params.wc*lpf->params.t*lpf->params.wc;
     lpf->data->data_num[1] = 2.0f*lpf->params.t*lpf->params.wc*lpf->params.t*lpf->params.wc;
 
-    lpf->data->data_den[0] = 4.0f + VALUE_2_SQRT2*lpf->params.t*lpf->params.wc + lpf->params.t*lpf->params.wc*lpf->params.t*lpf->params.wc;
+    lpf->data->data_den[0] = 4.0f + VALUE_F_2_SQRT2*lpf->params.t*lpf->params.wc + lpf->params.t*lpf->params.wc*lpf->params.t*lpf->params.wc;
     lpf->data->data_den[1] = -8.0f + 2.0f*lpf->params.t*lpf->params.wc*lpf->params.t*lpf->params.wc;
-    lpf->data->data_den[2] = 4.0f - VALUE_2_SQRT2*lpf->params.t*lpf->params.wc + lpf->params.t*lpf->params.wc*lpf->params.t*lpf->params.wc;
+    lpf->data->data_den[2] = 4.0f - VALUE_F_2_SQRT2*lpf->params.t*lpf->params.wc + lpf->params.t*lpf->params.wc*lpf->params.t*lpf->params.wc;
 
     // 初始化为零
     lpf->data->i[0] = 0.0f;
@@ -857,21 +857,21 @@ void transfer_lpf2_init(Lpf2 *lpf){
     
     lpf->in.input = 0.0f;
     lpf->out.output = 0.0f;
-    #endif // CONFIG_IQMATH
+    #endif // VALUE_MODE_MATH
 }
 
 void transfer_lpf2_loop(Lpf2 *lpf){
-    #if CONFIG_IQMATH
+    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
     unitlib_patch_lpf2_loop(lpf);
-    #else // CONFIG_IQMATH
+    #else // VALUE_MODE_MATH
     // 1.传递函数运算系数动态计算
     if (lpf->params.recalculate_total_flag){
         lpf->data->data_num[0] = lpf->params.t*lpf->params.wc*lpf->params.t*lpf->params.wc;
         lpf->data->data_num[1] = 2.0f*lpf->params.t*lpf->params.wc*lpf->params.t*lpf->params.wc;
 
-        lpf->data->data_den[0] = 4.0f + VALUE_2_SQRT2*lpf->params.t*lpf->params.wc + lpf->params.t*lpf->params.wc*lpf->params.t*lpf->params.wc;
+        lpf->data->data_den[0] = 4.0f + VALUE_F_2_SQRT2*lpf->params.t*lpf->params.wc + lpf->params.t*lpf->params.wc*lpf->params.t*lpf->params.wc;
         lpf->data->data_den[1] = -8.0f + 2.0f*lpf->params.t*lpf->params.wc*lpf->params.t*lpf->params.wc;
-        lpf->data->data_den[2] = 4.0f - VALUE_2_SQRT2*lpf->params.t*lpf->params.wc + lpf->params.t*lpf->params.wc*lpf->params.t*lpf->params.wc;
+        lpf->data->data_den[2] = 4.0f - VALUE_F_2_SQRT2*lpf->params.t*lpf->params.wc + lpf->params.t*lpf->params.wc*lpf->params.t*lpf->params.wc;
     }
 
     // 2.运算传递函数
@@ -883,7 +883,7 @@ void transfer_lpf2_loop(Lpf2 *lpf){
     
     lpf->data->o[1] = lpf->data->o[0];
     lpf->data->o[0] = lpf->out.output;
-    #endif // CONFIG_IQMATH
+    #endif // VALUE_MODE_MATH
 }
 
 // ---------------------------工程模块Transfer---------------------------
@@ -900,9 +900,9 @@ struct Hpf1Data {
 
 
 void transfer_hpf1_init(Hpf1 *hpf){
-    #if CONFIG_IQMATH
+    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
     unitlib_patch_hpf1_init(hpf);
-    #else // CONFIG_IQMATH
+    #else // VALUE_MODE_MATH
     // 传递函数运算系数固定计算
     hpf->data->data_num[0] = 2.0f;
     hpf->data->data_num[1] = -2.0f;
@@ -916,13 +916,13 @@ void transfer_hpf1_init(Hpf1 *hpf){
 
     hpf->in.input = 0.0f;
     hpf->out.output = 0.0f;
-    #endif // CONFIG_IQMATH
+    #endif // VALUE_MODE_MATH
 }
 
 void transfer_hpf1_loop(Hpf1 *hpf){
-    #if CONFIG_IQMATH
+    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
     unitlib_patch_hpf1_loop(hpf);
-    #else // CONFIG_IQMATH
+    #else // VALUE_MODE_MATH
     // 1.传递函数运算系数动态计算
     if (hpf->params.recalculate_total_flag){
         hpf->data->data_num[0] = 2.0f;
@@ -938,7 +938,7 @@ void transfer_hpf1_loop(Hpf1 *hpf){
     // 3.更新历史数值
     hpf->data->i = hpf->in.input;
     hpf->data->o = hpf->out.output;
-    #endif // CONFIG_IQMATH
+    #endif // VALUE_MODE_MATH
 }
 
 // ---------------------------工程模块Transfer---------------------------
@@ -958,16 +958,16 @@ struct Hpf2Data {
 
 
 void transfer_hpf2_init(Hpf2 *hpf){
-    #if CONFIG_IQMATH
+    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
     unitlib_patch_hpf2_init(hpf);
-    #else // CONFIG_IQMATH
+    #else // VALUE_MODE_MATH
     // 传递函数运算系数固定计算
     hpf->data->data_num[0] = 4.0f;
     hpf->data->data_num[1] = -8.0f;
 
-    hpf->data->data_den[0] = 4.0f + VALUE_2_SQRT2*hpf->params.t*hpf->params.wc + hpf->params.t*hpf->params.wc*hpf->params.t*hpf->params.wc;
+    hpf->data->data_den[0] = 4.0f + VALUE_F_2_SQRT2*hpf->params.t*hpf->params.wc + hpf->params.t*hpf->params.wc*hpf->params.t*hpf->params.wc;
     hpf->data->data_den[1] = -8.0f + 2.0f*hpf->params.t*hpf->params.wc*hpf->params.t*hpf->params.wc;
-    hpf->data->data_den[2] = 4.0f - VALUE_2_SQRT2*hpf->params.t*hpf->params.wc + hpf->params.t*hpf->params.wc*hpf->params.t*hpf->params.wc;
+    hpf->data->data_den[2] = 4.0f - VALUE_F_2_SQRT2*hpf->params.t*hpf->params.wc + hpf->params.t*hpf->params.wc*hpf->params.t*hpf->params.wc;
 
     // 初始化为零
     hpf->data->i[0] = 0.0f;
@@ -978,21 +978,21 @@ void transfer_hpf2_init(Hpf2 *hpf){
 
     hpf->in.input = 0.0f;
     hpf->out.output = 0.0f;
-    #endif // CONFIG_IQMATH
+    #endif // VALUE_MODE_MATH
 }
 
 void transfer_hpf2_loop(Hpf2 *hpf){
-    #if CONFIG_IQMATH
+    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
     unitlib_patch_hpf2_loop(hpf);
-    #else // CONFIG_IQMATH
+    #else // VALUE_MODE_MATH
     // 1.传递函数运算系数动态计算
     if (hpf->params.recalculate_total_flag){
         hpf->data->data_num[0] = 4.0f;
         hpf->data->data_num[1] = -8.0f;
 
-        hpf->data->data_den[0] = 4.0f + VALUE_2_SQRT2*hpf->params.t*hpf->params.wc + hpf->params.t*hpf->params.wc*hpf->params.t*hpf->params.wc;
+        hpf->data->data_den[0] = 4.0f + VALUE_F_2_SQRT2*hpf->params.t*hpf->params.wc + hpf->params.t*hpf->params.wc*hpf->params.t*hpf->params.wc;
         hpf->data->data_den[1] = -8.0f + 2.0f*hpf->params.t*hpf->params.wc*hpf->params.t*hpf->params.wc;
-        hpf->data->data_den[2] = 4.0f - VALUE_2_SQRT2*hpf->params.t*hpf->params.wc + hpf->params.t*hpf->params.wc*hpf->params.t*hpf->params.wc;
+        hpf->data->data_den[2] = 4.0f - VALUE_F_2_SQRT2*hpf->params.t*hpf->params.wc + hpf->params.t*hpf->params.wc*hpf->params.t*hpf->params.wc;
     }
 
     // 2.运算传递函数
@@ -1004,7 +1004,7 @@ void transfer_hpf2_loop(Hpf2 *hpf){
     
     hpf->data->o[1] = hpf->data->o[0];
     hpf->data->o[0] = hpf->out.output;
-    #endif // CONFIG_IQMATH
+    #endif // VALUE_MODE_MATH
 }
 
 // ---------------------------工程模块Transfer---------------------------
@@ -1024,9 +1024,9 @@ struct Bpf1Data {
 
 
 void transfer_bpf1_init(Bpf1 *bpf){
-    #if CONFIG_IQMATH
+    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
     unitlib_patch_bpf1_init(bpf);
-    #else // CONFIG_IQMATH
+    #else // VALUE_MODE_MATH
     // 传递函数运算系数固定计算
     bpf->data->data_num[0] = 2.0f*bpf->params.t*bpf->params.wc_low;
     bpf->data->data_num[1] = -2.0f*bpf->params.t*bpf->params.wc_low;
@@ -1044,13 +1044,13 @@ void transfer_bpf1_init(Bpf1 *bpf){
     
     bpf->in.input = 0.0f;
     bpf->out.output = 0.0f;
-    #endif // CONFIG_IQMATH
+    #endif // VALUE_MODE_MATH
 }
 
 void transfer_bpf1_loop(Bpf1 *bpf){
-    #if CONFIG_IQMATH
+    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
     unitlib_patch_bpf1_loop(bpf);
-    #else // CONFIG_IQMATH
+    #else // VALUE_MODE_MATH
     // 1.传递函数运算系数动态计算
     if (bpf->params.recalculate_total_flag){
         bpf->data->data_num[0] = 2.0f*bpf->params.t*bpf->params.wc_low;
@@ -1070,7 +1070,7 @@ void transfer_bpf1_loop(Bpf1 *bpf){
 
     bpf->data->o[1] = bpf->data->o[0];
     bpf->data->o[0] = bpf->out.output;
-    #endif // CONFIG_IQMATH
+    #endif // VALUE_MODE_MATH
 }
 
 // ---------------------------工程模块Transfer---------------------------
@@ -1090,9 +1090,9 @@ struct Bpf2Data {
 
 
 void transfer_bpf2_init(Bpf2 *bpf){
-    #if CONFIG_IQMATH
+    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
     unitlib_patch_bpf2_init(bpf);
-    #else // CONFIG_IQMATH
+    #else // VALUE_MODE_MATH
     // 传递函数运算系数固定计算
     bpf->data->data_num[0] = 4.0f*bpf->params.t*bpf->params.wo*bpf->params.zeta;
     bpf->data->data_num[1] = -4.0f*bpf->params.t*bpf->params.wo*bpf->params.zeta;
@@ -1110,13 +1110,13 @@ void transfer_bpf2_init(Bpf2 *bpf){
     
     bpf->in.input = 0.0f;
     bpf->out.output = 0.0f;
-    #endif // CONFIG_IQMATH
+    #endif // VALUE_MODE_MATH
 }
 
 void transfer_bpf2_loop(Bpf2 *bpf){
-    #if CONFIG_IQMATH
+    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
     unitlib_patch_bpf2_loop(bpf);
-    #else // CONFIG_IQMATH
+    #else // VALUE_MODE_MATH
     // 1.传递函数运算系数动态计算
     if (bpf->params.recalculate_total_flag){
         bpf->data->data_num[0] = 4.0f*bpf->params.t*bpf->params.wo*bpf->params.zeta;
@@ -1136,7 +1136,7 @@ void transfer_bpf2_loop(Bpf2 *bpf){
 
     bpf->data->o[1] = bpf->data->o[0];
     bpf->data->o[0] = bpf->out.output;
-    #endif // CONFIG_IQMATH
+    #endif // VALUE_MODE_MATH
 }
 // ---------------------------工程模块Transfer---------------------------
 
@@ -1155,21 +1155,21 @@ struct SogiData {
 
 
 void transfer_sogi_init(Sogi *sogi){
-    #if CONFIG_IQMATH
+    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
     unitlib_patch_sogi_init(sogi);
-    #else // CONFIG_IQMATH
+    #else // VALUE_MODE_MATH
     // 传递函数运算系数固定计算
 
 
     // 初始化为零
 
-    #endif // CONFIG_IQMATH
+    #endif // VALUE_MODE_MATH
 }
 
 void transfer_sogi_loop(Sogi *sogi){
-    #if CONFIG_IQMATH
+    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
     unitlib_patch_sogi_loop(sogi);
-    #else // CONFIG_IQMATH
+    #else // VALUE_MODE_MATH
     // 1.传递函数运算系数动态计算
     if (1){
 
@@ -1177,7 +1177,7 @@ void transfer_sogi_loop(Sogi *sogi){
 
     // 2.运算传递函数
 
-    #endif // CONFIG_IQMATH
+    #endif // VALUE_MODE_MATH
 }
 
 // ---------------------------工程模块Transfer---------------------------
@@ -1197,9 +1197,9 @@ struct NfData {
 
 
 void transfer_nf_init(Nf *nf){
-    #if CONFIG_IQMATH
+    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
     unitlib_patch_nf_init(nf);
-    #else // CONFIG_IQMATH
+    #else // VALUE_MODE_MATH
     // 传递函数运算系数固定计算
     nf->data->data_num[0] = 4.0f + nf->params.t*nf->params.wo*nf->params.t*nf->params.wo;
     nf->data->data_num[1] = -8.0f + 2.0f*nf->params.t*nf->params.wo*nf->params.t*nf->params.wo;
@@ -1217,13 +1217,13 @@ void transfer_nf_init(Nf *nf){
 
     nf->in.input = 0.0f;
     nf->out.output = 0.0f;
-    #endif // CONFIG_IQMATH
+    #endif // VALUE_MODE_MATH
 }
 
 void transfer_nf_loop(Nf *nf){
-    #if CONFIG_IQMATH
+    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
     unitlib_patch_nf_loop(nf);
-    #else // CONFIG_IQMATH
+    #else // VALUE_MODE_MATH
     // 1.传递函数运算系数动态计算
     if (nf->params.recalculate_total_flag){
         nf->data->data_num[0] = 4.0f + nf->params.t*nf->params.wo*nf->params.t*nf->params.wo;
@@ -1243,7 +1243,7 @@ void transfer_nf_loop(Nf *nf){
     
     nf->data->o[1] = nf->data->o[0];
     nf->data->o[0] = nf->out.output;
-    #endif // CONFIG_IQMATH
+    #endif // VALUE_MODE_MATH
 }
 
 // ---------------------------工程模块Transfer---------------------------
@@ -1260,9 +1260,9 @@ struct TpnfData {
 
 
 void transfer_tpnf_init(Tpnf *tpnf){
-    #if CONFIG_IQMATH
+    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
     unitlib_patch_tpnf_init(tpnf);
-    #else // CONFIG_IQMATH
+    #else // VALUE_MODE_MATH
     // 传递函数运算系数固定计算
     tpnf->data->data_num[0] = 4.0f + 4.0f*tpnf->params.k2*tpnf->params.t*tpnf->params.wo + tpnf->params.t*tpnf->params.wo*tpnf->params.t*tpnf->params.wo;
     tpnf->data->data_num[1] = -8.0f + 2.0f*tpnf->params.t*tpnf->params.wo*tpnf->params.t*tpnf->params.wo;
@@ -1281,13 +1281,13 @@ void transfer_tpnf_init(Tpnf *tpnf){
 
     tpnf->in.input = 0.0f;
     tpnf->out.output = 0.0f;
-    #endif // CONFIG_IQMATH
+    #endif // VALUE_MODE_MATH
 }
 
 void transfer_tpnf_loop(Tpnf *tpnf){
-    #if CONFIG_IQMATH
+    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
     unitlib_patch_tpnf_loop(tpnf);
-    #else // CONFIG_IQMATH
+    #else // VALUE_MODE_MATH
     // 1.传递函数运算系数动态计算
     if (tpnf->params.recalculate_total_flag){
         tpnf->data->data_num[0] = 4.0f + 4.0f*tpnf->params.k2*tpnf->params.t*tpnf->params.wo + tpnf->params.t*tpnf->params.wo*tpnf->params.t*tpnf->params.wo;
@@ -1308,7 +1308,7 @@ void transfer_tpnf_loop(Tpnf *tpnf){
     
     tpnf->data->o[1] = tpnf->data->o[0];
     tpnf->data->o[0] = tpnf->out.output;
-    #endif // CONFIG_IQMATH
+    #endif // VALUE_MODE_MATH
 }
 
 // ---------------------------工程模块Transfer---------------------------
@@ -1322,24 +1322,24 @@ struct DobData {
 
 
 void transfer_dob_init(Dob *dob){
-    #if CONFIG_IQMATH
+    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
     unitlib_patch_dob_init(dob);
-    #else // CONFIG_IQMATH
+    #else // VALUE_MODE_MATH
 
 
     
-    #endif // CONFIG_IQMATH
+    #endif // VALUE_MODE_MATH
 }
 
 void transfer_dob_loop(Dob *dob){
-    #if CONFIG_IQMATH
+    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
     unitlib_patch_dob_loop(dob);
-    #else // CONFIG_IQMATH
+    #else // VALUE_MODE_MATH
 
 
     
 
-    #endif // CONFIG_IQMATH
+    #endif // VALUE_MODE_MATH
 }
 
 // ---------------------------工程模块Transfer---------------------------
@@ -1353,24 +1353,24 @@ struct RlsData {
 
 
 void transfer_rls_init(Rls *rls){
-    #if CONFIG_IQMATH
+    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
     unitlib_patch_rls_init(rls);
-    #else // CONFIG_IQMATH
+    #else // VALUE_MODE_MATH
 
 
     
-    #endif // CONFIG_IQMATH
+    #endif // VALUE_MODE_MATH
 }
 
 void transfer_rls_loop(Rls *rls){
-    #if CONFIG_IQMATH
+    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
     unitlib_patch_rls_loop(rls);
-    #else // CONFIG_IQMATH
+    #else // VALUE_MODE_MATH
 
 
     
 
-    #endif // CONFIG_IQMATH
+    #endif // VALUE_MODE_MATH
 }
 
 // ---------------------------工程模块Transfer---------------------------
@@ -1384,24 +1384,24 @@ struct SmoData {
 
 
 void transfer_smo_init(Smo *smo){
-    #if CONFIG_IQMATH
+    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
     unitlib_patch_smo_init(smo);
-    #else // CONFIG_IQMATH
+    #else // VALUE_MODE_MATH
 
 
     
-    #endif // CONFIG_IQMATH
+    #endif // VALUE_MODE_MATH
 }
 
 void transfer_smo_loop(Smo *smo){
-    #if CONFIG_IQMATH
+    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
     unitlib_patch_smo_loop(smo);
-    #else // CONFIG_IQMATH
+    #else // VALUE_MODE_MATH
 
 
     
 
-    #endif // CONFIG_IQMATH
+    #endif // VALUE_MODE_MATH
 }
 
 // ---------------------------工程模块Transfer---------------------------
@@ -1415,24 +1415,24 @@ struct NlfoData {
 
 
 void transfer_nlfo_init(Nlfo *nlfo){
-    #if CONFIG_IQMATH
+    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
     unitlib_patch_nlfo_init(nlfo);
-    #else // CONFIG_IQMATH
+    #else // VALUE_MODE_MATH
 
 
     
-    #endif // CONFIG_IQMATH
+    #endif // VALUE_MODE_MATH
 }
 
 void transfer_nlfo_loop(Nlfo *nlfo){
-    #if CONFIG_IQMATH
+    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
     unitlib_patch_nlfo_loop(nlfo);
-    #else // CONFIG_IQMATH
+    #else // VALUE_MODE_MATH
 
 
     
 
-    #endif // CONFIG_IQMATH
+    #endif // VALUE_MODE_MATH
 }
 // ---------------------------工程模块Transfer---------------------------
 
@@ -1445,24 +1445,24 @@ struct VcfoData {
 
 
 void transfer_vcfo_init(Vcfo *vcfo){
-    #if CONFIG_IQMATH
+    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
     unitlib_patch_vcfo_init(vcfo);
-    #else // CONFIG_IQMATH
+    #else // VALUE_MODE_MATH
 
 
     
-    #endif // CONFIG_IQMATH
+    #endif // VALUE_MODE_MATH
 }
 
 void transfer_vcfo_loop(Vcfo *vcfo){
-    #if CONFIG_IQMATH
+    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
     unitlib_patch_vcfo_loop(vcfo);
-    #else // CONFIG_IQMATH
+    #else // VALUE_MODE_MATH
 
 
     
 
-    #endif // CONFIG_IQMATH
+    #endif // VALUE_MODE_MATH
 }
 
 // ---------------------------工程模块Transfer---------------------------
@@ -1476,24 +1476,24 @@ struct HfiData {
 
 
 void transfer_hfi_init(Hfi *hfi){
-    #if CONFIG_IQMATH
+    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
     unitlib_patch_hfi_init(hfi);
-    #else // CONFIG_IQMATH
+    #else // VALUE_MODE_MATH
 
 
     
-    #endif // CONFIG_IQMATH
+    #endif // VALUE_MODE_MATH
 }
 
 void transfer_hfi_loop(Hfi *hfi){
-    #if CONFIG_IQMATH
+    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
     unitlib_patch_hfi_loop(hfi);
-    #else // CONFIG_IQMATH
+    #else // VALUE_MODE_MATH
 
 
     
 
-    #endif // CONFIG_IQMATH
+    #endif // VALUE_MODE_MATH
 }
 
 // ---------------------------工程模块Transfer---------------------------
@@ -1507,24 +1507,24 @@ struct RoloData {
 
 
 void transfer_rolo_init(Rolo *rolo){
-    #if CONFIG_IQMATH
+    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
     unitlib_patch_rolo_init(rolo);
-    #else // CONFIG_IQMATH
+    #else // VALUE_MODE_MATH
 
 
     
-    #endif // CONFIG_IQMATH
+    #endif // VALUE_MODE_MATH
 }
 
 void transfer_rolo_loop(Rolo *rolo){
-    #if CONFIG_IQMATH
+    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
     unitlib_patch_rolo_loop(rolo);
-    #else // CONFIG_IQMATH
+    #else // VALUE_MODE_MATH
 
 
     
 
-    #endif // CONFIG_IQMATH
+    #endif // VALUE_MODE_MATH
 }
 
 // ---------------------------工程模块Transfer---------------------------
@@ -1538,24 +1538,24 @@ struct MarsData {
 
 
 void transfer_mars_init(Mars *mars){
-    #if CONFIG_IQMATH
+    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
     unitlib_patch_mars_init(mars);
-    #else // CONFIG_IQMATH
+    #else // VALUE_MODE_MATH
 
 
     
-    #endif // CONFIG_IQMATH
+    #endif // VALUE_MODE_MATH
 }
 
 void transfer_mars_loop(Mars *mars){
-    #if CONFIG_IQMATH
+    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
     unitlib_patch_mars_loop(mars);
-    #else // CONFIG_IQMATH
+    #else // VALUE_MODE_MATH
 
 
     
 
-    #endif // CONFIG_IQMATH
+    #endif // VALUE_MODE_MATH
 }
 
 // ---------------------------工程模块Transfer---------------------------
@@ -1569,24 +1569,24 @@ struct EkfData {
 
 
 void transfer_ekf_init(Ekf *ekf){
-    #if CONFIG_IQMATH
+    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
     unitlib_patch_ekf_init(ekf);
-    #else // CONFIG_IQMATH
+    #else // VALUE_MODE_MATH
 
 
     
-    #endif // CONFIG_IQMATH
+    #endif // VALUE_MODE_MATH
 }
 
 void transfer_ekf_loop(Ekf *ekf){
-    #if CONFIG_IQMATH
+    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
     unitlib_patch_ekf_loop(ekf);
-    #else // CONFIG_IQMATH
+    #else // VALUE_MODE_MATH
 
 
     
 
-    #endif // CONFIG_IQMATH
+    #endif // VALUE_MODE_MATH
 }
 
 // ---------------------------工程模块Transfer---------------------------
@@ -1594,19 +1594,19 @@ void transfer_ekf_loop(Ekf *ekf){
 
 
 void transfer_delay1_init(Delay1 *delay){
-    #if CONFIG_IQMATH
+    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
 
-    #else // CONFIG_IQMATH
+    #else // VALUE_MODE_MATH
     // 初始化为零
     delay->in.input = 0.0f;
     delay->out.output = 0.0f;
-    #endif // CONFIG_IQMATH
+    #endif // VALUE_MODE_MATH
 }
 
 void transfer_delay1_loop(Delay1 *delay){
-    #if CONFIG_IQMATH
+    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
 
-    #else // CONFIG_IQMATH
+    #else // VALUE_MODE_MATH
     // 1.创建局部静态变量
     static SguanQ delay_num;
 
@@ -1615,7 +1615,7 @@ void transfer_delay1_loop(Delay1 *delay){
 
     // 3.更新历史数值
     delay_num = delay->in.input;
-    #endif // CONFIG_IQMATH
+    #endif // VALUE_MODE_MATH
 }
 
 // ---------------------------工程模块Transfer---------------------------
@@ -1623,19 +1623,19 @@ void transfer_delay1_loop(Delay1 *delay){
 
 
 void transfer_delay2_init(Delay2 *delay){
-    #if CONFIG_IQMATH
+    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
 
-    #else // CONFIG_IQMATH
+    #else // VALUE_MODE_MATH
     // 初始化为零
     delay->in.input = 0.0f;
     delay->out.output = 0.0f;
-    #endif // CONFIG_IQMATH
+    #endif // VALUE_MODE_MATH
 }
 
 void transfer_delay2_loop(Delay2 *delay){
-    #if CONFIG_IQMATH
+    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
 
-    #else // CONFIG_IQMATH
+    #else // VALUE_MODE_MATH
     // 1.创建局部静态变量
     static SguanQ delay_num[2];
 
@@ -1645,7 +1645,7 @@ void transfer_delay2_loop(Delay2 *delay){
     // 3.更新历史数值
     delay_num[1] = delay_num[0];
     delay_num[0] = delay->in.input;
-    #endif // CONFIG_IQMATH
+    #endif // VALUE_MODE_MATH
 }
 
 // ---------------------------工程模块Transfer---------------------------
@@ -1653,19 +1653,19 @@ void transfer_delay2_loop(Delay2 *delay){
 
 
 void transfer_delay3_init(Delay3 *delay){
-    #if CONFIG_IQMATH
+    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
 
-    #else // CONFIG_IQMATH
+    #else // VALUE_MODE_MATH
     // 初始化为零
     delay->in.input = 0.0f;
     delay->out.output = 0.0f;
-    #endif // CONFIG_IQMATH
+    #endif // VALUE_MODE_MATH
 }
 
 void transfer_delay3_loop(Delay3 *delay){
-    #if CONFIG_IQMATH
+    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
 
-    #else // CONFIG_IQMATH
+    #else // VALUE_MODE_MATH
     // 1.创建局部静态变量
     static SguanQ delay_num[3];
 
@@ -1676,7 +1676,7 @@ void transfer_delay3_loop(Delay3 *delay){
     delay_num[2] = delay_num[1];
     delay_num[1] = delay_num[0];
     delay_num[0] = delay->in.input;  
-    #endif // CONFIG_IQMATH
+    #endif // VALUE_MODE_MATH
 }
 
 // ---------------------------工程模块Transfer---------------------------
@@ -1684,11 +1684,11 @@ void transfer_delay3_loop(Delay3 *delay){
 
 
 void transfer_sine_loop(Sine *sine){
-    #if CONFIG_IQMATH
+    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
 
-    #else // CONFIG_IQMATH
+    #else // VALUE_MODE_MATH
     sine->out.output = math_sin(sine->in.input);
-    #endif // CONFIG_IQMATH
+    #endif // VALUE_MODE_MATH
 }
 
 // ---------------------------工程模块Transfer---------------------------
@@ -1696,11 +1696,11 @@ void transfer_sine_loop(Sine *sine){
 
 
 void transfer_cosine_loop(Cosine *cosine){
-    #if CONFIG_IQMATH
+    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
 
-    #else // CONFIG_IQMATH
+    #else // VALUE_MODE_MATH
     cosine->out.output = math_cos(cosine->in.input);
-    #endif // CONFIG_IQMATH
+    #endif // VALUE_MODE_MATH
 }
 
 // ---------------------------工程模块Transfer---------------------------
@@ -1708,66 +1708,66 @@ void transfer_cosine_loop(Cosine *cosine){
 
 
 void transfer_sincos_loop(SinCos *sincos){
-    #if CONFIG_IQMATH
+    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
 
-    #else // CONFIG_IQMATH
+    #else // VALUE_MODE_MATH
     math_sin_cos(sincos->in.input, 
         &sincos->out.sine, 
         &sincos->out.cosine);
-    #endif // CONFIG_IQMATH
+    #endif // VALUE_MODE_MATH
 }
 
 // ---------------------------工程模块Transfer---------------------------
 void transfer_tan_loop(Tan *tan){
-    #if CONFIG_IQMATH
+    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
 
-    #else // CONFIG_IQMATH
+    #else // VALUE_MODE_MATH
 
 
     
 
-    #endif // CONFIG_IQMATH
+    #endif // VALUE_MODE_MATH
 }
 
 
 // ---------------------------工程模块Transfer---------------------------
 void transfer_atan_loop(Atan *atan){
-    #if CONFIG_IQMATH
+    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
 
-    #else // CONFIG_IQMATH
+    #else // VALUE_MODE_MATH
 
 
     
 
-    #endif // CONFIG_IQMATH
+    #endif // VALUE_MODE_MATH
 }
 
 
 
 // ---------------------------工程模块Transfer---------------------------
 void transfer_limit_loop(Limit *limit){
-    #if CONFIG_IQMATH
+    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
 
-    #else // CONFIG_IQMATH
+    #else // VALUE_MODE_MATH
 
 
     
 
-    #endif // CONFIG_IQMATH
+    #endif // VALUE_MODE_MATH
 }
 
 
 
 // ---------------------------工程模块Transfer---------------------------
 void transfer_sign_loop(Sign *sign){
-    #if CONFIG_IQMATH
+    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
 
-    #else // CONFIG_IQMATH
+    #else // VALUE_MODE_MATH
 
 
     
 
-    #endif // CONFIG_IQMATH
+    #endif // VALUE_MODE_MATH
 }
 
 
@@ -1776,14 +1776,14 @@ void transfer_sign_loop(Sign *sign){
 
 
 void transfer_clarke_loop(Clarke *clarke){
-    #if CONFIG_IQMATH
+    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
 
-    #else // CONFIG_IQMATH
+    #else // VALUE_MODE_MATH
 
 
     
 
-    #endif // CONFIG_IQMATH
+    #endif // VALUE_MODE_MATH
 }
 
 // ---------------------------工程模块Transfer---------------------------
@@ -1791,14 +1791,14 @@ void transfer_clarke_loop(Clarke *clarke){
 
 
 void transfer_park_loop(Park *park){
-    #if CONFIG_IQMATH
+    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
 
-    #else // CONFIG_IQMATH
+    #else // VALUE_MODE_MATH
 
 
     
 
-    #endif // CONFIG_IQMATH
+    #endif // VALUE_MODE_MATH
 }
 
 // ---------------------------工程模块Transfer---------------------------
@@ -1806,14 +1806,14 @@ void transfer_park_loop(Park *park){
 
 
 void transfer_ipark_loop(Ipark *ipark){
-    #if CONFIG_IQMATH
+    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
 
-    #else // CONFIG_IQMATH
+    #else // VALUE_MODE_MATH
 
 
     
 
-    #endif // CONFIG_IQMATH
+    #endif // VALUE_MODE_MATH
 }
 
 // ---------------------------工程模块Transfer---------------------------
@@ -1821,14 +1821,14 @@ void transfer_ipark_loop(Ipark *ipark){
 
 
 void transfer_spwm0_loop(Spwm0 *spwm){
-    #if CONFIG_IQMATH
+    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
 
-    #else // CONFIG_IQMATH
+    #else // VALUE_MODE_MATH
 
 
     
 
-    #endif // CONFIG_IQMATH
+    #endif // VALUE_MODE_MATH
 }
 
 // ---------------------------工程模块Transfer---------------------------
@@ -1836,27 +1836,27 @@ void transfer_spwm0_loop(Spwm0 *spwm){
 
 
 void transfer_spwm_loop(Spwm *spwm){
-    #if CONFIG_IQMATH
+    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
 
-    #else // CONFIG_IQMATH
+    #else // VALUE_MODE_MATH
 
 
     
 
-    #endif // CONFIG_IQMATH
+    #endif // VALUE_MODE_MATH
 }
 
 // ---------------------------工程模块Transfer---------------------------
 
 void transfer_svpwm_loop(Svpwm *svpwm){
-    #if CONFIG_IQMATH
+    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
 
-    #else // CONFIG_IQMATH
+    #else // VALUE_MODE_MATH
 
 
     
 
-    #endif // CONFIG_IQMATH
+    #endif // VALUE_MODE_MATH
 }
 
 // ---------------------------工程模块Transfer---------------------------
@@ -1864,24 +1864,24 @@ void transfer_svpwm_loop(Svpwm *svpwm){
 
 
 void transfer_swpwm_loop(Swpwm *swpwm){
-    #if CONFIG_IQMATH
+    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
 
-    #else // CONFIG_IQMATH
+    #else // VALUE_MODE_MATH
     // TODO: 浮点实现
-    #endif // CONFIG_IQMATH
+    #endif // VALUE_MODE_MATH
 }
 
 // ---------------------------工程模块Transfer---------------------------
 
 void transfer_singlers_loop(SingleRs *singlers){
-    #if CONFIG_IQMATH
+    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
 
-    #else // CONFIG_IQMATH
+    #else // VALUE_MODE_MATH
 
 
     
 
-    #endif // CONFIG_IQMATH
+    #endif // VALUE_MODE_MATH
 }
 
 
@@ -1889,13 +1889,13 @@ void transfer_singlers_loop(SingleRs *singlers){
 
 // ---------------------------工程模块Transfer---------------------------
 void transfer_reset_integrator(void *p){
-    #if CONFIG_IQMATH
+    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
 
-    #else // CONFIG_IQMATH
+    #else // VALUE_MODE_MATH
 
 
 
-    #endif // CONFIG_IQMATH
+    #endif // VALUE_MODE_MATH
 }
 
 // ================== 实例池（块实例统一住在这里，用户通过 _get() 拿指针）==================

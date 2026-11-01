@@ -1,6 +1,7 @@
 #include "Sguan_MotorStatus.h"
+
 /* SguanFOC配置文件声明 */
-#include "UnitLib_Status.h"
+#include "UnitLib_Situation.h"
 
 /* 内部宏定义设计 */
 #define STATUS(x) ((uint8_t)(x))
@@ -11,94 +12,94 @@
 #define MODE_POSITION   0x02
 
 /* 内部私有变量与函数 */
-static void motorstatus_null0(SguanFoc *sguan);
-static void motorstatus_null1(void);
-static void motorstatus_idle_init(SguanFoc *sguan);
-static void motorstatus_overvoltage_init(SguanFoc *sguan);
-static void motorstatus_undervoltage_init(SguanFoc *sguan);
-static void motorstatus_overcurrent_init(SguanFoc *sguan);
-static void motorstatus_overtemp_motor_init(SguanFoc *sguan);
-static void motorstatus_undertemp_motor_init(SguanFoc *sguan);
-static void motorstatus_overtemp_driver_init(SguanFoc *sguan);
-static void motorstatus_undertemp_driver_init(SguanFoc *sguan);
-static void motorstatus_overtemp_pcb_init(SguanFoc *sguan);
-static void motorstatus_undertemp_pcb_init(SguanFoc *sguan);
-static void motorstatus_stuck_init(SguanFoc *sguan);
-static void motorstatus_phase_loss_init(SguanFoc *sguan);
-static void motorstatus_fault_init(SguanFoc *sguan);
-static HandleEvent motorstatus_event_get(uint8_t run);
+static void local_null0(SguanFoc *sguan);
+static void local_null1(void);
+static void local_idle_init(SguanFoc *sguan);
+static void local_overvoltage_init(SguanFoc *sguan);
+static void local_undervoltage_init(SguanFoc *sguan);
+static void local_overcurrent_init(SguanFoc *sguan);
+static void local_overtemp_motor_init(SguanFoc *sguan);
+static void local_undertemp_motor_init(SguanFoc *sguan);
+static void local_overtemp_driver_init(SguanFoc *sguan);
+static void local_undertemp_driver_init(SguanFoc *sguan);
+static void local_overtemp_pcb_init(SguanFoc *sguan);
+static void local_undertemp_pcb_init(SguanFoc *sguan);
+static void local_stuck_init(SguanFoc *sguan);
+static void local_phase_loss_init(SguanFoc *sguan);
+static void local_fault_init(SguanFoc *sguan);
+static HandleEvent local_event_get(uint8_t run);
 // ===================================================
-static void motorstatus_null0(SguanFoc *sguan){
+static void local_null0(SguanFoc *sguan){
     // 空函数
 }
 
-static void motorstatus_null1(void){
+static void local_null1(void){
     // 空函数
 }
 
-static void motorstatus_idle_init(SguanFoc *sguan){
+static void local_idle_init(SguanFoc *sguan){
     sguan->motorstatus.data.error_code = 0x00;
-    unitlib_main_standby_init(sguan);
+    main_standby_init(sguan);
 }
 
-static void motorstatus_overvoltage_init(SguanFoc *sguan){
+static void local_overvoltage_init(SguanFoc *sguan){
     sguan->motorstatus.data.error_code = 0x01;
-    unitlib_main_standby_init(sguan);
+    main_standby_init(sguan);
 }
 
-static void motorstatus_undervoltage_init(SguanFoc *sguan){
+static void local_undervoltage_init(SguanFoc *sguan){
     sguan->motorstatus.data.error_code = 0x02;
-    unitlib_main_standby_init(sguan);
+    main_standby_init(sguan);
 }
 
-static void motorstatus_overcurrent_init(SguanFoc *sguan){
+static void local_overcurrent_init(SguanFoc *sguan){
     sguan->motorstatus.data.error_code = 0x03;
-    unitlib_main_standby_init(sguan);
+    main_standby_init(sguan);
 }
 
-static void motorstatus_overtemp_motor_init(SguanFoc *sguan){
+static void local_overtemp_motor_init(SguanFoc *sguan){
     sguan->motorstatus.data.error_code = 0x04;
-    unitlib_main_standby_init(sguan);
+    main_standby_init(sguan);
 }
 
-static void motorstatus_undertemp_motor_init(SguanFoc *sguan){
+static void local_undertemp_motor_init(SguanFoc *sguan){
     sguan->motorstatus.data.error_code = 0x05;
-    unitlib_main_standby_init(sguan);
+    main_standby_init(sguan);
 }
 
-static void motorstatus_overtemp_driver_init(SguanFoc *sguan){
+static void local_overtemp_driver_init(SguanFoc *sguan){
     sguan->motorstatus.data.error_code = 0x06;
-    unitlib_main_standby_init(sguan);
+    main_standby_init(sguan);
 }
 
-static void motorstatus_undertemp_driver_init(SguanFoc *sguan){
+static void local_undertemp_driver_init(SguanFoc *sguan){
     sguan->motorstatus.data.error_code = 0x07;
-    unitlib_main_standby_init(sguan);
+    main_standby_init(sguan);
 }
 
-static void motorstatus_overtemp_pcb_init(SguanFoc *sguan){
+static void local_overtemp_pcb_init(SguanFoc *sguan){
     sguan->motorstatus.data.error_code = 0x08;
-    unitlib_main_standby_init(sguan);
+    main_standby_init(sguan);
 }
 
-static void motorstatus_undertemp_pcb_init(SguanFoc *sguan){
+static void local_undertemp_pcb_init(SguanFoc *sguan){
     sguan->motorstatus.data.error_code = 0x09;
-    unitlib_main_standby_init(sguan);
+    main_standby_init(sguan);
 }
 
-static void motorstatus_stuck_init(SguanFoc *sguan){
+static void local_stuck_init(SguanFoc *sguan){
     sguan->motorstatus.data.error_code = 0x0A;
-    unitlib_main_standby_init(sguan);
+    main_standby_init(sguan);
 }
 
-static void motorstatus_phase_loss_init(SguanFoc *sguan){
+static void local_phase_loss_init(SguanFoc *sguan){
     sguan->motorstatus.data.error_code = 0x0B;
-    unitlib_main_standby_init(sguan);
+    main_standby_init(sguan);
 }
 
-static void motorstatus_fault_init(SguanFoc *sguan){
+static void local_fault_init(SguanFoc *sguan){
     sguan->motorstatus.data.error_code = 0x0C;
-    unitlib_main_standby_init(sguan);
+    main_standby_init(sguan);
 }
 
 static const MotorTab motor_tab[196] = {
@@ -370,73 +371,73 @@ static const MotorTab motor_tab[196] = {
     {STATUS(status_fault),              EVENT(event_standby1),              STATUS(status_standby)}
 };
 
-static void (*const motorstatus_initial_init[])(SguanFoc *) = {
-    unitlib_main_standby_init,
+static void (*const local_initial_init[])(SguanFoc *) = {
+    main_standby_init,
 
-    unitlib_main_ready_init,
-    unitlib_main_initializing_init,
-    unitlib_main_goinit0_angle_init,
-    unitlib_main_goinit1_current_init,
+    main_ready_init,
+    main_initializing_init,
+    main_goinit0_angle_init,
+    main_goinit1_current_init,
     
-    motorstatus_idle_init,
-    motorstatus_null0,
-    motorstatus_null0,
-    motorstatus_null0,
-    motorstatus_null0,
-    motorstatus_null0,
-    motorstatus_null0,
-    motorstatus_null0,
-    motorstatus_null0,
-    motorstatus_null0,
+    local_idle_init,
+    local_null0,
+    local_null0,
+    local_null0,
+    local_null0,
+    local_null0,
+    local_null0,
+    local_null0,
+    local_null0,
+    local_null0,
 
-    motorstatus_overvoltage_init,
-    motorstatus_undervoltage_init,
-    motorstatus_overcurrent_init,
-    motorstatus_overtemp_motor_init,
-    motorstatus_undertemp_motor_init,
-    motorstatus_overtemp_driver_init,
-    motorstatus_undertemp_driver_init,
-    motorstatus_overtemp_pcb_init,
-    motorstatus_undertemp_pcb_init,
-    motorstatus_stuck_init,
-    motorstatus_phase_loss_init,
-    motorstatus_fault_init
+    local_overvoltage_init,
+    local_undervoltage_init,
+    local_overcurrent_init,
+    local_overtemp_motor_init,
+    local_undertemp_motor_init,
+    local_overtemp_driver_init,
+    local_undertemp_driver_init,
+    local_overtemp_pcb_init,
+    local_undertemp_pcb_init,
+    local_stuck_init,
+    local_phase_loss_init,
+    local_fault_init
 };
 
-static void (*const motorstatus_action_loop[])(void) = {
-    unitlib_status_standby_loop,
+static void (*const local_action_loop[])(void) = {
+    situation_standby_loop,
 
-    unitlib_status_ready_loop,
-    unitlib_status_initial_loop,
-    unitlib_status_initial_loop,
-    unitlib_status_initial_loop,
+    situation_ready_loop,
+    situation_initial_loop,
+    situation_initial_loop,
+    situation_initial_loop,
 
-    motorstatus_null1,
-    unitlib_status_increasing_loop,
-    unitlib_status_decreasing_loop,
-    unitlib_status_hold_loop,
-    unitlib_status_increasing_loop,
-    unitlib_status_decreasing_loop,
-    unitlib_status_hold_loop,
-    unitlib_status_increasing_loop,
-    unitlib_status_decreasing_loop,
-    unitlib_status_hold_loop,
+    local_null1,
+    situation_increasing_loop,
+    situation_decreasing_loop,
+    situation_hold_loop,
+    situation_increasing_loop,
+    situation_decreasing_loop,
+    situation_hold_loop,
+    situation_increasing_loop,
+    situation_decreasing_loop,
+    situation_hold_loop,
 
-    unitlib_status_overvoltage_loop,
-    unitlib_status_undervoltage_loop,
-    unitlib_status_overcurrent_loop,
-    unitlib_status_overtemp_motor_loop,
-    unitlib_status_undertemp_motor_loop,
-    unitlib_status_overtemp_driver_loop,
-    unitlib_status_undertemp_driver_loop,
-    unitlib_status_overtemp_pcb_loop,
-    unitlib_status_undertemp_pcb_loop,
-    unitlib_status_stuck_loop,
-    unitlib_status_phase_loss_loop,
-    unitlib_status_fault_loop
+    situation_overvoltage_loop,
+    situation_undervoltage_loop,
+    situation_overcurrent_loop,
+    situation_overtemp_motor_loop,
+    situation_undertemp_motor_loop,
+    situation_overtemp_driver_loop,
+    situation_undertemp_driver_loop,
+    situation_overtemp_pcb_loop,
+    situation_undertemp_pcb_loop,
+    situation_stuck_loop,
+    situation_phase_loss_loop,
+    situation_fault_loop
 };
 
-static HandleEvent motorstatus_event_get(uint8_t run){
+static HandleEvent local_event_get(uint8_t run){
     switch (run){
     case RUN_READY: // 准备触发
         return event_ready;
@@ -467,7 +468,7 @@ void motorstatus_loop(void *sguan){
             switch ((HandleEvent)motor_tab[i].event_now){
                 case event_ready:{
                     // 此处有触发event的代码
-                    if (motorstatus_event_get(p->run_flag) == 
+                    if (local_event_get(p->run_flag) == 
                         (HandleEvent)motor_tab[i].event_now){ // 手动触发
                         p->run_flag = 0;
 
@@ -478,7 +479,7 @@ void motorstatus_loop(void *sguan){
                 }
                 case event_initializing:{
                     // 此处有触发event的代码
-                    if (motorstatus_event_get(p->run_flag) == 
+                    if (local_event_get(p->run_flag) == 
                         (HandleEvent)motor_tab[i].event_now){ // 手动触发
                         p->run_flag = 0;
                             
@@ -489,7 +490,7 @@ void motorstatus_loop(void *sguan){
                 }
                 case event_success:{
                     // 此处有触发event的代码
-                    if (motorstatus_event_get(p->run_flag) == 
+                    if (local_event_get(p->run_flag) == 
                         (HandleEvent)motor_tab[i].event_now){ // 手动触发
                         p->run_flag = 0;
                             
@@ -500,7 +501,7 @@ void motorstatus_loop(void *sguan){
                 }
                 case event_standby0:{
                     // 此处有触发event的代码
-                    if (motorstatus_event_get(p->run_flag) == 
+                    if (local_event_get(p->run_flag) == 
                         (HandleStatus)motor_tab[i].event_now){ // 手动触发
                         p->run_flag = 0;
                             
@@ -824,7 +825,7 @@ void motorstatus_loop(void *sguan){
                 }
                 case event_fault:{
                     // 此处有触发event的代码
-                    if (motorstatus_event_get(p->run_flag) == 
+                    if (local_event_get(p->run_flag) == 
                         (HandleStatus)motor_tab[i].event_now){ // 手动触发
                         p->run_flag = 0;
                             
@@ -847,10 +848,10 @@ void motorstatus_loop(void *sguan){
         p->motorstatus.data.tick_last = p->motorstatus.data.tick_run;
 
         // 仅在状态机变化开始，初始化一次init函数并更新last状态机
-        motorstatus_initial_init[p->motorstatus.status](p);
+        local_initial_init[p->motorstatus.status](p);
         p->motorstatus.last = p->motorstatus.status;
     }
-    motorstatus_action_loop[p->motorstatus.status]();
+    local_action_loop[p->motorstatus.status]();
 }
 
 

@@ -5,37 +5,37 @@
 #include "Sguan_Config.h"
 
 typedef enum{
-    status_standby = 0,                         // (standby)停机状态->待机
+    status_standby = 0,                         // (待机状态)待机
 
-    status_ready,                               // (ready)初始化状态->准备
-    status_initializing,                        // (initializing)初始化状态->开始初始
-    status_gotoinit0_angle,                     // (angle)初始化状态->角度初始专项
-    status_gotoinit1_current,                   // (current)初始化状态->电流初始化专项
+    status_ready,                               // (初始化状态)准备
+    status_initializing,                        // (初始化状态)开始初始
+    status_gotoinit0_angle,                     // (初始化状态)角度专项
+    status_gotoinit1_current,                   // (初始化状态)电流专项
 
-    status_idle,                                // (idle)正常状态->空闲
-    status_torque_increasing,                   // (torque)正常状态->增加中
-    status_torque_decreasing,                   // (torque)正常状态->减少中
-    status_torque_hold,                         // (torque)正常状态->保持
-    status_velocity_increasing,                 // (velocity)正常状态->增加中
-    status_velocity_decreasing,                 // (velocity)正常状态->减少中
-    status_velocity_hold,                       // (velocity)正常状态->保持
-    status_position_increasing,                 // (position)正常状态->增加中
-    status_position_decreasing,                 // (position)正常状态->减少中
-    status_position_hold,                       // (position)正常状态->保持
+    status_idle,                                // (正常状态)空闲
+    status_torque_increasing,                   // (正常状态)力矩增加中
+    status_torque_decreasing,                   // (正常状态)力矩减少中
+    status_torque_hold,                         // (正常状态)力矩保持
+    status_velocity_increasing,                 // (正常状态)速度增加中
+    status_velocity_decreasing,                 // (正常状态)速度减少中
+    status_velocity_hold,                       // (正常状态)速度保持
+    status_position_increasing,                 // (正常状态)位置增加中
+    status_position_decreasing,                 // (正常状态)位置减少中
+    status_position_hold,                       // (正常状态)位置保持
 
-    status_overvoltage,                         // (overvoltage)错误状态->过压
-    status_undervoltage,                        // (undervoltage)错误状态->欠压
-    status_overcurrent,                         // (overcurrent)错误状态->过流
-    status_overtemp_motor,                      // (overtemp_motor)错误状态->电机过温
-    status_undertemp_motor,                     // (undertemp_motor)错误状态->电机过冷
-    status_overtemp_driver,                     // (overtemp_driver)错误状态->功率器件过温
-    status_undertemp_driver,                    // (undertemp_driver)错误状态->功率器件过冷
-    status_overtemp_pcb,                        // (overtemp_pcb)错误状态->驱动器过温
-    status_undertemp_pcb,                       // (undertemp_pcb)错误状态->驱动器过冷
-    status_stuck,                               // (stuck)错误状态->运行卡死
-    status_phase_loss,                          // (phase_loss)错误状态->缺相保护[暂无处理]
-    status_circuit_short,                       // (circuit_short)错误状态->短路保护[暂未处理]
-    status_fault                                // (fault)错误状态->未知错误
+    status_overvoltage,                         // (错误状态)过压
+    status_undervoltage,                        // (错误状态)欠压
+    status_overcurrent,                         // (错误状态)过流
+    status_overtemp_motor,                      // (错误状态)电机过温
+    status_undertemp_motor,                     // (错误状态)电机过冷
+    status_overtemp_driver,                     // (错误状态)功率器件过温
+    status_undertemp_driver,                    // (错误状态)功率器件过冷
+    status_overtemp_pcb,                        // (错误状态)驱动器过温
+    status_undertemp_pcb,                       // (错误状态)驱动器过冷
+    status_stuck,                               // (错误状态)运行卡死
+    status_phase_loss,                          // (错误状态)缺相[暂无，过流保护已可预防]
+    status_circuit_short,                       // (错误状态)短路[暂无，过流保护已可预防]
+    status_fault                                // (错误状态)未知错误
 }HandleStatus;
 
 typedef enum{
@@ -49,39 +49,37 @@ typedef enum{
 }HandleState;
 
 typedef enum{
-    event_zero = 0,                             // (zero)
-    event_ready,                                // (ready->手动)
-    event_initializing,                         // (initializing->手动)
-    event_success,                              // (success->手动)
-    event_standby0,                             // (standby0->手动)
-    event_standby1,                             // (standby1)
+    event_zero = 0,                             // (自动事件)零事件
 
-    event_torque_hold = 11,                     // (torque_hold)
-    event_torque_increasing,                    // (torque_increasing)
-    event_torque_decreasing,                    // (torque_decreasing)
+    event_ready,                                // (手动)用户触发准备
+    event_initializing,                         // (手动)用户触发初始化
+    event_success,                              // (手动)用户触发初始化
+    event_standby0,                             // (手动)用户触发待机
+    event_standby1,                             // (自动事件)待机事件
 
-    event_velocity_hold = 21,                   // (velocity_hold)
-    event_velocity_increasing,                  // (velocity_increasing)
-    event_velocity_decreasing,                  // (velocity_decreasing)
-
-    event_position_hold = 31,                   // (position_hold)
-    event_position_increasing,                  // (position_increasing)
-    event_position_decreasing,                  // (position_decreasing)
-
-    event_overvoltage = 81,                     // (overvoltage)
-    event_undervoltage,                         // (undervoltage)
-    event_overcurrent,                          // (overcurrent)
-    event_overtemp_motor,                       // (overtemp_motor)
-    event_undertemp_motor,                      // (undertemp_motor)
-    event_overtemp_driver,                      // (overtemp_driver)
-    event_undertemp_driver,                     // (undertemp_driver)
-    event_overtemp_pcb,                         // (overtemp_pcb)
-    event_undertemp_pcb,                        // (undertemp_pcb)
-
-    event_stuck = 91,                           // (stuck)
-    event_phase_loss,                           // (phase_loss)
-    event_circuit_short,                        // (circuit_short)
-    event_fault                                 // (fault->手动)
+    event_torque_increasing = 11,               // (自动事件)力矩增加事件
+    event_torque_decreasing,                    // (自动事件)力矩减少事件
+    event_torque_hold,                          // (自动事件)力矩保持事件
+    event_velocity_increasing = 21,             // (自动事件)速度增加事件
+    event_velocity_decreasing,                  // (自动事件)速度减少事件
+    event_velocity_hold,                        // (自动事件)速度保持事件
+    event_position_increasing = 31,             // (自动事件)位置增加事件
+    event_position_decreasing,                  // (自动事件)位置减少事件
+    event_position_hold,                        // (自动事件)位置保持事件
+    
+    event_overvoltage = 81,                     // (自动事件)过压事件
+    event_undervoltage,                         // (自动事件)欠压事件
+    event_overcurrent,                          // (自动事件)过流事件
+    event_overtemp_motor,                       // (自动事件)电机过温事件
+    event_undertemp_motor,                      // (自动事件)电机过冷事件
+    event_overtemp_driver,                      // (自动事件)功率器件过温事件
+    event_undertemp_driver,                     // (自动事件)功率器件过冷事件
+    event_overtemp_pcb,                         // (自动事件)驱动器过温事件
+    event_undertemp_pcb,                        // (自动事件)驱动器过冷事件
+    event_stuck = 91,                           // (自动事件)运行卡死事件
+    event_phase_loss,                           // (自动事件)缺相事件[暂无，过流保护已可预防]
+    event_circuit_short,                        // (自动事件)短路事件[暂无，过流保护已可预防]
+    event_fault                                 // (手动)未知错误
 }HandleEvent;
 
 typedef struct{
