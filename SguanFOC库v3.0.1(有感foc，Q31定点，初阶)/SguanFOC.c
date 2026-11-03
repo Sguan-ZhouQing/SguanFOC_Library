@@ -1079,7 +1079,7 @@ static void Status_VBUS_OVERVOLTAGE(SguanFOC_System_STRUCT *sguan,uint32_t *coun
 
 // Status判断欠压保护状态
 static void Status_VBUS_UNDERVOLTAGE(SguanFOC_System_STRUCT *sguan,uint32_t *count){
-    if (sguan->foc.Real_VBUS < sguan->safe.VBUS_MIM){
+    if (sguan->foc.Real_VBUS < sguan->safe.VBUS_MIN){
         Status_Switch_STANDBY(sguan,count);
     }
 }
@@ -1147,7 +1147,7 @@ static void Status_Switch_Loop(SguanFOC_System_STRUCT *sguan){
             sguan->status = MOTOR_STATUS_OVERVOLTAGE;
         }
         else if ((sguan->status != MOTOR_STATUS_UNDERVOLTAGE) && 
-            sguan->foc.Real_VBUS < sguan->safe.VBUS_MIM){
+            sguan->foc.Real_VBUS < sguan->safe.VBUS_MIN){
             sguan->status = MOTOR_STATUS_UNDERVOLTAGE;
         }
     }
