@@ -51,11 +51,11 @@
 #define DESIGN_COUNT_MOTOR          1
 
 // 宏定义(0指float，1指double，2指Q15，3指Q31)
-#define DESIGN_MODE_MATH            2
+#define DESIGN_MODE_MATH            3
 
-#define DESIGN_BASE_TIME            0.001953125f
-#define DESIGN_BASE_VOLTAGE         1024.0f
-#define DESIGN_BASE_CURRENT         64.0f
+#define DESIGN_BASE_TIME            0.001953125
+#define DESIGN_BASE_VOLTAGE         1024.0
+#define DESIGN_BASE_CURRENT         64.0
 
 
 #endif // UNITLIB_DESIGN_H

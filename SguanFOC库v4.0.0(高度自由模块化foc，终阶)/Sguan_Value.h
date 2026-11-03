@@ -19,9 +19,9 @@ typedef int16_t Q15;    // 1位符号+0位整数+15位小数
 #define VALUE_MODE_Q31          0x03
 
 #if !((DESIGN_MODE_MATH>=VALUE_MODE_FLOAT) && (DESIGN_MODE_MATH<=VALUE_MODE_Q31))
-#define VALUE_MODE_MATH        VALUE_MODE_FLOAT
+#define VALUE_MODE_MATH         VALUE_MODE_FLOAT
 #else // DESIGN_COUNT_MOTOR
-#define VALUE_MODE_MATH        DESIGN_MODE_MATH
+#define VALUE_MODE_MATH         DESIGN_MODE_MATH
 #endif // DESIGN_COUNT_MOTOR
 
 // ================================================================================
@@ -44,33 +44,42 @@ typedef float                   SguanQ;
 typedef float                   SguanF;
 #endif // CONFIG_IQMATH
 
+#define SGUAN_Q(x) ((SguanQ)(x))
+#define SGUAN_F(x) ((SguanF)(x))
+
 // ================================================================================
 // 4.常用数值宏定义
 // (若是定点，Rad例程代码按照8.0归一化)
 /* 以下定义分别是浮点的：
-(2pi的数值)
-(二分之pi)
-(二倍根号二)
+(2pi的数值) (pi的数值) (二分之pi)
+(二倍根号二) (数值一) (数值零)
 定点Q15的数值：
-()
+(2pi的数值) (pi的数值) (二分之pi)
 定点Q31的数值：
-()
-()*/
-#define VALUE_F_2PI             (SguanF)6.283185307179586
-#define VALUE_F_PI              (SguanF)3.141592653589793
-#define VALUE_F_PI_2            (SguanF)1.570796326794896
-#define VALUE_F_2_SQRT2         (SguanF)2.8284271247461903
+(2pi的数值) (pi的数值) (二分之pi)*/
+#define VALUE_F_2PI             (SguanF)6.283185307179586477
+#define VALUE_F_PI              (SguanF)3.141592653589793239
+#define VALUE_F_PI_2            (SguanF)1.570796326794896619
+#define VALUE_F_2_SQRT2         (SguanF)2.828427124746190098
+#define VALUE_F_ONE             (SguanF)1.0
+#define VALUE_F_ZERO            (SguanF)0.0
 
 #define VALUE_Q15_2PI           (Q15)25736
 #define VALUE_Q15_PI            (Q15)12868
 #define VALUE_Q15_PI_2          (Q15)6434
+#define VALUE_Q15_MAX           0x7FFF      // 表示最大值0.9999694824
+#define VALUE_Q15_MIN           0x8000      // 表示最小值-1.0
+#define VALUE_Q15_HALF          0x4000      // 表示0.5(特殊场景会用到)
 
 #define VALUE_Q31_2PI           (Q31)1686629713
 #define VALUE_Q31_PI            (Q31)843314857
 #define VALUE_Q31_PI_2          (Q31)421657428
+#define VALUE_Q31_MAX           0x7FFFFFFF  // 表示最大值0.9999999995
+#define VALUE_Q31_MIN           0x80000000  // 表示最小值-1.0
+#define VALUE_Q31_HALF          0x40000000  // 表示0.5(特殊场景会用到)
 
 // ================================================================================
-// 4.基值设计Q15或者Q31
+// 5.基值设计Q15或者Q31
 // (前面时间、弧度角度、电压和电流自变量)
 // (后面频率、角速度、电阻、电感和磁链是因变量)
 // VALUE_BASE_RAD这个固定设定为8.0
