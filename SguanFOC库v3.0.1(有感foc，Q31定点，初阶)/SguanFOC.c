@@ -1203,12 +1203,12 @@ static void Status_Switch_Loop(SguanFOC_System_STRUCT *sguan){
     }
     if ((sguan->mode == Current_SINGLE_MODE) && 
         (sguan->status != MOTOR_STATUS_TORQUE_INCREASING) && 
-        (sguan->current.Real_Iq < (sguan->foc.Target_Iq + sguan->safe.Current_limit))){
+        (sguan->current.Real_Iq < (sguan->foc.Target_Iq - sguan->safe.Current_limit))){
         sguan->status = MOTOR_STATUS_TORQUE_INCREASING;
     }
     if ((sguan->mode == Current_SINGLE_MODE) && 
         (sguan->status != MOTOR_STATUS_TORQUE_DECREASING) && 
-        (sguan->current.Real_Iq > (sguan->foc.Target_Iq - sguan->safe.Current_limit))){
+        (sguan->current.Real_Iq > (sguan->foc.Target_Iq + sguan->safe.Current_limit))){
         sguan->status = MOTOR_STATUS_TORQUE_DECREASING;
     }
     // 2.速度模式检测
@@ -1220,12 +1220,12 @@ static void Status_Switch_Loop(SguanFOC_System_STRUCT *sguan){
     }
     if ((sguan->mode == VelCur_DOUBLE_MODE) && 
         (sguan->status != MOTOR_STATUS_ACCELERATING) && 
-        (sguan->encoder.Real_Speed < sguan->foc.Target_Speed + sguan->safe.Speed_limit)){
+        (sguan->encoder.Real_Speed < sguan->foc.Target_Speed - sguan->safe.Speed_limit)){
         sguan->status = MOTOR_STATUS_ACCELERATING;
     }
     if ((sguan->mode == VelCur_DOUBLE_MODE) && 
         (sguan->status != MOTOR_STATUS_DECELERATING) && 
-        (sguan->encoder.Real_Speed > sguan->foc.Target_Speed - sguan->safe.Speed_limit)){
+        (sguan->encoder.Real_Speed > sguan->foc.Target_Speed + sguan->safe.Speed_limit)){
         sguan->status = MOTOR_STATUS_DECELERATING;
     }
     // 3.位置模式检测
@@ -1237,12 +1237,12 @@ static void Status_Switch_Loop(SguanFOC_System_STRUCT *sguan){
     }
     if ((sguan->mode == PosVelCur_THREE_MODE) && 
         (sguan->status != MOTOR_STATUS_POSITION_INCREASING) && 
-        (sguan->encoder.Real_Pos < sguan->foc.Target_Pos + sguan->safe.Position_limit)){
+        (sguan->encoder.Real_Pos < sguan->foc.Target_Pos - sguan->safe.Position_limit)){
         sguan->status = MOTOR_STATUS_POSITION_INCREASING;
     }
     if ((sguan->mode == PosVelCur_THREE_MODE) && 
         (sguan->status != MOTOR_STATUS_POSITION_DECREASING) && 
-        (sguan->encoder.Real_Pos > sguan->foc.Target_Pos - sguan->safe.Position_limit)){
+        (sguan->encoder.Real_Pos > sguan->foc.Target_Pos + sguan->safe.Position_limit)){
         sguan->status = MOTOR_STATUS_POSITION_DECREASING;
     }
     #else // CONFIG_Q31
@@ -1255,12 +1255,12 @@ static void Status_Switch_Loop(SguanFOC_System_STRUCT *sguan){
     }
     if ((sguan->mode == Current_SINGLE_MODE) && 
         (sguan->status != MOTOR_STATUS_TORQUE_INCREASING) && 
-        (sguan->current.Real_Iq_q31 < (sguan->foc.Target_Iq_q31 + sguan->safe.Current_limit_q31))){
+        (sguan->current.Real_Iq_q31 < (sguan->foc.Target_Iq_q31 - sguan->safe.Current_limit_q31))){
         sguan->status = MOTOR_STATUS_TORQUE_INCREASING;
     }
     if ((sguan->mode == Current_SINGLE_MODE) && 
         (sguan->status != MOTOR_STATUS_TORQUE_DECREASING) && 
-        (sguan->current.Real_Iq_q31 > (sguan->foc.Target_Iq_q31 - sguan->safe.Current_limit_q31))){
+        (sguan->current.Real_Iq_q31 > (sguan->foc.Target_Iq_q31 + sguan->safe.Current_limit_q31))){
         sguan->status = MOTOR_STATUS_TORQUE_DECREASING;
     }
     // 2.速度模式检测
@@ -1272,12 +1272,12 @@ static void Status_Switch_Loop(SguanFOC_System_STRUCT *sguan){
     }
     if ((sguan->mode == VelCur_DOUBLE_MODE) && 
         (sguan->status != MOTOR_STATUS_ACCELERATING) && 
-        (sguan->encoder.Real_Speed_q31 < sguan->foc.Target_Speed_q31 + sguan->safe.Speed_limit_q31)){
+        (sguan->encoder.Real_Speed_q31 < sguan->foc.Target_Speed_q31 - sguan->safe.Speed_limit_q31)){
         sguan->status = MOTOR_STATUS_ACCELERATING;
     }
     if ((sguan->mode == VelCur_DOUBLE_MODE) && 
         (sguan->status != MOTOR_STATUS_DECELERATING) && 
-        (sguan->encoder.Real_Speed_q31 > sguan->foc.Target_Speed_q31 - sguan->safe.Speed_limit_q31)){
+        (sguan->encoder.Real_Speed_q31 > sguan->foc.Target_Speed_q31 + sguan->safe.Speed_limit_q31)){
         sguan->status = MOTOR_STATUS_DECELERATING;
     }
     // 3.位置模式检测
@@ -1289,12 +1289,12 @@ static void Status_Switch_Loop(SguanFOC_System_STRUCT *sguan){
     }
     if ((sguan->mode == PosVelCur_THREE_MODE) && 
         (sguan->status != MOTOR_STATUS_POSITION_INCREASING) && 
-        (sguan->encoder.Real_Pos_q31 < sguan->foc.Target_Pos_q31 + sguan->safe.Position_limit_q31)){
+        (sguan->encoder.Real_Pos_q31 < sguan->foc.Target_Pos_q31 - sguan->safe.Position_limit_q31)){
         sguan->status = MOTOR_STATUS_POSITION_INCREASING;
     }
     if ((sguan->mode == PosVelCur_THREE_MODE) && 
         (sguan->status != MOTOR_STATUS_POSITION_DECREASING) && 
-        (sguan->encoder.Real_Pos_q31 > sguan->foc.Target_Pos_q31 - sguan->safe.Position_limit_q31)){
+        (sguan->encoder.Real_Pos_q31 > sguan->foc.Target_Pos_q31 + sguan->safe.Position_limit_q31)){
         sguan->status = MOTOR_STATUS_POSITION_DECREASING;
     }
     #endif // CONFIG_Q31
