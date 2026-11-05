@@ -635,12 +635,12 @@ static void Status_Switch_Loop(SguanFOC_System_STRUCT *sguan){
     }
     if ((sguan->mode == Current_SINGLE_MODE) && 
         (sguan->status != MOTOR_STATUS_TORQUE_INCREASING) && 
-        (sguan->current.Real_Iq < (sguan->foc.Target_Iq + 0.2f))){
+        (sguan->current.Real_Iq < (sguan->foc.Target_Iq - 0.2f))){
         sguan->status = MOTOR_STATUS_TORQUE_INCREASING;
     }
     if ((sguan->mode == Current_SINGLE_MODE) && 
         (sguan->status != MOTOR_STATUS_TORQUE_DECREASING) && 
-        (sguan->current.Real_Iq > (sguan->foc.Target_Iq - 0.2f))){
+        (sguan->current.Real_Iq > (sguan->foc.Target_Iq + 0.2f))){
         sguan->status = MOTOR_STATUS_TORQUE_DECREASING;
     }
     // 2.速度模式检测
@@ -652,12 +652,12 @@ static void Status_Switch_Loop(SguanFOC_System_STRUCT *sguan){
     }
     if ((sguan->mode == VelCur_DOUBLE_MODE) && 
         (sguan->status != MOTOR_STATUS_ACCELERATING) && 
-        (sguan->encoder.Real_Speed < sguan->foc.Target_Speed + 6.0f)){
+        (sguan->encoder.Real_Speed < sguan->foc.Target_Speed - 6.0f)){
         sguan->status = MOTOR_STATUS_ACCELERATING;
     }
     if ((sguan->mode == VelCur_DOUBLE_MODE) && 
         (sguan->status != MOTOR_STATUS_DECELERATING) && 
-        (sguan->encoder.Real_Speed > sguan->foc.Target_Speed - 6.0f)){
+        (sguan->encoder.Real_Speed > sguan->foc.Target_Speed + 6.0f)){
         sguan->status = MOTOR_STATUS_DECELERATING;
     }
     // 3.位置模式检测
@@ -669,12 +669,12 @@ static void Status_Switch_Loop(SguanFOC_System_STRUCT *sguan){
     }
     if ((sguan->mode == PosVelCur_THREE_MODE) && 
         (sguan->status != MOTOR_STATUS_POSITION_INCREASING) && 
-        (sguan->encoder.Real_Pos < sguan->foc.Target_Pos + 1.0f)){
+        (sguan->encoder.Real_Pos < sguan->foc.Target_Pos - 1.0f)){
         sguan->status = MOTOR_STATUS_POSITION_INCREASING;
     }
     if ((sguan->mode == PosVelCur_THREE_MODE) && 
         (sguan->status != MOTOR_STATUS_POSITION_DECREASING) && 
-        (sguan->encoder.Real_Pos > sguan->foc.Target_Pos - 1.0f)){
+        (sguan->encoder.Real_Pos > sguan->foc.Target_Pos + 1.0f)){
         sguan->status = MOTOR_STATUS_POSITION_DECREASING;
     }
 }
