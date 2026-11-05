@@ -1832,12 +1832,12 @@ static void Status_Switch_Loop(SguanFOC_System_STRUCT *sguan){
     }
     if ((CONFIG_MODE == MODE_Current_SINGLE) && 
         (sguan->status != MOTOR_STATUS_TORQUE_INCREASING) && 
-        (sguan->current.Real_Iq < (sguan->foc.Target_Iq + sguan->safe.Current_limit))){
+        (sguan->current.Real_Iq < (sguan->foc.Target_Iq - sguan->safe.Current_limit))){
         sguan->status = MOTOR_STATUS_TORQUE_INCREASING;
     }
     if ((CONFIG_MODE == MODE_Current_SINGLE) && 
         (sguan->status != MOTOR_STATUS_TORQUE_DECREASING) && 
-        (sguan->current.Real_Iq > (sguan->foc.Target_Iq - sguan->safe.Current_limit))){
+        (sguan->current.Real_Iq > (sguan->foc.Target_Iq + sguan->safe.Current_limit))){
         sguan->status = MOTOR_STATUS_TORQUE_DECREASING;
     }
     // 2.速度模式检测
@@ -1849,12 +1849,12 @@ static void Status_Switch_Loop(SguanFOC_System_STRUCT *sguan){
     }
     if (IS_Vel_MODE && 
         (sguan->status != MOTOR_STATUS_ACCELERATING) && 
-        (sguan->encoder.Real_Speed < sguan->foc.Target_Speed + sguan->safe.Speed_limit)){
+        (sguan->encoder.Real_Speed < sguan->foc.Target_Speed - sguan->safe.Speed_limit)){
         sguan->status = MOTOR_STATUS_ACCELERATING;
     }
     if (IS_Vel_MODE && 
         (sguan->status != MOTOR_STATUS_DECELERATING) && 
-        (sguan->encoder.Real_Speed > sguan->foc.Target_Speed - sguan->safe.Speed_limit)){
+        (sguan->encoder.Real_Speed > sguan->foc.Target_Speed + sguan->safe.Speed_limit)){
         sguan->status = MOTOR_STATUS_DECELERATING;
     }
     // 3.位置模式检测
@@ -1866,12 +1866,12 @@ static void Status_Switch_Loop(SguanFOC_System_STRUCT *sguan){
     }
     if ((CONFIG_MODE == MODE_PosVelCur_THREE) && 
         (sguan->status != MOTOR_STATUS_POSITION_INCREASING) && 
-        (sguan->encoder.Real_Pos < sguan->foc.Target_Pos + sguan->safe.Position_limit)){
+        (sguan->encoder.Real_Pos < sguan->foc.Target_Pos - sguan->safe.Position_limit)){
         sguan->status = MOTOR_STATUS_POSITION_INCREASING;
     }
     if ((CONFIG_MODE == MODE_PosVelCur_THREE) && 
         (sguan->status != MOTOR_STATUS_POSITION_DECREASING) && 
-        (sguan->encoder.Real_Pos > sguan->foc.Target_Pos - sguan->safe.Position_limit)){
+        (sguan->encoder.Real_Pos > sguan->foc.Target_Pos + sguan->safe.Position_limit)){
         sguan->status = MOTOR_STATUS_POSITION_DECREASING;
     }
 }
