@@ -280,6 +280,10 @@
 
 // ================================================================================
 // 3.MOTOR电机使用数量的宏定义
+#ifndef DESIGN_COUNT_MOTOR
+#define DESIGN_COUNT_MOTOR  1
+#endif
+
 #if !(DESIGN_COUNT_MOTOR >= 1 && DESIGN_COUNT_MOTOR <= 6)
 #define CONFIG_MOTOR        1
 #else // DESIGN_COUNT_MOTOR
@@ -288,7 +292,7 @@
 
 // ================================================================================
 // 4.控制系统离散周期的宏定义
-#define PMSM_RUN_T          iqmath_from_float((SguanF)DEFINE_TIM_T,VALUE_BASE_TIME)
+#define PMSM_RUN_T          math_from_float((SguanF)DEFINE_TIM_T,VALUE_BASE_TIME)
 
 
 #endif // SGUAN_CONFIG_H

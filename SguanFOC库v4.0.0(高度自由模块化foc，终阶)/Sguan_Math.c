@@ -54,30 +54,16 @@ static const Q15 sin_tab[512] = {
     -2411,  -2009,  -1608,  -1206,  -804,   -402
 };
 
-static const float atan_tab[91] = {
-    0.000000000000000f, 0.011110653897607f, 0.022218565326719f, 0.033320995878247f, 
-    0.044415215246910f, 0.055498505245716f, 0.066568163775823f, 0.077621508737393f,
-    0.088655881867437f, 0.099668652491162f, 0.110657221173895f, 0.121619023261346f, 
-    0.132551532296674f, 0.143452263303658f, 0.154318775926119f, 0.165148677414626f,
-    0.175939625452527f, 0.186689330814249f, 0.197395559849880f, 0.208056136791025f, 
-    0.218668945873941f, 0.229231933276995f, 0.239743108870456f, 0.250200547777640f,
-    0.260602391747340f, 0.270946850338420f, 0.281232201918295f, 0.291456794477867f, 
-    0.301619046266239f, 0.311717446249266f, 0.321750554396642f, 0.331717001802849f,
-    0.341615490647807f, 0.351444794003551f, 0.361203755493681f, 0.370891288812662f, 
-    0.380506377112364f, 0.390048072263449f, 0.399515493999374f, 0.408907828950925f,
-    0.418224329579229f, 0.427464313015225f, 0.436627159813541f, 0.445712312628635f, 
-    0.454719274820969f, 0.463647609000806f, 0.472496935517063f, 0.481266930898431f,
-    0.489957326253728f, 0.498567905638217f, 0.507098504392336f, 0.515549007458979f, 
-    0.523919347685198f, 0.532209504113878f, 0.540419500270584f, 0.548549402450528f,
-    0.556599318010222f, 0.564569393668099f, 0.572459813818051f, 0.580270798859531f, 
-    0.588002603547567f, 0.595655515365710f, 0.603229852924684f, 0.610725964389208f,
-    0.618144225935187f, 0.625485040239229f, 0.632748835002183f, 0.639936061508166f, 
-    0.647047193220323f, 0.654082724414360f, 0.661043168850686f, 0.667929058485822f,
-    0.674740942223552f, 0.681479384706156f, 0.688144965145882f, 0.694738276196703f, 
-    0.701259922866277f, 0.707710521467902f, 0.714090698612158f, 0.720401090237845f,
-    0.726642340681725f, 0.732815101786506f, 0.738920032046445f, 0.744957795789878f, 
-    0.750929062397940f, 0.756834505558688f, 0.762674802555807f, 0.768450633591043f,
-    0.774162681139485f, 0.779811629336792f, 0.785398163397448f
+static const Q15 atan_tab[91] = {
+        0,   364,   728,  1092,  1455,  1819,  2181,  2544,  2905,  3266,  3626,
+     3985,  4343,  4701,  5057,  5412,  5765,  6117,  6468,  6818,  7165,  7511,
+     7856,  8199,  8539,  8878,  9215,  9550,  9883, 10214, 10543, 10870, 11194,
+    11516, 11836, 12153, 12468, 12781, 13091, 13399, 13704, 14007, 14307, 14605,
+    14900, 15193, 15483, 15770, 16055, 16337, 16617, 16894, 17168, 17439, 17708,
+    17975, 18239, 18500, 18758, 19014, 19268, 19518, 19767, 20012, 20255, 20496,
+    20734, 20969, 21202, 21433, 21661, 21887, 22110, 22331, 22549, 22765, 22979,
+    23190, 23399, 23606, 23811, 24013, 24213, 24411, 24606, 24800, 24991, 25181,
+    25368, 25553, 25736
 };
 
 #elif VALUE_MODE_MATH==VALUE_MODE_Q31
@@ -158,30 +144,20 @@ static const Q31 sin_tab[512] = {
     -26352928
 };
 
-static const float atan_tab[91] = {
-    0.000000000000000f, 0.011110653897607f, 0.022218565326719f, 0.033320995878247f, 
-    0.044415215246910f, 0.055498505245716f, 0.066568163775823f, 0.077621508737393f,
-    0.088655881867437f, 0.099668652491162f, 0.110657221173895f, 0.121619023261346f, 
-    0.132551532296674f, 0.143452263303658f, 0.154318775926119f, 0.165148677414626f,
-    0.175939625452527f, 0.186689330814249f, 0.197395559849880f, 0.208056136791025f, 
-    0.218668945873941f, 0.229231933276995f, 0.239743108870456f, 0.250200547777640f,
-    0.260602391747340f, 0.270946850338420f, 0.281232201918295f, 0.291456794477867f, 
-    0.301619046266239f, 0.311717446249266f, 0.321750554396642f, 0.331717001802849f,
-    0.341615490647807f, 0.351444794003551f, 0.361203755493681f, 0.370891288812662f, 
-    0.380506377112364f, 0.390048072263449f, 0.399515493999374f, 0.408907828950925f,
-    0.418224329579229f, 0.427464313015225f, 0.436627159813541f, 0.445712312628635f, 
-    0.454719274820969f, 0.463647609000806f, 0.472496935517063f, 0.481266930898431f,
-    0.489957326253728f, 0.498567905638217f, 0.507098504392336f, 0.515549007458979f, 
-    0.523919347685198f, 0.532209504113878f, 0.540419500270584f, 0.548549402450528f,
-    0.556599318010222f, 0.564569393668099f, 0.572459813818051f, 0.580270798859531f, 
-    0.588002603547567f, 0.595655515365710f, 0.603229852924684f, 0.610725964389208f,
-    0.618144225935187f, 0.625485040239229f, 0.632748835002183f, 0.639936061508166f, 
-    0.647047193220323f, 0.654082724414360f, 0.661043168850686f, 0.667929058485822f,
-    0.674740942223552f, 0.681479384706156f, 0.688144965145882f, 0.694738276196703f, 
-    0.701259922866277f, 0.707710521467902f, 0.714090698612158f, 0.720401090237845f,
-    0.726642340681725f, 0.732815101786506f, 0.738920032046445f, 0.744957795789878f, 
-    0.750929062397940f, 0.756834505558688f, 0.762674802555807f, 0.768450633591043f,
-    0.774162681139485f, 0.779811629336792f, 0.785398163397448f
+static const Q31 atan_tab[91] = {
+             0,   23859948,   47714006,   71556294,   95380948,  119182133,  142954043,
+     166690921,  190387057,  214036801,  237634573,  261174864,  284652248,  308061390,
+     331397048,  354654084,  377827469,  400912285,  423903737,  446797152,  469587986,
+     492271828,  514844406,  537301585,  559639375,  581853931,  603941555,  625898700,
+     647721970,  669408119,  690954054,  712356837,  733613680,  754721948,  775679159,
+     796482978,  817131223,  837621857,  857952990,  878122876,  898129909,  917972622,
+     937649686,  957159903,  976502207,  995675659, 1014679443, 1033512864, 1052175346,
+    1070666425, 1088985746, 1107133063, 1125108232, 1142911207, 1160542040, 1178000872,  
+    1195287934, 1212403541, 1229348089, 1246122052, 1262725976, 1279160479, 1295426245, 
+    1311524022, 1327454617, 1343218896, 1358817776, 1374252228, 1389523267, 1404631955,  
+    1419579396, 1434366731, 1448995140, 1463465835, 1477780060, 1491939088, 1505944217,  
+    1519796772, 1533498098, 1547049561, 1560452545, 1573708448, 1586818686, 1599784685,
+    1612607882, 1625289725, 1637831667, 1650235170, 1662501699, 1674632723, 1686629713
 };
 
 #else // VALUE_MODE_MATH
@@ -316,94 +292,94 @@ static const SguanF sin_tab[512] = {
     -0.049067674327418014, -0.036807222941358832, -0.024541228522912288, -0.012271538285719926
 };
 
-static const float atan_tab[91] = {
-    0.000000000000000f, 0.011110653897607f, 0.022218565326719f, 0.033320995878247f, 
-    0.044415215246910f, 0.055498505245716f, 0.066568163775823f, 0.077621508737393f,
-    0.088655881867437f, 0.099668652491162f, 0.110657221173895f, 0.121619023261346f, 
-    0.132551532296674f, 0.143452263303658f, 0.154318775926119f, 0.165148677414626f,
-    0.175939625452527f, 0.186689330814249f, 0.197395559849880f, 0.208056136791025f, 
-    0.218668945873941f, 0.229231933276995f, 0.239743108870456f, 0.250200547777640f,
-    0.260602391747340f, 0.270946850338420f, 0.281232201918295f, 0.291456794477867f, 
-    0.301619046266239f, 0.311717446249266f, 0.321750554396642f, 0.331717001802849f,
-    0.341615490647807f, 0.351444794003551f, 0.361203755493681f, 0.370891288812662f, 
-    0.380506377112364f, 0.390048072263449f, 0.399515493999374f, 0.408907828950925f,
-    0.418224329579229f, 0.427464313015225f, 0.436627159813541f, 0.445712312628635f, 
-    0.454719274820969f, 0.463647609000806f, 0.472496935517063f, 0.481266930898431f,
-    0.489957326253728f, 0.498567905638217f, 0.507098504392336f, 0.515549007458979f, 
-    0.523919347685198f, 0.532209504113878f, 0.540419500270584f, 0.548549402450528f,
-    0.556599318010222f, 0.564569393668099f, 0.572459813818051f, 0.580270798859531f, 
-    0.588002603547567f, 0.595655515365710f, 0.603229852924684f, 0.610725964389208f,
-    0.618144225935187f, 0.625485040239229f, 0.632748835002183f, 0.639936061508166f, 
-    0.647047193220323f, 0.654082724414360f, 0.661043168850686f, 0.667929058485822f,
-    0.674740942223552f, 0.681479384706156f, 0.688144965145882f, 0.694738276196703f, 
-    0.701259922866277f, 0.707710521467902f, 0.714090698612158f, 0.720401090237845f,
-    0.726642340681725f, 0.732815101786506f, 0.738920032046445f, 0.744957795789878f, 
-    0.750929062397940f, 0.756834505558688f, 0.762674802555807f, 0.768450633591043f,
-    0.774162681139485f, 0.779811629336792f, 0.785398163397448f
+static const SguanF atan_tab[91] = {
+    0.000000000000000000, 0.011110653897607473, 0.022218565326719061, 0.033320995878247196,
+    0.044415215246910840, 0.055498505245716832, 0.066568163775823808, 0.077621508737393485,
+    0.088655881867437475, 0.099668652491162038, 0.110657221173895630, 0.121619023261346580,
+    0.132551532296674020, 0.143452263303658730, 0.154318775926119030, 0.165148677414626830,
+    0.175939625452527840, 0.186689330814249320, 0.197395559849880780, 0.208056136791025800,
+    0.218668945873941950, 0.229231933276995340, 0.239743108870456580, 0.250200547777640670,
+    0.260602391747340960, 0.270946850338420530, 0.281232201918295230, 0.291456794477867100,
+    0.301619046266239700, 0.311717446249266450, 0.321750554396642190, 0.331717001802849240,
+    0.341615490647807160, 0.351444794003551660, 0.361203755493681670, 0.370891288812662370,
+    0.380506377112364900, 0.390048072263449620, 0.399515493999374530, 0.408907828950925420,
+    0.418224329579229060, 0.427464313015225470, 0.436627159813541330, 0.445712312628635640,
+    0.454719274820969410, 0.463647609000806090, 0.472496935517063790, 0.481266930898431920,
+    0.489957326253728290, 0.498567905638217900, 0.507098504392336950, 0.515549007458979030,
+    0.523919347685198990, 0.532209504113878570, 0.540419500270584160, 0.548549402450528080,
+    0.556599318010222670, 0.564569393668099990, 0.572459813818051220, 0.580270798859531480,
+    0.588002603547567500, 0.595655515365710490, 0.603229852924684900, 0.610725964389208560,
+    0.618144225935187250, 0.625485040239229020, 0.632748835002183150, 0.639936061508166070,
+    0.647047193220323000, 0.654082724414360330, 0.661043168850686810, 0.667929058485822400,
+    0.674740942223552740, 0.681479384706156990, 0.688144965145882530, 0.694738276196703250,
+    0.701259922866277360, 0.707710521467902030, 0.714090698612158010, 0.720401090237845490,
+    0.726642340681725620, 0.732815101786506550, 0.738920032046445410, 0.744957795789878310,
+    0.750929062397940330, 0.756834505558688250, 0.762674802555807220, 0.768450633591043370,
+    0.774162681139485610, 0.779811629336792380, 0.785398163397448280
 };
 #endif // VALUE_MODE_MATH
 
 // ================================================================================
 // 2.定点局部常量定义
 // (Q15局部常量定义)
-static const int32_t LOCAL_Q15_MAX_32 = 32767;
-static const int32_t LOCAL_Q15_MIN_32 = -32768;
-#define LOCAL_Q15_MAX_F0 (SguanF)32767.0
-#define LOCAL_Q15_MAX_F1 (SguanF)32768.0
+static const int32_t __LOCAL_Q15_MAX_32 = 32767;
+static const int32_t __LOCAL_Q15_MIN_32 = -32768;
+#define __LOCAL_Q15_MAX_F0 (SguanF)32767.0
+#define __LOCAL_Q15_MAX_F1 (SguanF)32768.0
 // (Q31局部常量定义)
-static const int64_t LOCAL_Q31_MAX_64 = 2147483647LL;
-static const int64_t LOCAL_Q31_MIN_64 = -2147483648LL;
-#define LOCAL_Q31_MAX_F0 (SguanF)2147483647.0
-#define LOCAL_Q31_MAX_F1 (SguanF)2147483648.0
+static const int64_t __LOCAL_Q31_MAX_64 = 2147483647LL;
+static const int64_t __LOCAL_Q31_MIN_64 = -2147483648LL;
+#define __LOCAL_Q31_MAX_F0 (SguanF)2147483647.0
+#define __LOCAL_Q31_MAX_F1 (SguanF)2147483648.0
 
 // ================================================================================
-// 3.局部函数local
+// 3.局部函数__local基础
 // (q15相关局部函数)
-static Q15 local_q15_from_float(SguanF f, SguanF base_value){
-    double scaled;
-    if (base_value <= 0.0f || f != f){ 
+static Q15 __local_q15_from_float(SguanF f, SguanF base_value){
+    SguanF scaled;
+    if (base_value <= VALUE_F_ZERO || f != f){ 
         return 0;
     }
-    else if(base_value != 1.0f){
-        float normalized = f / base_value;
-        if (normalized >= 1.0f){
+    else if(base_value != VALUE_F_ONE){
+        SguanF normalized = f / base_value;
+        if (normalized >= VALUE_F_ONE){
             return VALUE_Q15_MAX;
-        } else if (normalized <= -1.0f){
+        } else if (normalized <= -VALUE_F_ONE){
             return VALUE_Q15_MIN;
         }
-        scaled = (double)normalized * 32768.0;
+        scaled = normalized * __LOCAL_Q15_MAX_F1;
     }
     else{
-        scaled = (double)f * 32768.0;
+        scaled = f * __LOCAL_Q15_MAX_F1;
     }
 
-    if (scaled >= 0.0){
-        scaled += 0.5;
+    if (scaled >= VALUE_F_ZERO){
+        scaled += VALUE_F_HALF;
     } else{
-        scaled -= 0.5;
+        scaled -= VALUE_F_HALF;
     }
 
     int32_t result = (int32_t)scaled;
-    if (result > LOCAL_Q15_MAX_32){
+    if (result > __LOCAL_Q15_MAX_32){
         return VALUE_Q15_MAX;
-    } else if (result < LOCAL_Q15_MIN_32){
+    } else if (result < __LOCAL_Q15_MIN_32){
         return VALUE_Q15_MIN;
     }
     return (Q15)result;
 }
 
 // (q15相关局部函数)
-static SguanF local_q15_to_float(Q15 q, SguanF base_value){
-    if (base_value <= 0.0f){
-        return 0.0f;
+static SguanF __local_q15_to_float(Q15 q, SguanF base_value){
+    if (base_value <= VALUE_F_ZERO){
+        return VALUE_F_ZERO;
     }
 
-    double normalized = (double)q * (1.0/32768.0);
+    SguanF normalized = SGUAN_F(q)*(VALUE_F_ONE/__LOCAL_Q15_MAX_F1);
     return (SguanF)(normalized * base_value);
 }
 
 // (q15相关局部函数)
-static Q15 local_q15_add(Q15 a, Q15 b){
+static Q15 __local_q15_add(Q15 a, Q15 b){
     int16_t sum = a + b;
     if ((a > 0) && (b > 0) && (sum <= 0)){
         return VALUE_Q15_MAX;
@@ -415,7 +391,7 @@ static Q15 local_q15_add(Q15 a, Q15 b){
 }
 
 // (q15相关局部函数)
-static Q15 local_q15_sub(Q15 a, Q15 b){
+static Q15 __local_q15_sub(Q15 a, Q15 b){
     int16_t diff = a - b;
     if ((a > 0) && (b < 0) && (diff <= 0)){
         return VALUE_Q15_MAX;
@@ -427,22 +403,22 @@ static Q15 local_q15_sub(Q15 a, Q15 b){
 }
 
 // (q15相关局部函数)
-static Q15 local_q15_mul(Q15 a, Q15 b){
+static Q15 __local_q15_mul(Q15 a, Q15 b){
     int32_t result = (int32_t)a * (int32_t)b;
     result += 1 << 14;
     result >>= 15;
 
-    if (result > LOCAL_Q15_MAX_32){
+    if (result > __LOCAL_Q15_MAX_32){
         return VALUE_Q15_MAX;
     }
-    if (result < LOCAL_Q15_MIN_32){
+    if (result < __LOCAL_Q15_MIN_32){
         return VALUE_Q15_MIN;
     }
     return (Q15)result;
 }
 
 // (q15相关局部函数)
-static Q15 local_q15_div(Q15 a, Q15 b){
+static Q15 __local_q15_div(Q15 a, Q15 b){
     if (b == 0){
         return (a >= 0) ? VALUE_Q15_MAX : VALUE_Q15_MIN;
     }
@@ -458,18 +434,18 @@ static Q15 local_q15_div(Q15 a, Q15 b){
         }
     }
 
-    if (result > LOCAL_Q15_MAX_32){
+    if (result > __LOCAL_Q15_MAX_32){
         return VALUE_Q15_MAX;
     }
-    if (result < LOCAL_Q15_MIN_32){
+    if (result < __LOCAL_Q15_MIN_32){
         return VALUE_Q15_MIN;
     }
     return (Q15)result;
 }
 
 // (q15相关局部函数)
-static Q15 local_q15_convert_base(Q15 q, SguanF old_base, SguanF new_base){
-    if (old_base <= 0.0f || new_base <= 0.0f){
+static Q15 __local_q15_convert_base(Q15 q, SguanF old_base, SguanF new_base){
+    if (old_base <= VALUE_F_ZERO || new_base <= VALUE_F_ZERO){
         return 0;
     }
     
@@ -478,70 +454,70 @@ static Q15 local_q15_convert_base(Q15 q, SguanF old_base, SguanF new_base){
         return q;
     }
     
-    double ratio = (double)old_base / (double)new_base;
-    double result = (double)q * ratio;
-    if (result > 32767.0){
+    SguanF ratio = old_base/new_base;
+    SguanF result = SGUAN_F(q) * ratio;
+    if (result > __LOCAL_Q15_MAX_F0){
         return VALUE_Q15_MAX;
     }
-    if (result < -32768.0){
+    if (result < -__LOCAL_Q15_MAX_F1){
         return VALUE_Q15_MIN;
     }
     
     if (result >= 0){
-        result += 0.5;
+        result += VALUE_F_HALF;
     } else{
-        result -= 0.5;
+        result -= VALUE_F_HALF;
     }
     
     return (Q15)result;
 }
 
 // (局部函数q31)
-static Q31 local_q31_from_float(SguanF f, SguanF base_value){
-    double scaled;
-    if (base_value <= 0.0f || f != f){ 
+static Q31 __local_q31_from_float(SguanF f, SguanF base_value){
+    SguanF scaled;
+    if (base_value <= VALUE_F_ZERO || f != f){ 
         return 0;
     }
-    else if(base_value != 1.0f){
-        float normalized = f / base_value;
-        if (normalized >= 1.0f){
+    else if(base_value != VALUE_F_ONE){
+        SguanF normalized = f / base_value;
+        if (normalized >= VALUE_F_ONE){
             return VALUE_Q31_MAX;
-        } else if (normalized <= -1.0f){
+        } else if (normalized <= -VALUE_F_ONE){
             return VALUE_Q31_MIN;
         }
-        scaled = (double)normalized * 2147483648.0;
+        scaled = normalized * __LOCAL_Q31_MAX_F1;
     }
     else{
-        scaled = (double)f * 2147483648.0;
+        scaled = f * __LOCAL_Q31_MAX_F1;
     }
 
-    if (scaled >= 0.0){
-        scaled += 0.5;
+    if (scaled >= VALUE_F_ZERO){
+        scaled += VALUE_F_HALF;
     } else{
-        scaled -= 0.5;
+        scaled -= VALUE_F_HALF;
     }
 
     int64_t result = (int64_t)scaled;
-    if (result > LOCAL_Q31_MAX_64){
+    if (result > __LOCAL_Q31_MAX_64){
         return VALUE_Q31_MAX;
-    } else if (result < LOCAL_Q31_MIN_64){
+    } else if (result < __LOCAL_Q31_MIN_64){
         return VALUE_Q31_MIN;
     }
     return (Q31)result;
 }
 
 // (局部函数q31)
-static SguanF local_q31_to_float(Q31 q, SguanF base_value){
-    if (base_value <= 0.0f){
-        return 0.0f;
+static SguanF __local_q31_to_float(Q31 q, SguanF base_value){
+    if (base_value <= VALUE_F_ZERO){
+        return VALUE_F_ZERO;
     }
 
-    double normalized = (double)q * (1.0/2147483648.0);
+    SguanF normalized = SGUAN_F(q) * (VALUE_F_ONE/__LOCAL_Q31_MAX_F1);
     return (SguanF)(normalized * base_value);
 }
 
 // (局部函数q31)
-static Q31 local_q31_add(Q31 a, Q31 b){
+static Q31 __local_q31_add(Q31 a, Q31 b){
     int32_t sum = a + b;
     if ((a > 0) && (b > 0) && (sum <= 0)){
         return VALUE_Q31_MAX;
@@ -553,7 +529,7 @@ static Q31 local_q31_add(Q31 a, Q31 b){
 }
 
 // (局部函数q31)
-static Q31 local_q31_sub(Q31 a, Q31 b){
+static Q31 __local_q31_sub(Q31 a, Q31 b){
     int32_t diff = a - b;
     if ((a > 0) && (b < 0) && (diff <= 0)){
         return VALUE_Q31_MAX;
@@ -565,22 +541,22 @@ static Q31 local_q31_sub(Q31 a, Q31 b){
 }
 
 // (局部函数q31)
-static Q31 local_q31_mul(Q31 a, Q31 b){
+static Q31 __local_q31_mul(Q31 a, Q31 b){
     int64_t result = (int64_t)a * (int64_t)b;
     result += 1LL << 30;
     result >>= 31;
 
-    if (result > LOCAL_Q31_MAX_64){
+    if (result > __LOCAL_Q31_MAX_64){
         return VALUE_Q31_MAX;
     }
-    if (result < LOCAL_Q31_MIN_64){
+    if (result < __LOCAL_Q31_MIN_64){
         return VALUE_Q31_MIN;
     }
     return (Q31)result;
 }
 
 // (局部函数q31)
-static Q31 local_q31_div(Q31 a, Q31 b){
+static Q31 __local_q31_div(Q31 a, Q31 b){
     if (b == 0){
         return (a >= 0) ? VALUE_Q31_MAX : VALUE_Q31_MIN;
     }
@@ -596,18 +572,18 @@ static Q31 local_q31_div(Q31 a, Q31 b){
         }
     }
 
-    if (result > LOCAL_Q31_MAX_64){
+    if (result > __LOCAL_Q31_MAX_64){
         return VALUE_Q31_MAX;
     }
-    if (result < LOCAL_Q31_MIN_64){
+    if (result < __LOCAL_Q31_MIN_64){
         return VALUE_Q31_MIN;
     }
     return (Q31)result;
 }
 
 // (局部函数q31)
-static Q31 local_q31_convert_base(Q31 q, SguanF old_base, SguanF new_base){
-    if (old_base <= 0.0f || new_base <= 0.0f){
+static Q31 __local_q31_convert_base(Q31 q, SguanF old_base, SguanF new_base){
+    if (old_base <= VALUE_F_ZERO || new_base <= VALUE_F_ZERO){
         return 0;
     }
     
@@ -616,26 +592,26 @@ static Q31 local_q31_convert_base(Q31 q, SguanF old_base, SguanF new_base){
         return q;
     }
     
-    double ratio = (double)old_base / (double)new_base;
-    double result = (double)q * ratio;
-    if (result > 2147483647.0){
+    SguanF ratio = old_base/new_base;
+    SguanF result = SGUAN_F(q) * ratio;
+    if (result > __LOCAL_Q31_MAX_F0){
         return VALUE_Q31_MAX;
     }
-    if (result < -2147483648.0){
+    if (result < -__LOCAL_Q31_MAX_F1){
         return VALUE_Q31_MIN;
     }
     
     if (result >= 0){
-        result += 0.5;
+        result += VALUE_F_HALF;
     } else{
-        result -= 0.5;
+        result -= VALUE_F_HALF;
     }
     
     return (Q31)result;
 }
 
 // (浮点相关的三角局部函数)
-static SguanF local_sin_f(SguanF x){
+static SguanF __local_sin_f(SguanF x){
     while (1){
         if (x > VALUE_F_2PI)
             x = x - VALUE_F_2PI;
@@ -649,8 +625,8 @@ static SguanF local_sin_f(SguanF x){
     int idx0 = (int)pos;
     SguanF frac = pos - (SguanF)idx0;
 
-    if (idx0 > 511){ idx0 = 511; frac = 0.0f; }
-    if (idx0 < 0){ idx0 = 0; frac = 0.0f; }
+    if (idx0 > 511){ idx0 = 511; frac = VALUE_F_ZERO; }
+    if (idx0 < 0){ idx0 = 0; frac = VALUE_F_ZERO; }
 
     int idx1 = idx0 + 1;
     if (idx1 >= 512) idx1 = 0;
@@ -659,20 +635,20 @@ static SguanF local_sin_f(SguanF x){
 }
 
 // (浮点相关的三角局部函数)
-static SguanF local_cos_f(SguanF x){
-    return local_sin_f(VALUE_F_PI_2 - x);
+static SguanF __local_cos_f(SguanF x){
+    return __local_sin_f(VALUE_F_PI_2 - x);
 }
 
 // (浮点相关的三角局部函数)
-static SguanF local_atan_f(SguanF x){
+static SguanF __local_atan_f(SguanF x){
     if (x != x){
       return x;
     }
     if (x < VALUE_F_ZERO){
-      return -local_atan_f(-x);
+      return -__local_atan_f(-x);
     }
     if (x > VALUE_F_ONE){
-      return VALUE_F_PI_2 - local_atan_f(SGUAN_Q(1.0) / x);
+      return VALUE_F_PI_2 - __local_atan_f(VALUE_F_ONE / x);
     }
 
     SguanF pos = x*SGUAN_F(90.0);
@@ -688,7 +664,7 @@ static SguanF local_atan_f(SguanF x){
 }
 
 // (q15相关的三角局部函数)
-static Q15 local_sin_q15(Q15 x){
+static Q15 __local_sin_q15(Q15 x){
     if (x < 0) x = 0;
     if (x > VALUE_Q15_2PI) x = VALUE_Q15_2PI;
 
@@ -706,23 +682,23 @@ static Q15 local_sin_q15(Q15 x){
 }
 
 // (q15相关的三角局部函数)
-static Q15 local_cos_q15(Q15 x){
+static Q15 __local_cos_q15(Q15 x){
     int32_t x_shift = (int32_t)x + VALUE_Q15_PI_2;
 
     if (x_shift >= VALUE_Q15_2PI){
         x_shift -= VALUE_Q15_2PI;
     }
 
-    return local_sin_q15((Q15)x_shift);
+    return __local_sin_q15((Q15)x_shift);
 }
 
 // (q15相关的三角局部函数)
-static Q15 local_atan_q15(Q15 x){
+static Q15 __local_atan_q15(Q15 x){
     return 0;
 }
 
 // (q31相关的三角局部函数)
-static Q31 local_sin_q31(Q31 x){
+static Q31 __local_sin_q31(Q31 x){
     if (x < 0) x = 0;
     if (x > VALUE_Q31_PI_2) x = VALUE_Q31_PI_2;
 
@@ -740,133 +716,175 @@ static Q31 local_sin_q31(Q31 x){
 }
 
 // (q31相关的三角局部函数)
-static Q31 local_cos_q31(Q31 x){
+static Q31 __local_cos_q31(Q31 x){
     Q31 x_shift = x + VALUE_Q31_PI_2;
 
     if (x_shift >= VALUE_Q31_2PI){
         x_shift -= VALUE_Q31_2PI;
     }
-    return local_sin_q31(x_shift);
+    return __local_sin_q31(x_shift);
 }
 
-static Q31 local_atan_q31(Q31 x){
+static Q31 __local_atan_q31(Q31 x){
     return 0;
 }
 
 // ================================================================================
-// 3.全局函数math
+// 3.全局函数math基础
 // (浮点转定点)
 SguanQ math_from_float(SguanF f, SguanF base_value){
     #if VALUE_MODE_MATH==VALUE_MODE_Q15
+    (void)__local_q31_from_float;
+    return __local_q15_from_float(f, base_value);
 
     #elif VALUE_MODE_MATH==VALUE_MODE_Q31
+    (void)__local_q15_from_float;
+    return __local_q31_from_float(f, base_value);
 
     #else // VALUE_MODE_MATH
-
+    (void)__local_q15_from_float;
+    (void)__local_q31_from_float;
+    return f;
     #endif // VALUE_MODE_MATH
 }
 
 // (定点转浮点)
 SguanF math_to_float(SguanQ q, SguanF base_value){
     #if VALUE_MODE_MATH==VALUE_MODE_Q15
+    (void)__local_q31_to_float;
+    return __local_q15_to_float(q, base_value);
 
     #elif VALUE_MODE_MATH==VALUE_MODE_Q31
+    (void)__local_q15_to_float;
+    return __local_q31_to_float(q, base_value);
 
     #else // VALUE_MODE_MATH
-    
+    (void)__local_q15_to_float;
+    (void)__local_q31_to_float;
+    return q;
     #endif // VALUE_MODE_MATH
 }
 
 // (全格式加法)
 SguanQ math_add(SguanQ a, SguanQ b){
     #if VALUE_MODE_MATH==VALUE_MODE_Q15
-
+    (void)__local_q31_add;
+    return __local_q15_add(a, b);
+    
     #elif VALUE_MODE_MATH==VALUE_MODE_Q31
+    (void)__local_q15_add;
+    return __local_q31_add(a, b);
 
     #else // VALUE_MODE_MATH
-    
+    (void)__local_q15_add;
+    (void)__local_q31_add;
+    return (a+b);
     #endif // VALUE_MODE_MATH
 }
 
 // (全格式减法)
 SguanQ math_sub(SguanQ a, SguanQ b){
     #if VALUE_MODE_MATH==VALUE_MODE_Q15
-
+    (void)__local_q31_sub;
+    return __local_q15_sub(a, b);
+    
     #elif VALUE_MODE_MATH==VALUE_MODE_Q31
+    (void)__local_q15_sub;
+    return __local_q31_sub(a, b);
 
     #else // VALUE_MODE_MATH
-    
+    (void)__local_q15_sub;
+    (void)__local_q31_sub;
+    return (a-b);
     #endif // VALUE_MODE_MATH
 }
 
 // (全格式乘法)
 SguanQ math_mul(SguanQ a, SguanQ b){
     #if VALUE_MODE_MATH==VALUE_MODE_Q15
+    (void)__local_q31_mul;
+    return __local_q15_mul(a, b);
 
     #elif VALUE_MODE_MATH==VALUE_MODE_Q31
-
-    #else // VALUE_MODE_MATH
+    (void)__local_q15_mul;
+    return __local_q31_mul(a, b);
     
+    #else // VALUE_MODE_MATH
+    (void)__local_q15_mul;
+    (void)__local_q31_mul;
+    return (a*b);
     #endif // VALUE_MODE_MATH
 }
 
 // (全格式除法)
 SguanQ math_div(SguanQ a, SguanQ b){
     #if VALUE_MODE_MATH==VALUE_MODE_Q15
-
+    (void)__local_q31_div;
+    return __local_q15_div(a, b);
+    
     #elif VALUE_MODE_MATH==VALUE_MODE_Q31
+    (void)__local_q15_div;
+    return __local_q31_div(a, b);
 
     #else // VALUE_MODE_MATH
-    
+    (void)__local_q15_div;
+    (void)__local_q31_div;
+    return (a/b);
     #endif // VALUE_MODE_MATH
 }
 
 // (定点单位互转)
 SguanQ math_convert_base(SguanQ q, SguanF old_base, SguanF new_base){
     #if VALUE_MODE_MATH==VALUE_MODE_Q15
+    (void)__local_q31_convert_base;
+    return __local_q15_convert_base(q, old_base, new_base);
 
     #elif VALUE_MODE_MATH==VALUE_MODE_Q31
+    (void)__local_q15_convert_base;
+    return __local_q31_convert_base(q, old_base, new_base);
 
     #else // VALUE_MODE_MATH
-    
+    (void)__local_q15_convert_base;
+    (void)__local_q31_convert_base;
+    return q;
     #endif // VALUE_MODE_MATH
 }
 
 // (快速求解sine)
 SguanQ math_sin(SguanQ x){
     #if VALUE_MODE_MATH==VALUE_MODE_Q15
-    return local_sin_q15(x);
+    return __local_sin_q15(x);
     #elif VALUE_MODE_MATH==VALUE_MODE_Q31
-    return local_sin_q31(x);
+    return __local_sin_q31(x);
     #else // VALUE_MODE_MATH
-    return local_sin_f(x);
+    return __local_sin_f(x);
     #endif // VALUE_MODE_MATH
 }
 
 // (快速求解cosine)
 SguanQ math_cos(SguanQ x){
     #if VALUE_MODE_MATH==VALUE_MODE_Q15
-    return local_cos_q15(x);
+    return __local_cos_q15(x);
     #elif VALUE_MODE_MATH==VALUE_MODE_Q31
-    return local_cos_q31(x);
+    return __local_cos_q31(x);
     #else // VALUE_MODE_MATH
-    return local_cos_f(x);
+    return __local_cos_f(x);
     #endif // VALUE_MODE_MATH
 }
 
 // (快速求解sine和cosine)
 void math_sin_cos(SguanQ x, SguanQ *sin_x, SguanQ *cos_x){
     #if VALUE_MODE_MATH==VALUE_MODE_Q15
-    (*sin_x) = local_sin_q15(x);
-    (*cos_x) = local_cos_q15(x);
+    (*sin_x) = __local_sin_q15(x);
+    (*cos_x) = __local_cos_q15(x);
 
     #elif VALUE_MODE_MATH==VALUE_MODE_Q31
-    (*sin_x) = local_sin_q31(x);
-    (*cos_x) = local_cos_q31(x);
+    (*sin_x) = __local_sin_q31(x);
+    (*cos_x) = __local_cos_q31(x);
 
     #else // VALUE_MODE_MATH
-    (*sin_x) = local_sin_f(x);
-    (*cos_x) = local_cos_f(x);
+    (*sin_x) = __local_sin_f(x);
+    (*cos_x) = __local_cos_f(x);
     #endif // VALUE_MODE_MATH
 }
 
@@ -874,30 +892,30 @@ void math_sin_cos(SguanQ x, SguanQ *sin_x, SguanQ *cos_x){
 SguanQ math_tan(SguanQ x){
     SguanQ sine,cosine;
     #if VALUE_MODE_MATH==VALUE_MODE_Q15
-    sine = local_sin_q15(x);
-    cosine = local_cos_q15(x);
-    (void)local_sin_f;
-    (void)local_cos_f;
-    (void)local_cos_q31;
-    (void)local_cos_q31;
-    return local_q15_div(sine, cosine);
+    sine = __local_sin_q15(x);
+    cosine = __local_cos_q15(x);
+    (void)__local_sin_f;
+    (void)__local_cos_f;
+    (void)__local_cos_q31;
+    (void)__local_cos_q31;
+    return __local_q15_div(sine, cosine);
 
     #elif VALUE_MODE_MATH==VALUE_MODE_Q31
-    sine = local_sin_q31(x);
-    cosine = local_cos_q31(x);
-    (void)local_sin_f;
-    (void)local_cos_f;
-    (void)local_cos_q15;
-    (void)local_cos_q15;
-    return local_q31_div(sine, cosine);
+    sine = __local_sin_q31(x);
+    cosine = __local_cos_q31(x);
+    (void)__local_sin_f;
+    (void)__local_cos_f;
+    (void)__local_cos_q15;
+    (void)__local_cos_q15;
+    return __local_q31_div(sine, cosine);
 
     #else // VALUE_MODE_MATH
-    sine = local_sin_f(x);
-    cosine = local_cos_f(x);
-    (void)local_sin_q15;
-    (void)local_cos_q15;
-    (void)local_cos_q31;
-    (void)local_cos_q31;
+    sine = __local_sin_f(x);
+    cosine = __local_cos_f(x);
+    (void)__local_sin_q15;
+    (void)__local_cos_q15;
+    (void)__local_cos_q31;
+    (void)__local_cos_q31;
     return (sine/cosine);
     #endif // VALUE_MODE_MATH
 }
@@ -905,23 +923,267 @@ SguanQ math_tan(SguanQ x){
 // (快速求解反三角tan函数)
 SguanQ math_atan(SguanQ x){
     #if VALUE_MODE_MATH==VALUE_MODE_Q15
-    (void)local_atan_f;
-    (void)local_atan_q31;
-    return local_atan_q15(x);
+    (void)__local_atan_f;
+    (void)__local_atan_q31;
+    return __local_atan_q15(x);
+
     #elif VALUE_MODE_MATH==VALUE_MODE_Q31
-    (void)local_atan_f;
-    (void)local_atan_q15;
-    return local_atan_q31(x);
+    (void)__local_atan_f;
+    (void)__local_atan_q15;
+    return __local_atan_q31(x);
+    
     #else // VALUE_MODE_MATH
-    (void)local_atan_q15;
-    (void)local_atan_q31;
-    return local_atan_f(x);
+    (void)__local_atan_q15;
+    (void)__local_atan_q31;
+    return __local_atan_f(x);
     #endif // VALUE_MODE_MATH
 }
 
+// ================================================================================
+// 5.全局函数math高级
+// (自定义内存填充函数)
+void *math_memset(void *ptr, int value, size_t num){
+    if (ptr == NULL || num == 0){
+        return ptr;
+    }
 
+    uint8_t *p = (uint8_t *)ptr;
+    uint8_t v = (uint8_t)value;
 
+    for (size_t i = 0; i < num; i++) {
+        p[i] = v;
+    }
+    return ptr;
+}
 
+// (自定义内存拷贝函数)
+void *math_memcpy(void *dst, const void *src, size_t n){
+    uint8_t *d = (uint8_t *)dst;
+    const uint8_t *s = (const uint8_t *)src;
+    while (n--){
+        *d++ = *s++;
+    }
+    return dst;
+}
+
+// (参数取模[0, 2π))
+SguanQ math_normalize(SguanQ angle){
+    #if VALUE_MODE_MATH==VALUE_MODE_Q15
+    static SguanQ temp = VALUE_Q15_2PI;
+    #elif VALUE_MODE_MATH==VALUE_MODE_Q31
+    static SguanQ temp = VALUE_Q31_2PI;
+    #else // VALUE_MODE_MATH
+    static SguanQ temp = VALUE_F_2PI;
+    #endif // VALUE_MODE_MATH
+
+    while (1){
+        if (angle > temp)
+            angle = math_sub(angle, temp);
+        else if (angle < 0)
+            angle = math_add(angle, temp);
+        else
+            break;
+    }
+    return angle;
+}
+
+// (角度积分函数)
+void math_rad_loop(SguanQ *out, SguanQ in, SguanQ time){
+    (*out) = math_add(*out, math_mul(in, time));
+    (*out) = math_normalize(*out);
+}
+
+// (角度越位处理函数)
+void math_correct(SguanQ *angle, SguanQ error){
+    #if VALUE_MODE_MATH==VALUE_MODE_Q15
+    static SguanQ temp0 = VALUE_Q15_2PI;
+    static SguanQ temp1 = VALUE_Q15_PI;
+    #elif VALUE_MODE_MATH==VALUE_MODE_Q31
+    static SguanQ temp0 = VALUE_Q31_2PI;
+    static SguanQ temp1 = VALUE_Q31_PI;
+    #else // VALUE_MODE_MATH
+    static SguanQ temp0 = VALUE_F_2PI;
+    static SguanQ temp1 = VALUE_F_PI;
+    #endif // VALUE_MODE_MATH
+
+    if (error >= temp1){
+        (*angle) = math_sub(*angle, temp0);
+    }
+    if (error <= -temp1){
+        (*angle) = math_add(*angle, temp0);
+    }
+}
+
+// (数值限幅)
+SguanQ math_limit(SguanQ value, SguanQ max, SguanQ min){
+    if (value > max) return max;
+    if (value < min) return min;
+    return value;
+}
+
+// (计算Sign的符号函数)
+SguanQ math_sign(SguanQ value, SguanF base_value){
+    #if VALUE_MODE_MATH>=VALUE_MODE_Q15
+    SguanQ temp = math_from_float(1.0f, base_value);
+    #else // VALUE_MODE_MATH
+    static SguanQ temp = (SguanF)1.0;
+    #endif // VALUE_MODE_MATH
+
+    if (value > 0){
+        return temp;
+    }
+    else{
+        return -temp;
+    }
+}
+
+// (开平方)
+SguanQ math_sqrt(SguanQ x){
+    #if VALUE_MODE_MATH==VALUE_MODE_Q15
+    // 1.BASE语义：送入base=64的值，开方结果为base=8（sqrt(64)=8）
+    // 因 math_from_float 已把base归一化，函数本身无需base参数
+    if (x <= 0) return 0;
+
+    uint32_t n = ((uint32_t)(uint16_t)x) << 15;
+    uint32_t g;
+    if      (n >= (1UL << 30)) g = 1UL << 15;
+    else if (n >= (1UL << 28)) g = 1UL << 14;
+    else if (n >= (1UL << 26)) g = 1UL << 13;
+    else if (n >= (1UL << 24)) g = 1UL << 12;
+    else if (n >= (1UL << 22)) g = 1UL << 11;
+    else if (n >= (1UL << 20)) g = 1UL << 10;
+    else if (n >= (1UL << 18)) g = 1UL << 9;
+    else if (n >= (1UL << 16)) g = 1UL << 8;
+    else if (n >= (1UL << 14)) g = 1UL << 7;
+    else if (n >= (1UL << 12)) g = 1UL << 6;
+    else if (n >= (1UL << 10)) g = 1UL << 5;
+    else if (n >= (1UL <<  8)) g = 1UL << 4;
+    else if (n >= (1UL <<  6)) g = 1UL << 3;
+    else if (n >= (1UL <<  4)) g = 1UL << 2;
+    else if (n >= (1UL <<  2)) g = 1UL << 1;
+    else                       g = 1;
+
+    for (int i = 0; i < 8; i++){
+        uint32_t ng = (g + n / g) >> 1;
+        if (ng == g || ng + 1 == g) break;
+        g = ng;
+    }
+    while (g > 0 && (uint32_t)g * g > n) g--;
+    while ((uint32_t)(g + 1) * (g + 1) <= n && g < 0x7FFF) g++;
+    if (g > 0x7FFF) g = 0x7FFF;
+    return (Q15)g;
+
+    #elif VALUE_MODE_MATH==VALUE_MODE_Q31
+    // 2.BASE语义：送入base=64的值，开方结果为base=8（sqrt(64)=8）
+    // 因 math_from_float 已把base归一化，函数本身无需base参数
+    if (x <= 0) return 0;
+
+    uint64_t n = ((uint64_t)(uint32_t)x) << 31;
+    uint64_t g;
+    if      (n >= (1ULL << 62)) g = 1ULL << 31;
+    else if (n >= (1ULL << 58)) g = 1ULL << 29;
+    else if (n >= (1ULL << 54)) g = 1ULL << 27;
+    else if (n >= (1ULL << 50)) g = 1ULL << 25;
+    else if (n >= (1ULL << 46)) g = 1ULL << 23;
+    else if (n >= (1ULL << 42)) g = 1ULL << 21;
+    else if (n >= (1ULL << 38)) g = 1ULL << 19;
+    else if (n >= (1ULL << 34)) g = 1ULL << 17;
+    else if (n >= (1ULL << 30)) g = 1ULL << 15;
+    else if (n >= (1ULL << 26)) g = 1ULL << 13;
+    else if (n >= (1ULL << 22)) g = 1ULL << 11;
+    else if (n >= (1ULL << 18)) g = 1ULL << 9;
+    else if (n >= (1ULL << 14)) g = 1ULL << 7;
+    else if (n >= (1ULL << 10)) g = 1ULL << 5;
+    else if (n >= (1ULL <<  6)) g = 1ULL << 3;
+    else if (n >= (1ULL <<  2)) g = 1ULL << 1;
+    else                        g = 1;
+
+    for (int i = 0; i < 8; i++){
+        uint64_t ng = (g + n / g) >> 1;
+        if (ng == g || ng + 1 == g) break;
+        g = ng;
+    }
+    while (g > 0 && g * g > n) g--;
+    while ((g + 1) * (g + 1) <= n && g < 0x7FFFFFFFULL) g++;
+    if (g > 0x7FFFFFFFULL) g = 0x7FFFFFFFULL;
+    return (Q31)g;
+
+    #elif VALUE_MODE_MATH==VALUE_MODE_DOUBLE
+    // 3.double数值开平方，输入double，输出double
+    // 用math_memcpy做位重解释，避开严格别名UB
+    if (x <= 0.0) return 0.0;
+
+    double y = x;
+    uint64_t i;
+    math_memcpy(&i, &y, sizeof(i));
+    i = 0x5fe6eb50c7b537a9ULL - (i >> 1);
+    math_memcpy(&y, &i, sizeof(y));
+
+    y = y * (1.5 - 0.5 * x * y * y);
+    y = y * (1.5 - 0.5 * x * y * y);
+    y = y * (1.5 - 0.5 * x * y * y);
+    return x * y;
+
+    #else // VALUE_MODE_MATH (float)
+    // 4.float 数值开平方，输入 float，输出 float
+    if (x <= 0.0f) return 0.0f;
+
+    float y = x;
+    uint32_t i;
+    math_memcpy(&i, &y, sizeof(i));
+    i = 0x5f3759dfu - (i >> 1);
+    math_memcpy(&y, &i, sizeof(y));
+
+    y = y * (1.5f - 0.5f * x * y * y);
+    y = y * (1.5f - 0.5f * x * y * y);
+    y = y * (1.5f - 0.5f * x * y * y);
+    return y * x;
+    #endif // VALUE_MODE_MATH
+}
+
+// ================================================================================
+// 6.全局函数math电机
+// (等幅值克拉克变换)
+void math_clarke(
+    SguanQ *i_alpha, 
+    SguanQ *i_beta, 
+    SguanQ i_a, 
+    SguanQ i_b){
+    #if VALUE_MODE_MATH==VALUE_MODE_Q15
+    static SguanQ temp = VALUE_Q15_INV_SQRT3;
+    #elif VALUE_MODE_MATH==VALUE_MODE_Q31
+    static SguanQ temp = VALUE_Q31_INV_SQRT3;
+    #else // VALUE_MODE_MATH
+    static SguanQ temp = VALUE_F_INV_SQRT3;
+    #endif // VALUE_MODE_MATH
+
+    (*i_alpha) = i_a;
+    (*i_beta) = math_mul(math_add(i_a,(2*i_b)), temp);
+}
+
+// (帕克变换)
+void math_park(
+    SguanQ *i_d, 
+    SguanQ *i_q, 
+    SguanQ i_alpha, 
+    SguanQ i_beta, 
+    SguanQ sine, 
+    SguanQ cosine){
+    (*i_d) = math_add(math_mul(i_alpha,cosine), math_mul(i_beta,sine));
+    (*i_q) = math_sub(math_mul(i_beta,cosine), math_mul(i_alpha,sine));
+}
+
+// (帕克逆变换)
+void math_ipark(
+    SguanQ *u_alpha, 
+    SguanQ *u_beta, 
+    SguanQ u_d, 
+    SguanQ u_q, 
+    SguanQ sine, 
+    SguanQ cosine){
+    (*u_alpha) = math_sub(math_mul(u_d,cosine), math_mul(u_q,sine));
+    (*u_beta) = math_add(math_mul(u_q,cosine), math_mul(u_d,sine));
+}
 
 
 

@@ -3,6 +3,7 @@
 
 /* SguanFOC配置文件声明 */
 #include "Sguan_Method.h"
+#include "Sguan_Modbus.h"
 #include "Sguan_MotorStatus.h"
 #include "Sguan_Printf.h"
 #include "Sguan_Transfer.h"
@@ -117,6 +118,7 @@ typedef struct{
     uint32_t tick_last;                         // []
     
     Method method;                              // []
+    Modbus modbus;                              // []
     MotorStatus motorstatus;                    // []
     Printf printf;                              // []
     Transfer transfer;                          // []
@@ -133,6 +135,14 @@ typedef struct{
 }SguanFoc;
 
 extern SguanFoc sguanfoc[CONFIG_MOTOR];
+void __local_high_loop(const uint8_t *cmds, int count);
+
+
+#define SGUANFOC_HIGH_LOOP(arr) do { \
+    int count = (int)(sizeof(arr)/sizeof((arr)[0])); \
+    sguanfoc_high_loop((arr), count); \
+} while (0)
+void sguanfoc_printf_loop(uint8_t *data, uint16_t length);
 
 
 #endif // SGUANFOC_H

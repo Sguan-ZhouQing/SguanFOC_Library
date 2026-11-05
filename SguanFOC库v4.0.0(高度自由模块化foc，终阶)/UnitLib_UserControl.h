@@ -13,7 +13,7 @@ void usercontrol_ud(float value);
 void usercontrol_uq(float value);
 
 // 动态可修改的指令字典（预留 hash_val 位置为 0）
-static CmdMap cmd_dict[] = {
+static __LocalMap cmd_dict[] = {
     {"MOTOR",       0, usercontrol_motor},
     {"Speed",       0, usercontrol_speed},
     {"Position",    0, usercontrol_position},

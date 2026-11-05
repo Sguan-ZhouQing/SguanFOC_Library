@@ -36,7 +36,7 @@ typedef enum{
     status_phase_loss,                          // (错误状态)缺相[暂无，过流保护已可预防]
     status_circuit_short,                       // (错误状态)短路[暂无，过流保护已可预防]
     status_fault                                // (错误状态)未知错误
-}HandleStatus;
+}__LocalStatus;
 
 typedef enum{
     state_standby = 0,                          // (standby)待机
@@ -46,7 +46,7 @@ typedef enum{
     state_gotoinit1_current,                    // (current)电流初始
     state_com,                                  // (com)正常
     state_fault                                 // (fault)错误
-}HandleState;
+}__LocalState;
 
 typedef enum{
     event_zero = 0,                             // (自动事件)零事件
@@ -80,7 +80,7 @@ typedef enum{
     event_phase_loss,                           // (自动事件)缺相事件[暂无，过流保护已可预防]
     event_circuit_short,                        // (自动事件)短路事件[暂无，过流保护已可预防]
     event_fault                                 // (手动)未知错误
-}HandleEvent;
+}__LocalEvent;
 
 typedef struct{
     SguanQ tor_real;                            // (实时输入数据)
@@ -134,19 +134,19 @@ typedef struct{
     uint32_t tick_last;                         // (临时数据)
     
     uint8_t mode_flag;                          // (固定输入参数)
-}HandleData;
+}__LocalData;
 
 typedef struct{
     uint8_t status_now;                         // ()
     uint8_t event_now;                          // ()
     uint8_t status_future;                      // ()
-}MotorTab;
+}__LocalTab;
 
 typedef struct{
-    HandleStatus status;                        // ()
-    HandleStatus last;                          // ()
-    HandleState state;                          // ()
-    HandleData data;                            // ()
+    __LocalStatus status;                        // ()
+    __LocalStatus last;                          // ()
+    __LocalState state;                          // ()
+    __LocalData data;                            // ()
 }MotorStatus;
 
 void motorstatus_loop(void *sguan);

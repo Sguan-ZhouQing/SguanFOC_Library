@@ -3,6 +3,8 @@
 
 /* SguanFOC配置文件声明 */
 #include <stdint.h>
+#include <stdio.h>
+#include <string.h>
 #include "UnitLib_Design.h"
 #include "UserData_Define.h"
 
@@ -18,11 +20,15 @@ typedef int16_t Q15;    // 1位符号+0位整数+15位小数
 #define VALUE_MODE_Q15          0x02
 #define VALUE_MODE_Q31          0x03
 
+#ifndef DESIGN_MODE_MATH
+#define DESIGN_MODE_MATH    VALUE_MODE_FLOAT
+#endif
+
 #if !((DESIGN_MODE_MATH>=VALUE_MODE_FLOAT) && (DESIGN_MODE_MATH<=VALUE_MODE_Q31))
 #define VALUE_MODE_MATH         VALUE_MODE_FLOAT
-#else // DESIGN_COUNT_MOTOR
+#else // DESIGN_MODE_MATH
 #define VALUE_MODE_MATH         DESIGN_MODE_MATH
-#endif // DESIGN_COUNT_MOTOR
+#endif // DESIGN_MODE_MATH
 
 // ================================================================================
 // 3.Value数值分类
@@ -52,7 +58,8 @@ typedef float                   SguanF;
 // (若是定点，Rad例程代码按照8.0归一化)
 /* 以下定义分别是浮点的：
 (2pi的数值) (pi的数值) (二分之pi)
-(二倍根号二) (数值一) (数值零)
+(二倍根号二) (二分之根号三)
+(数值壹) (数值半) (数值零)
 定点Q15的数值：
 (2pi的数值) (pi的数值) (二分之pi)
 定点Q31的数值：
@@ -61,22 +68,28 @@ typedef float                   SguanF;
 #define VALUE_F_PI              (SguanF)3.141592653589793239
 #define VALUE_F_PI_2            (SguanF)1.570796326794896619
 #define VALUE_F_2_SQRT2         (SguanF)2.828427124746190098
-#define VALUE_F_ONE             (SguanF)1.0
-#define VALUE_F_ZERO            (SguanF)0.0
+#define VALUE_F_SQRT3_2         (SguanF)0.866025403784438646
+#define VALUE_F_INV_SQRT3       (SguanF)0.577350269189625764
+#define VALUE_F_ONE             (SguanF)1.0     // 数值壹
+#define VALUE_F_HALF            (SguanF)0.5     // 数值半
+#define VALUE_F_ZERO            (SguanF)0.0     // 数值零
+#define Value_F_INF             0xFF800000      // (负无穷数)
 
-#define VALUE_Q15_2PI           (Q15)25736
-#define VALUE_Q15_PI            (Q15)12868
-#define VALUE_Q15_PI_2          (Q15)6434
-#define VALUE_Q15_MAX           0x7FFF      // 表示最大值0.9999694824
-#define VALUE_Q15_MIN           0x8000      // 表示最小值-1.0
-#define VALUE_Q15_HALF          0x4000      // 表示0.5(特殊场景会用到)
+#define VALUE_Q15_2PI           (Q15)25736      // BASE=8.0
+#define VALUE_Q15_PI            (Q15)12868      // BASE=8.0
+#define VALUE_Q15_PI_2          (Q15)6434       // BASE=8.0
+#define VALUE_Q15_INV_SQRT3     (Q15)18919      // BASE=1.0
+#define VALUE_Q15_MAX           0x7FFF          // 表示最大值0.9999694824
+#define VALUE_Q15_MIN           0x8000          // 表示最小值-1.0
+#define VALUE_Q15_HALF          0x4000          // 表示0.5(特殊场景会用到)
 
-#define VALUE_Q31_2PI           (Q31)1686629713
-#define VALUE_Q31_PI            (Q31)843314857
-#define VALUE_Q31_PI_2          (Q31)421657428
-#define VALUE_Q31_MAX           0x7FFFFFFF  // 表示最大值0.9999999995
-#define VALUE_Q31_MIN           0x80000000  // 表示最小值-1.0
-#define VALUE_Q31_HALF          0x40000000  // 表示0.5(特殊场景会用到)
+#define VALUE_Q31_2PI           (Q31)1686629713 // BASE=8.0
+#define VALUE_Q31_PI            (Q31)843314857  // BASE=8.0
+#define VALUE_Q31_PI_2          (Q31)421657428  // BASE=8.0
+#define VALUE_Q31_INV_SQRT3     (Q31)1239850262 // BASE=1.0
+#define VALUE_Q31_MAX           0x7FFFFFFF      // 表示最大值0.9999999995
+#define VALUE_Q31_MIN           0x80000000      // 表示最小值-1.0
+#define VALUE_Q31_HALF          0x40000000      // 表示0.5(特殊场景会用到)
 
 // ================================================================================
 // 5.基值设计Q15或者Q31
@@ -104,7 +117,13 @@ typedef float                   SguanF;
 #define VALUE_BASE_CURRENT      64.0f
 #endif // DESIGN_BASE_CURRENT
 
-#define VALUE_BASE_RAD          8.0f    // 固定BASE基值设计
+#ifdef DESIGN_BASE_OTHER
+#define VALUE_BASE_OTHER        (float)DESIGN_BASE_OTHER
+#else // DESIGN_BASE_OTHER
+#define VALUE_BASE_OTHER        512.0f
+#endif // DESIGN_BASE_OTHER
+
+#define VALUE_BASE_RAD          8.0f    // 固定BASE=8.0基值设计
 #define VALUE_BASE_HZ           1.0f/VALUE_BASE_TIME
 #define VALUE_BASE_SPEED        VALUE_BASE_RAD/VALUE_BASE_TIME
 #define VALUE_BSAE_RESISTOR     VALUE_BASE_VOLTAGE/VALUE_BASE_CURRENT

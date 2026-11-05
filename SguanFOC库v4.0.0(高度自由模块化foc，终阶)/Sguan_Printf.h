@@ -4,20 +4,18 @@
 /* SguanFOC配置文件声明 */
 #include "Sguan_Config.h"
 
-#define CH_COUNT      10    // JustFloat 通道数
-#define CMD_MAX_LEN   20    // 最大支持的指令长度
-#define HASH_SIZE     32    // 哈希表大小
-typedef void (*cmd_callback)(float value);
+#define LOCAL_CH_COUNT      10  // JustFloat 通道数
+typedef void (*Cmd_Callback)(float value);
 
 typedef struct{
-    const char* name;       // 指令名称
-    uint32_t hash_val;      // 哈希值 (运行时计算并缓存)
-    cmd_callback callback;   // 对应的处理函数
-}CmdMap;
+    const char* name;           // 指令名称
+    uint32_t hash_val;          // 哈希值 (运行时计算并缓存)
+    Cmd_Callback callback;      // 对应的处理函数
+}__LocalMap;
 
 typedef struct{
     uint8_t tail[4];
-    float fdata[CH_COUNT];
+    float fdata[LOCAL_CH_COUNT];
 }Printf;
 
 extern uint8_t sguan_printfbuff[64];

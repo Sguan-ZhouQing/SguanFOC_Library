@@ -7,102 +7,102 @@
 #define STATUS(x) ((uint8_t)(x))
 #define EVENT(x)  ((uint8_t)(x))
 
-#define MODE_TORQUE     0x00
-#define MODE_VELOCITY   0x01
-#define MODE_POSITION   0x02
+#define __LOCAL_MODE_TORQUE   0x00
+#define __LOCAL_MODE_VELOCITY 0x01
+#define __LOCAL_MODE_POSITION 0x02
 
 /* 内部私有变量与函数 */
-static void local_null0(SguanFoc *sguan);
-static void local_null1(void);
-static void local_idle_init(SguanFoc *sguan);
-static void local_overvoltage_init(SguanFoc *sguan);
-static void local_undervoltage_init(SguanFoc *sguan);
-static void local_overcurrent_init(SguanFoc *sguan);
-static void local_overtemp_motor_init(SguanFoc *sguan);
-static void local_undertemp_motor_init(SguanFoc *sguan);
-static void local_overtemp_driver_init(SguanFoc *sguan);
-static void local_undertemp_driver_init(SguanFoc *sguan);
-static void local_overtemp_pcb_init(SguanFoc *sguan);
-static void local_undertemp_pcb_init(SguanFoc *sguan);
-static void local_stuck_init(SguanFoc *sguan);
-static void local_phase_loss_init(SguanFoc *sguan);
-static void local_fault_init(SguanFoc *sguan);
-static HandleEvent local_event_get(uint8_t run);
+static void __local_null0(SguanFoc *sguan);
+static void __local_null1(void);
+static void __local_idle_init(SguanFoc *sguan);
+static void __local_overvoltage_init(SguanFoc *sguan);
+static void __local_undervoltage_init(SguanFoc *sguan);
+static void __local_overcurrent_init(SguanFoc *sguan);
+static void __local_overtemp_motor_init(SguanFoc *sguan);
+static void __local_undertemp_motor_init(SguanFoc *sguan);
+static void __local_overtemp_driver_init(SguanFoc *sguan);
+static void __local_undertemp_driver_init(SguanFoc *sguan);
+static void __local_overtemp_pcb_init(SguanFoc *sguan);
+static void __local_undertemp_pcb_init(SguanFoc *sguan);
+static void __local_stuck_init(SguanFoc *sguan);
+static void __local_phase_loss_init(SguanFoc *sguan);
+static void __local_fault_init(SguanFoc *sguan);
+static __LocalEvent __local_event_get(uint8_t run);
 // ===================================================
-static void local_null0(SguanFoc *sguan){
+static void __local_null0(SguanFoc *sguan){
     // 空函数
 }
 
-static void local_null1(void){
+static void __local_null1(void){
     // 空函数
 }
 
-static void local_idle_init(SguanFoc *sguan){
+static void __local_idle_init(SguanFoc *sguan){
     sguan->motorstatus.data.error_code = 0x00;
     main_standby_init(sguan);
 }
 
-static void local_overvoltage_init(SguanFoc *sguan){
+static void __local_overvoltage_init(SguanFoc *sguan){
     sguan->motorstatus.data.error_code = 0x01;
     main_standby_init(sguan);
 }
 
-static void local_undervoltage_init(SguanFoc *sguan){
+static void __local_undervoltage_init(SguanFoc *sguan){
     sguan->motorstatus.data.error_code = 0x02;
     main_standby_init(sguan);
 }
 
-static void local_overcurrent_init(SguanFoc *sguan){
+static void __local_overcurrent_init(SguanFoc *sguan){
     sguan->motorstatus.data.error_code = 0x03;
     main_standby_init(sguan);
 }
 
-static void local_overtemp_motor_init(SguanFoc *sguan){
+static void __local_overtemp_motor_init(SguanFoc *sguan){
     sguan->motorstatus.data.error_code = 0x04;
     main_standby_init(sguan);
 }
 
-static void local_undertemp_motor_init(SguanFoc *sguan){
+static void __local_undertemp_motor_init(SguanFoc *sguan){
     sguan->motorstatus.data.error_code = 0x05;
     main_standby_init(sguan);
 }
 
-static void local_overtemp_driver_init(SguanFoc *sguan){
+static void __local_overtemp_driver_init(SguanFoc *sguan){
     sguan->motorstatus.data.error_code = 0x06;
     main_standby_init(sguan);
 }
 
-static void local_undertemp_driver_init(SguanFoc *sguan){
+static void __local_undertemp_driver_init(SguanFoc *sguan){
     sguan->motorstatus.data.error_code = 0x07;
     main_standby_init(sguan);
 }
 
-static void local_overtemp_pcb_init(SguanFoc *sguan){
+static void __local_overtemp_pcb_init(SguanFoc *sguan){
     sguan->motorstatus.data.error_code = 0x08;
     main_standby_init(sguan);
 }
 
-static void local_undertemp_pcb_init(SguanFoc *sguan){
+static void __local_undertemp_pcb_init(SguanFoc *sguan){
     sguan->motorstatus.data.error_code = 0x09;
     main_standby_init(sguan);
 }
 
-static void local_stuck_init(SguanFoc *sguan){
+static void __local_stuck_init(SguanFoc *sguan){
     sguan->motorstatus.data.error_code = 0x0A;
     main_standby_init(sguan);
 }
 
-static void local_phase_loss_init(SguanFoc *sguan){
+static void __local_phase_loss_init(SguanFoc *sguan){
     sguan->motorstatus.data.error_code = 0x0B;
     main_standby_init(sguan);
 }
 
-static void local_fault_init(SguanFoc *sguan){
+static void __local_fault_init(SguanFoc *sguan){
     sguan->motorstatus.data.error_code = 0x0C;
     main_standby_init(sguan);
 }
 
-static const MotorTab motor_tab[196] = {
+static const __LocalTab motor_tab[196] = {
     // 1.当前的状态机                    2.当前状态机可触发的事件              3.如果触发此事件，下一时刻的状态机
     {STATUS(status_standby),            EVENT(event_ready),                 STATUS(status_ready)},
 
@@ -371,7 +371,7 @@ static const MotorTab motor_tab[196] = {
     {STATUS(status_fault),              EVENT(event_standby1),              STATUS(status_standby)}
 };
 
-static void (*const local_initial_init[])(SguanFoc *) = {
+static void (*const __local_initial_init[])(SguanFoc *) = {
     main_standby_init,
 
     main_ready_init,
@@ -379,32 +379,32 @@ static void (*const local_initial_init[])(SguanFoc *) = {
     main_goinit0_angle_init,
     main_goinit1_current_init,
     
-    local_idle_init,
-    local_null0,
-    local_null0,
-    local_null0,
-    local_null0,
-    local_null0,
-    local_null0,
-    local_null0,
-    local_null0,
-    local_null0,
+    __local_idle_init,
+    __local_null0,
+    __local_null0,
+    __local_null0,
+    __local_null0,
+    __local_null0,
+    __local_null0,
+    __local_null0,
+    __local_null0,
+    __local_null0,
 
-    local_overvoltage_init,
-    local_undervoltage_init,
-    local_overcurrent_init,
-    local_overtemp_motor_init,
-    local_undertemp_motor_init,
-    local_overtemp_driver_init,
-    local_undertemp_driver_init,
-    local_overtemp_pcb_init,
-    local_undertemp_pcb_init,
-    local_stuck_init,
-    local_phase_loss_init,
-    local_fault_init
+    __local_overvoltage_init,
+    __local_undervoltage_init,
+    __local_overcurrent_init,
+    __local_overtemp_motor_init,
+    __local_undertemp_motor_init,
+    __local_overtemp_driver_init,
+    __local_undertemp_driver_init,
+    __local_overtemp_pcb_init,
+    __local_undertemp_pcb_init,
+    __local_stuck_init,
+    __local_phase_loss_init,
+    __local_fault_init
 };
 
-static void (*const local_action_loop[])(void) = {
+static void (*const __local_action_loop[])(void) = {
     situation_standby_loop,
 
     situation_ready_loop,
@@ -412,7 +412,7 @@ static void (*const local_action_loop[])(void) = {
     situation_initial_loop,
     situation_initial_loop,
 
-    local_null1,
+    __local_null1,
     situation_increasing_loop,
     situation_decreasing_loop,
     situation_hold_loop,
@@ -437,7 +437,7 @@ static void (*const local_action_loop[])(void) = {
     situation_fault_loop
 };
 
-static HandleEvent local_event_get(uint8_t run){
+static __LocalEvent __local_event_get(uint8_t run){
     switch (run){
     case RUN_READY: // 准备触发
         return event_ready;
@@ -465,48 +465,48 @@ void motorstatus_loop(void *sguan){
     // 2.遍历状态转换表，给触发事件的条件
     for (uint16_t i = 0; i < 184; i++){
         if (motor_tab[i].status_now == p->motorstatus.status){
-            switch ((HandleEvent)motor_tab[i].event_now){
+            switch ((__LocalEvent)motor_tab[i].event_now){
                 case event_ready:{
                     // 此处有触发event的代码
-                    if (local_event_get(p->run_flag) == 
-                        (HandleEvent)motor_tab[i].event_now){ // 手动触发
+                    if (__local_event_get(p->run_flag) == 
+                        (__LocalEvent)motor_tab[i].event_now){ // 手动触发
                         p->run_flag = 0;
 
                         p->motorstatus.status = 
-                            (HandleStatus)motor_tab[i].status_future;
+                            (__LocalStatus)motor_tab[i].status_future;
                     }
                     break;
                 }
                 case event_initializing:{
                     // 此处有触发event的代码
-                    if (local_event_get(p->run_flag) == 
-                        (HandleEvent)motor_tab[i].event_now){ // 手动触发
+                    if (__local_event_get(p->run_flag) == 
+                        (__LocalEvent)motor_tab[i].event_now){ // 手动触发
                         p->run_flag = 0;
                             
                         p->motorstatus.status = 
-                            (HandleStatus)motor_tab[i].status_future;
+                            (__LocalStatus)motor_tab[i].status_future;
                     }
                     break;
                 }
                 case event_success:{
                     // 此处有触发event的代码
-                    if (local_event_get(p->run_flag) == 
-                        (HandleEvent)motor_tab[i].event_now){ // 手动触发
+                    if (__local_event_get(p->run_flag) == 
+                        (__LocalEvent)motor_tab[i].event_now){ // 手动触发
                         p->run_flag = 0;
                             
                         p->motorstatus.status = 
-                            (HandleStatus)motor_tab[i].status_future;
+                            (__LocalStatus)motor_tab[i].status_future;
                     }
                     break;
                 }
                 case event_standby0:{
                     // 此处有触发event的代码
-                    if (local_event_get(p->run_flag) == 
-                        (HandleStatus)motor_tab[i].event_now){ // 手动触发
+                    if (__local_event_get(p->run_flag) == 
+                        (__LocalStatus)motor_tab[i].event_now){ // 手动触发
                         p->run_flag = 0;
                             
                         p->motorstatus.status = 
-                            (HandleStatus)motor_tab[i].status_future;
+                            (__LocalStatus)motor_tab[i].status_future;
                     }
                     break;
                 }
@@ -519,13 +519,13 @@ void motorstatus_loop(void *sguan){
                     if (tick >= p->motorstatus.data.fault_tick_delay){ // 自动触发
                             
                         p->motorstatus.status = 
-                            (HandleStatus)motor_tab[i].status_future;
+                            (__LocalStatus)motor_tab[i].status_future;
                     }
                     break;
                 }
                 case event_torque_hold:{
                     // 此处有触发event的代码
-                    if (p->motorstatus.data.mode_flag == MODE_TORQUE){
+                    if (p->motorstatus.data.mode_flag == __LOCAL_MODE_TORQUE){
                         SguanQ tor_target_min = iqmath_sub(
                             p->motorstatus.data.tor_target, 
                             p->motorstatus.data.tor_scope);
@@ -541,14 +541,14 @@ void motorstatus_loop(void *sguan){
                                 p->motorstatus.data.tick_run;
 
                             p->motorstatus.status = 
-                                (HandleStatus)motor_tab[i].status_future;
+                                (__LocalStatus)motor_tab[i].status_future;
                         }
                     }
                     break;
                 }
                 case event_torque_increasing:{
                     // 此处有触发event的代码
-                    if (p->motorstatus.data.mode_flag == MODE_TORQUE){                    
+                    if (p->motorstatus.data.mode_flag == __LOCAL_MODE_TORQUE){                    
                         SguanQ tor_target_min = iqmath_sub(
                             p->motorstatus.data.tor_target, 
                             p->motorstatus.data.tor_scope);
@@ -558,14 +558,14 @@ void motorstatus_loop(void *sguan){
                         if (tor_real_abs <= tor_target_min){ // 自动触发
                             
                             p->motorstatus.status = 
-                                (HandleStatus)motor_tab[i].status_future;
+                                (__LocalStatus)motor_tab[i].status_future;
                         }
                     }
                     break;
                 }
                 case event_torque_decreasing:{
                     // 此处有触发event的代码
-                    if (p->motorstatus.data.mode_flag == MODE_TORQUE){
+                    if (p->motorstatus.data.mode_flag == __LOCAL_MODE_TORQUE){
                         SguanQ tor_target_max = iqmath_add(
                             p->motorstatus.data.tor_target, 
                             p->motorstatus.data.tor_scope);
@@ -575,14 +575,14 @@ void motorstatus_loop(void *sguan){
                         if (tor_real_abs >= tor_target_max){ // 自动触发
                             
                             p->motorstatus.status = 
-                                (HandleStatus)motor_tab[i].status_future;
+                                (__LocalStatus)motor_tab[i].status_future;
                         }
                     }
                     break;
                 }
                 case event_velocity_hold:{
                     // 此处有触发event的代码
-                    if (p->motorstatus.data.mode_flag == MODE_VELOCITY){
+                    if (p->motorstatus.data.mode_flag == __LOCAL_MODE_VELOCITY){
                         SguanQ vel_target_min = iqmath_sub(
                             p->motorstatus.data.vel_target, 
                             p->motorstatus.data.vel_scope);
@@ -598,14 +598,14 @@ void motorstatus_loop(void *sguan){
                                 p->motorstatus.data.tick_run;
                             
                             p->motorstatus.status = 
-                                (HandleStatus)motor_tab[i].status_future;
+                                (__LocalStatus)motor_tab[i].status_future;
                         }
                     }
                     break;
                 }
                 case event_velocity_increasing:{
                     // 此处有触发event的代码
-                    if (p->motorstatus.data.mode_flag == MODE_VELOCITY){
+                    if (p->motorstatus.data.mode_flag == __LOCAL_MODE_VELOCITY){
                         SguanQ vel_target_min = iqmath_sub(
                             p->motorstatus.data.vel_target, 
                             p->motorstatus.data.vel_scope);
@@ -615,14 +615,14 @@ void motorstatus_loop(void *sguan){
                         if (vel_real_abs <= vel_target_min){ // 自动触发
                             
                             p->motorstatus.status = 
-                                (HandleStatus)motor_tab[i].status_future;
+                                (__LocalStatus)motor_tab[i].status_future;
                         }
                     }
                     break;
                 }
                 case event_velocity_decreasing:{
                     // 此处有触发event的代码
-                    if (p->motorstatus.data.mode_flag == MODE_VELOCITY){
+                    if (p->motorstatus.data.mode_flag == __LOCAL_MODE_VELOCITY){
                         SguanQ vel_target_max = iqmath_add(
                             p->motorstatus.data.vel_target, 
                             p->motorstatus.data.vel_scope);
@@ -632,14 +632,14 @@ void motorstatus_loop(void *sguan){
                         if (vel_real_abs >= vel_target_max){ // 自动触发
                             
                             p->motorstatus.status = 
-                                (HandleStatus)motor_tab[i].status_future;
+                                (__LocalStatus)motor_tab[i].status_future;
                         }
                     }
                     break;
                 }
                 case event_position_hold:{
                     // 此处有触发event的代码
-                    if (p->motorstatus.data.mode_flag == MODE_POSITION){
+                    if (p->motorstatus.data.mode_flag == __LOCAL_MODE_POSITION){
                         SguanQ pos_target_min = iqmath_sub(
                             p->motorstatus.data.pos_target, 
                             p->motorstatus.data.pos_scope);
@@ -655,14 +655,14 @@ void motorstatus_loop(void *sguan){
                                 p->motorstatus.data.tick_run;
                             
                             p->motorstatus.status = 
-                                (HandleStatus)motor_tab[i].status_future;
+                                (__LocalStatus)motor_tab[i].status_future;
                         }
                     }
                     break;
                 }
                 case event_position_increasing:{
                     // 此处有触发event的代码
-                    if (p->motorstatus.data.mode_flag == MODE_POSITION){
+                    if (p->motorstatus.data.mode_flag == __LOCAL_MODE_POSITION){
                         SguanQ pos_target_min = iqmath_sub(
                             p->motorstatus.data.pos_target, 
                             p->motorstatus.data.pos_scope);
@@ -673,14 +673,14 @@ void motorstatus_loop(void *sguan){
         
                             
                             p->motorstatus.status = 
-                                (HandleStatus)motor_tab[i].status_future;
+                                (__LocalStatus)motor_tab[i].status_future;
                         }
                     }
                     break;
                 }
                 case event_position_decreasing:{
                     // 此处有触发event的代码
-                    if (p->motorstatus.data.mode_flag == MODE_POSITION){
+                    if (p->motorstatus.data.mode_flag == __LOCAL_MODE_POSITION){
                         SguanQ pos_target_max = iqmath_add(
                             p->motorstatus.data.pos_target, 
                             p->motorstatus.data.pos_scope);
@@ -690,7 +690,7 @@ void motorstatus_loop(void *sguan){
                         if (pos_real_abs >= pos_target_max){ // 自动触发
                             
                             p->motorstatus.status = 
-                                (HandleStatus)motor_tab[i].status_future;
+                                (__LocalStatus)motor_tab[i].status_future;
                         }
                     }
                     break;
@@ -701,7 +701,7 @@ void motorstatus_loop(void *sguan){
                         p->motorstatus.data.vbus_max){ // 自动触发
                             
                         p->motorstatus.status = 
-                            (HandleStatus)motor_tab[i].status_future;
+                            (__LocalStatus)motor_tab[i].status_future;
                     }
                     break;
                 }
@@ -711,7 +711,7 @@ void motorstatus_loop(void *sguan){
                         p->motorstatus.data.vbus_min){ // 自动触发
                             
                         p->motorstatus.status = 
-                            (HandleStatus)motor_tab[i].status_future;
+                            (__LocalStatus)motor_tab[i].status_future;
                     }
                     break;
                 }
@@ -736,7 +736,7 @@ void motorstatus_loop(void *sguan){
                         (tick >= p->motorstatus.data.ibus_tick_delay)){ // 自动触发
                             
                         p->motorstatus.status = 
-                            (HandleStatus)motor_tab[i].status_future;
+                            (__LocalStatus)motor_tab[i].status_future;
                     }
                     break;
                 }
@@ -746,7 +746,7 @@ void motorstatus_loop(void *sguan){
                         p->motorstatus.data.temp_motor_max){ // 自动触发
                             
                         p->motorstatus.status = 
-                            (HandleStatus)motor_tab[i].status_future;
+                            (__LocalStatus)motor_tab[i].status_future;
                     }
                     break;
                 }
@@ -756,7 +756,7 @@ void motorstatus_loop(void *sguan){
                         p->motorstatus.data.temp_motor_min){ // 自动触发
                             
                         p->motorstatus.status = 
-                            (HandleStatus)motor_tab[i].status_future;
+                            (__LocalStatus)motor_tab[i].status_future;
                     }
                     break;
                 }
@@ -766,7 +766,7 @@ void motorstatus_loop(void *sguan){
                         p->motorstatus.data.temp_driver_max){ // 自动触发
                             
                         p->motorstatus.status = 
-                            (HandleStatus)motor_tab[i].status_future;
+                            (__LocalStatus)motor_tab[i].status_future;
                     }
                     break;
                 }
@@ -776,7 +776,7 @@ void motorstatus_loop(void *sguan){
                         p->motorstatus.data.temp_driver_min){ // 自动触发
                             
                         p->motorstatus.status = 
-                            (HandleStatus)motor_tab[i].status_future;
+                            (__LocalStatus)motor_tab[i].status_future;
                     }
                     break;
                 }
@@ -786,7 +786,7 @@ void motorstatus_loop(void *sguan){
                         p->motorstatus.data.temp_pcb_max){ // 自动触发
                             
                         p->motorstatus.status = 
-                            (HandleStatus)motor_tab[i].status_future;
+                            (__LocalStatus)motor_tab[i].status_future;
                     }
                     break;
                 }
@@ -796,7 +796,7 @@ void motorstatus_loop(void *sguan){
                         p->motorstatus.data.temp_pcb_min){ // 自动触发
                             
                         p->motorstatus.status = 
-                            (HandleStatus)motor_tab[i].status_future;
+                            (__LocalStatus)motor_tab[i].status_future;
                     }
                     break;
                 }
@@ -809,7 +809,7 @@ void motorstatus_loop(void *sguan){
                     if (tick >= p->motorstatus.data.stuck_tick_delay){ // 自动触发
                             
                         p->motorstatus.status = 
-                            (HandleStatus)motor_tab[i].status_future;
+                            (__LocalStatus)motor_tab[i].status_future;
                     }
                     break;
                 }
@@ -819,18 +819,18 @@ void motorstatus_loop(void *sguan){
                     if (0){ // 自动触发
                             
                         p->motorstatus.status = 
-                            (HandleStatus)motor_tab[i].status_future;
+                            (__LocalStatus)motor_tab[i].status_future;
                     }
                     break;
                 }
                 case event_fault:{
                     // 此处有触发event的代码
-                    if (local_event_get(p->run_flag) == 
-                        (HandleStatus)motor_tab[i].event_now){ // 手动触发
+                    if (__local_event_get(p->run_flag) == 
+                        (__LocalStatus)motor_tab[i].event_now){ // 手动触发
                         p->run_flag = 0;
                             
                         p->motorstatus.status = 
-                            (HandleStatus)motor_tab[i].status_future;
+                            (__LocalStatus)motor_tab[i].status_future;
                     }
                     break;
                 }
@@ -848,10 +848,10 @@ void motorstatus_loop(void *sguan){
         p->motorstatus.data.tick_last = p->motorstatus.data.tick_run;
 
         // 仅在状态机变化开始，初始化一次init函数并更新last状态机
-        local_initial_init[p->motorstatus.status](p);
+        __local_initial_init[p->motorstatus.status](p);
         p->motorstatus.last = p->motorstatus.status;
     }
-    local_action_loop[p->motorstatus.status]();
+    __local_action_loop[p->motorstatus.status]();
 }
 
 

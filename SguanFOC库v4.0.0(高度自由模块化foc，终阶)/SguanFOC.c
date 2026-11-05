@@ -3,10 +3,10 @@
 /* SguanFOC配置文件声明 */
 #include "UnitLib_main.h"
 
-static void sguanfoc_high_loop(SguanFoc *sguan);
-static void sguanfoc_low_loop(SguanFoc *sguan);
-static void sguanfoc_printf_loop(uint8_t *data, uint16_t length);
-static void sguanfoc_main_loop(SguanFoc *sguan);
+static void __local_high_loop(SguanFoc *sguan);
+static void __local_low_loop(SguanFoc *sguan);
+static void __local_printf_loop(uint8_t *data, uint16_t length);
+static void __local_main_loop(SguanFoc *sguan);
 
 
 // 1. 先定义基础宏
@@ -65,34 +65,34 @@ static void sguanfoc_high_loop(SguanFoc *sguan){
     #if CONFIG_MOTOR >= 0x02
     switch (sguan->id_flag){
     case MOTOR_ONE:
-        unitlib_main_high_loop_one(sguan);
+        main_high_loop_one(sguan);
         break;
     case MOTOR_TWO:
-        unitlib_main_high_loop_two(sguan);
+        main_high_loop_two(sguan);
         break;
     case MOTOR_THREE:
-        unitlib_main_high_loop_three(sguan);
+        main_high_loop_three(sguan);
         break;
     case MOTOR_FOUR:
-        unitlib_main_high_loop_four(sguan);
+        main_high_loop_four(sguan);
         break;
     case MOTOR_FIVE:
-        unitlib_main_high_loop_five(sguan);
+        main_high_loop_five(sguan);
         break;
     case MOTOR_SIX:
-        unitlib_main_high_loop_six(sguan);
+        main_high_loop_six(sguan);
         break;
     
     default:
         break;
     }
     #else // CONFIG_MOTOR
-    unitlib_main_high_loop(sguan);
+    main_high_loop(sguan);
     #endif // CONFIG_MOTOR
 }
 
 static void sguanfoc_low_loop(SguanFoc *sguan){
-    unitlib_main_low_loop(sguan);
+    main_low_loop(sguan);
 }
 
 static void sguanfoc_printf_loop(uint8_t *data, uint16_t length){
@@ -108,29 +108,43 @@ static void sguanfoc_main_loop(SguanFoc *sguan){
     #if CONFIG_MOTOR >= 0x02
     switch (sguan->id_flag){
     case MOTOR_ONE:
-        unitlib_main_main_loop_one(sguan);
+        main_main_loop_one(sguan);
         break;
     case MOTOR_TWO:
-        unitlib_main_main_loop_two(sguan);
+        main_main_loop_two(sguan);
         break;
     case MOTOR_THREE:
-        unitlib_main_main_loop_three(sguan);
+        main_main_loop_three(sguan);
         break;
     case MOTOR_FOUR:
-        unitlib_main_main_loop_four(sguan);
+        main_main_loop_four(sguan);
         break;
     case MOTOR_FIVE:
-        unitlib_main_main_loop_five(sguan);
+        main_main_loop_five(sguan);
         break;
     case MOTOR_SIX:
-        unitlib_main_main_loop_six(sguan);
+        main_main_loop_six(sguan);
         break;
     
     default:
         break;
     }
     #else // CONFIG_MOTOR
-    unitlib_main_main_loop(sguan);
+    main_main_loop(sguan);
     #endif // CONFIG_MOTOR
 }
 
+void __local_high_loop(const uint8_t *cmds, int count){
+    for (int i = 0; i < count; i++) {
+        uint8_t cmd = cmds[i];
+        if (cmd > 5) continue;
+        switch (cmd) {
+            case 0: /* ... */ break;
+            case 1: /* ... */ break;
+            case 2: /* ... */ break;
+            case 3: /* ... */ break;
+            case 4: /* ... */ break;
+            case 5: /* ... */ break;
+        }
+    }
+}

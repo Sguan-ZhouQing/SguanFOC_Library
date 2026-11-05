@@ -1,5 +1,5 @@
-#ifndef SGUAN_TRANSFER_H
-#define SGUAN_TRANSFER_H
+#ifndef __SGUAN_TRANSFER_H
+#define __SGUAN_TRANSFER_H
 
 /* SguanFOC配置文件声明 */
 #include "Sguan_Config.h"
@@ -14,11 +14,11 @@
 // --------------------------- TRANSFER1 典型一阶传递函数 ---------------------------
 typedef struct{
     SguanQ input;
-}Transfer1In;
+}__LocalTransfer1In;
 
 typedef struct{
     SguanQ output;
-}Transfer1Out;
+}__LocalTransfer1Out;
 
 typedef struct{
     SguanQ t;
@@ -30,24 +30,24 @@ typedef struct{
     SguanQ den1;
 
     uint8_t recalculate_total_flag;
-}Transfer1Params;
+}__LocalTransfer1Params;
 
-typedef struct Transfer1Data Transfer1Data;   // 不透明：运行状态
+typedef struct __LocalTransfer1Data __LocalTransfer1Data;   // 不透明：运行状态
 
-typedef struct Transfer1{
-    Transfer1In in;
-    Transfer1Out out;
-    Transfer1Params params;
-    Transfer1Data *data;                       // transfer_transfer1_get() 自动绑定
-}Transfer1;
+typedef struct __LocalTransfer1{
+    __LocalTransfer1In in;
+    __LocalTransfer1Out out;
+    __LocalTransfer1Params params;
+    __LocalTransfer1Data *data;                       // transfer_transfer1_get() 自动绑定
+}__LocalTransfer1;
 // --------------------------- TRANSFER2 典型二阶传递函数 ---------------------------
 typedef struct{
     SguanQ input;
-}Transfer2In;
+}__LocalTransfer2In;
 
 typedef struct{
     SguanQ output;
-}Transfer2Out;
+}__LocalTransfer2Out;
 
 typedef struct{
     SguanQ t;
@@ -61,24 +61,24 @@ typedef struct{
     SguanQ den2;
 
     uint8_t recalculate_total_flag;
-}Transfer2Params;
+}__LocalTransfer2Params;
 
-typedef struct Transfer2Data Transfer2Data;
+typedef struct __LocalTransfer2Data __LocalTransfer2Data;
 
-typedef struct Transfer2{
-    Transfer2In in;
-    Transfer2Out out;
-    Transfer2Params params;
-    Transfer2Data *data;
-}Transfer2;
+typedef struct __LocalTransfer2{
+    __LocalTransfer2In in;
+    __LocalTransfer2Out out;
+    __LocalTransfer2Params params;
+    __LocalTransfer2Data *data;
+}__LocalTransfer2;
 // --------------------------- TRANSFER3 典型三阶传递函数 ---------------------------
 typedef struct{
     SguanQ input;
-}Transfer3In;
+}__LocalTransfer3In;
 
 typedef struct{
     SguanQ output;
-}Transfer3Out;
+}__LocalTransfer3Out;
 
 typedef struct{
     SguanQ t;
@@ -94,24 +94,24 @@ typedef struct{
     SguanQ den3;
 
     uint8_t recalculate_total_flag;
-}Transfer3Params;
+}__LocalTransfer3Params;
 
-typedef struct Transfer3Data Transfer3Data;
+typedef struct __LocalTransfer3Data __LocalTransfer3Data;
 
-typedef struct Transfer3{
-    Transfer3In in;
-    Transfer3Out out;
-    Transfer3Params params;
-    Transfer3Data *data;
-}Transfer3;
+typedef struct __LocalTransfer3{
+    __LocalTransfer3In in;
+    __LocalTransfer3Out out;
+    __LocalTransfer3Params params;
+    __LocalTransfer3Data *data;
+}__LocalTransfer3;
 // --------------------------- TRANSFER4 典型四阶传递函数 ---------------------------
 typedef struct{
     SguanQ input;
-}Transfer4In;
+}__LocalTransfer4In;
 
 typedef struct{
     SguanQ output;
-}Transfer4Out;
+}__LocalTransfer4Out;
 
 typedef struct{
     SguanQ t;
@@ -129,24 +129,24 @@ typedef struct{
     SguanQ den4;
 
     uint8_t recalculate_total_flag;
-}Transfer4Params;
+}__LocalTransfer4Params;
 
-typedef struct Transfer4Data Transfer4Data;
+typedef struct __LocalTransfer4Data __LocalTransfer4Data;
 
-typedef struct Transfer4{
-    Transfer4In in;
-    Transfer4Out out;
-    Transfer4Params params;
-    Transfer4Data *data;
-}Transfer4;
+typedef struct __LocalTransfer4{
+    __LocalTransfer4In in;
+    __LocalTransfer4Out out;
+    __LocalTransfer4Params params;
+    __LocalTransfer4Data *data;
+}__LocalTransfer4;
 // --------------------------- TRANSFER5 典型五阶传递函数 ---------------------------
 typedef struct{
     SguanQ input;
-}Transfer5In;
+}__LocalTransfer5In;
 
 typedef struct{
     SguanQ output;
-}Transfer5Out;
+}__LocalTransfer5Out;
 
 typedef struct{
     SguanQ t;
@@ -166,69 +166,69 @@ typedef struct{
     SguanQ den5;
 
     uint8_t recalculate_total_flag;
-}Transfer5Params;
+}__LocalTransfer5Params;
 
-typedef struct Transfer5Data Transfer5Data;
+typedef struct __LocalTransfer5Data __LocalTransfer5Data;
 
-typedef struct Transfer5{
-    Transfer5In in;
-    Transfer5Out out;
-    Transfer5Params params;
-    Transfer5Data *data;
-}Transfer5;
+typedef struct __LocalTransfer5{
+    __LocalTransfer5In in;
+    __LocalTransfer5Out out;
+    __LocalTransfer5Params params;
+    __LocalTransfer5Data *data;
+}__LocalTransfer5;
 // --------------------------- INTEGRATOR 积分器 ---------------------------
 typedef struct{
     SguanQ input;
-}IntegratorIn;
+}__LocalIntegratorIn;
 
 typedef struct{
     SguanQ output;
-}IntegratorOut;
+}__LocalIntegratorOut;
 
 typedef struct{
     SguanQ t;
-}IntegratorParams;
+}__LocalIntegratorParams;
 
-typedef struct IntegratorData IntegratorData;
+typedef struct __LocalIntegratorData __LocalIntegratorData;
 
-typedef struct Integrator{
-    IntegratorIn in;
-    IntegratorOut out;
-    IntegratorParams params;
-    IntegratorData *data;
-}Integrator;
+typedef struct __LocalIntegrator{
+    __LocalIntegratorIn in;
+    __LocalIntegratorOut out;
+    __LocalIntegratorParams params;
+    __LocalIntegratorData *data;
+}__LocalIntegrator;
 // --------------------------- DERIVATIVE 微分器 ---------------------------
 typedef struct{
     SguanQ input;
-}DerivativeIn;
+}__LocalDerivativeIn;
 
 typedef struct{
     SguanQ output;
-}DerivativeOut;
+}__LocalDerivativeOut;
 
 typedef struct{
     SguanQ t;
     SguanQ wc;
 
     uint8_t recalculate_total_flag;
-}DerivativeParams;
+}__LocalDerivativeParams;
 
-typedef struct DerivativeData DerivativeData;
+typedef struct __LocalDerivativeData __LocalDerivativeData;
 
-typedef struct Derivative{
-    DerivativeIn in;
-    DerivativeOut out;
-    DerivativeParams params;
-    DerivativeData *data;
-}Derivative;
+typedef struct __LocalDerivative{
+    __LocalDerivativeIn in;
+    __LocalDerivativeOut out;
+    __LocalDerivativeParams params;
+    __LocalDerivativeData *data;
+}__LocalDerivative;
 // --------------------------- Curve S型曲线加减速函数 ---------------------------
 typedef struct{
     SguanQ input;
-}CurveIn;
+}__LocalCurveIn;
 
 typedef struct{
     SguanQ output;
-}CurveOut;
+}__LocalCurveOut;
 
 typedef struct{
     SguanQ t;
@@ -238,49 +238,49 @@ typedef struct{
     SguanQ k2;
 
     uint8_t recalculate_total_flag;
-}CurveParams;
+}__LocalCurveParams;
 
-typedef struct CurveData CurveData;
+typedef struct __LocalCurveData __LocalCurveData;
 
-typedef struct Curve{
-    CurveIn in;
-    CurveOut out;
-    CurveParams params;
-    CurveData *data;
-}Curve;
+typedef struct __LocalCurve{
+    __LocalCurveIn in;
+    __LocalCurveOut out;
+    __LocalCurveParams params;
+    __LocalCurveData *data;
+}__LocalCurve;
 // --------------------------- DFT 快速傅里叶变换 ---------------------------
 typedef struct{
     SguanQ input;
-}DftIn;
+}__LocalDftIn;
 
 typedef struct{
     SguanQ output;
-}DftOut;
+}__LocalDftOut;
 
 typedef struct{
     SguanQ t;
     SguanQ wc;
 
     uint8_t recalculate_total_flag;
-}DftParams;
+}__LocalDftParams;
 
-typedef struct DftData DftData;
+typedef struct __LocalDftData __LocalDftData;
 
-typedef struct Dft{
-    DftIn in;
-    DftOut out;
-    DftParams params;
-    DftData *data;
-}Dft;
+typedef struct __LocalDft{
+    __LocalDftIn in;
+    __LocalDftOut out;
+    __LocalDftParams params;
+    __LocalDftData *data;
+}__LocalDft;
 // --------------------------- HALL ---------------------------
 typedef struct{
     SguanQ ref;
     SguanQ fbk;
-}HallIn;
+}__LocalHallIn;
 
 typedef struct{
     SguanQ output;
-}HallOut;
+}__LocalHallOut;
 
 typedef struct{
     SguanQ t;
@@ -297,25 +297,25 @@ typedef struct{
 
     uint8_t recalculate_total_flag;
     uint8_t integral_frozen_flag;
-}HallParams;
+}__LocalHallParams;
 
-typedef struct HallData HallData;
+typedef struct __LocalHallData __LocalHallData;
 
-typedef struct Hall{
-    HallIn in;
-    HallOut out;
-    HallParams params;
-    HallData *data;
-}Hall;
+typedef struct __LocalHall{
+    __LocalHallIn in;
+    __LocalHallOut out;
+    __LocalHallParams params;
+    __LocalHallData *data;
+}__LocalHall;
 // --------------------------- LADRC1 一阶线性自适应抗干扰控制 ---------------------------
 typedef struct{
     SguanQ ref;
     SguanQ fbk;
-}Ladrc1In;
+}__LocalLadrc1In;
 
 typedef struct{
     SguanQ output;
-}Ladrc1Out;
+}__LocalLadrc1Out;
 
 typedef struct{
     SguanQ t;
@@ -332,25 +332,25 @@ typedef struct{
 
     uint8_t recalculate_total_flag;
     uint8_t integral_frozen_flag;
-}Ladrc1Params;
+}__LocalLadrc1Params;
 
-typedef struct Ladrc1Data Ladrc1Data;
+typedef struct __LocalLadrc1Data __LocalLadrc1Data;
 
-typedef struct Ladrc1{
-    Ladrc1In in;
-    Ladrc1Out out;
-    Ladrc1Params params;
-    Ladrc1Data *data;
-}Ladrc1;
+typedef struct __LocalLadrc1{
+    __LocalLadrc1In in;
+    __LocalLadrc1Out out;
+    __LocalLadrc1Params params;
+    __LocalLadrc1Data *data;
+}__LocalLadrc1;
 // --------------------------- LADRC2 二阶线性自适应抗干扰控制 ---------------------------
 typedef struct{
     SguanQ ref;
     SguanQ fbk;
-}Ladrc2In;
+}__LocalLadrc2In;
 
 typedef struct{
     SguanQ output;
-}Ladrc2Out;
+}__LocalLadrc2Out;
 
 typedef struct{
     SguanQ t;
@@ -367,25 +367,25 @@ typedef struct{
 
     uint8_t recalculate_total_flag;
     uint8_t integral_frozen_flag;
-}Ladrc2Params;
+}__LocalLadrc2Params;
 
-typedef struct Ladrc2Data Ladrc2Data;
+typedef struct __LocalLadrc2Data __LocalLadrc2Data;
 
-typedef struct Ladrc2{
-    Ladrc2In in;
-    Ladrc2Out out;
-    Ladrc2Params params;
-    Ladrc2Data *data;
-}Ladrc2;
+typedef struct __LocalLadrc2{
+    __LocalLadrc2In in;
+    __LocalLadrc2Out out;
+    __LocalLadrc2Params params;
+    __LocalLadrc2Data *data;
+}__LocalLadrc2;
 // --------------------------- SMC 传统指数型趋近率的滑模控制 ---------------------------
 typedef struct{
     SguanQ ref;
     SguanQ fbk;
-}SmcIn;
+}__LocalSmcIn;
 
 typedef struct{
     SguanQ output;
-}SmcOut;
+}__LocalSmcOut;
 
 typedef struct{
     SguanQ t;
@@ -402,25 +402,25 @@ typedef struct{
 
     uint8_t recalculate_total_flag;
     uint8_t integral_frozen_flag;
-}SmcParams;
+}__LocalSmcParams;
 
-typedef struct SmcData SmcData;
+typedef struct __LocalSmcData __LocalSmcData;
 
-typedef struct Smc{
-    SmcIn in;
-    SmcOut out;
-    SmcParams params;
-    SmcData *data;
-}Smc;
+typedef struct __LocalSmc{
+    __LocalSmcIn in;
+    __LocalSmcOut out;
+    __LocalSmcParams params;
+    __LocalSmcData *data;
+}__LocalSmc;
 // --------------------------- DPCC 增量式电流预测控制 ---------------------------
 typedef struct{
     SguanQ ref;
     SguanQ fbk;
-}DpccIn;
+}__LocalDpccIn;
 
 typedef struct{
     SguanQ output;
-}DpccOut;
+}__LocalDpccOut;
 
 typedef struct{
     SguanQ t;
@@ -437,25 +437,25 @@ typedef struct{
 
     uint8_t recalculate_total_flag;
     uint8_t integral_frozen_flag;
-}DpccParams;
+}__LocalDpccParams;
 
-typedef struct DpccData DpccData;
+typedef struct __LocalDpccData __LocalDpccData;
 
-typedef struct Dpcc{
-    DpccIn in;
-    DpccOut out;
-    DpccParams params;
-    DpccData *data;
-}Dpcc;
+typedef struct __LocalDpcc{
+    __LocalDpccIn in;
+    __LocalDpccOut out;
+    __LocalDpccParams params;
+    __LocalDpccData *data;
+}__LocalDpcc;
 // --------------------------- PIR 比例积分谐振调节器 ---------------------------
 typedef struct{
     SguanQ ref;
     SguanQ fbk;
-}PirIn;
+}__LocalPirIn;
 
 typedef struct{
     SguanQ output;
-}PirOut;
+}__LocalPirOut;
 
 typedef struct{
     SguanQ t;
@@ -472,25 +472,25 @@ typedef struct{
 
     uint8_t recalculate_total_flag;
     uint8_t integral_frozen_flag;
-}PirParams;
+}__LocalPirParams;
 
-typedef struct PirData PirData;
+typedef struct __LocalPirData __LocalPirData;
 
-typedef struct Pir{
-    PirIn in;
-    PirOut out;
-    PirParams params;
-    PirData *data;
-}Pir;
+typedef struct __LocalPir{
+    __LocalPirIn in;
+    __LocalPirOut out;
+    __LocalPirParams params;
+    __LocalPirData *data;
+}__LocalPir;
 // --------------------------- PID 传统闭环控制器 ---------------------------
 typedef struct{
     SguanQ ref;
     SguanQ fbk;
-}PidIn;
+}__LocalPidIn;
 
 typedef struct{
     SguanQ output;
-}PidOut;
+}__LocalPidOut;
 
 typedef struct{
     SguanQ t;
@@ -507,25 +507,25 @@ typedef struct{
 
     uint8_t recalculate_total_flag;
     uint8_t integral_frozen_flag;
-}PidParams;
+}__LocalPidParams;
 
-typedef struct PidData PidData;
+typedef struct __LocalPidData __LocalPidData;
 
-typedef struct Pid{
-    PidIn in;
-    PidOut out;
-    PidParams params;
-    PidData *data;
-}Pid;
+typedef struct __LocalPid{
+    __LocalPidIn in;
+    __LocalPidOut out;
+    __LocalPidParams params;
+    __LocalPidData *data;
+}__LocalPid;
 // --------------------------- PLL 开环锁相环 ---------------------------
 typedef struct{
     SguanQ error;
-}PllIn;
+}__LocalPllIn;
 
 typedef struct{
     SguanQ we;
     SguanQ re;
-}PllOut;
+}__LocalPllOut;
 
 typedef struct{
     SguanQ t;
@@ -535,120 +535,120 @@ typedef struct{
     SguanQ ki;
 
     uint8_t recalculate_total_flag;
-}PllParams;
+}__LocalPllParams;
 
-typedef struct PllData PllData;
+typedef struct __LocalPllData __LocalPllData;
 
-typedef struct Pll{
-    PllIn in;
-    PllOut out;
-    PllParams params;
-    PllData *data;
-}Pll;
+typedef struct __LocalPll{
+    __LocalPllIn in;
+    __LocalPllOut out;
+    __LocalPllParams params;
+    __LocalPllData *data;
+}__LocalPll;
 // --------------------------- LPF1 一阶低通滤波器 ---------------------------
 typedef struct{
     SguanQ input;
-}Lpf1In;
+}__LocalLpf1In;
 
 typedef struct{
     SguanQ output;
-}Lpf1Out;
+}__LocalLpf1Out;
 
 typedef struct{
     SguanQ t;
     SguanQ wc;
 
     uint8_t recalculate_total_flag;
-}Lpf1Params;
+}__LocalLpf1Params;
 
-typedef struct Lpf1Data Lpf1Data;
+typedef struct __LocalLpf1Data __LocalLpf1Data;
 
-typedef struct Lpf1{
-    Lpf1In in;
-    Lpf1Out out;
-    Lpf1Params params;
-    Lpf1Data *data;
-}Lpf1;
+typedef struct __LocalLpf1{
+    __LocalLpf1In in;
+    __LocalLpf1Out out;
+    __LocalLpf1Params params;
+    __LocalLpf1Data *data;
+}__LocalLpf1;
 // --------------------------- LPF2 二阶低通滤波器 ---------------------------
 typedef struct{
     SguanQ input;
-}Lpf2In;
+}__LocalLpf2In;
 
 typedef struct{
     SguanQ output;
-}Lpf2Out;
+}__LocalLpf2Out;
 
 typedef struct{
     SguanQ t;
     SguanQ wc;
 
     uint8_t recalculate_total_flag;
-}Lpf2Params;
+}__LocalLpf2Params;
 
-typedef struct Lpf2Data Lpf2Data;
+typedef struct __LocalLpf2Data __LocalLpf2Data;
 
-typedef struct Lpf2{
-    Lpf2In in;
-    Lpf2Out out;
-    Lpf2Params params;
-    Lpf2Data *data;
-}Lpf2;
+typedef struct __LocalLpf2{
+    __LocalLpf2In in;
+    __LocalLpf2Out out;
+    __LocalLpf2Params params;
+    __LocalLpf2Data *data;
+}__LocalLpf2;
 // --------------------------- HPF1 一阶高通滤波器 ---------------------------
 typedef struct{
     SguanQ input;
-}Hpf1In;
+}__LocalHpf1In;
 
 typedef struct{
     SguanQ output;
-}Hpf1Out;
+}__LocalHpf1Out;
 
 typedef struct{
     SguanQ t;
     SguanQ wc;
 
     uint8_t recalculate_total_flag;
-}Hpf1Params;
+}__LocalHpf1Params;
 
-typedef struct Hpf1Data Hpf1Data;
+typedef struct __LocalHpf1Data __LocalHpf1Data;
 
-typedef struct Hpf1{
-    Hpf1In in;
-    Hpf1Out out;
-    Hpf1Params params;
-    Hpf1Data *data;
-}Hpf1;
+typedef struct __LocalHpf1{
+    __LocalHpf1In in;
+    __LocalHpf1Out out;
+    __LocalHpf1Params params;
+    __LocalHpf1Data *data;
+}__LocalHpf1;
 // --------------------------- HPF2 二阶高通滤波器 ---------------------------
 typedef struct{
     SguanQ input;
-}Hpf2In;
+}__LocalHpf2In;
 
 typedef struct{
     SguanQ output;
-}Hpf2Out;
+}__LocalHpf2Out;
 
 typedef struct{
     SguanQ t;
     SguanQ wc;
 
     uint8_t recalculate_total_flag;
-}Hpf2Params;
+}__LocalHpf2Params;
 
-typedef struct Hpf2Data Hpf2Data;
+typedef struct __LocalHpf2Data __LocalHpf2Data;
 
-typedef struct Hpf2{
-    Hpf2In in;
-    Hpf2Out out;
-    Hpf2Params params;
-    Hpf2Data *data;
-}Hpf2;
+typedef struct __LocalHpf2{
+    __LocalHpf2In in;
+    __LocalHpf2Out out;
+    __LocalHpf2Params params;
+    __LocalHpf2Data *data;
+}__LocalHpf2;
 // --------------------------- BPF1 带通滤波器(一阶低通和高通串联) ---------------------------
 typedef struct{
     SguanQ input;
-}Bpf1In;
+}__LocalBpf1In;
 
 typedef struct{
     SguanQ output;
-}Bpf1Out;
+}__LocalBpf1Out;
 
 typedef struct{
     SguanQ t;
@@ -656,24 +656,24 @@ typedef struct{
     SguanQ wc_high;
 
     uint8_t recalculate_total_flag;
-}Bpf1Params;
+}__LocalBpf1Params;
 
-typedef struct Bpf1Data Bpf1Data;
+typedef struct __LocalBpf1Data __LocalBpf1Data;
 
-typedef struct Bpf1{
-    Bpf1In in;
-    Bpf1Out out;
-    Bpf1Params params;
-    Bpf1Data *data;
-}Bpf1;
+typedef struct __LocalBpf1{
+    __LocalBpf1In in;
+    __LocalBpf1Out out;
+    __LocalBpf1Params params;
+    __LocalBpf1Data *data;
+}__LocalBpf1;
 // --------------------------- BPF2 带通滤波器(典型二阶系统改型) ---------------------------
 typedef struct{
     SguanQ input;
-}Bpf2In;
+}__LocalBpf2In;
 
 typedef struct{
     SguanQ output;
-}Bpf2Out;
+}__LocalBpf2Out;
 
 typedef struct{
     SguanQ t;
@@ -681,24 +681,24 @@ typedef struct{
     SguanQ zeta;
 
     uint8_t recalculate_total_flag;
-}Bpf2Params;
+}__LocalBpf2Params;
 
-typedef struct Bpf2Data Bpf2Data;
+typedef struct __LocalBpf2Data __LocalBpf2Data;
 
-typedef struct Bpf2{
-    Bpf2In in;
-    Bpf2Out out;
-    Bpf2Params params;
-    Bpf2Data *data;
-}Bpf2;
+typedef struct __LocalBpf2{
+    __LocalBpf2In in;
+    __LocalBpf2Out out;
+    __LocalBpf2Params params;
+    __LocalBpf2Data *data;
+}__LocalBpf2;
 // --------------------------- BPF2 带通滤波器(典型二阶系统改型) ---------------------------
 typedef struct{
     SguanQ input;
-}SogiIn;
+}__LocalSogiIn;
 
 typedef struct{
     SguanQ output;
-}SogiOut;
+}__LocalSogiOut;
 
 typedef struct{
     SguanQ t;
@@ -706,24 +706,24 @@ typedef struct{
     SguanQ zeta;
 
     uint8_t recalculate_total_flag;
-}SogiParams;
+}__LocalSogiParams;
 
-typedef struct SogiData SogiData;
+typedef struct __LocalSogiData __LocalSogiData;
 
-typedef struct Sogi{
-    SogiIn in;
-    SogiOut out;
-    SogiParams params;
-    SogiData *data;
-}Sogi;
+typedef struct __LocalSogi{
+    __LocalSogiIn in;
+    __LocalSogiOut out;
+    __LocalSogiParams params;
+    __LocalSogiData *data;
+}__LocalSogi;
 // --------------------------- NF 陷波滤波器(典型二阶系统改型) ---------------------------
 typedef struct{
     SguanQ input;
-}NfIn;
+}__LocalNfIn;
 
 typedef struct{
     SguanQ output;
-}NfOut;
+}__LocalNfOut;
 
 typedef struct{
     SguanQ t;
@@ -731,24 +731,24 @@ typedef struct{
     SguanQ zeta;
 
     uint8_t recalculate_total_flag;
-}NfParams;
+}__LocalNfParams;
 
-typedef struct NfData NfData;
+typedef struct __LocalNfData __LocalNfData;
 
-typedef struct Nf{
-    NfIn in;
-    NfOut out;
-    NfParams params;
-    NfData *data;
-}Nf;
+typedef struct __LocalNf{
+    __LocalNfIn in;
+    __LocalNfOut out;
+    __LocalNfParams params;
+    __LocalNfData *data;
+}__LocalNf;
 // --------------------------- TPNF 陷波滤波器(三参数陷波滤波器) ---------------------------
 typedef struct{
     SguanQ input;
-}TpnfIn;
+}__LocalTpnfIn;
 
 typedef struct{
     SguanQ output;
-}TpnfOut;
+}__LocalTpnfOut;
 
 typedef struct{
     SguanQ t;
@@ -758,24 +758,24 @@ typedef struct{
     SguanQ k2;
 
     uint8_t recalculate_total_flag;
-}TpnfParams;
+}__LocalTpnfParams;
 
-typedef struct TpnfData TpnfData;
+typedef struct __LocalTpnfData __LocalTpnfData;
 
-typedef struct Tpnf{
-    TpnfIn in;
-    TpnfOut out;
-    TpnfParams params;
-    TpnfData *data;
-}Tpnf;
+typedef struct __LocalTpnf{
+    __LocalTpnfIn in;
+    __LocalTpnfOut out;
+    __LocalTpnfParams params;
+    __LocalTpnfData *data;
+}__LocalTpnf;
 // --------------------------- DOB 超螺旋滑模扰动观测器 ---------------------------
 typedef struct{
     SguanQ input;
-}DobIn;
+}__LocalDobIn;
 
 typedef struct{
     SguanQ output;
-}DobOut;
+}__LocalDobOut;
 
 typedef struct{
     SguanQ t;
@@ -785,24 +785,24 @@ typedef struct{
     SguanQ k2;
 
     uint8_t recalculate_total_flag;
-}DobParams;
+}__LocalDobParams;
 
-typedef struct DobData DobData;
+typedef struct __LocalDobData __LocalDobData;
 
-typedef struct Dob{
-    DobIn in;
-    DobOut out;
-    DobParams params;
-    DobData *data;
-}Dob;
+typedef struct __LocalDob{
+    __LocalDobIn in;
+    __LocalDobOut out;
+    __LocalDobParams params;
+    __LocalDobData *data;
+}__LocalDob;
 // --------------------------- RLS 电机参数在线辨识观测器 ---------------------------
 typedef struct{
     SguanQ input;
-}RlsIn;
+}__LocalRlsIn;
 
 typedef struct{
     SguanQ output;
-}RlsOut;
+}__LocalRlsOut;
 
 typedef struct{
     SguanQ t;
@@ -812,24 +812,24 @@ typedef struct{
     SguanQ k2;
 
     uint8_t recalculate_total_flag;
-}RlsParams;
+}__LocalRlsParams;
 
-typedef struct RlsData RlsData;
+typedef struct __LocalRlsData __LocalRlsData;
 
-typedef struct Rls{
-    RlsIn in;
-    RlsOut out;
-    RlsParams params;
-    RlsData *data;
-}Rls;
+typedef struct __LocalRls{
+    __LocalRlsIn in;
+    __LocalRlsOut out;
+    __LocalRlsParams params;
+    __LocalRlsData *data;
+}__LocalRls;
 // --------------------------- SMO (无感)滑模观测器 ---------------------------
 typedef struct{
     SguanQ input;
-}SmoIn;
+}__LocalSmoIn;
 
 typedef struct{
     SguanQ output;
-}SmoOut;
+}__LocalSmoOut;
 
 typedef struct{
     SguanQ t;
@@ -839,24 +839,24 @@ typedef struct{
     SguanQ k2;
 
     uint8_t recalculate_total_flag;
-}SmoParams;
+}__LocalSmoParams;
 
-typedef struct SmoData SmoData;
+typedef struct __LocalSmoData __LocalSmoData;
 
-typedef struct Smo{
-    SmoIn in;
-    SmoOut out;
-    SmoParams params;
-    SmoData *data;
-}Smo;
+typedef struct __LocalSmo{
+    __LocalSmoIn in;
+    __LocalSmoOut out;
+    __LocalSmoParams params;
+    __LocalSmoData *data;
+}__LocalSmo;
 // --------------------------- NLFO (无感)非线性磁链观测器 ---------------------------
 typedef struct{
     SguanQ input;
-}NlfoIn;
+}__LocalNlfoIn;
 
 typedef struct{
     SguanQ output;
-}NlfoOut;
+}__LocalNlfoOut;
 
 typedef struct{
     SguanQ t;
@@ -866,24 +866,24 @@ typedef struct{
     SguanQ k2;
 
     uint8_t recalculate_total_flag;
-}NlfoParams;
+}__LocalNlfoParams;
 
-typedef struct NlfoData NlfoData;
+typedef struct __LocalNlfoData __LocalNlfoData;
 
-typedef struct Nlfo{
-    NlfoIn in;
-    NlfoOut out;
-    NlfoParams params;
-    NlfoData *data;
-}Nlfo;
+typedef struct __LocalNlfo{
+    __LocalNlfoIn in;
+    __LocalNlfoOut out;
+    __LocalNlfoParams params;
+    __LocalNlfoData *data;
+}__LocalNlfo;
 // --------------------------- NLFO (无感)非线性磁链观测器 ---------------------------
 typedef struct{
     SguanQ input;
-}VcfoIn;
+}__LocalVcfoIn;
 
 typedef struct{
     SguanQ output;
-}VcfoOut;
+}__LocalVcfoOut;
 
 typedef struct{
     SguanQ t;
@@ -893,24 +893,24 @@ typedef struct{
     SguanQ k2;
 
     uint8_t recalculate_total_flag;
-}VcfoParams;
+}__LocalVcfoParams;
 
-typedef struct VcfoData VcfoData;
+typedef struct __LocalVcfoData __LocalVcfoData;
 
-typedef struct Vcfo{
-    VcfoIn in;
-    VcfoOut out;
-    VcfoParams params;
-    VcfoData *data;
-}Vcfo;
+typedef struct __LocalVcfo{
+    __LocalVcfoIn in;
+    __LocalVcfoOut out;
+    __LocalVcfoParams params;
+    __LocalVcfoData *data;
+}__LocalVcfo;
 // --------------------------- HFI (无感)高频正弦波注入 ---------------------------
 typedef struct{
     SguanQ input;
-}HfiIn;
+}__LocalHfiIn;
 
 typedef struct{
     SguanQ output;
-}HfiOut;
+}__LocalHfiOut;
 
 typedef struct{
     SguanQ t;
@@ -920,24 +920,24 @@ typedef struct{
     SguanQ k2;
 
     uint8_t recalculate_total_flag;
-}HfiParams;
+}__LocalHfiParams;
 
-typedef struct HfiData HfiData;
+typedef struct __LocalHfiData __LocalHfiData;
 
-typedef struct Hfi{
-    HfiIn in;
-    HfiOut out;
-    HfiParams params;
-    HfiData *data;
-}Hfi;
+typedef struct __LocalHfi{
+    __LocalHfiIn in;
+    __LocalHfiOut out;
+    __LocalHfiParams params;
+    __LocalHfiData *data;
+}__LocalHfi;
 // --------------------------- ROLO (无感)降阶龙伯格观测器 ---------------------------
 typedef struct{
     SguanQ input;
-}RoloIn;
+}__LocalRoloIn;
 
 typedef struct{
     SguanQ output;
-}RoloOut;
+}__LocalRoloOut;
 
 typedef struct{
     SguanQ t;
@@ -947,24 +947,24 @@ typedef struct{
     SguanQ k2;
 
     uint8_t recalculate_total_flag;
-}RoloParams;
+}__LocalRoloParams;
 
-typedef struct RoloData RoloData;
+typedef struct __LocalRoloData __LocalRoloData;
 
-typedef struct Rolo{
-    RoloIn in;
-    RoloOut out;
-    RoloParams params;
-    RoloData *data;
-}Rolo;
+typedef struct __LocalRolo{
+    __LocalRoloIn in;
+    __LocalRoloOut out;
+    __LocalRoloParams params;
+    __LocalRoloData *data;
+}__LocalRolo;
 // --------------------------- MARS (无感)模型参考自适应观测器 ---------------------------
 typedef struct{
     SguanQ input;
-}MarsIn;
+}__LocalMarsIn;
 
 typedef struct{
     SguanQ output;
-}MarsOut;
+}__LocalMarsOut;
 
 typedef struct{
     SguanQ t;
@@ -974,24 +974,24 @@ typedef struct{
     SguanQ k2;
 
     uint8_t recalculate_total_flag;
-}MarsParams;
+}__LocalMarsParams;
 
-typedef struct MarsData MarsData;
+typedef struct __LocalMarsData __LocalMarsData;
 
-typedef struct Mars{
-    MarsIn in;
-    MarsOut out;
-    MarsParams params;
-    MarsData *data;
-}Mars;
+typedef struct __LocalMars{
+    __LocalMarsIn in;
+    __LocalMarsOut out;
+    __LocalMarsParams params;
+    __LocalMarsData *data;
+}__LocalMars;
 // --------------------------- EKF (无感)扩展卡尔曼滤波 ---------------------------
 typedef struct{
     SguanQ input;
-}EkfIn;
+}__LocalEkfIn;
 
 typedef struct{
     SguanQ output;
-}EkfOut;
+}__LocalEkfOut;
 
 typedef struct{
     SguanQ t;
@@ -1001,261 +1001,261 @@ typedef struct{
     SguanQ k2;
 
     uint8_t recalculate_total_flag;
-}EkfParams;
+}__LocalEkfParams;
 
-typedef struct EkfData EkfData;
+typedef struct __LocalEkfData __LocalEkfData;
 
-typedef struct Ekf{
-    EkfIn in;
-    EkfOut out;
-    EkfParams params;
-    EkfData *data;
-}Ekf;
+typedef struct __LocalEkf{
+    __LocalEkfIn in;
+    __LocalEkfOut out;
+    __LocalEkfParams params;
+    __LocalEkfData *data;
+}__LocalEkf;
 // --------------------------- DELAY1 延时函数(延时一拍) ---------------------------
 typedef struct{
     SguanQ input;
-}Delay1In;
+}__LocalDelay1In;
 
 typedef struct{
     SguanQ output;
-}Delay1Out;
+}__LocalDelay1Out;
 
-typedef struct Delay1{
-    Delay1In in;
-    Delay1Out out;
-}Delay1;
+typedef struct __LocalDelay1{
+    __LocalDelay1In in;
+    __LocalDelay1Out out;
+}__LocalDelay1;
 // --------------------------- DELAY2 延时函数(延时两拍) ---------------------------
 typedef struct{
     SguanQ input;
-}Delay2In;
+}__LocalDelay2In;
 
 typedef struct{
     SguanQ output;
-}Delay2Out;
+}__LocalDelay2Out;
 
-typedef struct Delay2{
-    Delay2In in;
-    Delay2Out out;
-}Delay2;
+typedef struct __LocalDelay2{
+    __LocalDelay2In in;
+    __LocalDelay2Out out;
+}__LocalDelay2;
 // --------------------------- DELAY3 延时函数(延时三拍) ---------------------------
 typedef struct{
     SguanQ input;
-}Delay3In;
+}__LocalDelay3In;
 
 typedef struct{
     SguanQ output;
-}Delay3Out;
+}__LocalDelay3Out;
 
-typedef struct Delay3{
-    Delay3In in;
-    Delay3Out out;
-}Delay3;
+typedef struct __LocalDelay3{
+    __LocalDelay3In in;
+    __LocalDelay3Out out;
+}__LocalDelay3;
 
 // --------------------------- Sine 正弦发生器 ---------------------------
 typedef struct{
     SguanQ input;
-}SineIn;
+}__LocalSineIn;
 
 typedef struct{
     SguanQ output;
-}SineOut;
+}__LocalSineOut;
 
-typedef struct Sine{
-    SineIn in;
-    SineOut out;
-}Sine;
+typedef struct __LocalSine{
+    __LocalSineIn in;
+    __LocalSineOut out;
+}__LocalSine;
 // --------------------------- Cosine 余弦发生器 ---------------------------
 typedef struct{
     SguanQ input;
-}CosineIn;
+}__LocalCosineIn;
 
 typedef struct{
     SguanQ output;
-}CosineOut;
+}__LocalCosineOut;
 
-typedef struct Cosine{
-    CosineIn in;
-    CosineOut out;
-}Cosine;
+typedef struct __LocalCosine{
+    __LocalCosineIn in;
+    __LocalCosineOut out;
+}__LocalCosine;
 // --------------------------- SinCos 正余弦发生器 ---------------------------
 typedef struct{
     SguanQ input;
-}SinCosIn;
+}__LocalSinCosIn;
 
 typedef struct{
     SguanQ sine;
     SguanQ cosine;
-}SinCosOut;
+}__LocalSinCosOut;
 
-typedef struct SinCos{
-    SinCosIn in;
-    SinCosOut out;
-}SinCos;
+typedef struct __LocalSinCos{
+    __LocalSinCosIn in;
+    __LocalSinCosOut out;
+}__LocalSinCos;
 // --------------------------- Tan 正切求解器 ---------------------------
 typedef struct{
     SguanQ input;
-}TanIn;
+}__LocalTanIn;
 
 typedef struct{
     SguanQ output;
-}TanOut;
+}__LocalTanOut;
 
-typedef struct Tan{
-    TanIn in;
-    TanOut out;
-}Tan;
+typedef struct __LocalTan{
+    __LocalTanIn in;
+    __LocalTanOut out;
+}__LocalTan;
 // --------------------------- Atan 反正切求解器 ---------------------------
 typedef struct{
     SguanQ input;
-}AtanIn;
+}__LocalAtanIn;
 
 typedef struct{
     SguanQ output;
-}AtanOut;
+}__LocalAtanOut;
 
-typedef struct Atan{
-    AtanIn in;
-    AtanOut out;
-}Atan;
+typedef struct __LocalAtan{
+    __LocalAtanIn in;
+    __LocalAtanOut out;
+}__LocalAtan;
 // --------------------------- Limit 限幅函数 ---------------------------
 typedef struct{
     SguanQ input;
-}LimitIn;
+}__LocalLimitIn;
 
 typedef struct{
     SguanQ output;
-}LimitOut;
+}__LocalLimitOut;
 
 typedef struct{
     SguanQ out_max;
     SguanQ out_min;
-}LimitParams;
+}__LocalLimitParams;
 
-typedef struct Limit{
-    LimitIn in;
-    LimitOut out;
-    LimitParams params;
-}Limit;
+typedef struct __LocalLimit{
+    __LocalLimitIn in;
+    __LocalLimitOut out;
+    __LocalLimitParams params;
+}__LocalLimit;
 // --------------------------- Sign 符号函数 ---------------------------
 typedef struct{
     SguanQ we;
     SguanQ wh;
-}SignIn;
+}__LocalSignIn;
 
 typedef struct{
     SguanQ output;
-}SignOut;
+}__LocalSignOut;
 
-typedef struct Sign{
-    SignIn in;
-    SignOut out;
-}Sign;
+typedef struct __LocalSign{
+    __LocalSignIn in;
+    __LocalSignOut out;
+}__LocalSign;
 // --------------------------- Clarke 克拉克变换 ---------------------------
 typedef struct{
     SguanQ we;
     SguanQ wh;
-}ClarkeIn;
+}__LocalClarkeIn;
 
 typedef struct{
     SguanQ output;
-}ClarkeOut;
+}__LocalClarkeOut;
 
-typedef struct Clarke{
-    ClarkeIn in;
-    ClarkeOut out;
-}Clarke;
+typedef struct __LocalClarke{
+    __LocalClarkeIn in;
+    __LocalClarkeOut out;
+}__LocalClarke;
 // --------------------------- Park 帕克变换 ---------------------------
 typedef struct{
     SguanQ we;
     SguanQ wh;
-}ParkIn;
+}__LocalParkIn;
 
 typedef struct{
     SguanQ output;
-}ParkOut;
+}__LocalParkOut;
 
-typedef struct Park{
-    ParkIn in;
-    ParkOut out;
-}Park;
+typedef struct __LocalPark{
+    __LocalParkIn in;
+    __LocalParkOut out;
+}__LocalPark;
 // --------------------------- Ipark 帕克逆变换 ---------------------------
 typedef struct{
     SguanQ we;
     SguanQ wh;
-}IparkIn;
+}__LocalIparkIn;
 
 typedef struct{
     SguanQ output;
-}IparkOut;
+}__LocalIparkOut;
 
-typedef struct Ipark{
-    IparkIn in;
-    IparkOut out;
-}Ipark;
+typedef struct __LocalIpark{
+    __LocalIparkIn in;
+    __LocalIparkOut out;
+}__LocalIpark;
 // --------------------------- Spwm0 零序注入的SPWM模块 ---------------------------
 typedef struct{
     SguanQ we;
     SguanQ wh;
-}Spwm0In;
+}__LocalSpwm0In;
 
 typedef struct{
     SguanQ output;
-}Spwm0Out;
+}__LocalSpwm0Out;
 
-typedef struct Spwm0{
-    Spwm0In in;
-    Spwm0Out out;
-}Spwm0;
+typedef struct __LocalSpwm0{
+    __LocalSpwm0In in;
+    __LocalSpwm0Out out;
+}__LocalSpwm0;
 // --------------------------- Spwm 普通SPWM模块 ---------------------------
 typedef struct{
     SguanQ we;
     SguanQ wh;
-}SpwmIn;
+}__LocalSpwmIn;
 
 typedef struct{
     SguanQ output;
-}SpwmOut;
+}__LocalSpwmOut;
 
-typedef struct Spwm{
-    SpwmIn in;
-    SpwmOut out;
-}Spwm;
+typedef struct __LocalSpwm{
+    __LocalSpwmIn in;
+    __LocalSpwmOut out;
+}__LocalSpwm;
 // --------------------------- Svpwm 七段式SVPWM模块 ---------------------------
 typedef struct{
     SguanQ we;
     SguanQ wh;
-}SvpwmIn;
+}__LocalSvpwmIn;
 
 typedef struct{
     SguanQ output;
-}SvpwmOut;
+}__LocalSvpwmOut;
 
-typedef struct Svpwm{
-    SvpwmIn in;
-    SvpwmOut out;
-}Svpwm;
+typedef struct __LocalSvpwm{
+    __LocalSvpwmIn in;
+    __LocalSvpwmOut out;
+}__LocalSvpwm;
 // --------------------------- Swpwm 电调PWM无感方波 ---------------------------
 typedef struct{
     SguanQ we;
     SguanQ wh;
-}SwpwmIn;
+}__LocalSwpwmIn;
 
 typedef struct{
     SguanQ output;
-}SwpwmOut;
+}__LocalSwpwmOut;
 
-typedef struct Swpwm{
-    SwpwmIn in;
-    SwpwmOut out;
-}Swpwm;
+typedef struct __LocalSwpwm{
+    __LocalSwpwmIn in;
+    __LocalSwpwmOut out;
+}__LocalSwpwm;
 // --------------------------- SingleRs 单电阻采样函数 ---------------------------
 typedef struct{
     SguanQ input;
-}SingleRsIn;
+}__LocalSingleRsIn;
 
 typedef struct{
     SguanQ output;
-}SingleRsOut;
+}__LocalSingleRsOut;
 
 typedef struct{
     SguanQ t;
@@ -1265,413 +1265,241 @@ typedef struct{
     SguanQ k2;
 
     uint8_t recalculate_total_flag;
-}SingleRsParams;
+}__LocalSingleRsParams;
 
-typedef struct SingleRs{
-    SingleRsIn in;
-    SingleRsOut out;
-    SingleRsParams params;
-}SingleRs;
+typedef struct __LocalSingleRs{
+    __LocalSingleRsIn in;
+    __LocalSingleRsOut out;
+    __LocalSingleRsParams params;
+}__LocalSingleRs;
 
-void transfer_transfer1_init(Transfer1 *transfer);
-void transfer_transfer2_init(Transfer2 *transfer);
-void transfer_transfer3_init(Transfer3 *transfer);
-void transfer_transfer4_init(Transfer4 *transfer);
-void transfer_transfer5_init(Transfer5 *transfer);
-void transfer_integrator_init(Integrator *integrator);
-void transfer_derivative_init(Derivative *derivative);
-void transfer_curve_init(Curve *curve);
-void transfer_dft_init(Dft *dft);
-void transfer_hall_init(Hall *hall);
-void transfer_ladrc1_init(Ladrc1 *ladrc);
-void transfer_ladrc2_init(Ladrc2 *ladrc);
-void transfer_smc_init(Smc *smc);
-void transfer_dpcc_init(Dpcc *dpcc);
-void transfer_pir_init(Pir *pir);
-void transfer_pid_init(Pid *pid);
-void transfer_pll_init(Pll *pll);
-void transfer_lpf1_init(Lpf1 *lpf);
-void transfer_lpf2_init(Lpf2 *lpf);
-void transfer_hpf1_init(Hpf1 *hpf);
-void transfer_hpf2_init(Hpf2 *hpf);
-void transfer_bpf1_init(Bpf1 *bpf);
-void transfer_bpf2_init(Bpf2 *bpf);
-void transfer_sogi_init(Sogi *sogi);
-void transfer_nf_init(Nf *nf);
-void transfer_tpnf_init(Tpnf *tpnf);
-void transfer_dob_init(Dob *dob);
-void transfer_rls_init(Rls *rls);
-void transfer_smo_init(Smo *smo);
-void transfer_nlfo_init(Nlfo *nlfo);
-void transfer_vcfo_init(Vcfo *vcfo);
-void transfer_hfi_init(Hfi *hfi);
-void transfer_rolo_init(Rolo *rolo);
-void transfer_mars_init(Mars *mars);
-void transfer_ekf_init(Ekf *ekf);
-void transfer_delay1_init(Delay1 *delay);
-void transfer_delay2_init(Delay2 *delay);
-void transfer_delay3_init(Delay3 *delay);
-
-void transfer_transfer1_loop(Transfer1 *transfer);
-void transfer_transfer2_loop(Transfer2 *transfer);
-void transfer_transfer3_loop(Transfer3 *transfer);
-void transfer_transfer4_loop(Transfer4 *transfer);
-void transfer_transfer5_loop(Transfer5 *transfer);
-void transfer_integrator_loop(Integrator *integrator);
-void transfer_derivative_loop(Derivative *derivative);
-void transfer_curve_loop(Curve *curve);
-void transfer_dft_loop(Dft *dft);
-void transfer_hall_loop(Hall *hall);
-void transfer_ladrc1_loop(Ladrc1 *ladrc);
-void transfer_ladrc2_loop(Ladrc2 *ladrc);
-void transfer_smc_loop(Smc *smc);
-void transfer_dpcc_loop(Dpcc *dpcc);
-void transfer_pir_loop(Pir *pir);
-void transfer_pid_loop(Pid *pid);
-void transfer_pll_loop(Pll *pll);
-void transfer_lpf1_loop(Lpf1 *lpf);
-void transfer_lpf2_loop(Lpf2 *lpf);
-void transfer_hpf1_loop(Hpf1 *hpf);
-void transfer_hpf2_loop(Hpf2 *hpf);
-void transfer_bpf1_loop(Bpf1 *bpf);
-void transfer_bpf2_loop(Bpf2 *bpf);
-void transfer_sogi_loop(Sogi *sogi);
-void transfer_nf_loop(Nf *nf);
-void transfer_tpnf_loop(Tpnf *tpnf);
-void transfer_dob_loop(Dob *dob);
-void transfer_rls_loop(Rls *rls);
-void transfer_smo_loop(Smo *smo);
-void transfer_nlfo_loop(Nlfo *nlfo);
-void transfer_vcfo_loop(Vcfo *vcfo);
-void transfer_hfi_loop(Hfi *hfi);
-void transfer_rolo_loop(Rolo *rolo);
-void transfer_mars_loop(Mars *mars);
-void transfer_ekf_loop(Ekf *ekf);
-void transfer_delay1_loop(Delay1 *delay);
-void transfer_delay2_loop(Delay2 *delay);
-void transfer_delay3_loop(Delay3 *delay);
-
-void transfer_sine_loop(Sine *sine);
-void transfer_cosine_loop(Cosine *cosine);
-void transfer_sincos_loop(SinCos *sincos);
-void transfer_tan_loop(Tan *tan);
-void transfer_atan_loop(Atan *atan);
-void transfer_limit_loop(Limit *limit);
-void transfer_sign_loop(Sign *sign);
-void transfer_clarke_loop(Clarke *clarke);
-void transfer_park_loop(Park *park);
-void transfer_ipark_loop(Ipark *ipark);
-void transfer_spwm0_loop(Spwm0 *spwm);
-void transfer_spwm_loop(Spwm *spwm);
-void transfer_svpwm_loop(Svpwm *svpwm);
-void transfer_swpwm_loop(Swpwm *swpwm);
-void transfer_singlers_loop(SingleRs *singlers);
-
-void transfer_reset_integrator(void *p);
-
-// ==================== 实例获取：块实例统一由 .c 的静态池提供，用户只拿指针 ====================
-#if CONFIG_TRANSFER1
-Transfer1 *transfer_transfer1_get(uint8_t motor, int ch);
-#endif
-#if CONFIG_TRANSFER2
-Transfer2 *transfer_transfer2_get(uint8_t motor, int ch);
-#endif
-#if CONFIG_TRANSFER3
-Transfer3 *transfer_transfer3_get(uint8_t motor, int ch);
-#endif
-#if CONFIG_TRANSFER4
-Transfer4 *transfer_transfer4_get(uint8_t motor, int ch);
-#endif
-#if CONFIG_TRANSFER5
-Transfer5 *transfer_transfer5_get(uint8_t motor, int ch);
-#endif
-#if CONFIG_INTEGRATOR
-Integrator *transfer_integrator_get(uint8_t motor, int ch);
-#endif
-#if CONFIG_DERIVATIVE
-Derivative *transfer_derivative_get(uint8_t motor, int ch);
-#endif
-#if CONFIG_DFT
-Dft *transfer_dft_get(uint8_t motor, int ch);
-#endif
-#if CONFIG_CURVE
-Curve *transfer_curve_get(uint8_t motor, int ch);
-#endif
-#if CONFIG_HALL
-Hall *transfer_hall_get(uint8_t motor, int ch);
-#endif
-#if CONFIG_LADRC1
-Ladrc1 *transfer_ladrc1_get(uint8_t motor, int ch);
-#endif
-#if CONFIG_LADRC2
-Ladrc2 *transfer_ladrc2_get(uint8_t motor, int ch);
-#endif
-#if CONFIG_SMC
-Smc *transfer_smc_get(uint8_t motor, int ch);
-#endif
-#if CONFIG_DPCC
-Dpcc *transfer_dpcc_get(uint8_t motor, int ch);
-#endif
-#if CONFIG_PIR
-Pir *transfer_pir_get(uint8_t motor, int ch);
-#endif
-#if CONFIG_PID
-Pid *transfer_pid_get(uint8_t motor, int ch);
-#endif
-#if CONFIG_PLL
-Pll *transfer_pll_get(uint8_t motor, int ch);
-#endif
-#if CONFIG_LPF1
-Lpf1 *transfer_lpf1_get(uint8_t motor, int ch);
-#endif
-#if CONFIG_LPF2
-Lpf2 *transfer_lpf2_get(uint8_t motor, int ch);
-#endif
-#if CONFIG_HPF1
-Hpf1 *transfer_hpf1_get(uint8_t motor, int ch);
-#endif
-#if CONFIG_HPF2
-Hpf2 *transfer_hpf2_get(uint8_t motor, int ch);
-#endif
-#if CONFIG_BPF1
-Bpf1 *transfer_bpf1_get(uint8_t motor, int ch);
-#endif
-#if CONFIG_BPF2
-Bpf2 *transfer_bpf2_get(uint8_t motor, int ch);
-#endif
-#if CONFIG_SOGI
-Sogi *transfer_sogi_get(uint8_t motor, int ch);
-#endif
-#if CONFIG_NF
-Nf *transfer_nf_get(uint8_t motor, int ch);
-#endif
-#if CONFIG_TPNF
-Tpnf *transfer_tpnf_get(uint8_t motor, int ch);
-#endif
-#if CONFIG_DOB
-Dob *transfer_dob_get(uint8_t motor, int ch);
-#endif
-#if CONFIG_RLS
-Rls *transfer_rls_get(uint8_t motor, int ch);
-#endif
-#if CONFIG_SMO
-Smo *transfer_smo_get(uint8_t motor, int ch);
-#endif
-#if CONFIG_NLFO
-Nlfo *transfer_nlfo_get(uint8_t motor, int ch);
-#endif
-#if CONFIG_VCFO
-Vcfo *transfer_vcfo_get(uint8_t motor, int ch);
-#endif
-#if CONFIG_HFI
-Hfi *transfer_hfi_get(uint8_t motor, int ch);
-#endif
-#if CONFIG_ROLO
-Rolo *transfer_rolo_get(uint8_t motor, int ch);
-#endif
-#if CONFIG_MARS
-Mars *transfer_mars_get(uint8_t motor, int ch);
-#endif
-#if CONFIG_EKF
-Ekf *transfer_ekf_get(uint8_t motor, int ch);
-#endif
-#if CONFIG_DELAY1
-Delay1 *transfer_delay1_get(uint8_t motor, int ch);
-#endif
-#if CONFIG_DELAY2
-Delay2 *transfer_delay2_get(uint8_t motor, int ch);
-#endif
-#if CONFIG_DELAY3
-Delay3 *transfer_delay3_get(uint8_t motor, int ch);
-#endif
-// ==================== 单一功能模块实例（单实例，无通道参数） ====================
-Sine *transfer_sine_get(uint8_t motor);
-Cosine *transfer_cosine_get(uint8_t motor);
-SinCos *transfer_sincos_get(uint8_t motor);
-Tan *transfer_tan_get(uint8_t motor);
-Atan *transfer_atan_get(uint8_t motor);
-Limit *transfer_limit_get(uint8_t motor);
-Sign *transfer_sign_get(uint8_t motor);
-Clarke *transfer_clarke_get(uint8_t motor);
-Park *transfer_park_get(uint8_t motor);
-Ipark *transfer_ipark_get(uint8_t motor);
-Spwm0 *transfer_spwm0_get(uint8_t motor);
-Spwm *transfer_spwm_get(uint8_t motor);
-Svpwm *transfer_svpwm_get(uint8_t motor);
-Swpwm *transfer_swpwm_get(uint8_t motor);
-SingleRs *transfer_singlers_get(uint8_t motor);
 // ---------------------------工程模块Transfer---------------------------
 typedef struct{
     #if CONFIG_TRANSFER1 // 典型一阶传递函数
-    Transfer1 *transfer1_ch[CONFIG_TRANSFER1];
+    __LocalTransfer1 *transfer1_ch[CONFIG_TRANSFER1];
     #endif // CONFIG_TRANSFER1
 
     #if CONFIG_TRANSFER2 // 典型二阶传递函数
-    Transfer2 *transfer2_ch[CONFIG_TRANSFER2];
+    __LocalTransfer2 *transfer2_ch[CONFIG_TRANSFER2];
     #endif // CONFIG_TRANSFER2
 
     #if CONFIG_TRANSFER3 // 典型三阶传递函数
-    Transfer3 *transfer3_ch[CONFIG_TRANSFER3];
+    __LocalTransfer3 *transfer3_ch[CONFIG_TRANSFER3];
     #endif // CONFIG_TRANSFER3
 
     #if CONFIG_TRANSFER4 // 典型四阶传递函数
-    Transfer4 *transfer4_ch[CONFIG_TRANSFER4];
+    __LocalTransfer4 *transfer4_ch[CONFIG_TRANSFER4];
     #endif // CONFIG_TRANSFER4
 
     #if CONFIG_TRANSFER5 // 典型五阶传递函数
-    Transfer5 *transfer5_ch[CONFIG_TRANSFER5];
+    __LocalTransfer5 *transfer5_ch[CONFIG_TRANSFER5];
     #endif // CONFIG_TRANSFER5
 
     #if CONFIG_INTEGRATOR // 积分器
-    Integrator *integrator_ch[CONFIG_INTEGRATOR];
+    __LocalIntegrator *integrator_ch[CONFIG_INTEGRATOR];
     #endif // CONFIG_INTEGRATOR
 
     #if CONFIG_DERIVATIVE // 微分器
-    Derivative *derivative_ch[CONFIG_DERIVATIVE];
+    __LocalDerivative *derivative_ch[CONFIG_DERIVATIVE];
     #endif // CONFIG_DERIVATIVE
 
     #if CONFIG_CURVE // S型曲线加减速函数
-    Curve *curve_ch[CONFIG_CURVE];
+    __LocalCurve *curve_ch[CONFIG_CURVE];
     #endif // CONFIG_DFT
 
     #if CONFIG_DFT // 快速傅里叶变换
-    Dft *dft_ch[CONFIG_DFT];
+    __LocalDft *dft_ch[CONFIG_DFT];
     #endif // CONFIG_DFT
 
     #if CONFIG_HALL // 霍尔编码器
-    Hall *hall_ch[CONFIG_HALL];
+    __LocalHall *hall_ch[CONFIG_HALL];
     #endif // CONFIG_HALL
 
     #if CONFIG_LADRC1 // 一阶线性自适应抗干扰控制
-    Ladrc1 *ladrc1_ch[CONFIG_LADRC1];
+    __LocalLadrc1 *ladrc1_ch[CONFIG_LADRC1];
     #endif // CONFIG_LADRC1
 
     #if CONFIG_LADRC2 // 二阶线性自适应抗干扰控制
-    Ladrc2 *ladrc2_ch[CONFIG_LADRC2];
+    __LocalLadrc2 *ladrc2_ch[CONFIG_LADRC2];
     #endif // CONFIG_LADRC2
 
     #if CONFIG_SMC // 传统指数型趋近率的滑模控制
-    Smc *smc_ch[CONFIG_SMC];
+    __LocalSmc *smc_ch[CONFIG_SMC];
     #endif // CONFIG_SMC
 
     #if CONFIG_DPCC // 增量式电流预测控制
-    Dpcc *dpcc_ch[CONFIG_DPCC];
+    __LocalDpcc *dpcc_ch[CONFIG_DPCC];
     #endif // CONFIG_DPCC
 
     #if CONFIG_PIR // 比例积分谐振调节器
-    Pir *pir_ch[CONFIG_PIR];
+    __LocalPir *pir_ch[CONFIG_PIR];
     #endif // CONFIG_PIR
 
     #if CONFIG_PID // 传统闭环控制器
-    Pid *pid_ch[CONFIG_PID];
+    __LocalPid *pid_ch[CONFIG_PID];
     #endif // CONFIG_PID
 
     #if CONFIG_PLL // 开环锁相环
-    Pll *pll_ch[CONFIG_PLL];
+    __LocalPll *pll_ch[CONFIG_PLL];
     #endif // CONFIG_PLL
 
     #if CONFIG_LPF1 // 一阶低通滤波器
-    Lpf1 *lpf1_ch[CONFIG_LPF1];
+    __LocalLpf1 *lpf1_ch[CONFIG_LPF1];
     #endif // CONFIG_LPF1
 
     #if CONFIG_LPF2 // 二阶低通滤波器
-    Lpf2 *lpf2_ch[CONFIG_LPF2];
+    __LocalLpf2 *lpf2_ch[CONFIG_LPF2];
     #endif // CONFIG_LPF2
 
     #if CONFIG_HPF1 // 一阶高通滤波器
-    Hpf1 *hpf1_ch[CONFIG_HPF1];
+    __LocalHpf1 *hpf1_ch[CONFIG_HPF1];
     #endif // CONFIG_HPF1
 
     #if CONFIG_HPF2 // 二阶高通滤波器
-    Hpf2 *hpf2_ch[CONFIG_HPF2];
+    __LocalHpf2 *hpf2_ch[CONFIG_HPF2];
     #endif // CONFIG_HPF2
 
     #if CONFIG_BPF1 // 带通滤波器(一阶低通和高通串联)
-    Bpf1 *bpf1_ch[CONFIG_BPF1];
+    __LocalBpf1 *bpf1_ch[CONFIG_BPF1];
     #endif // CONFIG_BPF1
 
     #if CONFIG_BPF2 // 带通滤波器(典型二阶系统改型)
-    Bpf2 *bpf2_ch[CONFIG_BPF2];
+    __LocalBpf2 *bpf2_ch[CONFIG_BPF2];
     #endif // CONFIG_BPF2
 
     #if CONFIG_SOGI // 广义积分器(典型二阶系统改型)
-    Sogi *sogi_ch[CONFIG_SOGI];
+    __LocalSogi *sogi_ch[CONFIG_SOGI];
     #endif // CONFIG_BPF2
 
     #if CONFIG_NF // 陷波滤波器(典型二阶系统改型)
-    Nf *nf_ch[CONFIG_NF];
+    __LocalNf *nf_ch[CONFIG_NF];
     #endif // CONFIG_NF
 
     #if CONFIG_TPNF // 陷波滤波器(三参数陷波滤波器)
-    Tpnf *tpnf_ch[CONFIG_TPNF];
+    __LocalTpnf *tpnf_ch[CONFIG_TPNF];
     #endif // CONFIG_TPNF
 
     #if CONFIG_DOB // 超螺旋滑模扰动观测器
-    Dob *dob_ch[CONFIG_DOB];
+    __LocalDob *dob_ch[CONFIG_DOB];
     #endif // CONFIG_DOB
 
     #if CONFIG_RLS // 电机参数在线辨识观测器
-    Rls *rls_ch[CONFIG_RLS];
+    __LocalRls *rls_ch[CONFIG_RLS];
     #endif // CONFIG_RLS
 
     #if CONFIG_SMO // (无感)滑模观测器
-    Smo *smo_ch[CONFIG_SMO];
+    __LocalSmo *smo_ch[CONFIG_SMO];
     #endif // CONFIG_SMO
 
     #if CONFIG_NLFO // (无感)非线性磁链观测器
-    Nlfo *nlfo_ch[CONFIG_NLFO];
+    __LocalNlfo *nlfo_ch[CONFIG_NLFO];
     #endif // CONFIG_NLFO
 
     #if CONFIG_VCFO // (无感)电压电流互补磁链观测器
-    Vcfo *vcfo_ch[CONFIG_VCFO];
+    __LocalVcfo *vcfo_ch[CONFIG_VCFO];
     #endif // CONFIG_VCFO
 
     #if CONFIG_HFI // (无感)高频正弦波注入
-    Hfi *hfi_ch[CONFIG_HFI];
+    __LocalHfi *hfi_ch[CONFIG_HFI];
     #endif // CONFIG_HFI
 
     #if CONFIG_ROLO // (无感)降阶龙伯格观测器
-    Rolo *rolo_ch[CONFIG_ROLO];
+    __LocalRolo *rolo_ch[CONFIG_ROLO];
     #endif // CONFIG_ROLO
 
     #if CONFIG_MARS // (无感)模型参考自适应观测器
-    Mars *mars_ch[CONFIG_MARS];
+    __LocalMars *mars_ch[CONFIG_MARS];
     #endif // CONFIG_MARS
 
     #if CONFIG_EKF // (无感)扩展卡尔曼滤波
-    Ekf *ekf_ch[CONFIG_EKF];
+    __LocalEkf *ekf_ch[CONFIG_EKF];
     #endif // CONFIG_EKF
 
     #if CONFIG_DELAY1 // 延时函数(延时一拍)
-    Delay1 *delay1_ch[CONFIG_DELAY1];
+    __LocalDelay1 *delay1_ch[CONFIG_DELAY1];
     #endif // CONFIG_DELAY1
 
     #if CONFIG_DELAY2 // 延时函数(延时两拍)
-    Delay2 *delay2_ch[CONFIG_DELAY2];
+    __LocalDelay2 *delay2_ch[CONFIG_DELAY2];
     #endif // CONFIG_DELAY2
 
     #if CONFIG_DELAY3 // 延时函数(延时三拍)
-    Delay3 *delay3_ch[CONFIG_DELAY3];
+    __LocalDelay3 *delay3_ch[CONFIG_DELAY3];
     #endif // CONFIG_DELAY3
 
-    Sine *sine;                     // 正弦发生器
-    Cosine *cosine;                 // 余弦发生器
-    SinCos *sincos;                 // 正余弦发生器
-    Tan *tan;                       // 正切求解器
-    Atan *atan;                     // 反正切求解器
-    Limit *limit;                   // 限幅函数
-    Sign *sign;                     // 符号函数
-    Clarke *clarke;                 // 克拉克变换
-    Park *park;                     // 帕克变换
-    Ipark *ipark;                   // 帕克逆变换
-    Spwm0 *spwm0;                   // 零序注入的SPWM模块
-    Spwm *spwm;                     // 普通SPWM模块
-    Svpwm *svpwm;                   // 七段式SVPWM模块
-    Swpwm *swpwm;                   // 电调PWM无感方波
-    SingleRs *singlers;             // 单电阻采样函数
+    __LocalSine *sine;                   // 正弦发生器
+    __LocalCosine *cosine;               // 余弦发生器
+    __LocalSinCos *sincos;               // 正余弦发生器
+    __LocalTan *tan;                     // 正切求解器
+    __LocalAtan *atan;                   // 反正切求解器
+    __LocalLimit *limit;                 // 限幅函数
+    __LocalSign *sign;                   // 符号函数
+    __LocalClarke *clarke;               // 克拉克变换
+    __LocalPark *park;                   // 帕克变换
+    __LocalIpark *ipark;                 // 帕克逆变换
+    __LocalSpwm0 *spwm0;                 // 零序注入的SPWM模块
+    __LocalSpwm *spwm;                   // 普通SPWM模块
+    __LocalSvpwm *svpwm;                 // 七段式SVPWM模块
+    __LocalSwpwm *swpwm;                 // 电调PWM无感方波
+    __LocalSingleRs *singlers;           // 单电阻采样函数
 }Transfer;
 
 void transfer_init(Transfer *transfer);
+
+void transfer_transfer1_loop(__LocalTransfer1 *transfer);
+void transfer_transfer2_loop(__LocalTransfer2 *transfer);
+void transfer_transfer3_loop(__LocalTransfer3 *transfer);
+void transfer_transfer4_loop(__LocalTransfer4 *transfer);
+void transfer_transfer5_loop(__LocalTransfer5 *transfer);
+void transfer_integrator_loop(__LocalIntegrator *integrator);
+void transfer_derivative_loop(__LocalDerivative *derivative);
+void transfer_curve_loop(__LocalCurve *curve);
+void transfer_dft_loop(__LocalDft *dft);
+void transfer_hall_loop(__LocalHall *hall);
+void transfer_ladrc1_loop(__LocalLadrc1 *ladrc);
+void transfer_ladrc2_loop(__LocalLadrc2 *ladrc);
+void transfer_smc_loop(__LocalSmc *smc);
+void transfer_dpcc_loop(__LocalDpcc *dpcc);
+void transfer_pir_loop(__LocalPir *pir);
+void transfer_pid_loop(__LocalPid *pid);
+void transfer_pll_loop(__LocalPll *pll);
+void transfer_lpf1_loop(__LocalLpf1 *lpf);
+void transfer_lpf2_loop(__LocalLpf2 *lpf);
+void transfer_hpf1_loop(__LocalHpf1 *hpf);
+void transfer_hpf2_loop(__LocalHpf2 *hpf);
+void transfer_bpf1_loop(__LocalBpf1 *bpf);
+void transfer_bpf2_loop(__LocalBpf2 *bpf);
+void transfer_sogi_loop(__LocalSogi *sogi);
+void transfer_nf_loop(__LocalNf *nf);
+void transfer_tpnf_loop(__LocalTpnf *tpnf);
+void transfer_dob_loop(__LocalDob *dob);
+void transfer_rls_loop(__LocalRls *rls);
+void transfer_smo_loop(__LocalSmo *smo);
+void transfer_nlfo_loop(__LocalNlfo *nlfo);
+void transfer_vcfo_loop(__LocalVcfo *vcfo);
+void transfer_hfi_loop(__LocalHfi *hfi);
+void transfer_rolo_loop(__LocalRolo *rolo);
+void transfer_mars_loop(__LocalMars *mars);
+void transfer_ekf_loop(__LocalEkf *ekf);
+void transfer_delay1_loop(__LocalDelay1 *delay);
+void transfer_delay2_loop(__LocalDelay2 *delay);
+void transfer_delay3_loop(__LocalDelay3 *delay);
+
+void transfer_sine_loop(__LocalSine *sine);
+void transfer_cosine_loop(__LocalCosine *cosine);
+void transfer_sincos_loop(__LocalSinCos *sincos);
+void transfer_tan_loop(__LocalTan *tan);
+void transfer_atan_loop(__LocalAtan *atan);
+void transfer_limit_loop(__LocalLimit *limit);
+void transfer_sign_loop(__LocalSign *sign);
+void transfer_clarke_loop(__LocalClarke *clarke);
+void transfer_park_loop(__LocalPark *park);
+void transfer_ipark_loop(__LocalIpark *ipark);
+void transfer_spwm0_loop(__LocalSpwm0 *spwm);
+void transfer_spwm_loop(__LocalSpwm *spwm);
+void transfer_svpwm_loop(__LocalSvpwm *svpwm);
+void transfer_swpwm_loop(__LocalSwpwm *swpwm);
+void transfer_singlers_loop(__LocalSingleRs *singlers);
 
 
 #endif // SGUAN_TRANSFER_H

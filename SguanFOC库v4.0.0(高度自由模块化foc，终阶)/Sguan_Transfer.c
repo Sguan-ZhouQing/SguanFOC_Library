@@ -3,8 +3,179 @@
 /* SguanFOC配置文件声明 */
 #include "UnitLib_Patch.h"
 
+static void __local_transfer1_init(__LocalTransfer1 *transfer);
+static void __local_transfer2_init(__LocalTransfer2 *transfer);
+static void __local_transfer3_init(__LocalTransfer3 *transfer);
+static void __local_transfer4_init(__LocalTransfer4 *transfer);
+static void __local_transfer5_init(__LocalTransfer5 *transfer);
+static void __local_integrator_init(__LocalIntegrator *integrator);
+static void __local_derivative_init(__LocalDerivative *derivative);
+static void __local_curve_init(__LocalCurve *curve);
+static void __local_dft_init(__LocalDft *dft);
+static void __local_hall_init(__LocalHall *hall);
+static void __local_ladrc1_init(__LocalLadrc1 *ladrc);
+static void __local_ladrc2_init(__LocalLadrc2 *ladrc);
+static void __local_smc_init(__LocalSmc *smc);
+static void __local_dpcc_init(__LocalDpcc *dpcc);
+static void __local_pir_init(__LocalPir *pir);
+static void __local_pid_init(__LocalPid *pid);
+static void __local_pll_init(__LocalPll *pll);
+static void __local_lpf1_init(__LocalLpf1 *lpf);
+static void __local_lpf2_init(__LocalLpf2 *lpf);
+static void __local_hpf1_init(__LocalHpf1 *hpf);
+static void __local_hpf2_init(__LocalHpf2 *hpf);
+static void __local_bpf1_init(__LocalBpf1 *bpf);
+static void __local_bpf2_init(__LocalBpf2 *bpf);
+static void __local_sogi_init(__LocalSogi *sogi);
+static void __local_nf_init(__LocalNf *nf);
+static void __local_tpnf_init(__LocalTpnf *tpnf);
+static void __local_dob_init(__LocalDob *dob);
+static void __local_rls_init(__LocalRls *rls);
+static void __local_smo_init(__LocalSmo *smo);
+static void __local_nlfo_init(__LocalNlfo *nlfo);
+static void __local_vcfo_init(__LocalVcfo *vcfo);
+static void __local_hfi_init(__LocalHfi *hfi);
+static void __local_rolo_init(__LocalRolo *rolo);
+static void __local_mars_init(__LocalMars *mars);
+static void __local_ekf_init(__LocalEkf *ekf);
+static void __local_delay1_init(__LocalDelay1 *delay);
+static void __local_delay2_init(__LocalDelay2 *delay);
+static void __local_delay3_init(__LocalDelay3 *delay);
+
+// ==================== 实例获取：块实例统一由 .c 的静态池提供，用户只拿指针 ====================
+#if CONFIG_TRANSFER1
+__LocalTransfer1 *__local_transfer1_get(uint8_t motor, int ch);
+#endif
+#if CONFIG_TRANSFER2
+__LocalTransfer2 *__local_transfer2_get(uint8_t motor, int ch);
+#endif
+#if CONFIG_TRANSFER3
+__LocalTransfer3 *__local_transfer3_get(uint8_t motor, int ch);
+#endif
+#if CONFIG_TRANSFER4
+__LocalTransfer4 *__local_transfer4_get(uint8_t motor, int ch);
+#endif
+#if CONFIG_TRANSFER5
+__LocalTransfer5 *__local_transfer5_get(uint8_t motor, int ch);
+#endif
+#if CONFIG_INTEGRATOR
+__LocalIntegrator *__local_integrator_get(uint8_t motor, int ch);
+#endif
+#if CONFIG_DERIVATIVE
+__LocalDerivative *__local_derivative_get(uint8_t motor, int ch);
+#endif
+#if CONFIG_DFT
+__LocalDft *__local_dft_get(uint8_t motor, int ch);
+#endif
+#if CONFIG_CURVE
+__LocalCurve *__local_curve_get(uint8_t motor, int ch);
+#endif
+#if CONFIG_HALL
+__LocalHall *__local_hall_get(uint8_t motor, int ch);
+#endif
+#if CONFIG_LADRC1
+__LocalLadrc1 *__local_ladrc1_get(uint8_t motor, int ch);
+#endif
+#if CONFIG_LADRC2
+__LocalLadrc2 *__local_ladrc2_get(uint8_t motor, int ch);
+#endif
+#if CONFIG_SMC
+__LocalSmc *__local_smc_get(uint8_t motor, int ch);
+#endif
+#if CONFIG_DPCC
+__LocalDpcc *__local_dpcc_get(uint8_t motor, int ch);
+#endif
+#if CONFIG_PIR
+__LocalPir *__local_pir_get(uint8_t motor, int ch);
+#endif
+#if CONFIG_PID
+__LocalPid *__local_pid_get(uint8_t motor, int ch);
+#endif
+#if CONFIG_PLL
+__LocalPll *__local_pll_get(uint8_t motor, int ch);
+#endif
+#if CONFIG_LPF1
+__LocalLpf1 *__local_lpf1_get(uint8_t motor, int ch);
+#endif
+#if CONFIG_LPF2
+__LocalLpf2 *__local_lpf2_get(uint8_t motor, int ch);
+#endif
+#if CONFIG_HPF1
+__LocalHpf1 *__local_hpf1_get(uint8_t motor, int ch);
+#endif
+#if CONFIG_HPF2
+__LocalHpf2 *__local_hpf2_get(uint8_t motor, int ch);
+#endif
+#if CONFIG_BPF1
+__LocalBpf1 *__local_bpf1_get(uint8_t motor, int ch);
+#endif
+#if CONFIG_BPF2
+__LocalBpf2 *__local_bpf2_get(uint8_t motor, int ch);
+#endif
+#if CONFIG_SOGI
+__LocalSogi *__local_sogi_get(uint8_t motor, int ch);
+#endif
+#if CONFIG_NF
+__LocalNf *__local_nf_get(uint8_t motor, int ch);
+#endif
+#if CONFIG_TPNF
+__LocalTpnf *__local_tpnf_get(uint8_t motor, int ch);
+#endif
+#if CONFIG_DOB
+__LocalDob *__local_dob_get(uint8_t motor, int ch);
+#endif
+#if CONFIG_RLS
+__LocalRls *__local_rls_get(uint8_t motor, int ch);
+#endif
+#if CONFIG_SMO
+__LocalSmo *__local_smo_get(uint8_t motor, int ch);
+#endif
+#if CONFIG_NLFO
+__LocalNlfo *__local_nlfo_get(uint8_t motor, int ch);
+#endif
+#if CONFIG_VCFO
+__LocalVcfo *__local_vcfo_get(uint8_t motor, int ch);
+#endif
+#if CONFIG_HFI
+__LocalHfi *__local_hfi_get(uint8_t motor, int ch);
+#endif
+#if CONFIG_ROLO
+__LocalRolo *__local_rolo_get(uint8_t motor, int ch);
+#endif
+#if CONFIG_MARS
+__LocalMars *__local_mars_get(uint8_t motor, int ch);
+#endif
+#if CONFIG_EKF
+__LocalEkf *__local_ekf_get(uint8_t motor, int ch);
+#endif
+#if CONFIG_DELAY1
+__LocalDelay1 *__local_delay1_get(uint8_t motor, int ch);
+#endif
+#if CONFIG_DELAY2
+__LocalDelay2 *__local_delay2_get(uint8_t motor, int ch);
+#endif
+#if CONFIG_DELAY3
+__LocalDelay3 *__local_delay3_get(uint8_t motor, int ch);
+#endif
+// ==================== 单一功能模块实例（单实例，无通道参数） ====================
+__LocalSine *__local_sine_get(uint8_t motor);
+__LocalCosine *__local_cosine_get(uint8_t motor);
+__LocalSinCos *__local_sincos_get(uint8_t motor);
+__LocalTan *__local_tan_get(uint8_t motor);
+__LocalAtan *__local_atan_get(uint8_t motor);
+__LocalLimit *__local_limit_get(uint8_t motor);
+__LocalSign *__local_sign_get(uint8_t motor);
+__LocalClarke *__local_clarke_get(uint8_t motor);
+__LocalPark *__local_park_get(uint8_t motor);
+__LocalIpark *__local_ipark_get(uint8_t motor);
+__LocalSpwm0 *__local_spwm0_get(uint8_t motor);
+__LocalSpwm *__local_spwm_get(uint8_t motor);
+__LocalSvpwm *__local_svpwm_get(uint8_t motor);
+__LocalSwpwm *__local_swpwm_get(uint8_t motor);
+__LocalSingleRs *__local_singlers_get(uint8_t motor);
+
 // ---------------------------工程模块Transfer---------------------------
-struct Transfer1Data {
+struct __LocalTransfer1Data{
     SguanQ i;
     SguanQ o;
 
@@ -12,9 +183,9 @@ struct Transfer1Data {
     SguanQ data_den[2];
 };
 
-void transfer_transfer1_init(Transfer1 *transfer){
-    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
-    unitlib_unitlib_patch_transfer1_init(transfer);
+static void __local_transfer1_init(__LocalTransfer1 *transfer){
+    #if VALUE_MODE_MATH>=VALUE_MODE_Q15
+    patch_transfer1_init(transfer);
     #else // VALUE_MODE_MATH
     // 传递函数运算系数固定计算
     transfer->data->data_num[0] = 2.0f*transfer->params.num1 + transfer->params.num0*transfer->params.t;
@@ -32,9 +203,9 @@ void transfer_transfer1_init(Transfer1 *transfer){
     #endif // VALUE_MODE_MATH
 }
 
-void transfer_transfer1_loop(Transfer1 *transfer){
-    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
-    unitlib_unitlib_patch_transfer1_loop(transfer);
+void transfer_transfer1_loop(__LocalTransfer1 *transfer){
+    #if VALUE_MODE_MATH>=VALUE_MODE_Q15
+    patch_transfer1_loop(transfer);
     #else // VALUE_MODE_MATH
     // 1.传递函数运算系数动态计算
     if (transfer->params.recalculate_total_flag){
@@ -55,7 +226,7 @@ void transfer_transfer1_loop(Transfer1 *transfer){
 }
 
 // ---------------------------工程模块Transfer---------------------------
-struct Transfer2Data {
+struct __LocalTransfer2Data{
     SguanQ i[2];
     SguanQ o[2];
 
@@ -63,9 +234,9 @@ struct Transfer2Data {
     SguanQ data_den[3];
 };
 
-void transfer_transfer2_init(Transfer2 *transfer){
-    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
-    unitlib_unitlib_patch_transfer2_init(transfer);
+static void __local_transfer2_init(__LocalTransfer2 *transfer){
+    #if VALUE_MODE_MATH>=VALUE_MODE_Q15
+    patch_transfer2_init(transfer);
     #else // VALUE_MODE_MATH
     // 传递函数运算系数固定计算
     transfer->data->data_num[0] = 4.0f*transfer->params.num2 + 2.0f*transfer->params.num1*transfer->params.t + transfer->params.num0*transfer->params.t*transfer->params.t;
@@ -88,9 +259,9 @@ void transfer_transfer2_init(Transfer2 *transfer){
     #endif // VALUE_MODE_MATH
 }
 
-void transfer_transfer2_loop(Transfer2 *transfer){
-    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
-    unitlib_unitlib_patch_transfer2_loop(transfer);
+void transfer_transfer2_loop(__LocalTransfer2 *transfer){
+    #if VALUE_MODE_MATH>=VALUE_MODE_Q15
+    patch_transfer2_loop(transfer);
     #else // VALUE_MODE_MATH
     // 1.传递函数运算系数动态计算
     if (transfer->params.recalculate_total_flag){
@@ -116,7 +287,7 @@ void transfer_transfer2_loop(Transfer2 *transfer){
 }
 
 // ---------------------------工程模块Transfer---------------------------
-struct Transfer3Data {
+struct __LocalTransfer3Data{
     SguanQ i[3];
     SguanQ o[3];
 
@@ -124,9 +295,9 @@ struct Transfer3Data {
     SguanQ data_den[4];
 };
 
-void transfer_transfer3_init(Transfer3 *transfer){
-    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
-    unitlib_unitlib_patch_transfer3_init(transfer);
+static void __local_transfer3_init(__LocalTransfer3 *transfer){
+    #if VALUE_MODE_MATH>=VALUE_MODE_Q15
+    patch_transfer3_init(transfer);
     #else // VALUE_MODE_MATH
     // 传递函数运算系数固定计算
     transfer->data->data_num[0] = 8.0f*transfer->params.num3 + 4.0f*transfer->params.num2*transfer->params.t + 2.0f*transfer->params.num1*transfer->params.t*transfer->params.t + transfer->params.num0*transfer->params.t*transfer->params.t*transfer->params.t;
@@ -153,9 +324,9 @@ void transfer_transfer3_init(Transfer3 *transfer){
     #endif // VALUE_MODE_MATH
 }
 
-void transfer_transfer3_loop(Transfer3 *transfer){
-    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
-    unitlib_unitlib_patch_transfer3_loop(transfer);
+void transfer_transfer3_loop(__LocalTransfer3 *transfer){
+    #if VALUE_MODE_MATH>=VALUE_MODE_Q15
+    patch_transfer3_loop(transfer);
     #else // VALUE_MODE_MATH
     // 1.传递函数运算系数动态计算
     if (transfer->params.recalculate_total_flag){
@@ -185,7 +356,7 @@ void transfer_transfer3_loop(Transfer3 *transfer){
 }
 
 // ---------------------------工程模块Transfer---------------------------
-struct Transfer4Data {
+struct __LocalTransfer4Data{
     SguanQ i[4];
     SguanQ o[4];
 
@@ -193,9 +364,9 @@ struct Transfer4Data {
     SguanQ data_den[5];
 };
 
-void transfer_transfer4_init(Transfer4 *transfer){
-    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
-    unitlib_patch_transfer4_init(transfer);
+static void __local_transfer4_init(__LocalTransfer4 *transfer){
+    #if VALUE_MODE_MATH>=VALUE_MODE_Q15
+    patch_transfer4_init(transfer);
     #else // VALUE_MODE_MATH
     // 传递函数运算系数固定计算
     transfer->data->data_num[0] = 16.0f*transfer->params.num4 + 8.0f*transfer->params.num3*transfer->params.t + 4.0f*transfer->params.num2*transfer->params.t*transfer->params.t + 2.0f*transfer->params.num1*transfer->params.t*transfer->params.t*transfer->params.t + transfer->params.num0*transfer->params.t*transfer->params.t*transfer->params.t*transfer->params.t;
@@ -226,9 +397,9 @@ void transfer_transfer4_init(Transfer4 *transfer){
     #endif // VALUE_MODE_MATH
 }
 
-void transfer_transfer4_loop(Transfer4 *transfer){
-    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
-    unitlib_patch_transfer4_loop(transfer);
+void transfer_transfer4_loop(__LocalTransfer4 *transfer){
+    #if VALUE_MODE_MATH>=VALUE_MODE_Q15
+    patch_transfer4_loop(transfer);
     #else // VALUE_MODE_MATH
     // 1.传递函数运算系数动态计算
     if (transfer->params.recalculate_total_flag){
@@ -262,7 +433,7 @@ void transfer_transfer4_loop(Transfer4 *transfer){
 }
 
 // ---------------------------工程模块Transfer---------------------------
-struct Transfer5Data {
+struct __LocalTransfer5Data{
     SguanQ i[5];
     SguanQ o[5];
 
@@ -270,9 +441,9 @@ struct Transfer5Data {
     SguanQ data_den[6];
 };
 
-void transfer_transfer5_init(Transfer5 *transfer){
-    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
-    unitlib_patch_transfer5_init(transfer);
+static void __local_transfer5_init(__LocalTransfer5 *transfer){
+    #if VALUE_MODE_MATH>=VALUE_MODE_Q15
+    patch_transfer5_init(transfer);
     #else // VALUE_MODE_MATH
     // 传递函数运算系数固定计算
     transfer->data->data_num[0] = 32.0f*transfer->params.num5 + 16.0f*transfer->params.num4*transfer->params.t + 8.0f*transfer->params.num3*transfer->params.t*transfer->params.t + 4.0f*transfer->params.num2*transfer->params.t*transfer->params.t*transfer->params.t + 2.0f*transfer->params.num1*transfer->params.t*transfer->params.t*transfer->params.t*transfer->params.t + transfer->params.num0*transfer->params.t*transfer->params.t*transfer->params.t*transfer->params.t*transfer->params.t;
@@ -307,9 +478,9 @@ void transfer_transfer5_init(Transfer5 *transfer){
     #endif // VALUE_MODE_MATH
 }
 
-void transfer_transfer5_loop(Transfer5 *transfer){
-    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
-    unitlib_patch_transfer5_loop(transfer);
+void transfer_transfer5_loop(__LocalTransfer5 *transfer){
+    #if VALUE_MODE_MATH>=VALUE_MODE_Q15
+    patch_transfer5_loop(transfer);
     #else // VALUE_MODE_MATH
     // 1.传递函数运算系数动态计算
     if (transfer->params.recalculate_total_flag){
@@ -347,15 +518,15 @@ void transfer_transfer5_loop(Transfer5 *transfer){
 }
 
 // ---------------------------工程模块Transfer---------------------------
-struct IntegratorData {
+struct __LocalIntegratorData{
     SguanQ i;
 
     SguanQ data_num;
 };
 
-void transfer_integrator_init(Integrator *integrator){
-    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
-    unitlib_patch_integrator_init(integrator);
+static void __local_integrator_init(__LocalIntegrator *integrator){
+    #if VALUE_MODE_MATH>=VALUE_MODE_Q15
+    patch_integrator_init(integrator);
     #else // VALUE_MODE_MATH
     // 传递函数运算系数固定计算
     integrator->data->data_num = integrator->params.t/2.0f;
@@ -368,9 +539,9 @@ void transfer_integrator_init(Integrator *integrator){
     #endif // VALUE_MODE_MATH
 }
 
-void transfer_integrator_loop(Integrator *integrator){
-    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
-    unitlib_patch_integrator_loop(integrator);
+void transfer_integrator_loop(__LocalIntegrator *integrator){
+    #if VALUE_MODE_MATH>=VALUE_MODE_Q15
+    patch_integrator_loop(integrator);
     #else // VALUE_MODE_MATH
     // 1.运算传递函数
     integrator->out.output += (integrator->in.input + integrator->data->i)*integrator->data->data_num;
@@ -381,7 +552,7 @@ void transfer_integrator_loop(Integrator *integrator){
 }
 
 // ---------------------------工程模块Transfer---------------------------
-struct DerivativeData {
+struct __LocalDerivativeData{
     SguanQ i;
     SguanQ o;
 
@@ -389,9 +560,9 @@ struct DerivativeData {
     SguanQ data_den[2];
 };
 
-void transfer_derivative_init(Derivative *derivative){
-    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
-    unitlib_patch_derivative_init(derivative);
+static void __local_derivative_init(__LocalDerivative *derivative){
+    #if VALUE_MODE_MATH>=VALUE_MODE_Q15
+    patch_derivative_init(derivative);
     #else // VALUE_MODE_MATH
     // 传递函数运算系数固定计算
     derivative->data->data_num[0] = 2.0f*derivative->params.wc;
@@ -409,9 +580,9 @@ void transfer_derivative_init(Derivative *derivative){
     #endif // VALUE_MODE_MATH
 }
 
-void transfer_derivative_loop(Derivative *derivative){
-    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
-    unitlib_patch_derivative_loop(derivative);
+void transfer_derivative_loop(__LocalDerivative *derivative){
+    #if VALUE_MODE_MATH>=VALUE_MODE_Q15
+    patch_derivative_loop(derivative);
     #else // VALUE_MODE_MATH
     // 1.传递函数运算系数动态计算
     if (derivative->params.recalculate_total_flag){
@@ -460,7 +631,7 @@ static const float speed_tab[100] = {
     0.998163461685181f, 0.999183773994446f, 0.999795913696289f, 1.000000000000000f
 };
 
-struct CurveData {
+struct __LocalCurveData{
     SguanQ i;
     SguanQ o;
 
@@ -468,17 +639,17 @@ struct CurveData {
     SguanQ data_den[2];
 };
 
-void transfer_curve_init(Curve *curve){
-    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
-    unitlib_patch_curve_init(curve);
+static void __local_curve_init(__LocalCurve *curve){
+    #if VALUE_MODE_MATH>=VALUE_MODE_Q15
+    patch_curve_init(curve);
     #else // VALUE_MODE_MATH
     
     #endif // VALUE_MODE_MATH
 }
 
-void transfer_curve_loop(Curve *curve){
-    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
-    unitlib_patch_curve_loop(curve);
+void transfer_curve_loop(__LocalCurve *curve){
+    #if VALUE_MODE_MATH>=VALUE_MODE_Q15
+    patch_curve_loop(curve);
     #else // VALUE_MODE_MATH
     
     #endif // VALUE_MODE_MATH
@@ -486,7 +657,7 @@ void transfer_curve_loop(Curve *curve){
 
 
 // ---------------------------工程模块Transfer---------------------------
-struct DftData {
+struct __LocalDftData{
     SguanQ i;
     SguanQ o;
 
@@ -495,18 +666,18 @@ struct DftData {
 };
 
 
-void transfer_dft_init(Dft *dft){
-    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
-    unitlib_patch_dft_init(dft);
+static void __local_dft_init(__LocalDft *dft){
+    #if VALUE_MODE_MATH>=VALUE_MODE_Q15
+    patch_dft_init(dft);
     #else // VALUE_MODE_MATH
     
     #endif // VALUE_MODE_MATH
 }
 
 
-void transfer_dft_loop(Dft *dft){
-    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
-    unitlib_patch_dft_loop(dft);
+void transfer_dft_loop(__LocalDft *dft){
+    #if VALUE_MODE_MATH>=VALUE_MODE_Q15
+    patch_dft_loop(dft);
     #else // VALUE_MODE_MATH
     
     #endif // VALUE_MODE_MATH
@@ -516,15 +687,15 @@ void transfer_dft_loop(Dft *dft){
 
 
 
-struct HallData {
+struct __LocalHallData{
     SguanQ num;
     SguanQ den;
 };
 
 
-void transfer_hall_init(Hall *hall){
-    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
-    unitlib_patch_hall_init(hall);
+static void __local_hall_init(__LocalHall *hall){
+    #if VALUE_MODE_MATH>=VALUE_MODE_Q15
+    patch_hall_init(hall);
     #else // VALUE_MODE_MATH
     // 传递函数运算系数固定计算
 
@@ -536,9 +707,9 @@ void transfer_hall_init(Hall *hall){
     #endif // VALUE_MODE_MATH
 }
 
-void transfer_hall_loop(Hall *hall){
-    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
-    unitlib_patch_hall_loop(hall);
+void transfer_hall_loop(__LocalHall *hall){
+    #if VALUE_MODE_MATH>=VALUE_MODE_Q15
+    patch_hall_loop(hall);
     #else // VALUE_MODE_MATH
 
 
@@ -551,15 +722,15 @@ void transfer_hall_loop(Hall *hall){
 
 
 
-struct Ladrc1Data {
+struct __LocalLadrc1Data{
     SguanQ num;
     SguanQ den;
 };
 
 
-void transfer_ladrc1_init(Ladrc1 *ladrc){
-    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
-    unitlib_patch_ladrc1_init(ladrc);
+static void __local_ladrc1_init(__LocalLadrc1 *ladrc){
+    #if VALUE_MODE_MATH>=VALUE_MODE_Q15
+    patch_ladrc1_init(ladrc);
     #else // VALUE_MODE_MATH
     // 传递函数运算系数固定计算
 
@@ -571,9 +742,9 @@ void transfer_ladrc1_init(Ladrc1 *ladrc){
     #endif // VALUE_MODE_MATH
 }
 
-void transfer_ladrc1_loop(Ladrc1 *ladrc){
-    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
-    unitlib_patch_ladrc1_loop(ladrc);
+void transfer_ladrc1_loop(__LocalLadrc1 *ladrc){
+    #if VALUE_MODE_MATH>=VALUE_MODE_Q15
+    patch_ladrc1_loop(ladrc);
     #else // VALUE_MODE_MATH
 
 
@@ -586,15 +757,15 @@ void transfer_ladrc1_loop(Ladrc1 *ladrc){
 
 
 
-struct Ladrc2Data {
+struct __LocalLadrc2Data{
     SguanQ num;
     SguanQ den;
 };
 
 
-void transfer_ladrc2_init(Ladrc2 *ladrc){
-    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
-    unitlib_patch_ladrc2_init(ladrc);
+static void __local_ladrc2_init(__LocalLadrc2 *ladrc){
+    #if VALUE_MODE_MATH>=VALUE_MODE_Q15
+    patch_ladrc2_init(ladrc);
     #else // VALUE_MODE_MATH
 
 
@@ -602,9 +773,9 @@ void transfer_ladrc2_init(Ladrc2 *ladrc){
     #endif // VALUE_MODE_MATH
 }
 
-void transfer_ladrc2_loop(Ladrc2 *ladrc){
-    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
-    unitlib_patch_ladrc2_loop(ladrc);
+void transfer_ladrc2_loop(__LocalLadrc2 *ladrc){
+    #if VALUE_MODE_MATH>=VALUE_MODE_Q15
+    patch_ladrc2_loop(ladrc);
     #else // VALUE_MODE_MATH
 
 
@@ -617,15 +788,15 @@ void transfer_ladrc2_loop(Ladrc2 *ladrc){
 
 
 
-struct SmcData {
+struct __LocalSmcData{
     SguanQ num;
     SguanQ den;
 };
 
 
-void transfer_smc_init(Smc *smc){
-    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
-    unitlib_patch_smc_init(smc);
+static void __local_smc_init(__LocalSmc *smc){
+    #if VALUE_MODE_MATH>=VALUE_MODE_Q15
+    patch_smc_init(smc);
     #else // VALUE_MODE_MATH
 
 
@@ -633,9 +804,9 @@ void transfer_smc_init(Smc *smc){
     #endif // VALUE_MODE_MATH
 }
 
-void transfer_smc_loop(Smc *smc){
-    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
-    unitlib_patch_smc_loop(smc);
+void transfer_smc_loop(__LocalSmc *smc){
+    #if VALUE_MODE_MATH>=VALUE_MODE_Q15
+    patch_smc_loop(smc);
     #else // VALUE_MODE_MATH
 
 
@@ -648,15 +819,15 @@ void transfer_smc_loop(Smc *smc){
 
 
 
-struct DpccData {
+struct __LocalDpccData{
     SguanQ num;
     SguanQ den;
 };
 
 
-void transfer_dpcc_init(Dpcc *dpcc){
-    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
-    unitlib_patch_dpcc_init(dpcc);
+static void __local_dpcc_init(__LocalDpcc *dpcc){
+    #if VALUE_MODE_MATH>=VALUE_MODE_Q15
+    patch_dpcc_init(dpcc);
     #else // VALUE_MODE_MATH
 
 
@@ -664,9 +835,9 @@ void transfer_dpcc_init(Dpcc *dpcc){
     #endif // VALUE_MODE_MATH
 }
 
-void transfer_dpcc_loop(Dpcc *dpcc){
-    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
-    unitlib_patch_dpcc_loop(dpcc);
+void transfer_dpcc_loop(__LocalDpcc *dpcc){
+    #if VALUE_MODE_MATH>=VALUE_MODE_Q15
+    patch_dpcc_loop(dpcc);
     #else // VALUE_MODE_MATH
 
 
@@ -679,15 +850,15 @@ void transfer_dpcc_loop(Dpcc *dpcc){
 
 
 
-struct PirData {
+struct __LocalPirData{
     SguanQ num;
     SguanQ den;
 };
 
 
-void transfer_pir_init(Pir *pir){
-    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
-    unitlib_patch_pir_init(pir);
+static void __local_pir_init(__LocalPir *pir){
+    #if VALUE_MODE_MATH>=VALUE_MODE_Q15
+    patch_pir_init(pir);
     #else // VALUE_MODE_MATH
 
 
@@ -695,9 +866,9 @@ void transfer_pir_init(Pir *pir){
     #endif // VALUE_MODE_MATH
 }
 
-void transfer_pir_loop(Pir *pir){
-    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
-    unitlib_patch_pir_loop(pir);
+void transfer_pir_loop(__LocalPir *pir){
+    #if VALUE_MODE_MATH>=VALUE_MODE_Q15
+    patch_pir_loop(pir);
     #else // VALUE_MODE_MATH
 
 
@@ -710,15 +881,15 @@ void transfer_pir_loop(Pir *pir){
 
 
 
-struct PidData {
+struct __LocalPidData{
     SguanQ num;
     SguanQ den;
 };
 
 
-void transfer_pid_init(Pid *pid){
-    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
-    unitlib_patch_pid_init(pid);
+static void __local_pid_init(__LocalPid *pid){
+    #if VALUE_MODE_MATH>=VALUE_MODE_Q15
+    patch_pid_init(pid);
     #else // VALUE_MODE_MATH
 
 
@@ -726,9 +897,9 @@ void transfer_pid_init(Pid *pid){
     #endif // VALUE_MODE_MATH
 }
 
-void transfer_pid_loop(Pid *pid){
-    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
-    unitlib_patch_pid_loop(pid);
+void transfer_pid_loop(__LocalPid *pid){
+    #if VALUE_MODE_MATH>=VALUE_MODE_Q15
+    patch_pid_loop(pid);
     #else // VALUE_MODE_MATH
 
 
@@ -741,15 +912,15 @@ void transfer_pid_loop(Pid *pid){
 
 
 
-struct PllData {
+struct __LocalPllData{
     SguanQ num;
     SguanQ den;
 };
 
 
-void transfer_pll_init(Pll *pll){
-    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
-    unitlib_patch_pll_init(pll);
+static void __local_pll_init(__LocalPll *pll){
+    #if VALUE_MODE_MATH>=VALUE_MODE_Q15
+    patch_pll_init(pll);
     #else // VALUE_MODE_MATH
 
 
@@ -757,9 +928,9 @@ void transfer_pll_init(Pll *pll){
     #endif // VALUE_MODE_MATH
 }
 
-void transfer_pll_loop(Pll *pll){
-    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
-    unitlib_patch_pll_loop(pll);
+void transfer_pll_loop(__LocalPll *pll){
+    #if VALUE_MODE_MATH>=VALUE_MODE_Q15
+    patch_pll_loop(pll);
     #else // VALUE_MODE_MATH
 
 
@@ -772,7 +943,7 @@ void transfer_pll_loop(Pll *pll){
 
 
 
-struct Lpf1Data {
+struct __LocalLpf1Data{
     SguanQ i;
     SguanQ o;
 
@@ -781,9 +952,9 @@ struct Lpf1Data {
 };
 
 
-void transfer_lpf1_init(Lpf1 *lpf){
-    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
-    unitlib_patch_lpf1_init(lpf);
+static void __local_lpf1_init(__LocalLpf1 *lpf){
+    #if VALUE_MODE_MATH>=VALUE_MODE_Q15
+    patch_lpf1_init(lpf);
     #else // VALUE_MODE_MATH
     // 传递函数运算系数固定计算
     lpf->data->data_num = lpf->params.t*lpf->params.wc;
@@ -800,9 +971,9 @@ void transfer_lpf1_init(Lpf1 *lpf){
     #endif // VALUE_MODE_MATH
 }
 
-void transfer_lpf1_loop(Lpf1 *lpf){
-    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
-    unitlib_patch_lpf1_loop(lpf);
+void transfer_lpf1_loop(__LocalLpf1 *lpf){
+    #if VALUE_MODE_MATH>=VALUE_MODE_Q15
+    patch_lpf1_loop(lpf);
     #else // VALUE_MODE_MATH
     // 1.传递函数运算系数动态计算
     if (lpf->params.recalculate_total_flag){
@@ -825,7 +996,7 @@ void transfer_lpf1_loop(Lpf1 *lpf){
 
 
 
-struct Lpf2Data {
+struct __LocalLpf2Data{
     SguanQ i[2];
     SguanQ o[2];
     
@@ -837,9 +1008,9 @@ struct Lpf2Data {
 };
 
 
-void transfer_lpf2_init(Lpf2 *lpf){
-    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
-    unitlib_patch_lpf2_init(lpf);
+static void __local_lpf2_init(__LocalLpf2 *lpf){
+    #if VALUE_MODE_MATH>=VALUE_MODE_Q15
+    patch_lpf2_init(lpf);
     #else // VALUE_MODE_MATH
     // 传递函数运算系数固定计算
     lpf->data->data_num[0] = lpf->params.t*lpf->params.wc*lpf->params.t*lpf->params.wc;
@@ -860,9 +1031,9 @@ void transfer_lpf2_init(Lpf2 *lpf){
     #endif // VALUE_MODE_MATH
 }
 
-void transfer_lpf2_loop(Lpf2 *lpf){
-    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
-    unitlib_patch_lpf2_loop(lpf);
+void transfer_lpf2_loop(__LocalLpf2 *lpf){
+    #if VALUE_MODE_MATH>=VALUE_MODE_Q15
+    patch_lpf2_loop(lpf);
     #else // VALUE_MODE_MATH
     // 1.传递函数运算系数动态计算
     if (lpf->params.recalculate_total_flag){
@@ -890,7 +1061,7 @@ void transfer_lpf2_loop(Lpf2 *lpf){
 
 
 
-struct Hpf1Data {
+struct __LocalHpf1Data{
     SguanQ i;
     SguanQ o;
 
@@ -899,9 +1070,9 @@ struct Hpf1Data {
 };
 
 
-void transfer_hpf1_init(Hpf1 *hpf){
-    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
-    unitlib_patch_hpf1_init(hpf);
+static void __local_hpf1_init(__LocalHpf1 *hpf){
+    #if VALUE_MODE_MATH>=VALUE_MODE_Q15
+    patch_hpf1_init(hpf);
     #else // VALUE_MODE_MATH
     // 传递函数运算系数固定计算
     hpf->data->data_num[0] = 2.0f;
@@ -919,9 +1090,9 @@ void transfer_hpf1_init(Hpf1 *hpf){
     #endif // VALUE_MODE_MATH
 }
 
-void transfer_hpf1_loop(Hpf1 *hpf){
-    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
-    unitlib_patch_hpf1_loop(hpf);
+void transfer_hpf1_loop(__LocalHpf1 *hpf){
+    #if VALUE_MODE_MATH>=VALUE_MODE_Q15
+    patch_hpf1_loop(hpf);
     #else // VALUE_MODE_MATH
     // 1.传递函数运算系数动态计算
     if (hpf->params.recalculate_total_flag){
@@ -945,7 +1116,7 @@ void transfer_hpf1_loop(Hpf1 *hpf){
 
 
 
-struct Hpf2Data {
+struct __LocalHpf2Data{
     SguanQ i[2];
     SguanQ o[2];
 
@@ -957,9 +1128,9 @@ struct Hpf2Data {
 };
 
 
-void transfer_hpf2_init(Hpf2 *hpf){
-    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
-    unitlib_patch_hpf2_init(hpf);
+static void __local_hpf2_init(__LocalHpf2 *hpf){
+    #if VALUE_MODE_MATH>=VALUE_MODE_Q15
+    patch_hpf2_init(hpf);
     #else // VALUE_MODE_MATH
     // 传递函数运算系数固定计算
     hpf->data->data_num[0] = 4.0f;
@@ -981,9 +1152,9 @@ void transfer_hpf2_init(Hpf2 *hpf){
     #endif // VALUE_MODE_MATH
 }
 
-void transfer_hpf2_loop(Hpf2 *hpf){
-    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
-    unitlib_patch_hpf2_loop(hpf);
+void transfer_hpf2_loop(__LocalHpf2 *hpf){
+    #if VALUE_MODE_MATH>=VALUE_MODE_Q15
+    patch_hpf2_loop(hpf);
     #else // VALUE_MODE_MATH
     // 1.传递函数运算系数动态计算
     if (hpf->params.recalculate_total_flag){
@@ -1011,7 +1182,7 @@ void transfer_hpf2_loop(Hpf2 *hpf){
 
 
 
-struct Bpf1Data {
+struct __LocalBpf1Data{
     SguanQ i[2];
     SguanQ o[2];
 
@@ -1023,9 +1194,9 @@ struct Bpf1Data {
 };
 
 
-void transfer_bpf1_init(Bpf1 *bpf){
-    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
-    unitlib_patch_bpf1_init(bpf);
+static void __local_bpf1_init(__LocalBpf1 *bpf){
+    #if VALUE_MODE_MATH>=VALUE_MODE_Q15
+    patch_bpf1_init(bpf);
     #else // VALUE_MODE_MATH
     // 传递函数运算系数固定计算
     bpf->data->data_num[0] = 2.0f*bpf->params.t*bpf->params.wc_low;
@@ -1047,9 +1218,9 @@ void transfer_bpf1_init(Bpf1 *bpf){
     #endif // VALUE_MODE_MATH
 }
 
-void transfer_bpf1_loop(Bpf1 *bpf){
-    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
-    unitlib_patch_bpf1_loop(bpf);
+void transfer_bpf1_loop(__LocalBpf1 *bpf){
+    #if VALUE_MODE_MATH>=VALUE_MODE_Q15
+    patch_bpf1_loop(bpf);
     #else // VALUE_MODE_MATH
     // 1.传递函数运算系数动态计算
     if (bpf->params.recalculate_total_flag){
@@ -1077,7 +1248,7 @@ void transfer_bpf1_loop(Bpf1 *bpf){
 
 
 
-struct Bpf2Data {
+struct __LocalBpf2Data{
     SguanQ i[2];
     SguanQ o[2];
 
@@ -1089,9 +1260,9 @@ struct Bpf2Data {
 };
 
 
-void transfer_bpf2_init(Bpf2 *bpf){
-    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
-    unitlib_patch_bpf2_init(bpf);
+static void __local_bpf2_init(__LocalBpf2 *bpf){
+    #if VALUE_MODE_MATH>=VALUE_MODE_Q15
+    patch_bpf2_init(bpf);
     #else // VALUE_MODE_MATH
     // 传递函数运算系数固定计算
     bpf->data->data_num[0] = 4.0f*bpf->params.t*bpf->params.wo*bpf->params.zeta;
@@ -1113,9 +1284,9 @@ void transfer_bpf2_init(Bpf2 *bpf){
     #endif // VALUE_MODE_MATH
 }
 
-void transfer_bpf2_loop(Bpf2 *bpf){
-    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
-    unitlib_patch_bpf2_loop(bpf);
+void transfer_bpf2_loop(__LocalBpf2 *bpf){
+    #if VALUE_MODE_MATH>=VALUE_MODE_Q15
+    patch_bpf2_loop(bpf);
     #else // VALUE_MODE_MATH
     // 1.传递函数运算系数动态计算
     if (bpf->params.recalculate_total_flag){
@@ -1142,7 +1313,7 @@ void transfer_bpf2_loop(Bpf2 *bpf){
 
 
 
-struct SogiData {
+struct __LocalSogiData{
     SguanQ i[2];
     SguanQ o[2];
 
@@ -1154,9 +1325,9 @@ struct SogiData {
 };
 
 
-void transfer_sogi_init(Sogi *sogi){
-    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
-    unitlib_patch_sogi_init(sogi);
+static void __local_sogi_init(__LocalSogi *sogi){
+    #if VALUE_MODE_MATH>=VALUE_MODE_Q15
+    patch_sogi_init(sogi);
     #else // VALUE_MODE_MATH
     // 传递函数运算系数固定计算
 
@@ -1166,9 +1337,9 @@ void transfer_sogi_init(Sogi *sogi){
     #endif // VALUE_MODE_MATH
 }
 
-void transfer_sogi_loop(Sogi *sogi){
-    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
-    unitlib_patch_sogi_loop(sogi);
+void transfer_sogi_loop(__LocalSogi *sogi){
+    #if VALUE_MODE_MATH>=VALUE_MODE_Q15
+    patch_sogi_loop(sogi);
     #else // VALUE_MODE_MATH
     // 1.传递函数运算系数动态计算
     if (1){
@@ -1184,7 +1355,7 @@ void transfer_sogi_loop(Sogi *sogi){
 
 
 
-struct NfData {
+struct __LocalNfData{
     SguanQ i[2];
     SguanQ o[2];
 
@@ -1196,9 +1367,9 @@ struct NfData {
 };
 
 
-void transfer_nf_init(Nf *nf){
-    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
-    unitlib_patch_nf_init(nf);
+static void __local_nf_init(__LocalNf *nf){
+    #if VALUE_MODE_MATH>=VALUE_MODE_Q15
+    patch_nf_init(nf);
     #else // VALUE_MODE_MATH
     // 传递函数运算系数固定计算
     nf->data->data_num[0] = 4.0f + nf->params.t*nf->params.wo*nf->params.t*nf->params.wo;
@@ -1220,9 +1391,9 @@ void transfer_nf_init(Nf *nf){
     #endif // VALUE_MODE_MATH
 }
 
-void transfer_nf_loop(Nf *nf){
-    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
-    unitlib_patch_nf_loop(nf);
+void transfer_nf_loop(__LocalNf *nf){
+    #if VALUE_MODE_MATH>=VALUE_MODE_Q15
+    patch_nf_loop(nf);
     #else // VALUE_MODE_MATH
     // 1.传递函数运算系数动态计算
     if (nf->params.recalculate_total_flag){
@@ -1250,7 +1421,7 @@ void transfer_nf_loop(Nf *nf){
 
 
 
-struct TpnfData {
+struct __LocalTpnfData{
     SguanQ i[2];
     SguanQ o[2];
 
@@ -1259,9 +1430,9 @@ struct TpnfData {
 };
 
 
-void transfer_tpnf_init(Tpnf *tpnf){
-    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
-    unitlib_patch_tpnf_init(tpnf);
+static void __local_tpnf_init(__LocalTpnf *tpnf){
+    #if VALUE_MODE_MATH>=VALUE_MODE_Q15
+    patch_tpnf_init(tpnf);
     #else // VALUE_MODE_MATH
     // 传递函数运算系数固定计算
     tpnf->data->data_num[0] = 4.0f + 4.0f*tpnf->params.k2*tpnf->params.t*tpnf->params.wo + tpnf->params.t*tpnf->params.wo*tpnf->params.t*tpnf->params.wo;
@@ -1284,9 +1455,9 @@ void transfer_tpnf_init(Tpnf *tpnf){
     #endif // VALUE_MODE_MATH
 }
 
-void transfer_tpnf_loop(Tpnf *tpnf){
-    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
-    unitlib_patch_tpnf_loop(tpnf);
+void transfer_tpnf_loop(__LocalTpnf *tpnf){
+    #if VALUE_MODE_MATH>=VALUE_MODE_Q15
+    patch_tpnf_loop(tpnf);
     #else // VALUE_MODE_MATH
     // 1.传递函数运算系数动态计算
     if (tpnf->params.recalculate_total_flag){
@@ -1315,15 +1486,15 @@ void transfer_tpnf_loop(Tpnf *tpnf){
 
 
 
-struct DobData {
+struct __LocalDobData{
     SguanQ num;
     SguanQ den;
 };
 
 
-void transfer_dob_init(Dob *dob){
-    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
-    unitlib_patch_dob_init(dob);
+static void __local_dob_init(__LocalDob *dob){
+    #if VALUE_MODE_MATH>=VALUE_MODE_Q15
+    patch_dob_init(dob);
     #else // VALUE_MODE_MATH
 
 
@@ -1331,9 +1502,9 @@ void transfer_dob_init(Dob *dob){
     #endif // VALUE_MODE_MATH
 }
 
-void transfer_dob_loop(Dob *dob){
-    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
-    unitlib_patch_dob_loop(dob);
+void transfer_dob_loop(__LocalDob *dob){
+    #if VALUE_MODE_MATH>=VALUE_MODE_Q15
+    patch_dob_loop(dob);
     #else // VALUE_MODE_MATH
 
 
@@ -1346,15 +1517,15 @@ void transfer_dob_loop(Dob *dob){
 
 
 
-struct RlsData {
+struct __LocalRlsData{
     SguanQ num;
     SguanQ den;
 };
 
 
-void transfer_rls_init(Rls *rls){
-    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
-    unitlib_patch_rls_init(rls);
+static void __local_rls_init(__LocalRls *rls){
+    #if VALUE_MODE_MATH>=VALUE_MODE_Q15
+    patch_rls_init(rls);
     #else // VALUE_MODE_MATH
 
 
@@ -1362,9 +1533,9 @@ void transfer_rls_init(Rls *rls){
     #endif // VALUE_MODE_MATH
 }
 
-void transfer_rls_loop(Rls *rls){
-    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
-    unitlib_patch_rls_loop(rls);
+void transfer_rls_loop(__LocalRls *rls){
+    #if VALUE_MODE_MATH>=VALUE_MODE_Q15
+    patch_rls_loop(rls);
     #else // VALUE_MODE_MATH
 
 
@@ -1377,15 +1548,15 @@ void transfer_rls_loop(Rls *rls){
 
 
 
-struct SmoData {
+struct __LocalSmoData{
     SguanQ num;
     SguanQ den;
 };
 
 
-void transfer_smo_init(Smo *smo){
-    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
-    unitlib_patch_smo_init(smo);
+static void __local_smo_init(__LocalSmo *smo){
+    #if VALUE_MODE_MATH>=VALUE_MODE_Q15
+    patch_smo_init(smo);
     #else // VALUE_MODE_MATH
 
 
@@ -1393,9 +1564,9 @@ void transfer_smo_init(Smo *smo){
     #endif // VALUE_MODE_MATH
 }
 
-void transfer_smo_loop(Smo *smo){
-    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
-    unitlib_patch_smo_loop(smo);
+void transfer_smo_loop(__LocalSmo *smo){
+    #if VALUE_MODE_MATH>=VALUE_MODE_Q15
+    patch_smo_loop(smo);
     #else // VALUE_MODE_MATH
 
 
@@ -1408,15 +1579,15 @@ void transfer_smo_loop(Smo *smo){
 
 
 
-struct NlfoData {
+struct __LocalNlfoData{
     SguanQ num;
     SguanQ den;
 };
 
 
-void transfer_nlfo_init(Nlfo *nlfo){
-    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
-    unitlib_patch_nlfo_init(nlfo);
+static void __local_nlfo_init(__LocalNlfo *nlfo){
+    #if VALUE_MODE_MATH>=VALUE_MODE_Q15
+    patch_nlfo_init(nlfo);
     #else // VALUE_MODE_MATH
 
 
@@ -1424,9 +1595,9 @@ void transfer_nlfo_init(Nlfo *nlfo){
     #endif // VALUE_MODE_MATH
 }
 
-void transfer_nlfo_loop(Nlfo *nlfo){
-    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
-    unitlib_patch_nlfo_loop(nlfo);
+void transfer_nlfo_loop(__LocalNlfo *nlfo){
+    #if VALUE_MODE_MATH>=VALUE_MODE_Q15
+    patch_nlfo_loop(nlfo);
     #else // VALUE_MODE_MATH
 
 
@@ -1438,15 +1609,15 @@ void transfer_nlfo_loop(Nlfo *nlfo){
 
 
 
-struct VcfoData {
+struct __LocalVcfoData{
     SguanQ num;
     SguanQ den;
 };
 
 
-void transfer_vcfo_init(Vcfo *vcfo){
-    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
-    unitlib_patch_vcfo_init(vcfo);
+static void __local_vcfo_init(__LocalVcfo *vcfo){
+    #if VALUE_MODE_MATH>=VALUE_MODE_Q15
+    patch_vcfo_init(vcfo);
     #else // VALUE_MODE_MATH
 
 
@@ -1454,40 +1625,9 @@ void transfer_vcfo_init(Vcfo *vcfo){
     #endif // VALUE_MODE_MATH
 }
 
-void transfer_vcfo_loop(Vcfo *vcfo){
-    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
-    unitlib_patch_vcfo_loop(vcfo);
-    #else // VALUE_MODE_MATH
-
-
-    
-
-    #endif // VALUE_MODE_MATH
-}
-
-// ---------------------------工程模块Transfer---------------------------
-
-
-
-struct HfiData {
-    SguanQ num;
-    SguanQ den;
-};
-
-
-void transfer_hfi_init(Hfi *hfi){
-    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
-    unitlib_patch_hfi_init(hfi);
-    #else // VALUE_MODE_MATH
-
-
-    
-    #endif // VALUE_MODE_MATH
-}
-
-void transfer_hfi_loop(Hfi *hfi){
-    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
-    unitlib_patch_hfi_loop(hfi);
+void transfer_vcfo_loop(__LocalVcfo *vcfo){
+    #if VALUE_MODE_MATH>=VALUE_MODE_Q15
+    patch_vcfo_loop(vcfo);
     #else // VALUE_MODE_MATH
 
 
@@ -1500,15 +1640,15 @@ void transfer_hfi_loop(Hfi *hfi){
 
 
 
-struct RoloData {
+struct __LocalHfiData{
     SguanQ num;
     SguanQ den;
 };
 
 
-void transfer_rolo_init(Rolo *rolo){
-    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
-    unitlib_patch_rolo_init(rolo);
+static void __local_hfi_init(__LocalHfi *hfi){
+    #if VALUE_MODE_MATH>=VALUE_MODE_Q15
+    patch_hfi_init(hfi);
     #else // VALUE_MODE_MATH
 
 
@@ -1516,9 +1656,9 @@ void transfer_rolo_init(Rolo *rolo){
     #endif // VALUE_MODE_MATH
 }
 
-void transfer_rolo_loop(Rolo *rolo){
-    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
-    unitlib_patch_rolo_loop(rolo);
+void transfer_hfi_loop(__LocalHfi *hfi){
+    #if VALUE_MODE_MATH>=VALUE_MODE_Q15
+    patch_hfi_loop(hfi);
     #else // VALUE_MODE_MATH
 
 
@@ -1531,15 +1671,15 @@ void transfer_rolo_loop(Rolo *rolo){
 
 
 
-struct MarsData {
+struct __LocalRoloData{
     SguanQ num;
     SguanQ den;
 };
 
 
-void transfer_mars_init(Mars *mars){
-    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
-    unitlib_patch_mars_init(mars);
+static void __local_rolo_init(__LocalRolo *rolo){
+    #if VALUE_MODE_MATH>=VALUE_MODE_Q15
+    patch_rolo_init(rolo);
     #else // VALUE_MODE_MATH
 
 
@@ -1547,9 +1687,9 @@ void transfer_mars_init(Mars *mars){
     #endif // VALUE_MODE_MATH
 }
 
-void transfer_mars_loop(Mars *mars){
-    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
-    unitlib_patch_mars_loop(mars);
+void transfer_rolo_loop(__LocalRolo *rolo){
+    #if VALUE_MODE_MATH>=VALUE_MODE_Q15
+    patch_rolo_loop(rolo);
     #else // VALUE_MODE_MATH
 
 
@@ -1562,15 +1702,15 @@ void transfer_mars_loop(Mars *mars){
 
 
 
-struct EkfData {
+struct __LocalMarsData{
     SguanQ num;
     SguanQ den;
 };
 
 
-void transfer_ekf_init(Ekf *ekf){
-    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
-    unitlib_patch_ekf_init(ekf);
+static void __local_mars_init(__LocalMars *mars){
+    #if VALUE_MODE_MATH>=VALUE_MODE_Q15
+    patch_mars_init(mars);
     #else // VALUE_MODE_MATH
 
 
@@ -1578,9 +1718,9 @@ void transfer_ekf_init(Ekf *ekf){
     #endif // VALUE_MODE_MATH
 }
 
-void transfer_ekf_loop(Ekf *ekf){
-    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
-    unitlib_patch_ekf_loop(ekf);
+void transfer_mars_loop(__LocalMars *mars){
+    #if VALUE_MODE_MATH>=VALUE_MODE_Q15
+    patch_mars_loop(mars);
     #else // VALUE_MODE_MATH
 
 
@@ -1593,8 +1733,39 @@ void transfer_ekf_loop(Ekf *ekf){
 
 
 
-void transfer_delay1_init(Delay1 *delay){
-    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
+struct __LocalEkfData{
+    SguanQ num;
+    SguanQ den;
+};
+
+
+static void __local_ekf_init(__LocalEkf *ekf){
+    #if VALUE_MODE_MATH>=VALUE_MODE_Q15
+    patch_ekf_init(ekf);
+    #else // VALUE_MODE_MATH
+
+
+    
+    #endif // VALUE_MODE_MATH
+}
+
+void transfer_ekf_loop(__LocalEkf *ekf){
+    #if VALUE_MODE_MATH>=VALUE_MODE_Q15
+    patch_ekf_loop(ekf);
+    #else // VALUE_MODE_MATH
+
+
+    
+
+    #endif // VALUE_MODE_MATH
+}
+
+// ---------------------------工程模块Transfer---------------------------
+
+
+
+static void __local_delay1_init(__LocalDelay1 *delay){
+    #if VALUE_MODE_MATH>=VALUE_MODE_Q15
 
     #else // VALUE_MODE_MATH
     // 初始化为零
@@ -1603,8 +1774,8 @@ void transfer_delay1_init(Delay1 *delay){
     #endif // VALUE_MODE_MATH
 }
 
-void transfer_delay1_loop(Delay1 *delay){
-    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
+void transfer_delay1_loop(__LocalDelay1 *delay){
+    #if VALUE_MODE_MATH>=VALUE_MODE_Q15
 
     #else // VALUE_MODE_MATH
     // 1.创建局部静态变量
@@ -1622,8 +1793,8 @@ void transfer_delay1_loop(Delay1 *delay){
 
 
 
-void transfer_delay2_init(Delay2 *delay){
-    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
+static void __local_delay2_init(__LocalDelay2 *delay){
+    #if VALUE_MODE_MATH>=VALUE_MODE_Q15
 
     #else // VALUE_MODE_MATH
     // 初始化为零
@@ -1632,8 +1803,8 @@ void transfer_delay2_init(Delay2 *delay){
     #endif // VALUE_MODE_MATH
 }
 
-void transfer_delay2_loop(Delay2 *delay){
-    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
+void transfer_delay2_loop(__LocalDelay2 *delay){
+    #if VALUE_MODE_MATH>=VALUE_MODE_Q15
 
     #else // VALUE_MODE_MATH
     // 1.创建局部静态变量
@@ -1652,8 +1823,8 @@ void transfer_delay2_loop(Delay2 *delay){
 
 
 
-void transfer_delay3_init(Delay3 *delay){
-    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
+static void __local_delay3_init(__LocalDelay3 *delay){
+    #if VALUE_MODE_MATH>=VALUE_MODE_Q15
 
     #else // VALUE_MODE_MATH
     // 初始化为零
@@ -1662,8 +1833,8 @@ void transfer_delay3_init(Delay3 *delay){
     #endif // VALUE_MODE_MATH
 }
 
-void transfer_delay3_loop(Delay3 *delay){
-    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
+void transfer_delay3_loop(__LocalDelay3 *delay){
+    #if VALUE_MODE_MATH>=VALUE_MODE_Q15
 
     #else // VALUE_MODE_MATH
     // 1.创建局部静态变量
@@ -1683,8 +1854,8 @@ void transfer_delay3_loop(Delay3 *delay){
 
 
 
-void transfer_sine_loop(Sine *sine){
-    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
+void transfer_sine_loop(__LocalSine *sine){
+    #if VALUE_MODE_MATH>=VALUE_MODE_Q15
 
     #else // VALUE_MODE_MATH
     sine->out.output = math_sin(sine->in.input);
@@ -1695,8 +1866,8 @@ void transfer_sine_loop(Sine *sine){
 
 
 
-void transfer_cosine_loop(Cosine *cosine){
-    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
+void transfer_cosine_loop(__LocalCosine *cosine){
+    #if VALUE_MODE_MATH>=VALUE_MODE_Q15
 
     #else // VALUE_MODE_MATH
     cosine->out.output = math_cos(cosine->in.input);
@@ -1707,8 +1878,8 @@ void transfer_cosine_loop(Cosine *cosine){
 
 
 
-void transfer_sincos_loop(SinCos *sincos){
-    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
+void transfer_sincos_loop(__LocalSinCos *sincos){
+    #if VALUE_MODE_MATH>=VALUE_MODE_Q15
 
     #else // VALUE_MODE_MATH
     math_sin_cos(sincos->in.input, 
@@ -1718,8 +1889,8 @@ void transfer_sincos_loop(SinCos *sincos){
 }
 
 // ---------------------------工程模块Transfer---------------------------
-void transfer_tan_loop(Tan *tan){
-    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
+void transfer_tan_loop(__LocalTan *tan){
+    #if VALUE_MODE_MATH>=VALUE_MODE_Q15
 
     #else // VALUE_MODE_MATH
 
@@ -1731,22 +1902,8 @@ void transfer_tan_loop(Tan *tan){
 
 
 // ---------------------------工程模块Transfer---------------------------
-void transfer_atan_loop(Atan *atan){
-    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
-
-    #else // VALUE_MODE_MATH
-
-
-    
-
-    #endif // VALUE_MODE_MATH
-}
-
-
-
-// ---------------------------工程模块Transfer---------------------------
-void transfer_limit_loop(Limit *limit){
-    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
+void transfer_atan_loop(__LocalAtan *atan){
+    #if VALUE_MODE_MATH>=VALUE_MODE_Q15
 
     #else // VALUE_MODE_MATH
 
@@ -1759,8 +1916,22 @@ void transfer_limit_loop(Limit *limit){
 
 
 // ---------------------------工程模块Transfer---------------------------
-void transfer_sign_loop(Sign *sign){
-    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
+void transfer_limit_loop(__LocalLimit *limit){
+    #if VALUE_MODE_MATH>=VALUE_MODE_Q15
+
+    #else // VALUE_MODE_MATH
+
+
+    
+
+    #endif // VALUE_MODE_MATH
+}
+
+
+
+// ---------------------------工程模块Transfer---------------------------
+void transfer_sign_loop(__LocalSign *sign){
+    #if VALUE_MODE_MATH>=VALUE_MODE_Q15
 
     #else // VALUE_MODE_MATH
 
@@ -1775,23 +1946,8 @@ void transfer_sign_loop(Sign *sign){
 
 
 
-void transfer_clarke_loop(Clarke *clarke){
-    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
-
-    #else // VALUE_MODE_MATH
-
-
-    
-
-    #endif // VALUE_MODE_MATH
-}
-
-// ---------------------------工程模块Transfer---------------------------
-
-
-
-void transfer_park_loop(Park *park){
-    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
+void transfer_clarke_loop(__LocalClarke *clarke){
+    #if VALUE_MODE_MATH>=VALUE_MODE_Q15
 
     #else // VALUE_MODE_MATH
 
@@ -1805,8 +1961,8 @@ void transfer_park_loop(Park *park){
 
 
 
-void transfer_ipark_loop(Ipark *ipark){
-    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
+void transfer_park_loop(__LocalPark *park){
+    #if VALUE_MODE_MATH>=VALUE_MODE_Q15
 
     #else // VALUE_MODE_MATH
 
@@ -1820,8 +1976,8 @@ void transfer_ipark_loop(Ipark *ipark){
 
 
 
-void transfer_spwm0_loop(Spwm0 *spwm){
-    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
+void transfer_ipark_loop(__LocalIpark *ipark){
+    #if VALUE_MODE_MATH>=VALUE_MODE_Q15
 
     #else // VALUE_MODE_MATH
 
@@ -1835,21 +1991,8 @@ void transfer_spwm0_loop(Spwm0 *spwm){
 
 
 
-void transfer_spwm_loop(Spwm *spwm){
-    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
-
-    #else // VALUE_MODE_MATH
-
-
-    
-
-    #endif // VALUE_MODE_MATH
-}
-
-// ---------------------------工程模块Transfer---------------------------
-
-void transfer_svpwm_loop(Svpwm *svpwm){
-    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
+void transfer_spwm0_loop(__LocalSpwm0 *spwm){
+    #if VALUE_MODE_MATH>=VALUE_MODE_Q15
 
     #else // VALUE_MODE_MATH
 
@@ -1863,8 +2006,36 @@ void transfer_svpwm_loop(Svpwm *svpwm){
 
 
 
-void transfer_swpwm_loop(Swpwm *swpwm){
-    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
+void transfer_spwm_loop(__LocalSpwm *spwm){
+    #if VALUE_MODE_MATH>=VALUE_MODE_Q15
+
+    #else // VALUE_MODE_MATH
+
+
+    
+
+    #endif // VALUE_MODE_MATH
+}
+
+// ---------------------------工程模块Transfer---------------------------
+
+void transfer_svpwm_loop(__LocalSvpwm *svpwm){
+    #if VALUE_MODE_MATH>=VALUE_MODE_Q15
+
+    #else // VALUE_MODE_MATH
+
+
+    
+
+    #endif // VALUE_MODE_MATH
+}
+
+// ---------------------------工程模块Transfer---------------------------
+
+
+
+void transfer_swpwm_loop(__LocalSwpwm *swpwm){
+    #if VALUE_MODE_MATH>=VALUE_MODE_Q15
 
     #else // VALUE_MODE_MATH
     // TODO: 浮点实现
@@ -1873,8 +2044,8 @@ void transfer_swpwm_loop(Swpwm *swpwm){
 
 // ---------------------------工程模块Transfer---------------------------
 
-void transfer_singlers_loop(SingleRs *singlers){
-    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
+void transfer_singlers_loop(__LocalSingleRs *singlers){
+    #if VALUE_MODE_MATH>=VALUE_MODE_Q15
 
     #else // VALUE_MODE_MATH
 
@@ -1889,7 +2060,7 @@ void transfer_singlers_loop(SingleRs *singlers){
 
 // ---------------------------工程模块Transfer---------------------------
 void transfer_reset_integrator(void *p){
-    #if VALUE_MODE_MATH>=VALUE_MODE_DOUBLE
+    #if VALUE_MODE_MATH>=VALUE_MODE_Q15
 
     #else // VALUE_MODE_MATH
 
@@ -1900,372 +2071,372 @@ void transfer_reset_integrator(void *p){
 
 // ================== 实例池（块实例统一住在这里，用户通过 _get() 拿指针）==================
 #if CONFIG_TRANSFER1
-static Transfer1 transfer1_pool[CONFIG_MOTOR][CONFIG_TRANSFER1];
-static Transfer1Data transfer1_data_pool[CONFIG_MOTOR][CONFIG_TRANSFER1];
-Transfer1 *transfer_transfer1_get(uint8_t motor, int ch) {
+static __LocalTransfer1 transfer1_pool[CONFIG_MOTOR][CONFIG_TRANSFER1];
+static __LocalTransfer1Data transfer1_data_pool[CONFIG_MOTOR][CONFIG_TRANSFER1];
+__LocalTransfer1 *__local_transfer1_get(uint8_t motor, int ch){
     if (motor >= CONFIG_MOTOR || ch >= CONFIG_TRANSFER1) return 0;
-    Transfer1 *self = &transfer1_pool[motor][ch];
+    __LocalTransfer1 *self = &transfer1_pool[motor][ch];
     self->data = &transfer1_data_pool[motor][ch];
     return self;
 }
 #endif
 #if CONFIG_TRANSFER2
-static Transfer2 transfer2_pool[CONFIG_MOTOR][CONFIG_TRANSFER2];
-static Transfer2Data transfer2_data_pool[CONFIG_MOTOR][CONFIG_TRANSFER2];
-Transfer2 *transfer_transfer2_get(uint8_t motor, int ch) {
+static __LocalTransfer2 transfer2_pool[CONFIG_MOTOR][CONFIG_TRANSFER2];
+static __LocalTransfer2Data transfer2_data_pool[CONFIG_MOTOR][CONFIG_TRANSFER2];
+__LocalTransfer2 *__local_transfer2_get(uint8_t motor, int ch){
     if (motor >= CONFIG_MOTOR || ch >= CONFIG_TRANSFER2) return 0;
-    Transfer2 *self = &transfer2_pool[motor][ch];
+    __LocalTransfer2 *self = &transfer2_pool[motor][ch];
     self->data = &transfer2_data_pool[motor][ch];
     return self;
 }
 #endif
 #if CONFIG_TRANSFER3
-static Transfer3 transfer3_pool[CONFIG_MOTOR][CONFIG_TRANSFER3];
-static Transfer3Data transfer3_data_pool[CONFIG_MOTOR][CONFIG_TRANSFER3];
-Transfer3 *transfer_transfer3_get(uint8_t motor, int ch) {
+static __LocalTransfer3 transfer3_pool[CONFIG_MOTOR][CONFIG_TRANSFER3];
+static __LocalTransfer3Data transfer3_data_pool[CONFIG_MOTOR][CONFIG_TRANSFER3];
+__LocalTransfer3 *__local_transfer3_get(uint8_t motor, int ch){
     if (motor >= CONFIG_MOTOR || ch >= CONFIG_TRANSFER3) return 0;
-    Transfer3 *self = &transfer3_pool[motor][ch];
+    __LocalTransfer3 *self = &transfer3_pool[motor][ch];
     self->data = &transfer3_data_pool[motor][ch];
     return self;
 }
 #endif
 #if CONFIG_TRANSFER4
-static Transfer4 transfer4_pool[CONFIG_MOTOR][CONFIG_TRANSFER4];
-static Transfer4Data transfer4_data_pool[CONFIG_MOTOR][CONFIG_TRANSFER4];
-Transfer4 *transfer_transfer4_get(uint8_t motor, int ch) {
+static __LocalTransfer4 transfer4_pool[CONFIG_MOTOR][CONFIG_TRANSFER4];
+static __LocalTransfer4Data transfer4_data_pool[CONFIG_MOTOR][CONFIG_TRANSFER4];
+__LocalTransfer4 *__local_transfer4_get(uint8_t motor, int ch){
     if (motor >= CONFIG_MOTOR || ch >= CONFIG_TRANSFER4) return 0;
-    Transfer4 *self = &transfer4_pool[motor][ch];
+    __LocalTransfer4 *self = &transfer4_pool[motor][ch];
     self->data = &transfer4_data_pool[motor][ch];
     return self;
 }
 #endif
 #if CONFIG_TRANSFER5
-static Transfer5 transfer5_pool[CONFIG_MOTOR][CONFIG_TRANSFER5];
-static Transfer5Data transfer5_data_pool[CONFIG_MOTOR][CONFIG_TRANSFER5];
-Transfer5 *transfer_transfer5_get(uint8_t motor, int ch) {
+static __LocalTransfer5 transfer5_pool[CONFIG_MOTOR][CONFIG_TRANSFER5];
+static __LocalTransfer5Data transfer5_data_pool[CONFIG_MOTOR][CONFIG_TRANSFER5];
+__LocalTransfer5 *__local_transfer5_get(uint8_t motor, int ch){
     if (motor >= CONFIG_MOTOR || ch >= CONFIG_TRANSFER5) return 0;
-    Transfer5 *self = &transfer5_pool[motor][ch];
+    __LocalTransfer5 *self = &transfer5_pool[motor][ch];
     self->data = &transfer5_data_pool[motor][ch];
     return self;
 }
 #endif
 #if CONFIG_INTEGRATOR
-static Integrator integrator_pool[CONFIG_MOTOR][CONFIG_INTEGRATOR];
-static IntegratorData integrator_data_pool[CONFIG_MOTOR][CONFIG_INTEGRATOR];
-Integrator *transfer_integrator_get(uint8_t motor, int ch) {
+static __LocalIntegrator integrator_pool[CONFIG_MOTOR][CONFIG_INTEGRATOR];
+static __LocalIntegratorData integrator_data_pool[CONFIG_MOTOR][CONFIG_INTEGRATOR];
+__LocalIntegrator *__local_integrator_get(uint8_t motor, int ch){
     if (motor >= CONFIG_MOTOR || ch >= CONFIG_INTEGRATOR) return 0;
-    Integrator *self = &integrator_pool[motor][ch];
+    __LocalIntegrator *self = &integrator_pool[motor][ch];
     self->data = &integrator_data_pool[motor][ch];
     return self;
 }
 #endif
 #if CONFIG_DERIVATIVE
-static Derivative derivative_pool[CONFIG_MOTOR][CONFIG_DERIVATIVE];
-static DerivativeData derivative_data_pool[CONFIG_MOTOR][CONFIG_DERIVATIVE];
-Derivative *transfer_derivative_get(uint8_t motor, int ch) {
+static __LocalDerivative derivative_pool[CONFIG_MOTOR][CONFIG_DERIVATIVE];
+static __LocalDerivativeData derivative_data_pool[CONFIG_MOTOR][CONFIG_DERIVATIVE];
+__LocalDerivative *__local_derivative_get(uint8_t motor, int ch){
     if (motor >= CONFIG_MOTOR || ch >= CONFIG_DERIVATIVE) return 0;
-    Derivative *self = &derivative_pool[motor][ch];
+    __LocalDerivative *self = &derivative_pool[motor][ch];
     self->data = &derivative_data_pool[motor][ch];
     return self;
 }
 #endif
 #if CONFIG_CURVE
-static Curve curve_pool[CONFIG_MOTOR][CONFIG_CURVE];
-static CurveData curve_data_pool[CONFIG_MOTOR][CONFIG_CURVE];
-Curve *transfer_curve_get(uint8_t motor, int ch) {
+static __LocalCurve curve_pool[CONFIG_MOTOR][CONFIG_CURVE];
+static __LocalCurveData curve_data_pool[CONFIG_MOTOR][CONFIG_CURVE];
+__LocalCurve *__local_curve_get(uint8_t motor, int ch){
     if (motor >= CONFIG_MOTOR || ch >= CONFIG_CURVE) return 0;
-    Curve *self = &curve_pool[motor][ch];
+    __LocalCurve *self = &curve_pool[motor][ch];
     self->data = &curve_data_pool[motor][ch];
     return self;
 }
 #endif
 #if CONFIG_DFT
-static Dft dft_pool[CONFIG_MOTOR][CONFIG_DFT];
-static DftData dft_data_pool[CONFIG_MOTOR][CONFIG_DFT];
-Dft *transfer_dft_get(uint8_t motor, int ch) {
+static __LocalDft dft_pool[CONFIG_MOTOR][CONFIG_DFT];
+static __LocalDftData dft_data_pool[CONFIG_MOTOR][CONFIG_DFT];
+__LocalDft *__local_dft_get(uint8_t motor, int ch){
     if (motor >= CONFIG_MOTOR || ch >= CONFIG_DFT) return 0;
-    Dft *self = &dft_pool[motor][ch];
+    __LocalDft *self = &dft_pool[motor][ch];
     self->data = &dft_data_pool[motor][ch];
     return self;
 }
 #endif
 #if CONFIG_HALL
-static Hall hall_pool[CONFIG_MOTOR][CONFIG_HALL];
-static HallData hall_data_pool[CONFIG_MOTOR][CONFIG_HALL];
-Hall *transfer_hall_get(uint8_t motor, int ch) {
+static __LocalHall hall_pool[CONFIG_MOTOR][CONFIG_HALL];
+static __LocalHallData hall_data_pool[CONFIG_MOTOR][CONFIG_HALL];
+__LocalHall *__local_hall_get(uint8_t motor, int ch){
     if (motor >= CONFIG_MOTOR || ch >= CONFIG_HALL) return 0;
-    Hall *self = &hall_pool[motor][ch];
+    __LocalHall *self = &hall_pool[motor][ch];
     self->data = &hall_data_pool[motor][ch];
     return self;
 }
 #endif
 #if CONFIG_LADRC1
-static Ladrc1 ladrc1_pool[CONFIG_MOTOR][CONFIG_LADRC1];
-static Ladrc1Data ladrc1_data_pool[CONFIG_MOTOR][CONFIG_LADRC1];
-Ladrc1 *transfer_ladrc1_get(uint8_t motor, int ch) {
+static __LocalLadrc1 ladrc1_pool[CONFIG_MOTOR][CONFIG_LADRC1];
+static __LocalLadrc1Data ladrc1_data_pool[CONFIG_MOTOR][CONFIG_LADRC1];
+__LocalLadrc1 *__local_ladrc1_get(uint8_t motor, int ch){
     if (motor >= CONFIG_MOTOR || ch >= CONFIG_LADRC1) return 0;
-    Ladrc1 *self = &ladrc1_pool[motor][ch];
+    __LocalLadrc1 *self = &ladrc1_pool[motor][ch];
     self->data = &ladrc1_data_pool[motor][ch];
     return self;
 }
 #endif
 #if CONFIG_LADRC2
-static Ladrc2 ladrc2_pool[CONFIG_MOTOR][CONFIG_LADRC2];
-static Ladrc2Data ladrc2_data_pool[CONFIG_MOTOR][CONFIG_LADRC2];
-Ladrc2 *transfer_ladrc2_get(uint8_t motor, int ch) {
+static __LocalLadrc2 ladrc2_pool[CONFIG_MOTOR][CONFIG_LADRC2];
+static __LocalLadrc2Data ladrc2_data_pool[CONFIG_MOTOR][CONFIG_LADRC2];
+__LocalLadrc2 *__local_ladrc2_get(uint8_t motor, int ch){
     if (motor >= CONFIG_MOTOR || ch >= CONFIG_LADRC2) return 0;
-    Ladrc2 *self = &ladrc2_pool[motor][ch];
+    __LocalLadrc2 *self = &ladrc2_pool[motor][ch];
     self->data = &ladrc2_data_pool[motor][ch];
     return self;
 }
 #endif
 #if CONFIG_SMC
-static Smc smc_pool[CONFIG_MOTOR][CONFIG_SMC];
-static SmcData smc_data_pool[CONFIG_MOTOR][CONFIG_SMC];
-Smc *transfer_smc_get(uint8_t motor, int ch) {
+static __LocalSmc smc_pool[CONFIG_MOTOR][CONFIG_SMC];
+static __LocalSmcData smc_data_pool[CONFIG_MOTOR][CONFIG_SMC];
+__LocalSmc *__local_smc_get(uint8_t motor, int ch){
     if (motor >= CONFIG_MOTOR || ch >= CONFIG_SMC) return 0;
-    Smc *self = &smc_pool[motor][ch];
+    __LocalSmc *self = &smc_pool[motor][ch];
     self->data = &smc_data_pool[motor][ch];
     return self;
 }
 #endif
 #if CONFIG_DPCC
-static Dpcc dpcc_pool[CONFIG_MOTOR][CONFIG_DPCC];
-static DpccData dpcc_data_pool[CONFIG_MOTOR][CONFIG_DPCC];
-Dpcc *transfer_dpcc_get(uint8_t motor, int ch) {
+static __LocalDpcc dpcc_pool[CONFIG_MOTOR][CONFIG_DPCC];
+static __LocalDpccData dpcc_data_pool[CONFIG_MOTOR][CONFIG_DPCC];
+__LocalDpcc *__local_dpcc_get(uint8_t motor, int ch){
     if (motor >= CONFIG_MOTOR || ch >= CONFIG_DPCC) return 0;
-    Dpcc *self = &dpcc_pool[motor][ch];
+    __LocalDpcc *self = &dpcc_pool[motor][ch];
     self->data = &dpcc_data_pool[motor][ch];
     return self;
 }
 #endif
 #if CONFIG_PIR
-static Pir pir_pool[CONFIG_MOTOR][CONFIG_PIR];
-static PirData pir_data_pool[CONFIG_MOTOR][CONFIG_PIR];
-Pir *transfer_pir_get(uint8_t motor, int ch) {
+static __LocalPir pir_pool[CONFIG_MOTOR][CONFIG_PIR];
+static __LocalPirData pir_data_pool[CONFIG_MOTOR][CONFIG_PIR];
+__LocalPir *__local_pir_get(uint8_t motor, int ch){
     if (motor >= CONFIG_MOTOR || ch >= CONFIG_PIR) return 0;
-    Pir *self = &pir_pool[motor][ch];
+    __LocalPir *self = &pir_pool[motor][ch];
     self->data = &pir_data_pool[motor][ch];
     return self;
 }
 #endif
 #if CONFIG_PID
-static Pid pid_pool[CONFIG_MOTOR][CONFIG_PID];
-static PidData pid_data_pool[CONFIG_MOTOR][CONFIG_PID];
-Pid *transfer_pid_get(uint8_t motor, int ch) {
+static __LocalPid pid_pool[CONFIG_MOTOR][CONFIG_PID];
+static __LocalPidData pid_data_pool[CONFIG_MOTOR][CONFIG_PID];
+__LocalPid *__local_pid_get(uint8_t motor, int ch){
     if (motor >= CONFIG_MOTOR || ch >= CONFIG_PID) return 0;
-    Pid *self = &pid_pool[motor][ch];
+    __LocalPid *self = &pid_pool[motor][ch];
     self->data = &pid_data_pool[motor][ch];
     return self;
 }
 #endif
 #if CONFIG_PLL
-static Pll pll_pool[CONFIG_MOTOR][CONFIG_PLL];
-static PllData pll_data_pool[CONFIG_MOTOR][CONFIG_PLL];
-Pll *transfer_pll_get(uint8_t motor, int ch) {
+static __LocalPll pll_pool[CONFIG_MOTOR][CONFIG_PLL];
+static __LocalPllData pll_data_pool[CONFIG_MOTOR][CONFIG_PLL];
+__LocalPll *__local_pll_get(uint8_t motor, int ch){
     if (motor >= CONFIG_MOTOR || ch >= CONFIG_PLL) return 0;
-    Pll *self = &pll_pool[motor][ch];
+    __LocalPll *self = &pll_pool[motor][ch];
     self->data = &pll_data_pool[motor][ch];
     return self;
 }
 #endif
 #if CONFIG_LPF1
-static Lpf1 lpf1_pool[CONFIG_MOTOR][CONFIG_LPF1];
-static Lpf1Data lpf1_data_pool[CONFIG_MOTOR][CONFIG_LPF1];
-Lpf1 *transfer_lpf1_get(uint8_t motor, int ch) {
+static __LocalLpf1 lpf1_pool[CONFIG_MOTOR][CONFIG_LPF1];
+static __LocalLpf1Data lpf1_data_pool[CONFIG_MOTOR][CONFIG_LPF1];
+__LocalLpf1 *__local_lpf1_get(uint8_t motor, int ch){
     if (motor >= CONFIG_MOTOR || ch >= CONFIG_LPF1) return 0;
-    Lpf1 *self = &lpf1_pool[motor][ch];
+    __LocalLpf1 *self = &lpf1_pool[motor][ch];
     self->data = &lpf1_data_pool[motor][ch];
     return self;
 }
 #endif
 #if CONFIG_LPF2
-static Lpf2 lpf2_pool[CONFIG_MOTOR][CONFIG_LPF2];
-static Lpf2Data lpf2_data_pool[CONFIG_MOTOR][CONFIG_LPF2];
-Lpf2 *transfer_lpf2_get(uint8_t motor, int ch) {
+static __LocalLpf2 lpf2_pool[CONFIG_MOTOR][CONFIG_LPF2];
+static __LocalLpf2Data lpf2_data_pool[CONFIG_MOTOR][CONFIG_LPF2];
+__LocalLpf2 *__local_lpf2_get(uint8_t motor, int ch){
     if (motor >= CONFIG_MOTOR || ch >= CONFIG_LPF2) return 0;
-    Lpf2 *self = &lpf2_pool[motor][ch];
+    __LocalLpf2 *self = &lpf2_pool[motor][ch];
     self->data = &lpf2_data_pool[motor][ch];
     return self;
 }
 #endif
 #if CONFIG_HPF1
-static Hpf1 hpf1_pool[CONFIG_MOTOR][CONFIG_HPF1];
-static Hpf1Data hpf1_data_pool[CONFIG_MOTOR][CONFIG_HPF1];
-Hpf1 *transfer_hpf1_get(uint8_t motor, int ch) {
+static __LocalHpf1 hpf1_pool[CONFIG_MOTOR][CONFIG_HPF1];
+static __LocalHpf1Data hpf1_data_pool[CONFIG_MOTOR][CONFIG_HPF1];
+__LocalHpf1 *__local_hpf1_get(uint8_t motor, int ch){
     if (motor >= CONFIG_MOTOR || ch >= CONFIG_HPF1) return 0;
-    Hpf1 *self = &hpf1_pool[motor][ch];
+    __LocalHpf1 *self = &hpf1_pool[motor][ch];
     self->data = &hpf1_data_pool[motor][ch];
     return self;
 }
 #endif
 #if CONFIG_HPF2
-static Hpf2 hpf2_pool[CONFIG_MOTOR][CONFIG_HPF2];
-static Hpf2Data hpf2_data_pool[CONFIG_MOTOR][CONFIG_HPF2];
-Hpf2 *transfer_hpf2_get(uint8_t motor, int ch) {
+static __LocalHpf2 hpf2_pool[CONFIG_MOTOR][CONFIG_HPF2];
+static __LocalHpf2Data hpf2_data_pool[CONFIG_MOTOR][CONFIG_HPF2];
+__LocalHpf2 *__local_hpf2_get(uint8_t motor, int ch){
     if (motor >= CONFIG_MOTOR || ch >= CONFIG_HPF2) return 0;
-    Hpf2 *self = &hpf2_pool[motor][ch];
+    __LocalHpf2 *self = &hpf2_pool[motor][ch];
     self->data = &hpf2_data_pool[motor][ch];
     return self;
 }
 #endif
 #if CONFIG_BPF1
-static Bpf1 bpf1_pool[CONFIG_MOTOR][CONFIG_BPF1];
-static Bpf1Data bpf1_data_pool[CONFIG_MOTOR][CONFIG_BPF1];
-Bpf1 *transfer_bpf1_get(uint8_t motor, int ch) {
+static __LocalBpf1 bpf1_pool[CONFIG_MOTOR][CONFIG_BPF1];
+static __LocalBpf1Data bpf1_data_pool[CONFIG_MOTOR][CONFIG_BPF1];
+__LocalBpf1 *__local_bpf1_get(uint8_t motor, int ch){
     if (motor >= CONFIG_MOTOR || ch >= CONFIG_BPF1) return 0;
-    Bpf1 *self = &bpf1_pool[motor][ch];
+    __LocalBpf1 *self = &bpf1_pool[motor][ch];
     self->data = &bpf1_data_pool[motor][ch];
     return self;
 }
 #endif
 #if CONFIG_BPF2
-static Bpf2 bpf2_pool[CONFIG_MOTOR][CONFIG_BPF2];
-static Bpf2Data bpf2_data_pool[CONFIG_MOTOR][CONFIG_BPF2];
-Bpf2 *transfer_bpf2_get(uint8_t motor, int ch) {
+static __LocalBpf2 bpf2_pool[CONFIG_MOTOR][CONFIG_BPF2];
+static __LocalBpf2Data bpf2_data_pool[CONFIG_MOTOR][CONFIG_BPF2];
+__LocalBpf2 *__local_bpf2_get(uint8_t motor, int ch){
     if (motor >= CONFIG_MOTOR || ch >= CONFIG_BPF2) return 0;
-    Bpf2 *self = &bpf2_pool[motor][ch];
+    __LocalBpf2 *self = &bpf2_pool[motor][ch];
     self->data = &bpf2_data_pool[motor][ch];
     return self;
 }
 #endif
 #if CONFIG_SOGI
-static Sogi sogi_pool[CONFIG_MOTOR][CONFIG_SOGI];
-static SogiData sogi_data_pool[CONFIG_MOTOR][CONFIG_SOGI];
-Sogi *transfer_sogi_get(uint8_t motor, int ch) {
+static __LocalSogi sogi_pool[CONFIG_MOTOR][CONFIG_SOGI];
+static __LocalSogiData sogi_data_pool[CONFIG_MOTOR][CONFIG_SOGI];
+__LocalSogi *__local_sogi_get(uint8_t motor, int ch){
     if (motor >= CONFIG_MOTOR || ch >= CONFIG_SOGI) return 0;
-    Sogi *self = &sogi_pool[motor][ch];
+    __LocalSogi *self = &sogi_pool[motor][ch];
     self->data = &sogi_data_pool[motor][ch];
     return self;
 }
 #endif
 #if CONFIG_NF
-static Nf nf_pool[CONFIG_MOTOR][CONFIG_NF];
-static NfData nf_data_pool[CONFIG_MOTOR][CONFIG_NF];
-Nf *transfer_nf_get(uint8_t motor, int ch) {
+static __LocalNf nf_pool[CONFIG_MOTOR][CONFIG_NF];
+static __LocalNfData nf_data_pool[CONFIG_MOTOR][CONFIG_NF];
+__LocalNf *__local_nf_get(uint8_t motor, int ch){
     if (motor >= CONFIG_MOTOR || ch >= CONFIG_NF) return 0;
-    Nf *self = &nf_pool[motor][ch];
+    __LocalNf *self = &nf_pool[motor][ch];
     self->data = &nf_data_pool[motor][ch];
     return self;
 }
 #endif
 #if CONFIG_TPNF
-static Tpnf tpnf_pool[CONFIG_MOTOR][CONFIG_TPNF];
-static TpnfData tpnf_data_pool[CONFIG_MOTOR][CONFIG_TPNF];
-Tpnf *transfer_tpnf_get(uint8_t motor, int ch) {
+static __LocalTpnf tpnf_pool[CONFIG_MOTOR][CONFIG_TPNF];
+static __LocalTpnfData tpnf_data_pool[CONFIG_MOTOR][CONFIG_TPNF];
+__LocalTpnf *__local_tpnf_get(uint8_t motor, int ch){
     if (motor >= CONFIG_MOTOR || ch >= CONFIG_TPNF) return 0;
-    Tpnf *self = &tpnf_pool[motor][ch];
+    __LocalTpnf *self = &tpnf_pool[motor][ch];
     self->data = &tpnf_data_pool[motor][ch];
     return self;
 }
 #endif
 #if CONFIG_DOB
-static Dob dob_pool[CONFIG_MOTOR][CONFIG_DOB];
-static DobData dob_data_pool[CONFIG_MOTOR][CONFIG_DOB];
-Dob *transfer_dob_get(uint8_t motor, int ch) {
+static __LocalDob dob_pool[CONFIG_MOTOR][CONFIG_DOB];
+static __LocalDobData dob_data_pool[CONFIG_MOTOR][CONFIG_DOB];
+__LocalDob *__local_dob_get(uint8_t motor, int ch){
     if (motor >= CONFIG_MOTOR || ch >= CONFIG_DOB) return 0;
-    Dob *self = &dob_pool[motor][ch];
+    __LocalDob *self = &dob_pool[motor][ch];
     self->data = &dob_data_pool[motor][ch];
     return self;
 }
 #endif
 #if CONFIG_RLS
-static Rls rls_pool[CONFIG_MOTOR][CONFIG_RLS];
-static RlsData rls_data_pool[CONFIG_MOTOR][CONFIG_RLS];
-Rls *transfer_rls_get(uint8_t motor, int ch) {
+static __LocalRls rls_pool[CONFIG_MOTOR][CONFIG_RLS];
+static __LocalRlsData rls_data_pool[CONFIG_MOTOR][CONFIG_RLS];
+__LocalRls *__local_rls_get(uint8_t motor, int ch){
     if (motor >= CONFIG_MOTOR || ch >= CONFIG_RLS) return 0;
-    Rls *self = &rls_pool[motor][ch];
+    __LocalRls *self = &rls_pool[motor][ch];
     self->data = &rls_data_pool[motor][ch];
     return self;
 }
 #endif
 #if CONFIG_SMO
-static Smo smo_pool[CONFIG_MOTOR][CONFIG_SMO];
-static SmoData smo_data_pool[CONFIG_MOTOR][CONFIG_SMO];
-Smo *transfer_smo_get(uint8_t motor, int ch) {
+static __LocalSmo smo_pool[CONFIG_MOTOR][CONFIG_SMO];
+static __LocalSmoData smo_data_pool[CONFIG_MOTOR][CONFIG_SMO];
+__LocalSmo *__local_smo_get(uint8_t motor, int ch){
     if (motor >= CONFIG_MOTOR || ch >= CONFIG_SMO) return 0;
-    Smo *self = &smo_pool[motor][ch];
+    __LocalSmo *self = &smo_pool[motor][ch];
     self->data = &smo_data_pool[motor][ch];
     return self;
 }
 #endif
 #if CONFIG_NLFO
-static Nlfo nlfo_pool[CONFIG_MOTOR][CONFIG_NLFO];
-static NlfoData nlfo_data_pool[CONFIG_MOTOR][CONFIG_NLFO];
-Nlfo *transfer_nlfo_get(uint8_t motor, int ch) {
+static __LocalNlfo nlfo_pool[CONFIG_MOTOR][CONFIG_NLFO];
+static __LocalNlfoData nlfo_data_pool[CONFIG_MOTOR][CONFIG_NLFO];
+__LocalNlfo *__local_nlfo_get(uint8_t motor, int ch){
     if (motor >= CONFIG_MOTOR || ch >= CONFIG_NLFO) return 0;
-    Nlfo *self = &nlfo_pool[motor][ch];
+    __LocalNlfo *self = &nlfo_pool[motor][ch];
     self->data = &nlfo_data_pool[motor][ch];
     return self;
 }
 #endif
 #if CONFIG_VCFO
-static Vcfo vcfo_pool[CONFIG_MOTOR][CONFIG_VCFO];
-static VcfoData vcfo_data_pool[CONFIG_MOTOR][CONFIG_VCFO];
-Vcfo *transfer_vcfo_get(uint8_t motor, int ch) {
+static __LocalVcfo vcfo_pool[CONFIG_MOTOR][CONFIG_VCFO];
+static __LocalVcfoData vcfo_data_pool[CONFIG_MOTOR][CONFIG_VCFO];
+__LocalVcfo *__local_vcfo_get(uint8_t motor, int ch){
     if (motor >= CONFIG_MOTOR || ch >= CONFIG_VCFO) return 0;
-    Vcfo *self = &vcfo_pool[motor][ch];
+    __LocalVcfo *self = &vcfo_pool[motor][ch];
     self->data = &vcfo_data_pool[motor][ch];
     return self;
 }
 #endif
 #if CONFIG_HFI
-static Hfi hfi_pool[CONFIG_MOTOR][CONFIG_HFI];
-static HfiData hfi_data_pool[CONFIG_MOTOR][CONFIG_HFI];
-Hfi *transfer_hfi_get(uint8_t motor, int ch) {
+static __LocalHfi hfi_pool[CONFIG_MOTOR][CONFIG_HFI];
+static __LocalHfiData hfi_data_pool[CONFIG_MOTOR][CONFIG_HFI];
+__LocalHfi *__local_hfi_get(uint8_t motor, int ch){
     if (motor >= CONFIG_MOTOR || ch >= CONFIG_HFI) return 0;
-    Hfi *self = &hfi_pool[motor][ch];
+    __LocalHfi *self = &hfi_pool[motor][ch];
     self->data = &hfi_data_pool[motor][ch];
     return self;
 }
 #endif
 #if CONFIG_ROLO
-static Rolo rolo_pool[CONFIG_MOTOR][CONFIG_ROLO];
-static RoloData rolo_data_pool[CONFIG_MOTOR][CONFIG_ROLO];
-Rolo *transfer_rolo_get(uint8_t motor, int ch) {
+static __LocalRolo rolo_pool[CONFIG_MOTOR][CONFIG_ROLO];
+static __LocalRoloData rolo_data_pool[CONFIG_MOTOR][CONFIG_ROLO];
+__LocalRolo *__local_rolo_get(uint8_t motor, int ch){
     if (motor >= CONFIG_MOTOR || ch >= CONFIG_ROLO) return 0;
-    Rolo *self = &rolo_pool[motor][ch];
+    __LocalRolo *self = &rolo_pool[motor][ch];
     self->data = &rolo_data_pool[motor][ch];
     return self;
 }
 #endif
 #if CONFIG_MARS
-static Mars mars_pool[CONFIG_MOTOR][CONFIG_MARS];
-static MarsData mars_data_pool[CONFIG_MOTOR][CONFIG_MARS];
-Mars *transfer_mars_get(uint8_t motor, int ch) {
+static __LocalMars mars_pool[CONFIG_MOTOR][CONFIG_MARS];
+static __LocalMarsData mars_data_pool[CONFIG_MOTOR][CONFIG_MARS];
+__LocalMars *__local_mars_get(uint8_t motor, int ch){
     if (motor >= CONFIG_MOTOR || ch >= CONFIG_MARS) return 0;
-    Mars *self = &mars_pool[motor][ch];
+    __LocalMars *self = &mars_pool[motor][ch];
     self->data = &mars_data_pool[motor][ch];
     return self;
 }
 #endif
 #if CONFIG_EKF
-static Ekf ekf_pool[CONFIG_MOTOR][CONFIG_EKF];
-static EkfData ekf_data_pool[CONFIG_MOTOR][CONFIG_EKF];
-Ekf *transfer_ekf_get(uint8_t motor, int ch) {
+static __LocalEkf ekf_pool[CONFIG_MOTOR][CONFIG_EKF];
+static __LocalEkfData ekf_data_pool[CONFIG_MOTOR][CONFIG_EKF];
+__LocalEkf *__local_ekf_get(uint8_t motor, int ch){
     if (motor >= CONFIG_MOTOR || ch >= CONFIG_EKF) return 0;
-    Ekf *self = &ekf_pool[motor][ch];
+    __LocalEkf *self = &ekf_pool[motor][ch];
     self->data = &ekf_data_pool[motor][ch];
     return self;
 }
 #endif
 #if CONFIG_DELAY1
-static Delay1 delay1_pool[CONFIG_MOTOR][CONFIG_DELAY1];
-Delay1 *transfer_delay1_get(uint8_t motor, int ch) {
+static __LocalDelay1 delay1_pool[CONFIG_MOTOR][CONFIG_DELAY1];
+__LocalDelay1 *__local_delay1_get(uint8_t motor, int ch){
     if (motor >= CONFIG_MOTOR || ch >= CONFIG_DELAY1) return 0;
     return &delay1_pool[motor][ch];
 }
 #endif
 #if CONFIG_DELAY2
-static Delay2 delay2_pool[CONFIG_MOTOR][CONFIG_DELAY2];
-Delay2 *transfer_delay2_get(uint8_t motor, int ch) {
+static __LocalDelay2 delay2_pool[CONFIG_MOTOR][CONFIG_DELAY2];
+__LocalDelay2 *__local_delay2_get(uint8_t motor, int ch){
     if (motor >= CONFIG_MOTOR || ch >= CONFIG_DELAY2) return 0;
     return &delay2_pool[motor][ch];
 }
 #endif
 #if CONFIG_DELAY3
-static Delay3 delay3_pool[CONFIG_MOTOR][CONFIG_DELAY3];
-Delay3 *transfer_delay3_get(uint8_t motor, int ch) {
+static __LocalDelay3 delay3_pool[CONFIG_MOTOR][CONFIG_DELAY3];
+__LocalDelay3 *__local_delay3_get(uint8_t motor, int ch){
     if (motor >= CONFIG_MOTOR || ch >= CONFIG_DELAY3) return 0;
     return &delay3_pool[motor][ch];
 }
@@ -2273,92 +2444,92 @@ Delay3 *transfer_delay3_get(uint8_t motor, int ch) {
 
 
 // ==================== 单一功能模块实例（单实例） ====================
-static Sine sine_pool[CONFIG_MOTOR];
-Sine *transfer_sine_get(uint8_t motor) {
+static __LocalSine sine_pool[CONFIG_MOTOR];
+__LocalSine *__local_sine_get(uint8_t motor){
     if (motor >= CONFIG_MOTOR) return 0;
     return &sine_pool[motor];
 }
 
-static Cosine cosine_pool[CONFIG_MOTOR];
-Cosine *transfer_cosine_get(uint8_t motor) {
+static __LocalCosine cosine_pool[CONFIG_MOTOR];
+__LocalCosine *__local_cosine_get(uint8_t motor){
     if (motor >= CONFIG_MOTOR) return 0;
     return &cosine_pool[motor];
 }
 
-static SinCos sincos_pool[CONFIG_MOTOR];
-SinCos *transfer_sincos_get(uint8_t motor) {
+static __LocalSinCos sincos_pool[CONFIG_MOTOR];
+__LocalSinCos *__local_sincos_get(uint8_t motor){
     if (motor >= CONFIG_MOTOR) return 0;
     return &sincos_pool[motor];
 }
 
-static Tan tan_pool[CONFIG_MOTOR];
-Tan *transfer_tan_get(uint8_t motor) {
+static __LocalTan tan_pool[CONFIG_MOTOR];
+__LocalTan *__local_tan_get(uint8_t motor){
     if (motor >= CONFIG_MOTOR) return 0;
     return &tan_pool[motor];
 }
 
-static Atan atan_pool[CONFIG_MOTOR];
-Atan *transfer_atan_get(uint8_t motor) {
+static __LocalAtan atan_pool[CONFIG_MOTOR];
+__LocalAtan *__local_atan_get(uint8_t motor){
     if (motor >= CONFIG_MOTOR) return 0;
     return &atan_pool[motor];
 }
 
-static Limit limit_pool[CONFIG_MOTOR];
-Limit *transfer_limit_get(uint8_t motor) {
+static __LocalLimit limit_pool[CONFIG_MOTOR];
+__LocalLimit *__local_limit_get(uint8_t motor){
     if (motor >= CONFIG_MOTOR) return 0;
     return &limit_pool[motor];
 }
 
-static Sign sign_pool[CONFIG_MOTOR];
-Sign *transfer_sign_get(uint8_t motor) {
+static __LocalSign sign_pool[CONFIG_MOTOR];
+__LocalSign *__local_sign_get(uint8_t motor){
     if (motor >= CONFIG_MOTOR) return 0;
     return &sign_pool[motor];
 }
 
-static Clarke clarke_pool[CONFIG_MOTOR];
-Clarke *transfer_clarke_get(uint8_t motor) {
+static __LocalClarke clarke_pool[CONFIG_MOTOR];
+__LocalClarke *__local_clarke_get(uint8_t motor){
     if (motor >= CONFIG_MOTOR) return 0;
     return &clarke_pool[motor];
 }
 
-static Park park_pool[CONFIG_MOTOR];
-Park *transfer_park_get(uint8_t motor) {
+static __LocalPark park_pool[CONFIG_MOTOR];
+__LocalPark *__local_park_get(uint8_t motor){
     if (motor >= CONFIG_MOTOR) return 0;
     return &park_pool[motor];
 }
 
-static Ipark ipark_pool[CONFIG_MOTOR];
-Ipark *transfer_ipark_get(uint8_t motor) {
+static __LocalIpark ipark_pool[CONFIG_MOTOR];
+__LocalIpark *__local_ipark_get(uint8_t motor){
     if (motor >= CONFIG_MOTOR) return 0;
     return &ipark_pool[motor];
 }
 
-static Spwm0 spwm0_pool[CONFIG_MOTOR];
-Spwm0 *transfer_spwm0_get(uint8_t motor) {
+static __LocalSpwm0 spwm0_pool[CONFIG_MOTOR];
+__LocalSpwm0 *__local_spwm0_get(uint8_t motor){
     if (motor >= CONFIG_MOTOR) return 0;
     return &spwm0_pool[motor];
 }
 
-static Spwm spwm_pool[CONFIG_MOTOR];
-Spwm *transfer_spwm_get(uint8_t motor) {
+static __LocalSpwm spwm_pool[CONFIG_MOTOR];
+__LocalSpwm *__local_spwm_get(uint8_t motor){
     if (motor >= CONFIG_MOTOR) return 0;
     return &spwm_pool[motor];
 }
 
-static Svpwm svpwm_pool[CONFIG_MOTOR];
-Svpwm *transfer_svpwm_get(uint8_t motor) {
+static __LocalSvpwm svpwm_pool[CONFIG_MOTOR];
+__LocalSvpwm *__local_svpwm_get(uint8_t motor){
     if (motor >= CONFIG_MOTOR) return 0;
     return &svpwm_pool[motor];
 }
 
-static Swpwm swpwm_pool[CONFIG_MOTOR];
-Swpwm *transfer_swpwm_get(uint8_t motor) {
+static __LocalSwpwm swpwm_pool[CONFIG_MOTOR];
+__LocalSwpwm *__local_swpwm_get(uint8_t motor){
     if (motor >= CONFIG_MOTOR) return 0;
     return &swpwm_pool[motor];
 }
 
-static SingleRs singlers_pool[CONFIG_MOTOR];
-SingleRs *transfer_singlers_get(uint8_t motor) {
+static __LocalSingleRs singlers_pool[CONFIG_MOTOR];
+__LocalSingleRs *__local_singlers_get(uint8_t motor){
     if (motor >= CONFIG_MOTOR) return 0;
     return &singlers_pool[motor];
 }
