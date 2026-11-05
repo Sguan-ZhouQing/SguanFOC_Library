@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Makefile 转 c_cpp_properties.json</title>
+    <style>
+        :root {
+            /* 柔和浅灰+线条主题配色 */
+            --bg-main: #e9eaec;
+            --bg-panel: #f2f3f5;
+            --bg-header: #e2e4e7;
+            --bg-textarea: #fafafa;
+            --border-color: #c5c8cd;
+            --text-main: #2c2c2c;
+            --text-muted: #6b7280;
+            --primary-color: #d1d5db;
+            --primary-hover: #bdc3c7;
+            --accent-color: #3b82f6;
+            --accent-hover: #2563eb;
+            --success-color: #10b981;
+            --error-color: #ef4444;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            box-sizing: border-box;
+        }
+
+        .header {
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+        }
+
+        .header h2 {
+            margin: 0;
+            font-size: 1.1rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            color: #374151;
+        }
+
+        .container {
+            display: flex;
+            gap: 20px;
+            flex: 1;
+            min-height: 0;
+        }
+
+        .panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background-color: var(--bg-panel);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .panel-header {
+            padding: 0 15px;
+            height: 36px;
+            background-color: var(--bg-header);
+            font-size: 0.85rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .panel-title {
+            font-weight: 600;
+            color: #4b5563;
+        }
+
+        .btn-group-header {
+            display: flex;
+            gap: 8px;
+        }
+
+        textarea {
+            flex: 1;
+            width: 100%;
+            box-sizing: border-box;
+            background-color: var(--bg-textarea);
+            color: var(--text-main);
+            border: none;
+            padding: 15px;
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 13.5px;
+            resize: none;
+            outline: none;
+            white-space: pre;
+            overflow: auto;
+            line-height: 1.5;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        textarea::placeholder {
+            color: #9ca3af;
+        }
+
+        button {
+            background-color: var(--primary-color);
+            color: #374151;
+            border: 1px solid var(--border-color);
+            padding: 4px 12px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        button:hover {
+            background-color: var(--primary-hover);
+        }
+
+        button:disabled {
+            background-color: transparent;
+            color: #9ca3af;
+            border-color: #d1d5db;
+            cursor: not-allowed;
+        }
+
+        button.btn-accent {
+            background-color: var(--accent-color);
+            border-color: var(--accent-color);
+            color: #ffffff;
+        }
+
+        button.btn-accent:hover:not(:disabled) {
+            background-color: var(--accent-hover);
+        }
+
+        .footer {
+            margin-top: 15px;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 15px;
+            border-top: 1px solid var(--border-color);
+            padding-top: 15px;
+        }
+
+        #status {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-right: auto;
+        }
+
+        .status-success { color: var(--success-color) !important; font-weight: 500; }
+        .status-error { color: var(--error-color) !important; font-weight: 500; }
+
+        #fileInput { display: none; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h2>Makefile ➔ c_cpp_properties.json</h2>
+        <button id="btnSample" style="font-size: 0.8rem;">填入示例</button>
+    </div>
+
+    <div class="container">
+        <!-- 左侧输入框 -->
+        <div class="panel">
+            <div class="panel-header">
+                <span class="panel-title">1. Makefile 内容</span>
+                <div class="btn-group-header">
+                    <input type="file" id="fileInput">
+                    <button id="btnOpenFile">打开文件</button>
+                </div>
+            </div>
+            <textarea id="makefileInput" placeholder="请将 Makefile 内容粘贴到这里，或点击右上角打开文件..."></textarea>
+        </div>
+
+        <!-- 右侧输出框 -->
+        <div class="panel">
+            <div class="panel-header">
+                <span class="panel-title">2. 生成并修改 JSON</span>
+                <div class="btn-group-header">
+                    <button id="btnCopy">复制</button>
+                </div>
+            </div>
+            <textarea id="jsonOutput" spellcheck="false" placeholder="点击下方【解析生成】按钮后，配置将显示在这里。您也可以手动修改此处的代码。"></textarea>
+        </div>
+    </div>
+
+    <div class="footer">
+        <span id="status">就绪</span>
+        <button id="btnParse" class="btn-accent" style="padding: 8px 20px;">解析生成 ➔</button>
+        <button id="btnSave" disabled style="padding: 8px 20px;">保存到项目目录</button>
+    </div>
+
+    <script>
+        const makefileInput = document.getElementById('makefileInput');
+        const jsonOutput = document.getElementById('jsonOutput');
+        const statusMsg = document.getElementById('status');
+        const btnCopy = document.getElementById('btnCopy');
+        const btnSave = document.getElementById('btnSave');
+        const btnParse = document.getElementById('btnParse');
+        const btnSample = document.getElementById('btnSample');
+        const btnOpenFile = document.getElementById('btnOpenFile');
+        const fileInput = document.getElementById('fileInput');
+
+        // 核心解析逻辑
+        function parseMakefile(text) {
+            if (!text.trim()) return null;
+
+            // 1. 提取 include 路径 (存纯文本，不加双引号)
+            let includePaths = [];
+            const includeRegex = /C_INCLUDES\s*=\s*([\s\S]*?)(?=\n[A-Za-z_]+\s*=|\n\n|$)/;
+            const includeMatch = text.match(includeRegex);
+            if (includeMatch) {
+                const matches = includeMatch[1].matchAll(/-I([^\s\\]+)/g);
+                for (const match of matches) {
+                    includePaths.push(`${'${workspaceFolder}'}/${match[1].replace(/\\/g, '/')}`);
+                }
+            }
+            includePaths.push(`${'${workspaceFolder}'}/**`);
+
+            // 2. 提取宏定义 (存纯文本，不加双引号)
+            let defines = [];
+            const defsRegex = /C_DEFS\s*=\s*([\s\S]*?)(?=\n[A-Za-z_]+\s*=|\n\n|$)/;
+            const defsMatch = text.match(defsRegex);
+            if (defsMatch) {
+                const matches = defsMatch[1].matchAll(/-D([^\s\\]+)/g);
+                for (const match of matches) {
+                    defines.push(match[1]);
+                }
+            }
+
+            // 3. 智能判断架构和工具链
+            let gccPath = "C:/Program Files (x86)/Arm GNU Toolchain arm-none-eabi/13.2 Rel1/bin/arm-none-eabi-gcc.exe";
+            let mode = "gcc-arm";
+
+            if (text.includes("riscv64-unknown-elf-")) {
+                gccPath = "riscv64-unknown-elf-gcc.exe";
+                mode = "gcc-riscv64";
+            } else if (!text.includes("arm-none-eabi-")) {
+                gccPath = "C:/mingw64/bin/gcc.exe";
+                mode = "gcc-x64";
+            }
+
+            // 4. 组装 JSON 对象 (JSON.stringify 会自动加上正确的引号)
+            const config = {
+                "configurations": [
+                    {
+                        "name": "Sguan_Project",
+                        "includePath": includePaths,
+                        "defines": defines,
+                        "compilerPath": gccPath,
+                        "cStandard": "c11",
+                        "cppStandard": "c++17",
+                        "intelliSenseMode": mode
+                    }
+                ],
+                "version": 4
+            };
+
+            return JSON.stringify(config, null, 4);
+        }
+
+        // 点击解析按钮
+        btnParse.addEventListener('click', () => {
+            const jsonStr = parseMakefile(makefileInput.value);
+            if (jsonStr) {
+                jsonOutput.value = jsonStr;
+                statusMsg.textContent = "✅ 解析成功！";
+                statusMsg.className = "status-success";
+                btnSave.disabled = false;
+            } else {
+                statusMsg.textContent = "❌ 输入为空，请粘贴 Makefile。";
+                statusMsg.className = "status-error";
+                btnSave.disabled = true;
+            }
+        });
+
+        // 监听右侧输出框的手动修改
+        jsonOutput.addEventListener('input', () => {
+            if (jsonOutput.value.trim()) {
+                btnSave.disabled = false;
+            } else {
+                btnSave.disabled = true;
+            }
+        });
+
+        // 复制功能
+        btnCopy.addEventListener('click', () => {
+            if (!jsonOutput.value) return;
+            navigator.clipboard.writeText(jsonOutput.value).then(() => {
+                const originalText = btnCopy.textContent;
+                btnCopy.textContent = "已复制!";
+                setTimeout(() => btnCopy.textContent = originalText, 2000);
+            });
+        });
+
+        // 打开本地文件
+        btnOpenFile.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                makefileInput.value = event.target.result;
+                statusMsg.textContent = `已读取文件: ${file.name}，请点击【解析生成】。`;
+                statusMsg.className = "";
+                fileInput.value = ''; 
+            };
+            reader.onerror = () => {
+                statusMsg.textContent = "❌ 读取文件失败。";
+                statusMsg.className = "status-error";
+            };
+            reader.readAsText(file); 
+        });
+
+        // 保存到本地文件夹
+        btnSave.addEventListener('click', async () => {
+            if (!jsonOutput.value) return;
+
+            try {
+                const dirHandle = await window.showDirectoryPicker({ mode: 'readwrite' });
+                const vscodeDirHandle = await dirHandle.getDirectoryHandle('.vscode', { create: true });
+                const fileHandle = await vscodeDirHandle.getFileHandle('c_cpp_properties.json', { create: true });
+                const writable = await fileHandle.createWritable();
+                
+                await writable.write(jsonOutput.value);
+                await writable.close();
+
+                statusMsg.textContent = `✅ 成功保存到: ${dirHandle.name}/.vscode/c_cpp_properties.json`;
+                statusMsg.className = "status-success";
+            } catch (err) {
+                if (err.name === 'AbortError') {
+                    statusMsg.textContent = "已取消保存。";
+                    statusMsg.className = "";
+                } else {
+                    console.error(err);
+                    statusMsg.textContent = `❌ 保存失败: ${err.message}`;
+                    statusMsg.className = "status-error";
+                }
+            }
+        });
+
+        // 填入示例
+        btnSample.addEventListener('click', () => {
+            makefileInput.value = `C_DEFS =  \\
+-DUSE_HAL_DRIVER \\
+-DSTM32G474xx
+
+C_INCLUDES =  \\
+-ICore/Inc \\
+-IDrivers/STM32G4xx_HAL_Driver/Inc \\
+-IDrivers/CMSIS/Device/ST/STM32G4xx/Include \\
+-IDrivers/CMSIS/Include \\
+-IDrivers/CMSIS/Core/Include \\
+-IHardware \\
+-ISoftware
+
+PREFIX = arm-none-eabi-`;
+            statusMsg.textContent = "已填入示例，请点击【解析生成】。";
+            statusMsg.className = "";
+        });
+    </script>
+</body>
+</html>
