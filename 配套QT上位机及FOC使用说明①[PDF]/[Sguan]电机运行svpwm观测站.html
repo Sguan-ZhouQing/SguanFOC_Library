@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>PARK逆变换 + SVPWM 交互仿真</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, "Segoe UI", "Microsoft YaHei", sans-serif;
+    background: #f7f8fa;
+    color: #2c3e50;
+    display: flex;
+    height: 100vh;
+  }
+  /* 左侧编辑区 */
+  #left {
+    width: 46%;
+    min-width: 360px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid #e3e6eb;
+    background: #ffffff;
+  }
+  #left h2, #right h2 {
+    font-size: 15px;
+    font-weight: 600;
+    margin: 0 0 8px;
+    color: #34495e;
+  }
+  .hint {
+    font-size: 12px;
+    color: #8a94a6;
+    margin-bottom: 8px;
+    line-height: 1.5;
+  }
+  textarea {
+    flex: 1;
+    width: 100%;
+    resize: none;
+    font-family: "Consolas", "Courier New", monospace;
+    font-size: 13px;
+    line-height: 1.45;
+    padding: 10px;
+    border: 1px solid #dfe3e8;
+    border-radius: 8px;
+    background: #fbfcfd;
+    color: #223;
+    outline: none;
+  }
+  textarea:focus { border-color: #9db8ff; }
+  .err {
+    color: #c0392b;
+    font-size: 12px;
+    min-height: 16px;
+    margin-top: 6px;
+    white-space: pre-wrap;
+  }
+  /* 右侧 */
+  #right {
+    flex: 1;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+  }
+  .controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    align-items: flex-end;
+    background: #ffffff;
+    border: 1px solid #e3e6eb;
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-bottom: 12px;
+  }
+  .field { display: flex; flex-direction: column; gap: 4px; }
+  .field label { font-size: 12px; color: #6b7688; }
+  .field input[type="number"] {
+    width: 110px;
+    padding: 6px 8px;
+    border: 1px solid #dfe3e8;
+    border-radius: 6px;
+    font-size: 13px;
+    outline: none;
+  }
+  .field input:focus { border-color: #9db8ff; }
+  button {
+    padding: 8px 18px;
+    border: none;
+    border-radius: 8px;
+    background: #4a7cff;
+    color: #fff;
+    font-size: 13px;
+    cursor: pointer;
+    transition: background .15s;
+  }
+  button:hover { background: #3a6ae8; }
+  canvas {
+    width: 100%;
+    background: #ffffff;
+    border: 1px solid #e3e6eb;
+    border-radius: 10px;
+  }
+  .legend {
+    display: flex;
+    gap: 18px;
+    font-size: 12px;
+    color: #5a6577;
+    margin: 8px 0 4px;
+    flex-wrap: wrap;
+  }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; }
+  .dot { width: 12px; height: 3px; border-radius: 2px; display: inline-block; }
+  .stats {
+    margin-top: 12px;
+    background: #ffffff;
+    border: 1px solid #e3e6eb;
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 12.5px;
+    line-height: 1.7;
+    overflow-x: auto;
+  }
+  table { border-collapse: collapse; width: 100%; }
+  th, td {
+    text-align: right;
+    padding: 4px 10px;
+    border-bottom: 1px solid #f0f2f5;
+    white-space: nowrap;
+  }
+  th:first-child, td:first-child { text-align: left; font-weight: 600; color: #3a4660; }
+  th { color: #8a94a6; font-weight: 500; }
+  .note { font-size: 11.5px; color: #9aa3b2; margin-top: 8px; }
+</style>
+</head>
+<body>
+
+<div id="left">
+  <h2>math_svpwm 函数体（可编辑）</h2>
+  <div class="hint">
+    这是 <code>math_svpwm(u_alpha, u_beta, &amp;d_u, &amp;d_v, &amp;d_w)</code> 的内部实现。<br>
+    请填写函数体（大括号内部），可使用参数 <code>u_alpha, u_beta</code>，并通过给 <code>d_u, d_v, d_w</code> 赋值输出。允许使用 <code>Math.sqrt</code> 等 JS 数学函数。
+  </div>
+  <textarea id="fnBody" spellcheck="false"></textarea>
+  <div class="err" id="errMsg"></div>
+</div>
+
+<div id="right">
+  <h2>参数与波形</h2>
+  <div class="controls">
+    <div class="field">
+      <label>u_q（0 ~ 1.0）</label>
+      <input id="uq" type="number" value="0.8" min="0" max="1" step="0.01">
+    </div>
+    <div class="field">
+      <label>u_d（固定 0）</label>
+      <input id="ud" type="number" value="0" disabled>
+    </div>
+    <div class="field">
+      <label>角频率 ω (rad/s)</label>
+      <input id="omega" type="number" value="50" step="1">
+    </div>
+    <div class="field">
+      <label>&nbsp;</label>
+      <button id="runBtn">运行仿真</button>
+    </div>
+  </div>
+
+  <div class="legend">
+    <span><i class="dot" style="background:#4a7cff"></i>d_u</span>
+    <span><i class="dot" style="background:#e67e22"></i>d_v</span>
+    <span><i class="dot" style="background:#27ae60"></i>d_w</span>
+  </div>
+  <canvas id="chart" height="380"></canvas>
+
+  <div class="stats">
+    <table id="statsTable">
+      <thead>
+        <tr><th>信号</th><th>最大值</th><th>最小值</th><th>峰峰值</th><th>频率 (Hz)</th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+    <div class="note">频率由 1 秒内采样数据的 FFT 主峰估计；若信号近似直流，频率项可能无实际意义。</div>
+  </div>
+</div>
+
+<script>
+/* ============ 默认 math_svpwm 函数体（来自上传代码） ============ */
+const DEFAULT_BODY = `
+    const ts = 1.0;
+    const SQRT3_2 = Math.sqrt(3) / 2;
+
+    let u1 = u_beta;
+    let u2 = -SQRT3_2 * u_alpha - 0.5 * u_beta;
+    let u3 = SQRT3_2 * u_alpha - 0.5 * u_beta;
+
+    const sector = (u1 > 0 ? 1 : 0) + ((u2 > 0 ? 1 : 0) << 1) + ((u3 > 0 ? 1 : 0) << 2);
+
+    let t_a, t_b, t_c, k_svpwm;
+
+    if (sector === 5) {
+        let t4 = u3, t6 = u1;
+        let sum = t4 + t6;
+        if (sum > ts) { k_svpwm = ts / sum; t4 *= k_svpwm; t6 *= k_svpwm; }
+        let t7 = (ts - t4 - t6) / 2;
+        t_a = t4 + t6 + t7; t_b = t6 + t7; t_c = t7;
+    } else if (sector === 1) {
+        let t2 = -u3, t6 = -u2;
+        let sum = t2 + t6;
+        if (sum > ts) { k_svpwm = ts / sum; t2 *= k_svpwm; t6 *= k_svpwm; }
+        let t7 = (ts - t2 - t6) / 2;
+        t_a = t6 + t7; t_b = t2 + t6 + t7; t_c = t7;
+    } else if (sector === 3) {
+        let t2 = u1, t3 = u2;
+        let sum = t2 + t3;
+        if (sum > ts) { k_svpwm = ts / sum; t2 *= k_svpwm; t3 *= k_svpwm; }
+        let t7 = (ts - t2 - t3) / 2;
+        t_a = t7; t_b = t2 + t3 + t7; t_c = t3 + t7;
+    } else if (sector === 2) {
+        let t1 = -u1, t3 = -u3;
+        let sum = t1 + t3;
+        if (sum > ts) { k_svpwm = ts / sum; t1 *= k_svpwm; t3 *= k_svpwm; }
+        let t7 = (ts - t1 - t3) / 2;
+        t_a = t7; t_b = t3 + t7; t_c = t1 + t3 + t7;
+    } else if (sector === 6) {
+        let t1 = u2, t5 = u3;
+        let sum = t1 + t5;
+        if (sum > ts) { k_svpwm = ts / sum; t1 *= k_svpwm; t5 *= k_svpwm; }
+        let t7 = (ts - t1 - t5) / 2;
+        t_a = t5 + t7; t_b = t7; t_c = t1 + t5 + t7;
+    } else if (sector === 4) {
+        let t4 = -u2, t5 = -u1;
+        let sum = t4 + t5;
+        if (sum > ts) { k_svpwm = ts / sum; t4 *= k_svpwm; t5 *= k_svpwm; }
+        let t7 = (ts - t4 - t5) / 2;
+        t_a = t4 + t5 + t7; t_b = t7; t_c = t5 + t7;
+    } else {
+        t_a = 0.5; t_b = 0.5; t_c = 0.5;
+    }
+
+    d_u = t_a; d_v = t_b; d_w = t_c;
+`;
+
+document.getElementById('fnBody').value = DEFAULT_BODY.trim();
+
+/* ============ math_ipark（保持不变） ============ */
+function math_ipark(u_d, u_q, sine, cosine) {
+  const u_alpha = u_d * cosine - u_q * sine;
+  const u_beta  = u_q * cosine + u_d * sine;
+  return { u_alpha, u_beta };
+}
+
+/* ============ 将用户函数体编译为可调用函数 ============ */
+function compileSvpwm(body) {
+  const src = `
+    return function math_svpwm(u_alpha, u_beta) {
+      let d_u = 0, d_v = 0, d_w = 0;
+      ${body}
+      return { d_u, d_v, d_w };
+    };
+  `;
+  // 使用 Function 构造器；body 中若引用未定义变量会抛错，由外部捕获
+  return new Function(src)();
+}
+
+/* ============ 采样仿真 ============ */
+const FS = 10000;       // 采样率 Hz（1 秒 10000 点）
+const DURATION = 1.0;   // 秒
+const N = Math.round(FS * DURATION);
+
+function simulate(uq, omega, svpwmFn) {
+  const ud = 0;
+  const du = new Float64Array(N);
+  const dv = new Float64Array(N);
+  const dw = new Float64Array(N);
+  const dt = 1 / FS;
+
+  for (let i = 0; i < N; i++) {
+    const theta = omega * i * dt;   // 角度，弧度
+    const sine = Math.sin(theta);
+    const cosine = Math.cos(theta);
+
+    const { u_alpha, u_beta } = math_ipark(ud, uq, sine, cosine);
+    const out = svpwmFn(u_alpha, u_beta);
+    du[i] = out.d_u;
+    dv[i] = out.d_v;
+    dw[i] = out.d_w;
+  }
+  return { du, dv, dw };
+}
+
+/* ============ 统计 ============ */
+function stats(arr, fs) {
+  let max = -Infinity, min = Infinity;
+  for (let i = 0; i < arr.length; i++) {
+    if (arr[i] > max) max = arr[i];
+    if (arr[i] < min) min = arr[i];
+  }
+  const pp = max - min;
+  const freq = estimateFrequency(arr, fs);
+  return { max, min, pp, freq };
+}
+
+/* 简易 DFT 找主频（仅取前 2000 Hz 范围，降低计算量） */
+function estimateFrequency(arr, fs) {
+  const n = arr.length;
+  // 去均值
+  let mean = 0;
+  for (let i = 0; i < n; i++) mean += arr[i];
+  mean /= n;
+
+  // 若信号几乎为直流（峰峰值极小），返回 0
+  let maxAbs = 0;
+  for (let i = 0; i < n; i++) maxAbs = Math.max(maxAbs, Math.abs(arr[i] - mean));
+  if (maxAbs < 1e-9) return 0;
+
+  const maxFreq = Math.min(2000, fs / 2);
+  const stepHz = 0.5;               // 频率分辨率
+  const numFreq = Math.floor(maxFreq / stepHz);
+  let bestPower = -1, bestFreq = 0;
+
+  // 用 Goertzel 思路逐频点计算幅度
+  for (let k = 1; k <= numFreq; k++) {
+    const f = k * stepHz;
+    const w = 2 * Math.PI * f / fs;
+    const cw = Math.cos(w), sw = Math.sin(w);
+    let re = 0, im = 0;
+    // 为提速，隔点采样（步长 2），对频率估计影响可接受
+    for (let i = 0; i < n; i += 2) {
+      const x = arr[i] - mean;
+      re += x * Math.cos(w * i);
+      im -= x * Math.sin(w * i);
+    }
+    const power = re * re + im * im;
+    if (power > bestPower) { bestPower = power; bestFreq = f; }
+  }
+  return bestFreq;
+}
+
+/* ============ 绘图 ============ */
+const canvas = document.getElementById('chart');
+const ctx = canvas.getContext('2d');
+
+function resizeCanvas() {
+  const rect = canvas.getBoundingClientRect();
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = Math.round(rect.width * dpr);
+  canvas.height = Math.round(380 * dpr);
+  canvas.style.height = '380px';
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+}
+window.addEventListener('resize', () => { resizeCanvas(); drawCurrent(); });
+
+let current = null; // {du,dv,dw}
+
+function drawCurrent() {
+  if (!current) return;
+  drawWave(current.du, current.dv, current.dw);
+}
+
+function drawWave(du, dv, dw) {
+  const W = canvas.clientWidth;
+  const H = 380;
+  const padL = 46, padR = 14, padT = 18, padB = 28;
+  const plotW = W - padL - padR;
+  const plotH = H - padT - padB;
+
+  ctx.clearRect(0, 0, W, H);
+
+  // 计算 y 范围
+  let max = -Infinity, min = Infinity;
+  for (const arr of [du, dv, dw]) {
+    for (let i = 0; i < arr.length; i++) {
+      if (arr[i] > max) max = arr[i];
+      if (arr[i] < min) min = arr[i];
+    }
+  }
+  if (!isFinite(max) || !isFinite(min)) { max = 1; min = 0; }
+  if (max - min < 1e-6) { max += 0.5; min -= 0.5; }
+  const span = max - min;
+  const yMin = min - span * 0.05;
+  const yMax = max + span * 0.05;
+
+  const xToPx = t => padL + (t / 1.0) * plotW;          // t ∈ [0,1] 秒
+  const yToPx = v => padT + (1 - (v - yMin) / (yMax - yMin)) * plotH;
+
+  // 网格
+  ctx.strokeStyle = '#eef0f4';
+  ctx.lineWidth = 1;
+  const yTicks = 5;
+  for (let i = 0; i <= yTicks; i++) {
+    const v = yMin + (yMax - yMin) * i / yTicks;
+    const y = yToPx(v);
+    ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(W - padR, y); ctx.stroke();
+    ctx.fillStyle = '#9aa3b2';
+    ctx.font = '11px -apple-system, sans-serif';
+    ctx.textAlign = 'right';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(v.toFixed(3), padL - 6, y);
+  }
+  const xTicks = 10;
+  for (let i = 0; i <= xTicks; i++) {
+    const t = i / xTicks;
+    const x = xToPx(t);
+    ctx.beginPath(); ctx.moveTo(x, padT); ctx.lineTo(x, H - padB); ctx.stroke();
+    ctx.fillStyle = '#9aa3b2';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    ctx.fillText(t.toFixed(1) + 's', x, H - padB + 6);
+  }
+
+  // 坐标轴
+  ctx.strokeStyle = '#cfd5df';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(padL, padT); ctx.lineTo(padL, H - padB); ctx.lineTo(W - padR, H - padB);
+  ctx.stroke();
+
+  // 绘制曲线（每像素列取 min/max，保证 1 万点不丢细节）
+  function plot(arr, color) {
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 1.4;
+    ctx.beginPath();
+    const stepPx = 1;
+    let started = false;
+    for (let px = 0; px <= plotW; px += stepPx) {
+      const i0 = Math.floor(px / plotW * (arr.length - 1));
+      const i1 = Math.min(arr.length - 1, Math.floor((px + stepPx) / plotW * (arr.length - 1)));
+      let lo = Infinity, hi = -Infinity;
+      for (let i = i0; i <= i1; i++) {
+        if (arr[i] < lo) lo = arr[i];
+        if (arr[i] > hi) hi = arr[i];
+      }
+      if (lo === Infinity) continue;
+      const x = padL + px;
+      if (!started) { ctx.moveTo(x, yToPx(hi)); started = true; }
+      else ctx.lineTo(x, yToPx(hi));
+      if (lo !== hi) ctx.lineTo(x, yToPx(lo));
+    }
+    ctx.stroke();
+  }
+  plot(du, '#4a7cff');
+  plot(dv, '#e67e22');
+  plot(dw, '#27ae60');
+
+  // 图例文字
+  ctx.font = '12px -apple-system, sans-serif';
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'top';
+}
+
+/* ============ 统计表填充 ============ */
+function fillStats(du, dv, dw) {
+  const tbody = document.querySelector('#statsTable tbody');
+  tbody.innerHTML = '';
+  const names = ['d_u', 'd_v', 'd_w'];
+  const arrs = [du, dv, dw];
+  for (let k = 0; k < 3; k++) {
+    const s = stats(arrs[k], FS);
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${names[k]}</td>
+      <td>${s.max.toFixed(6)}</td>
+      <td>${s.min.toFixed(6)}</td>
+      <td>${s.pp.toFixed(6)}</td>
+      <td>${s.freq.toFixed(3)}</td>
+    `;
+    tbody.appendChild(tr);
+  }
+}
+
+/* ============ 运行 ============ */
+const errEl = document.getElementById('errMsg');
+
+function run() {
+  errEl.textContent = '';
+  const body = document.getElementById('fnBody').value;
+  const uq = parseFloat(document.getElementById('uq').value);
+  const omega = parseFloat(document.getElementById('omega').value);
+
+  if (!isFinite(uq) || uq < 0 || uq > 1.0) {
+    errEl.textContent = 'u_q 必须是 0 ~ 1.0 之间的数值。';
+    return;
+  }
+  if (!isFinite(omega)) {
+    errEl.textContent = '角频率必须是数值。';
+    return;
+  }
+
+  let svpwmFn;
+  try {
+    svpwmFn = compileSvpwm(body);
+  } catch (e) {
+    errEl.textContent = '函数编译失败：' + e.message;
+    return;
+  }
+
+  // 先用一个点试运行，捕获运行时错误
+  try {
+    svpwmFn(0.1, 0.2);
+  } catch (e) {
+    errEl.textContent = '函数运行出错：' + e.message;
+    return;
+  }
+
+  let result;
+  try {
+    result = simulate(uq, omega, svpwmFn);
+  } catch (e) {
+    errEl.textContent = '仿真出错：' + e.message;
+    return;
+  }
+
+  current = result;
+  resizeCanvas();
+  drawWave(result.du, result.dv, result.dw);
+  fillStats(result.du, result.dv, result.dw);
+}
+
+document.getElementById('runBtn').addEventListener('click', run);
+window.addEventListener('load', () => { resizeCanvas(); run(); });
+</script>
+</body>
+</html>
