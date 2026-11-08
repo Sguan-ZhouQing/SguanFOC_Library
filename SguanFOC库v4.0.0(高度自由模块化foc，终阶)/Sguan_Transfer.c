@@ -2430,7 +2430,7 @@ __LocalSingleRs *__local_singlers_get(uint8_t motor){
 }
 
 // ================================================================================
-// 3.全局函数transfer初始化函数
+// 5.全局函数transfer初始化函数
 void transfer_init(Transfer *transfer){
 
 }
