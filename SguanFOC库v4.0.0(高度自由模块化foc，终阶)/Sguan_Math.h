@@ -25,6 +25,9 @@ void math_correct(SguanQ *angle, SguanQ error);
 SguanQ math_limit(SguanQ value, SguanQ max, SguanQ min);
 SguanQ math_sign(SguanQ value, SguanF base_value);
 SguanQ math_sqrt(SguanQ x);
+SguanQ math_ads(SguanQ x);
+SguanQ math_max(SguanQ a, SguanQ b);
+SguanQ math_min(SguanQ a, SguanQ b);
 
 void math_clarke(
     SguanQ *i_alpha, 
@@ -45,6 +48,15 @@ void math_ipark(
     SguanQ u_q, 
     SguanQ sine, 
     SguanQ cosine);
+void math_spwm(SguanQ u_alpha, SguanQ u_beta, 
+    SguanQ *d_u, SguanQ *d_v, SguanQ *d_w);
+uint8_t math_svpwm(SguanQ u_alpha, SguanQ u_beta, 
+    SguanQ *d_u, SguanQ *d_v, SguanQ *d_w);
+uint8_t math_swpwm(int8_t *sector, uint32_t *num_count, 
+    SguanQ const_ubus, SguanQ const_we, uint32_t const_count, 
+    SguanQ ubus, SguanQ we, 
+    SguanQ ua, SguanQ ub, SguanQ uc, SguanQ umid, 
+    uint8_t key[3], SguanQ *d_u, SguanQ *d_v, SguanQ *d_w);
 
 
 #endif // SGUAN_MATH_H

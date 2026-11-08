@@ -8,30 +8,31 @@
 #include "Sguan_Printf.h"
 #include "Sguan_Transfer.h"
 
-#define RUN_READY           0x01
-#define RUN_INITIALIZING    0x02
-#define RUN_STANDBY         0x03
-#define RUN_FAULT           0x04
-#define RUN_SUCCESS         0x05
+#define __LOCAL_RUN_READY           0x01
+#define __LOCAL_RUN_INITIALIZING    0x02
+#define __LOCAL_RUN_STANDBY         0x03
+#define __LOCAL_RUN_FAULT           0x04
+#define __LOCAL_RUN_SUCCESS         0x05
 
-#define MOTOR_ONE           0X00
-#define MOTOR_TWO           0X01
-#define MOTOR_THREE         0X02
-#define MOTOR_FOUR          0X03
-#define MOTOR_FIVE          0X04
-#define MOTOR_SIX           0X05
+#define __LOCAL_MOTOR_ONE           0X00
+#define __LOCAL_MOTOR_TWO           0X01
+#define __LOCAL_MOTOR_THREE         0X02
+#define __LOCAL_MOTOR_FOUR          0X03
+#define __LOCAL_MOTOR_FIVE          0X04
+#define __LOCAL_MOTOR_SIX           0X05
 
-#define CONTROL_TORUE       0x00
-#define CONTROL_VELOCITY    0x01
-#define CONTROL_POSITION    0x02
+#define __LOCAL_CONTROL_TORUE       0x00
+#define __LOCAL_CONTROL_VELOCITY    0x01
+#define __LOCAL_CONTROL_POSITION    0x02
 
-#define CURRENT_U           0x00
-#define CURRENT_V           0x01
-#define CURRENT_W           0x02
+#define __LOCAL_CURRENT_U           0x00
+#define __LOCAL_CURRENT_V           0x01
+#define __LOCAL_CURRENT_W           0x02
+#define __LOCAL_CURRENT_OTHER       0x03
 
-#define HALL_A              0x00
-#define HALL_B              0x01
-#define HALL_C              0x02
+#define __LOCAL_HALL_A              0x00
+#define __LOCAL_HALL_B              0x01
+#define __LOCAL_HALL_C              0x02
 
 typedef struct{
     SguanQ target_speed;                        // (期望速度)Target期望机械角速度
@@ -57,17 +58,26 @@ typedef struct{
     SguanQ cosine;                              // (数据)cosine临时保存的余弦值
 
     SguanQ real_vbus;                           // (数据)Real实际的电机母线电压
-    SguanQ real_current;                        // (数据)Current实际的电流数值
-    SguanQ real_temp;                           // (数据)Temp实际的驱动器物理温度
+    SguanQ real_is;                             // (数据)Current实际的电流数值
+    SguanQ real_temp_motor;                     // (数据)Temp实际的驱动器物理温度
+    SguanQ real_temp_driver;                    // (数据)Temp实际的驱动器物理温度
+    SguanQ real_temp_pcb;                       // (数据)Temp实际的驱动器物理温度
 }Foc;
 
 typedef struct{
-    SguanQ real_position;
     SguanQ real_speed;
+    SguanQ real_position;
     SguanQ real_We;
     SguanQ real_Re;
 
     SguanQ real_offset;
+
+    SguanQ other_speed;
+    SguanQ other_position;
+    SguanQ other_We;
+    SguanQ other_Re;
+
+    SguanQ other_offset;
 }Encoder;
 
 typedef struct{
@@ -81,9 +91,13 @@ typedef struct{
     SguanQ real_ialpha;                         // (Current中间量电流)alpha轴电流
     SguanQ real_ibeta;                          // (Current中间量电流)beta轴电流
 
+    SguanQ real_is;                             // (Current电流)电流峰值
+    SguanQ real_ibus;                           // (Current电流)母线电流
+
     SguanQ final_gain;                          // (ADC增益)最终的ADC电流采样增益
     int32_t current_offset0;                    // (Current电流偏置)offset偏置位
     int32_t current_offset1;                    // (Current电流偏置)offset偏置位
+    int32_t current_offset2;                    // (Current电流偏置)offset偏置位
 }Current;
 
 typedef struct{
@@ -94,6 +108,7 @@ typedef struct{
 
     uint8_t poles;                              // (电机实体参数)电机极对数
     SguanQ vbus;                                // (电机实体参数)母线电压
+    SguanQ eta;                                 // (电机实体参数)母线电流计算中的效率
 
     int8_t motor_dir;                           // (参数设计)电机的运行方向设计
     int8_t encoder_dir;                         // (有感实体参数)编码器方向
@@ -102,7 +117,7 @@ typedef struct{
 
     int8_t current_dir0;                        // (参数设计)电流采样方向0
     int8_t current_dir1;                        // (参数设计)电流采样方向1
-    uint8_t current_num;                        // (参数设计)电流通道0->AB相，1->AC相，2->BC相
+    int8_t current_dir2;                        // (参数设计)电流采样方向2
     uint32_t adc_precision;                     // (参数设计)ADC采样精度,如12位精度为4096
     SguanQ amplifier;                           // (参数设计)运放的放大倍数
     SguanQ mcu_voltage;                         // (参数设计)DSP/单片机的ADC基准电压

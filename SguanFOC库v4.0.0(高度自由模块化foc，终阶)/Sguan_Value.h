@@ -68,6 +68,7 @@ typedef float                   SguanF;
 #define VALUE_F_PI              (SguanF)3.141592653589793239
 #define VALUE_F_PI_2            (SguanF)1.570796326794896619
 #define VALUE_F_2_SQRT2         (SguanF)2.828427124746190098
+#define VALUE_F_SQRT3           (SguanF)1.732050807568877293
 #define VALUE_F_SQRT3_2         (SguanF)0.866025403784438646
 #define VALUE_F_INV_SQRT3       (SguanF)0.577350269189625764
 #define VALUE_F_ONE             (SguanF)1.0     // 数值壹
@@ -79,6 +80,7 @@ typedef float                   SguanF;
 #define VALUE_Q15_PI            (Q15)12868      // BASE=8.0
 #define VALUE_Q15_PI_2          (Q15)6434       // BASE=8.0
 #define VALUE_Q15_INV_SQRT3     (Q15)18919      // BASE=1.0
+#define VALUE_Q15_SQRT3_2       (Q15)28378      // BASE=1.0
 #define VALUE_Q15_MAX           0x7FFF          // 表示最大值0.9999694824
 #define VALUE_Q15_MIN           0x8000          // 表示最小值-1.0
 #define VALUE_Q15_HALF          0x4000          // 表示0.5(特殊场景会用到)
@@ -87,6 +89,7 @@ typedef float                   SguanF;
 #define VALUE_Q31_PI            (Q31)843314857  // BASE=8.0
 #define VALUE_Q31_PI_2          (Q31)421657428  // BASE=8.0
 #define VALUE_Q31_INV_SQRT3     (Q31)1239850262 // BASE=1.0
+#define VALUE_Q31_SQRT3_2       (Q31)1859775393 // BASE=1.0
 #define VALUE_Q31_MAX           0x7FFFFFFF      // 表示最大值0.9999999995
 #define VALUE_Q31_MIN           0x80000000      // 表示最小值-1.0
 #define VALUE_Q31_HALF          0x40000000      // 表示0.5(特殊场景会用到)

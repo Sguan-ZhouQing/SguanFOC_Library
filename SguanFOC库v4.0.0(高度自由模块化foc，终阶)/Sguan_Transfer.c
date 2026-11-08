@@ -3,6 +3,8 @@
 /* SguanFOC配置文件声明 */
 #include "UnitLib_Patch.h"
 
+// ================================================================================
+// 1.局部函数__local基础
 static void __local_transfer1_init(__LocalTransfer1 *transfer);
 static void __local_transfer2_init(__LocalTransfer2 *transfer);
 static void __local_transfer3_init(__LocalTransfer3 *transfer);
@@ -32,8 +34,8 @@ static void __local_tpnf_init(__LocalTpnf *tpnf);
 static void __local_dob_init(__LocalDob *dob);
 static void __local_rls_init(__LocalRls *rls);
 static void __local_smo_init(__LocalSmo *smo);
-static void __local_nlfo_init(__LocalNlfo *nlfo);
-static void __local_vcfo_init(__LocalVcfo *vcfo);
+static void __local_nfo_init(__LocalNfo *nfo);
+static void __local_afo_init(__LocalAfo *afo);
 static void __local_hfi_init(__LocalHfi *hfi);
 static void __local_rolo_init(__LocalRolo *rolo);
 static void __local_mars_init(__LocalMars *mars);
@@ -42,7 +44,8 @@ static void __local_delay1_init(__LocalDelay1 *delay);
 static void __local_delay2_init(__LocalDelay2 *delay);
 static void __local_delay3_init(__LocalDelay3 *delay);
 
-// ==================== 实例获取：块实例统一由 .c 的静态池提供，用户只拿指针 ====================
+// ================================================================================
+// 2.实例获取静态池(声明)
 #if CONFIG_TRANSFER1
 __LocalTransfer1 *__local_transfer1_get(uint8_t motor, int ch);
 #endif
@@ -131,10 +134,10 @@ __LocalRls *__local_rls_get(uint8_t motor, int ch);
 __LocalSmo *__local_smo_get(uint8_t motor, int ch);
 #endif
 #if CONFIG_NLFO
-__LocalNlfo *__local_nlfo_get(uint8_t motor, int ch);
+__LocalNfo *__local_nfo_get(uint8_t motor, int ch);
 #endif
 #if CONFIG_VCFO
-__LocalVcfo *__local_vcfo_get(uint8_t motor, int ch);
+__LocalAfo *__local_afo_get(uint8_t motor, int ch);
 #endif
 #if CONFIG_HFI
 __LocalHfi *__local_hfi_get(uint8_t motor, int ch);
@@ -157,7 +160,7 @@ __LocalDelay2 *__local_delay2_get(uint8_t motor, int ch);
 #if CONFIG_DELAY3
 __LocalDelay3 *__local_delay3_get(uint8_t motor, int ch);
 #endif
-// ==================== 单一功能模块实例（单实例，无通道参数） ====================
+
 __LocalSine *__local_sine_get(uint8_t motor);
 __LocalCosine *__local_cosine_get(uint8_t motor);
 __LocalSinCos *__local_sincos_get(uint8_t motor);
@@ -168,13 +171,14 @@ __LocalSign *__local_sign_get(uint8_t motor);
 __LocalClarke *__local_clarke_get(uint8_t motor);
 __LocalPark *__local_park_get(uint8_t motor);
 __LocalIpark *__local_ipark_get(uint8_t motor);
-__LocalSpwm0 *__local_spwm0_get(uint8_t motor);
 __LocalSpwm *__local_spwm_get(uint8_t motor);
 __LocalSvpwm *__local_svpwm_get(uint8_t motor);
 __LocalSwpwm *__local_swpwm_get(uint8_t motor);
 __LocalSingleRs *__local_singlers_get(uint8_t motor);
 
-// ---------------------------工程模块Transfer---------------------------
+// ================================================================================
+// 3.全局函数transfer基础
+// (典型一阶传递函数，计数1)----------------------------------------------------------
 struct __LocalTransfer1Data{
     SguanQ i;
     SguanQ o;
@@ -183,6 +187,7 @@ struct __LocalTransfer1Data{
     SguanQ data_den[2];
 };
 
+// (典型一阶传递函数，计数1)
 static void __local_transfer1_init(__LocalTransfer1 *transfer){
     #if VALUE_MODE_MATH>=VALUE_MODE_Q15
     patch_transfer1_init(transfer);
@@ -203,6 +208,7 @@ static void __local_transfer1_init(__LocalTransfer1 *transfer){
     #endif // VALUE_MODE_MATH
 }
 
+// (典型一阶传递函数，计数1)
 void transfer_transfer1_loop(__LocalTransfer1 *transfer){
     #if VALUE_MODE_MATH>=VALUE_MODE_Q15
     patch_transfer1_loop(transfer);
@@ -225,7 +231,7 @@ void transfer_transfer1_loop(__LocalTransfer1 *transfer){
     #endif // VALUE_MODE_MATH
 }
 
-// ---------------------------工程模块Transfer---------------------------
+// (典型二阶传递函数，计数2)----------------------------------------------------------
 struct __LocalTransfer2Data{
     SguanQ i[2];
     SguanQ o[2];
@@ -234,6 +240,7 @@ struct __LocalTransfer2Data{
     SguanQ data_den[3];
 };
 
+// (典型二阶传递函数，计数2)
 static void __local_transfer2_init(__LocalTransfer2 *transfer){
     #if VALUE_MODE_MATH>=VALUE_MODE_Q15
     patch_transfer2_init(transfer);
@@ -259,6 +266,7 @@ static void __local_transfer2_init(__LocalTransfer2 *transfer){
     #endif // VALUE_MODE_MATH
 }
 
+// (典型二阶传递函数，计数2)
 void transfer_transfer2_loop(__LocalTransfer2 *transfer){
     #if VALUE_MODE_MATH>=VALUE_MODE_Q15
     patch_transfer2_loop(transfer);
@@ -286,7 +294,7 @@ void transfer_transfer2_loop(__LocalTransfer2 *transfer){
     #endif // VALUE_MODE_MATH
 }
 
-// ---------------------------工程模块Transfer---------------------------
+// (典型三阶传递函数，计数3)----------------------------------------------------------
 struct __LocalTransfer3Data{
     SguanQ i[3];
     SguanQ o[3];
@@ -295,6 +303,7 @@ struct __LocalTransfer3Data{
     SguanQ data_den[4];
 };
 
+// (典型三阶传递函数，计数3)
 static void __local_transfer3_init(__LocalTransfer3 *transfer){
     #if VALUE_MODE_MATH>=VALUE_MODE_Q15
     patch_transfer3_init(transfer);
@@ -324,6 +333,7 @@ static void __local_transfer3_init(__LocalTransfer3 *transfer){
     #endif // VALUE_MODE_MATH
 }
 
+// (典型三阶传递函数，计数3)
 void transfer_transfer3_loop(__LocalTransfer3 *transfer){
     #if VALUE_MODE_MATH>=VALUE_MODE_Q15
     patch_transfer3_loop(transfer);
@@ -355,7 +365,7 @@ void transfer_transfer3_loop(__LocalTransfer3 *transfer){
     #endif // VALUE_MODE_MATH
 }
 
-// ---------------------------工程模块Transfer---------------------------
+// (典型四阶传递函数，计数4)----------------------------------------------------------
 struct __LocalTransfer4Data{
     SguanQ i[4];
     SguanQ o[4];
@@ -364,6 +374,7 @@ struct __LocalTransfer4Data{
     SguanQ data_den[5];
 };
 
+// (典型四阶传递函数，计数4)
 static void __local_transfer4_init(__LocalTransfer4 *transfer){
     #if VALUE_MODE_MATH>=VALUE_MODE_Q15
     patch_transfer4_init(transfer);
@@ -397,6 +408,7 @@ static void __local_transfer4_init(__LocalTransfer4 *transfer){
     #endif // VALUE_MODE_MATH
 }
 
+// (典型四阶传递函数，计数4)
 void transfer_transfer4_loop(__LocalTransfer4 *transfer){
     #if VALUE_MODE_MATH>=VALUE_MODE_Q15
     patch_transfer4_loop(transfer);
@@ -432,7 +444,7 @@ void transfer_transfer4_loop(__LocalTransfer4 *transfer){
     #endif // VALUE_MODE_MATH
 }
 
-// ---------------------------工程模块Transfer---------------------------
+// (典型五阶传递函数，计数5)----------------------------------------------------------
 struct __LocalTransfer5Data{
     SguanQ i[5];
     SguanQ o[5];
@@ -441,6 +453,7 @@ struct __LocalTransfer5Data{
     SguanQ data_den[6];
 };
 
+// (典型五阶传递函数，计数5)
 static void __local_transfer5_init(__LocalTransfer5 *transfer){
     #if VALUE_MODE_MATH>=VALUE_MODE_Q15
     patch_transfer5_init(transfer);
@@ -478,6 +491,7 @@ static void __local_transfer5_init(__LocalTransfer5 *transfer){
     #endif // VALUE_MODE_MATH
 }
 
+// (典型五阶传递函数，计数5)
 void transfer_transfer5_loop(__LocalTransfer5 *transfer){
     #if VALUE_MODE_MATH>=VALUE_MODE_Q15
     patch_transfer5_loop(transfer);
@@ -517,13 +531,14 @@ void transfer_transfer5_loop(__LocalTransfer5 *transfer){
     #endif // VALUE_MODE_MATH
 }
 
-// ---------------------------工程模块Transfer---------------------------
+// (积分器，计数6)-------------------------------------------------------------------
 struct __LocalIntegratorData{
     SguanQ i;
 
     SguanQ data_num;
 };
 
+// (积分器，计数6)
 static void __local_integrator_init(__LocalIntegrator *integrator){
     #if VALUE_MODE_MATH>=VALUE_MODE_Q15
     patch_integrator_init(integrator);
@@ -539,6 +554,7 @@ static void __local_integrator_init(__LocalIntegrator *integrator){
     #endif // VALUE_MODE_MATH
 }
 
+// (积分器，计数6)
 void transfer_integrator_loop(__LocalIntegrator *integrator){
     #if VALUE_MODE_MATH>=VALUE_MODE_Q15
     patch_integrator_loop(integrator);
@@ -551,7 +567,7 @@ void transfer_integrator_loop(__LocalIntegrator *integrator){
     #endif // VALUE_MODE_MATH
 }
 
-// ---------------------------工程模块Transfer---------------------------
+// (微分器，计数7)-------------------------------------------------------------------
 struct __LocalDerivativeData{
     SguanQ i;
     SguanQ o;
@@ -560,6 +576,7 @@ struct __LocalDerivativeData{
     SguanQ data_den[2];
 };
 
+// (微分器，计数7)
 static void __local_derivative_init(__LocalDerivative *derivative){
     #if VALUE_MODE_MATH>=VALUE_MODE_Q15
     patch_derivative_init(derivative);
@@ -580,6 +597,7 @@ static void __local_derivative_init(__LocalDerivative *derivative){
     #endif // VALUE_MODE_MATH
 }
 
+// (微分器，计数7)
 void transfer_derivative_loop(__LocalDerivative *derivative){
     #if VALUE_MODE_MATH>=VALUE_MODE_Q15
     patch_derivative_loop(derivative);
@@ -602,7 +620,7 @@ void transfer_derivative_loop(__LocalDerivative *derivative){
     #endif // VALUE_MODE_MATH
 }
 
-// ---------------------------工程模块Transfer---------------------------
+// (S型曲线加减速函数，计数8)---------------------------------------------------------
 static const float speed_tab[100] = {
     0.000000000000000f, 0.000204061405384f, 0.000816243642475f, 0.001836552750319f,
     0.003264978528023f, 0.005101525224745f, 0.007346192840487f, 0.009998980909586f,
@@ -631,6 +649,7 @@ static const float speed_tab[100] = {
     0.998163461685181f, 0.999183773994446f, 0.999795913696289f, 1.000000000000000f
 };
 
+// (S型曲线加减速函数，计数8)
 struct __LocalCurveData{
     SguanQ i;
     SguanQ o;
@@ -639,6 +658,7 @@ struct __LocalCurveData{
     SguanQ data_den[2];
 };
 
+// (S型曲线加减速函数，计数8)
 static void __local_curve_init(__LocalCurve *curve){
     #if VALUE_MODE_MATH>=VALUE_MODE_Q15
     patch_curve_init(curve);
@@ -647,6 +667,7 @@ static void __local_curve_init(__LocalCurve *curve){
     #endif // VALUE_MODE_MATH
 }
 
+// (S型曲线加减速函数，计数8)
 void transfer_curve_loop(__LocalCurve *curve){
     #if VALUE_MODE_MATH>=VALUE_MODE_Q15
     patch_curve_loop(curve);
@@ -655,8 +676,7 @@ void transfer_curve_loop(__LocalCurve *curve){
     #endif // VALUE_MODE_MATH
 }
 
-
-// ---------------------------工程模块Transfer---------------------------
+// (傅里叶变换，计数9)---------------------------------------------------------------
 struct __LocalDftData{
     SguanQ i;
     SguanQ o;
@@ -665,7 +685,7 @@ struct __LocalDftData{
     SguanQ data_den[2];
 };
 
-
+// (傅里叶变换，计数9)
 static void __local_dft_init(__LocalDft *dft){
     #if VALUE_MODE_MATH>=VALUE_MODE_Q15
     patch_dft_init(dft);
@@ -674,7 +694,7 @@ static void __local_dft_init(__LocalDft *dft){
     #endif // VALUE_MODE_MATH
 }
 
-
+// (傅里叶变换，计数9)
 void transfer_dft_loop(__LocalDft *dft){
     #if VALUE_MODE_MATH>=VALUE_MODE_Q15
     patch_dft_loop(dft);
@@ -683,16 +703,13 @@ void transfer_dft_loop(__LocalDft *dft){
     #endif // VALUE_MODE_MATH
 }
 
-// ---------------------------工程模块Transfer---------------------------
-
-
-
+// (霍尔编码器，计数10)--------------------------------------------------------------
 struct __LocalHallData{
     SguanQ num;
     SguanQ den;
 };
 
-
+// (霍尔编码器，计数10)
 static void __local_hall_init(__LocalHall *hall){
     #if VALUE_MODE_MATH>=VALUE_MODE_Q15
     patch_hall_init(hall);
@@ -707,6 +724,7 @@ static void __local_hall_init(__LocalHall *hall){
     #endif // VALUE_MODE_MATH
 }
 
+// (霍尔编码器，计数10)
 void transfer_hall_loop(__LocalHall *hall){
     #if VALUE_MODE_MATH>=VALUE_MODE_Q15
     patch_hall_loop(hall);
@@ -718,16 +736,13 @@ void transfer_hall_loop(__LocalHall *hall){
     #endif // VALUE_MODE_MATH
 }
 
-// ---------------------------工程模块Transfer---------------------------
-
-
-
+// (一阶线性自适应抗干扰控制，计数11)-------------------------------------------------
 struct __LocalLadrc1Data{
     SguanQ num;
     SguanQ den;
 };
 
-
+// (一阶线性自适应抗干扰控制，计数11)
 static void __local_ladrc1_init(__LocalLadrc1 *ladrc){
     #if VALUE_MODE_MATH>=VALUE_MODE_Q15
     patch_ladrc1_init(ladrc);
@@ -742,6 +757,7 @@ static void __local_ladrc1_init(__LocalLadrc1 *ladrc){
     #endif // VALUE_MODE_MATH
 }
 
+// (一阶线性自适应抗干扰控制，计数11)
 void transfer_ladrc1_loop(__LocalLadrc1 *ladrc){
     #if VALUE_MODE_MATH>=VALUE_MODE_Q15
     patch_ladrc1_loop(ladrc);
@@ -753,16 +769,13 @@ void transfer_ladrc1_loop(__LocalLadrc1 *ladrc){
     #endif // VALUE_MODE_MATH
 }
 
-// ---------------------------工程模块Transfer---------------------------
-
-
-
+// (二阶线性自适应抗干扰控制，计数12)--------------------------------------------------
 struct __LocalLadrc2Data{
     SguanQ num;
     SguanQ den;
 };
 
-
+// (二阶线性自适应抗干扰控制，计数12)
 static void __local_ladrc2_init(__LocalLadrc2 *ladrc){
     #if VALUE_MODE_MATH>=VALUE_MODE_Q15
     patch_ladrc2_init(ladrc);
@@ -773,6 +786,7 @@ static void __local_ladrc2_init(__LocalLadrc2 *ladrc){
     #endif // VALUE_MODE_MATH
 }
 
+// (二阶线性自适应抗干扰控制，计数12)
 void transfer_ladrc2_loop(__LocalLadrc2 *ladrc){
     #if VALUE_MODE_MATH>=VALUE_MODE_Q15
     patch_ladrc2_loop(ladrc);
@@ -784,16 +798,13 @@ void transfer_ladrc2_loop(__LocalLadrc2 *ladrc){
     #endif // VALUE_MODE_MATH
 }
 
-// ---------------------------工程模块Transfer---------------------------
-
-
-
+// (传统指数型趋近率的滑模控制，计数13)------------------------------------------------
 struct __LocalSmcData{
     SguanQ num;
     SguanQ den;
 };
 
-
+// (传统指数型趋近率的滑模控制，计数13)
 static void __local_smc_init(__LocalSmc *smc){
     #if VALUE_MODE_MATH>=VALUE_MODE_Q15
     patch_smc_init(smc);
@@ -804,6 +815,7 @@ static void __local_smc_init(__LocalSmc *smc){
     #endif // VALUE_MODE_MATH
 }
 
+// (传统指数型趋近率的滑模控制，计数13)
 void transfer_smc_loop(__LocalSmc *smc){
     #if VALUE_MODE_MATH>=VALUE_MODE_Q15
     patch_smc_loop(smc);
@@ -815,16 +827,13 @@ void transfer_smc_loop(__LocalSmc *smc){
     #endif // VALUE_MODE_MATH
 }
 
-// ---------------------------工程模块Transfer---------------------------
-
-
-
+// (增量式电流预测控制，计数14)-------------------------------------------------------
 struct __LocalDpccData{
     SguanQ num;
     SguanQ den;
 };
 
-
+// (增量式电流预测控制，计数14)
 static void __local_dpcc_init(__LocalDpcc *dpcc){
     #if VALUE_MODE_MATH>=VALUE_MODE_Q15
     patch_dpcc_init(dpcc);
@@ -835,6 +844,7 @@ static void __local_dpcc_init(__LocalDpcc *dpcc){
     #endif // VALUE_MODE_MATH
 }
 
+// (增量式电流预测控制，计数14)
 void transfer_dpcc_loop(__LocalDpcc *dpcc){
     #if VALUE_MODE_MATH>=VALUE_MODE_Q15
     patch_dpcc_loop(dpcc);
@@ -846,16 +856,13 @@ void transfer_dpcc_loop(__LocalDpcc *dpcc){
     #endif // VALUE_MODE_MATH
 }
 
-// ---------------------------工程模块Transfer---------------------------
-
-
-
+// (比例积分谐振调节器，计数15)-------------------------------------------------------
 struct __LocalPirData{
     SguanQ num;
     SguanQ den;
 };
 
-
+// (比例积分谐振调节器，计数15)
 static void __local_pir_init(__LocalPir *pir){
     #if VALUE_MODE_MATH>=VALUE_MODE_Q15
     patch_pir_init(pir);
@@ -866,6 +873,7 @@ static void __local_pir_init(__LocalPir *pir){
     #endif // VALUE_MODE_MATH
 }
 
+// (比例积分谐振调节器，计数15)
 void transfer_pir_loop(__LocalPir *pir){
     #if VALUE_MODE_MATH>=VALUE_MODE_Q15
     patch_pir_loop(pir);
@@ -877,16 +885,13 @@ void transfer_pir_loop(__LocalPir *pir){
     #endif // VALUE_MODE_MATH
 }
 
-// ---------------------------工程模块Transfer---------------------------
-
-
-
+// (传统闭环控制器，计数16)-----------------------------------------------------------
 struct __LocalPidData{
     SguanQ num;
     SguanQ den;
 };
 
-
+// (传统闭环控制器，计数16)
 static void __local_pid_init(__LocalPid *pid){
     #if VALUE_MODE_MATH>=VALUE_MODE_Q15
     patch_pid_init(pid);
@@ -897,6 +902,7 @@ static void __local_pid_init(__LocalPid *pid){
     #endif // VALUE_MODE_MATH
 }
 
+// (传统闭环控制器，计数16)
 void transfer_pid_loop(__LocalPid *pid){
     #if VALUE_MODE_MATH>=VALUE_MODE_Q15
     patch_pid_loop(pid);
@@ -908,16 +914,13 @@ void transfer_pid_loop(__LocalPid *pid){
     #endif // VALUE_MODE_MATH
 }
 
-// ---------------------------工程模块Transfer---------------------------
-
-
-
+// (开环锁相环，计数17)---------------------------------------------------------------
 struct __LocalPllData{
     SguanQ num;
     SguanQ den;
 };
 
-
+// (开环锁相环，计数17)
 static void __local_pll_init(__LocalPll *pll){
     #if VALUE_MODE_MATH>=VALUE_MODE_Q15
     patch_pll_init(pll);
@@ -928,6 +931,7 @@ static void __local_pll_init(__LocalPll *pll){
     #endif // VALUE_MODE_MATH
 }
 
+// (开环锁相环，计数17)
 void transfer_pll_loop(__LocalPll *pll){
     #if VALUE_MODE_MATH>=VALUE_MODE_Q15
     patch_pll_loop(pll);
@@ -939,10 +943,7 @@ void transfer_pll_loop(__LocalPll *pll){
     #endif // VALUE_MODE_MATH
 }
 
-// ---------------------------工程模块Transfer---------------------------
-
-
-
+// (一阶低通滤波器，计数18)-----------------------------------------------------------
 struct __LocalLpf1Data{
     SguanQ i;
     SguanQ o;
@@ -951,7 +952,7 @@ struct __LocalLpf1Data{
     SguanQ data_den[2];
 };
 
-
+// (一阶低通滤波器，计数18)
 static void __local_lpf1_init(__LocalLpf1 *lpf){
     #if VALUE_MODE_MATH>=VALUE_MODE_Q15
     patch_lpf1_init(lpf);
@@ -971,6 +972,7 @@ static void __local_lpf1_init(__LocalLpf1 *lpf){
     #endif // VALUE_MODE_MATH
 }
 
+// (一阶低通滤波器，计数18)
 void transfer_lpf1_loop(__LocalLpf1 *lpf){
     #if VALUE_MODE_MATH>=VALUE_MODE_Q15
     patch_lpf1_loop(lpf);
@@ -992,10 +994,7 @@ void transfer_lpf1_loop(__LocalLpf1 *lpf){
     #endif // VALUE_MODE_MATH
 }
 
-// ---------------------------工程模块Transfer---------------------------
-
-
-
+// (二阶低通滤波器，计数19)-----------------------------------------------------------
 struct __LocalLpf2Data{
     SguanQ i[2];
     SguanQ o[2];
@@ -1007,7 +1006,7 @@ struct __LocalLpf2Data{
     SguanQ data_den[3];
 };
 
-
+// (二阶低通滤波器，计数19)
 static void __local_lpf2_init(__LocalLpf2 *lpf){
     #if VALUE_MODE_MATH>=VALUE_MODE_Q15
     patch_lpf2_init(lpf);
@@ -1031,6 +1030,7 @@ static void __local_lpf2_init(__LocalLpf2 *lpf){
     #endif // VALUE_MODE_MATH
 }
 
+// (二阶低通滤波器，计数19)
 void transfer_lpf2_loop(__LocalLpf2 *lpf){
     #if VALUE_MODE_MATH>=VALUE_MODE_Q15
     patch_lpf2_loop(lpf);
@@ -1057,10 +1057,7 @@ void transfer_lpf2_loop(__LocalLpf2 *lpf){
     #endif // VALUE_MODE_MATH
 }
 
-// ---------------------------工程模块Transfer---------------------------
-
-
-
+// (一阶高通滤波器，计数20)-----------------------------------------------------------
 struct __LocalHpf1Data{
     SguanQ i;
     SguanQ o;
@@ -1069,7 +1066,7 @@ struct __LocalHpf1Data{
     SguanQ data_den[2];
 };
 
-
+// (一阶高通滤波器，计数20)
 static void __local_hpf1_init(__LocalHpf1 *hpf){
     #if VALUE_MODE_MATH>=VALUE_MODE_Q15
     patch_hpf1_init(hpf);
@@ -1090,6 +1087,7 @@ static void __local_hpf1_init(__LocalHpf1 *hpf){
     #endif // VALUE_MODE_MATH
 }
 
+// (一阶高通滤波器，计数20)
 void transfer_hpf1_loop(__LocalHpf1 *hpf){
     #if VALUE_MODE_MATH>=VALUE_MODE_Q15
     patch_hpf1_loop(hpf);
@@ -1112,10 +1110,7 @@ void transfer_hpf1_loop(__LocalHpf1 *hpf){
     #endif // VALUE_MODE_MATH
 }
 
-// ---------------------------工程模块Transfer---------------------------
-
-
-
+// (二阶高通滤波器，计数21)-----------------------------------------------------------
 struct __LocalHpf2Data{
     SguanQ i[2];
     SguanQ o[2];
@@ -1127,7 +1122,7 @@ struct __LocalHpf2Data{
     SguanQ data_den[3];
 };
 
-
+// (二阶高通滤波器，计数21)
 static void __local_hpf2_init(__LocalHpf2 *hpf){
     #if VALUE_MODE_MATH>=VALUE_MODE_Q15
     patch_hpf2_init(hpf);
@@ -1152,6 +1147,7 @@ static void __local_hpf2_init(__LocalHpf2 *hpf){
     #endif // VALUE_MODE_MATH
 }
 
+// (二阶高通滤波器，计数21)
 void transfer_hpf2_loop(__LocalHpf2 *hpf){
     #if VALUE_MODE_MATH>=VALUE_MODE_Q15
     patch_hpf2_loop(hpf);
@@ -1178,10 +1174,7 @@ void transfer_hpf2_loop(__LocalHpf2 *hpf){
     #endif // VALUE_MODE_MATH
 }
 
-// ---------------------------工程模块Transfer---------------------------
-
-
-
+// (带通滤波器"一阶低通和高通串联"，计数22)--------------------------------------------
 struct __LocalBpf1Data{
     SguanQ i[2];
     SguanQ o[2];
@@ -1193,7 +1186,7 @@ struct __LocalBpf1Data{
     SguanQ data_den[3];
 };
 
-
+// (带通滤波器"一阶低通和高通串联"，计数22)
 static void __local_bpf1_init(__LocalBpf1 *bpf){
     #if VALUE_MODE_MATH>=VALUE_MODE_Q15
     patch_bpf1_init(bpf);
@@ -1218,6 +1211,7 @@ static void __local_bpf1_init(__LocalBpf1 *bpf){
     #endif // VALUE_MODE_MATH
 }
 
+// (带通滤波器"一阶低通和高通串联"，计数22)
 void transfer_bpf1_loop(__LocalBpf1 *bpf){
     #if VALUE_MODE_MATH>=VALUE_MODE_Q15
     patch_bpf1_loop(bpf);
@@ -1244,10 +1238,7 @@ void transfer_bpf1_loop(__LocalBpf1 *bpf){
     #endif // VALUE_MODE_MATH
 }
 
-// ---------------------------工程模块Transfer---------------------------
-
-
-
+// (带通滤波器"典型二阶系统改型"，计数23)----------------------------------------------
 struct __LocalBpf2Data{
     SguanQ i[2];
     SguanQ o[2];
@@ -1259,7 +1250,7 @@ struct __LocalBpf2Data{
     SguanQ data_den[3];
 };
 
-
+// (带通滤波器"典型二阶系统改型"，计数23)
 static void __local_bpf2_init(__LocalBpf2 *bpf){
     #if VALUE_MODE_MATH>=VALUE_MODE_Q15
     patch_bpf2_init(bpf);
@@ -1284,6 +1275,7 @@ static void __local_bpf2_init(__LocalBpf2 *bpf){
     #endif // VALUE_MODE_MATH
 }
 
+// (带通滤波器"典型二阶系统改型"，计数23)
 void transfer_bpf2_loop(__LocalBpf2 *bpf){
     #if VALUE_MODE_MATH>=VALUE_MODE_Q15
     patch_bpf2_loop(bpf);
@@ -1309,10 +1301,8 @@ void transfer_bpf2_loop(__LocalBpf2 *bpf){
     bpf->data->o[0] = bpf->out.output;
     #endif // VALUE_MODE_MATH
 }
-// ---------------------------工程模块Transfer---------------------------
 
-
-
+// (广义积分器"典型二阶系统改型"，计数24)----------------------------------------------
 struct __LocalSogiData{
     SguanQ i[2];
     SguanQ o[2];
@@ -1324,7 +1314,7 @@ struct __LocalSogiData{
     SguanQ data_den[3];
 };
 
-
+// (广义积分器"典型二阶系统改型"，计数24)
 static void __local_sogi_init(__LocalSogi *sogi){
     #if VALUE_MODE_MATH>=VALUE_MODE_Q15
     patch_sogi_init(sogi);
@@ -1337,6 +1327,7 @@ static void __local_sogi_init(__LocalSogi *sogi){
     #endif // VALUE_MODE_MATH
 }
 
+// (广义积分器"典型二阶系统改型"，计数24)
 void transfer_sogi_loop(__LocalSogi *sogi){
     #if VALUE_MODE_MATH>=VALUE_MODE_Q15
     patch_sogi_loop(sogi);
@@ -1351,10 +1342,7 @@ void transfer_sogi_loop(__LocalSogi *sogi){
     #endif // VALUE_MODE_MATH
 }
 
-// ---------------------------工程模块Transfer---------------------------
-
-
-
+// (陷波滤波器"典型二阶系统改型"，计数25)----------------------------------------------
 struct __LocalNfData{
     SguanQ i[2];
     SguanQ o[2];
@@ -1366,7 +1354,7 @@ struct __LocalNfData{
     SguanQ data_den[3];
 };
 
-
+// (陷波滤波器"典型二阶系统改型"，计数25)
 static void __local_nf_init(__LocalNf *nf){
     #if VALUE_MODE_MATH>=VALUE_MODE_Q15
     patch_nf_init(nf);
@@ -1391,6 +1379,7 @@ static void __local_nf_init(__LocalNf *nf){
     #endif // VALUE_MODE_MATH
 }
 
+// (陷波滤波器"典型二阶系统改型"，计数25)
 void transfer_nf_loop(__LocalNf *nf){
     #if VALUE_MODE_MATH>=VALUE_MODE_Q15
     patch_nf_loop(nf);
@@ -1417,10 +1406,7 @@ void transfer_nf_loop(__LocalNf *nf){
     #endif // VALUE_MODE_MATH
 }
 
-// ---------------------------工程模块Transfer---------------------------
-
-
-
+// (陷波滤波器"三参数陷波滤波器"，计数26)----------------------------------------------
 struct __LocalTpnfData{
     SguanQ i[2];
     SguanQ o[2];
@@ -1429,7 +1415,7 @@ struct __LocalTpnfData{
     SguanQ data_den[3];
 };
 
-
+// (陷波滤波器"三参数陷波滤波器"，计数26)
 static void __local_tpnf_init(__LocalTpnf *tpnf){
     #if VALUE_MODE_MATH>=VALUE_MODE_Q15
     patch_tpnf_init(tpnf);
@@ -1455,6 +1441,7 @@ static void __local_tpnf_init(__LocalTpnf *tpnf){
     #endif // VALUE_MODE_MATH
 }
 
+// (陷波滤波器"三参数陷波滤波器"，计数26)
 void transfer_tpnf_loop(__LocalTpnf *tpnf){
     #if VALUE_MODE_MATH>=VALUE_MODE_Q15
     patch_tpnf_loop(tpnf);
@@ -1482,16 +1469,13 @@ void transfer_tpnf_loop(__LocalTpnf *tpnf){
     #endif // VALUE_MODE_MATH
 }
 
-// ---------------------------工程模块Transfer---------------------------
-
-
-
+// (超螺旋滑模扰动观测器，计数27)-----------------------------------------------------
 struct __LocalDobData{
     SguanQ num;
     SguanQ den;
 };
 
-
+// (超螺旋滑模扰动观测器，计数27)
 static void __local_dob_init(__LocalDob *dob){
     #if VALUE_MODE_MATH>=VALUE_MODE_Q15
     patch_dob_init(dob);
@@ -1502,6 +1486,7 @@ static void __local_dob_init(__LocalDob *dob){
     #endif // VALUE_MODE_MATH
 }
 
+// (超螺旋滑模扰动观测器，计数27)
 void transfer_dob_loop(__LocalDob *dob){
     #if VALUE_MODE_MATH>=VALUE_MODE_Q15
     patch_dob_loop(dob);
@@ -1513,16 +1498,13 @@ void transfer_dob_loop(__LocalDob *dob){
     #endif // VALUE_MODE_MATH
 }
 
-// ---------------------------工程模块Transfer---------------------------
-
-
-
+// (电机参数在线辨识观测器，计数28)----------------------------------------------------
 struct __LocalRlsData{
     SguanQ num;
     SguanQ den;
 };
 
-
+// (电机参数在线辨识观测器，计数28)
 static void __local_rls_init(__LocalRls *rls){
     #if VALUE_MODE_MATH>=VALUE_MODE_Q15
     patch_rls_init(rls);
@@ -1533,6 +1515,7 @@ static void __local_rls_init(__LocalRls *rls){
     #endif // VALUE_MODE_MATH
 }
 
+// (电机参数在线辨识观测器，计数28)
 void transfer_rls_loop(__LocalRls *rls){
     #if VALUE_MODE_MATH>=VALUE_MODE_Q15
     patch_rls_loop(rls);
@@ -1544,16 +1527,13 @@ void transfer_rls_loop(__LocalRls *rls){
     #endif // VALUE_MODE_MATH
 }
 
-// ---------------------------工程模块Transfer---------------------------
-
-
-
+// ("无感"滑模观测器，计数29)---------------------------------------------------------
 struct __LocalSmoData{
     SguanQ num;
     SguanQ den;
 };
 
-
+// ("无感"滑模观测器，计数29)
 static void __local_smo_init(__LocalSmo *smo){
     #if VALUE_MODE_MATH>=VALUE_MODE_Q15
     patch_smo_init(smo);
@@ -1564,6 +1544,7 @@ static void __local_smo_init(__LocalSmo *smo){
     #endif // VALUE_MODE_MATH
 }
 
+// ("无感"滑模观测器，计数29)
 void transfer_smo_loop(__LocalSmo *smo){
     #if VALUE_MODE_MATH>=VALUE_MODE_Q15
     patch_smo_loop(smo);
@@ -1575,19 +1556,16 @@ void transfer_smo_loop(__LocalSmo *smo){
     #endif // VALUE_MODE_MATH
 }
 
-// ---------------------------工程模块Transfer---------------------------
-
-
-
-struct __LocalNlfoData{
+// ("无感"非线性磁链观测器，计数30)---------------------------------------------------
+struct __LocalNfoData{
     SguanQ num;
     SguanQ den;
 };
 
-
-static void __local_nlfo_init(__LocalNlfo *nlfo){
+// ("无感"非线性磁链观测器，计数30)
+static void __local_nfo_init(__LocalNfo *nfo){
     #if VALUE_MODE_MATH>=VALUE_MODE_Q15
-    patch_nlfo_init(nlfo);
+    patch_nfo_init(nfo);
     #else // VALUE_MODE_MATH
 
 
@@ -1595,9 +1573,10 @@ static void __local_nlfo_init(__LocalNlfo *nlfo){
     #endif // VALUE_MODE_MATH
 }
 
-void transfer_nlfo_loop(__LocalNlfo *nlfo){
+// ("无感"非线性磁链观测器，计数30)
+void transfer_nfo_loop(__LocalNfo *nfo){
     #if VALUE_MODE_MATH>=VALUE_MODE_Q15
-    patch_nlfo_loop(nlfo);
+    patch_nfo_loop(nfo);
     #else // VALUE_MODE_MATH
 
 
@@ -1605,19 +1584,17 @@ void transfer_nlfo_loop(__LocalNlfo *nlfo){
 
     #endif // VALUE_MODE_MATH
 }
-// ---------------------------工程模块Transfer---------------------------
 
-
-
-struct __LocalVcfoData{
+// ("无感"有效磁链观测器，计数31)----------------------------------------------
+struct __LocalAfoData{
     SguanQ num;
     SguanQ den;
 };
 
-
-static void __local_vcfo_init(__LocalVcfo *vcfo){
+// ("无感"有效磁链观测器，计数31)
+static void __local_afo_init(__LocalAfo *afo){
     #if VALUE_MODE_MATH>=VALUE_MODE_Q15
-    patch_vcfo_init(vcfo);
+    patch_afo_init(afo);
     #else // VALUE_MODE_MATH
 
 
@@ -1625,9 +1602,10 @@ static void __local_vcfo_init(__LocalVcfo *vcfo){
     #endif // VALUE_MODE_MATH
 }
 
-void transfer_vcfo_loop(__LocalVcfo *vcfo){
+// ("无感"有效磁链观测器，计数31)
+void transfer_afo_loop(__LocalAfo *afo){
     #if VALUE_MODE_MATH>=VALUE_MODE_Q15
-    patch_vcfo_loop(vcfo);
+    patch_afo_loop(afo);
     #else // VALUE_MODE_MATH
 
 
@@ -1636,16 +1614,13 @@ void transfer_vcfo_loop(__LocalVcfo *vcfo){
     #endif // VALUE_MODE_MATH
 }
 
-// ---------------------------工程模块Transfer---------------------------
-
-
-
+// ("无感"高频正弦波注入，计数32)-----------------------------------------------------
 struct __LocalHfiData{
     SguanQ num;
     SguanQ den;
 };
 
-
+// ("无感"高频正弦波注入，计数32)
 static void __local_hfi_init(__LocalHfi *hfi){
     #if VALUE_MODE_MATH>=VALUE_MODE_Q15
     patch_hfi_init(hfi);
@@ -1656,6 +1631,7 @@ static void __local_hfi_init(__LocalHfi *hfi){
     #endif // VALUE_MODE_MATH
 }
 
+// ("无感"高频正弦波注入，计数32)
 void transfer_hfi_loop(__LocalHfi *hfi){
     #if VALUE_MODE_MATH>=VALUE_MODE_Q15
     patch_hfi_loop(hfi);
@@ -1667,16 +1643,13 @@ void transfer_hfi_loop(__LocalHfi *hfi){
     #endif // VALUE_MODE_MATH
 }
 
-// ---------------------------工程模块Transfer---------------------------
-
-
-
+// ("无感"降阶龙伯格观测器，计数33)---------------------------------------------------
 struct __LocalRoloData{
     SguanQ num;
     SguanQ den;
 };
 
-
+// ("无感"降阶龙伯格观测器，计数33)
 static void __local_rolo_init(__LocalRolo *rolo){
     #if VALUE_MODE_MATH>=VALUE_MODE_Q15
     patch_rolo_init(rolo);
@@ -1687,6 +1660,7 @@ static void __local_rolo_init(__LocalRolo *rolo){
     #endif // VALUE_MODE_MATH
 }
 
+// ("无感"降阶龙伯格观测器，计数33)
 void transfer_rolo_loop(__LocalRolo *rolo){
     #if VALUE_MODE_MATH>=VALUE_MODE_Q15
     patch_rolo_loop(rolo);
@@ -1698,16 +1672,13 @@ void transfer_rolo_loop(__LocalRolo *rolo){
     #endif // VALUE_MODE_MATH
 }
 
-// ---------------------------工程模块Transfer---------------------------
-
-
-
+// ("无感"模型参考自适应观测器，计数34)------------------------------------------------
 struct __LocalMarsData{
     SguanQ num;
     SguanQ den;
 };
 
-
+// ("无感"模型参考自适应观测器，计数34)
 static void __local_mars_init(__LocalMars *mars){
     #if VALUE_MODE_MATH>=VALUE_MODE_Q15
     patch_mars_init(mars);
@@ -1718,6 +1689,7 @@ static void __local_mars_init(__LocalMars *mars){
     #endif // VALUE_MODE_MATH
 }
 
+// ("无感"模型参考自适应观测器，计数34)
 void transfer_mars_loop(__LocalMars *mars){
     #if VALUE_MODE_MATH>=VALUE_MODE_Q15
     patch_mars_loop(mars);
@@ -1729,16 +1701,13 @@ void transfer_mars_loop(__LocalMars *mars){
     #endif // VALUE_MODE_MATH
 }
 
-// ---------------------------工程模块Transfer---------------------------
-
-
-
+// ("无感"扩展卡尔曼滤波，计数35)-----------------------------------------------------
 struct __LocalEkfData{
     SguanQ num;
     SguanQ den;
 };
 
-
+// ("无感"扩展卡尔曼滤波，计数35)
 static void __local_ekf_init(__LocalEkf *ekf){
     #if VALUE_MODE_MATH>=VALUE_MODE_Q15
     patch_ekf_init(ekf);
@@ -1749,6 +1718,7 @@ static void __local_ekf_init(__LocalEkf *ekf){
     #endif // VALUE_MODE_MATH
 }
 
+// ("无感"扩展卡尔曼滤波，计数35)
 void transfer_ekf_loop(__LocalEkf *ekf){
     #if VALUE_MODE_MATH>=VALUE_MODE_Q15
     patch_ekf_loop(ekf);
@@ -1760,10 +1730,7 @@ void transfer_ekf_loop(__LocalEkf *ekf){
     #endif // VALUE_MODE_MATH
 }
 
-// ---------------------------工程模块Transfer---------------------------
-
-
-
+// (延时函数"延时一拍"，计数36)-------------------------------------------------------
 static void __local_delay1_init(__LocalDelay1 *delay){
     #if VALUE_MODE_MATH>=VALUE_MODE_Q15
 
@@ -1774,6 +1741,7 @@ static void __local_delay1_init(__LocalDelay1 *delay){
     #endif // VALUE_MODE_MATH
 }
 
+// (延时函数"延时一拍"，计数36)
 void transfer_delay1_loop(__LocalDelay1 *delay){
     #if VALUE_MODE_MATH>=VALUE_MODE_Q15
 
@@ -1789,10 +1757,7 @@ void transfer_delay1_loop(__LocalDelay1 *delay){
     #endif // VALUE_MODE_MATH
 }
 
-// ---------------------------工程模块Transfer---------------------------
-
-
-
+// (延时函数"延时二拍"，计数37)-------------------------------------------------------
 static void __local_delay2_init(__LocalDelay2 *delay){
     #if VALUE_MODE_MATH>=VALUE_MODE_Q15
 
@@ -1803,6 +1768,7 @@ static void __local_delay2_init(__LocalDelay2 *delay){
     #endif // VALUE_MODE_MATH
 }
 
+// (延时函数"延时二拍"，计数37)
 void transfer_delay2_loop(__LocalDelay2 *delay){
     #if VALUE_MODE_MATH>=VALUE_MODE_Q15
 
@@ -1819,10 +1785,7 @@ void transfer_delay2_loop(__LocalDelay2 *delay){
     #endif // VALUE_MODE_MATH
 }
 
-// ---------------------------工程模块Transfer---------------------------
-
-
-
+// (延时函数"延时三拍"，计数38)-------------------------------------------------------
 static void __local_delay3_init(__LocalDelay3 *delay){
     #if VALUE_MODE_MATH>=VALUE_MODE_Q15
 
@@ -1833,6 +1796,7 @@ static void __local_delay3_init(__LocalDelay3 *delay){
     #endif // VALUE_MODE_MATH
 }
 
+// (延时函数"延时三拍"，计数38)
 void transfer_delay3_loop(__LocalDelay3 *delay){
     #if VALUE_MODE_MATH>=VALUE_MODE_Q15
 
@@ -1850,10 +1814,7 @@ void transfer_delay3_loop(__LocalDelay3 *delay){
     #endif // VALUE_MODE_MATH
 }
 
-// ---------------------------工程模块Transfer---------------------------
-
-
-
+// (正弦发生器，计数39)--------------------------------------------------------------
 void transfer_sine_loop(__LocalSine *sine){
     #if VALUE_MODE_MATH>=VALUE_MODE_Q15
 
@@ -1862,10 +1823,7 @@ void transfer_sine_loop(__LocalSine *sine){
     #endif // VALUE_MODE_MATH
 }
 
-// ---------------------------工程模块Transfer---------------------------
-
-
-
+// (余弦发生器，计数40)--------------------------------------------------------------
 void transfer_cosine_loop(__LocalCosine *cosine){
     #if VALUE_MODE_MATH>=VALUE_MODE_Q15
 
@@ -1874,10 +1832,7 @@ void transfer_cosine_loop(__LocalCosine *cosine){
     #endif // VALUE_MODE_MATH
 }
 
-// ---------------------------工程模块Transfer---------------------------
-
-
-
+// (正余弦发生器，计数41)------------------------------------------------------------
 void transfer_sincos_loop(__LocalSinCos *sincos){
     #if VALUE_MODE_MATH>=VALUE_MODE_Q15
 
@@ -1888,7 +1843,7 @@ void transfer_sincos_loop(__LocalSinCos *sincos){
     #endif // VALUE_MODE_MATH
 }
 
-// ---------------------------工程模块Transfer---------------------------
+// (正切求解器，计数42)--------------------------------------------------------------
 void transfer_tan_loop(__LocalTan *tan){
     #if VALUE_MODE_MATH>=VALUE_MODE_Q15
 
@@ -1900,8 +1855,7 @@ void transfer_tan_loop(__LocalTan *tan){
     #endif // VALUE_MODE_MATH
 }
 
-
-// ---------------------------工程模块Transfer---------------------------
+// (反正切求解器，计数43)------------------------------------------------------------
 void transfer_atan_loop(__LocalAtan *atan){
     #if VALUE_MODE_MATH>=VALUE_MODE_Q15
 
@@ -1913,9 +1867,7 @@ void transfer_atan_loop(__LocalAtan *atan){
     #endif // VALUE_MODE_MATH
 }
 
-
-
-// ---------------------------工程模块Transfer---------------------------
+// (限幅函数，计数44)----------------------------------------------------------------
 void transfer_limit_loop(__LocalLimit *limit){
     #if VALUE_MODE_MATH>=VALUE_MODE_Q15
 
@@ -1927,9 +1879,7 @@ void transfer_limit_loop(__LocalLimit *limit){
     #endif // VALUE_MODE_MATH
 }
 
-
-
-// ---------------------------工程模块Transfer---------------------------
+// (符号函数，计数45)----------------------------------------------------------------
 void transfer_sign_loop(__LocalSign *sign){
     #if VALUE_MODE_MATH>=VALUE_MODE_Q15
 
@@ -1941,11 +1891,7 @@ void transfer_sign_loop(__LocalSign *sign){
     #endif // VALUE_MODE_MATH
 }
 
-
-// ---------------------------工程模块Transfer---------------------------
-
-
-
+// (克拉克变换，计数46)--------------------------------------------------------------
 void transfer_clarke_loop(__LocalClarke *clarke){
     #if VALUE_MODE_MATH>=VALUE_MODE_Q15
 
@@ -1957,10 +1903,7 @@ void transfer_clarke_loop(__LocalClarke *clarke){
     #endif // VALUE_MODE_MATH
 }
 
-// ---------------------------工程模块Transfer---------------------------
-
-
-
+// (帕克变换，计数47)----------------------------------------------------------------
 void transfer_park_loop(__LocalPark *park){
     #if VALUE_MODE_MATH>=VALUE_MODE_Q15
 
@@ -1972,10 +1915,7 @@ void transfer_park_loop(__LocalPark *park){
     #endif // VALUE_MODE_MATH
 }
 
-// ---------------------------工程模块Transfer---------------------------
-
-
-
+// (帕克逆变换，计数48)--------------------------------------------------------------
 void transfer_ipark_loop(__LocalIpark *ipark){
     #if VALUE_MODE_MATH>=VALUE_MODE_Q15
 
@@ -1987,25 +1927,7 @@ void transfer_ipark_loop(__LocalIpark *ipark){
     #endif // VALUE_MODE_MATH
 }
 
-// ---------------------------工程模块Transfer---------------------------
-
-
-
-void transfer_spwm0_loop(__LocalSpwm0 *spwm){
-    #if VALUE_MODE_MATH>=VALUE_MODE_Q15
-
-    #else // VALUE_MODE_MATH
-
-
-    
-
-    #endif // VALUE_MODE_MATH
-}
-
-// ---------------------------工程模块Transfer---------------------------
-
-
-
+// (零序注入的SPWM模块，计数49)-------------------------------------------------------
 void transfer_spwm_loop(__LocalSpwm *spwm){
     #if VALUE_MODE_MATH>=VALUE_MODE_Q15
 
@@ -2017,8 +1939,7 @@ void transfer_spwm_loop(__LocalSpwm *spwm){
     #endif // VALUE_MODE_MATH
 }
 
-// ---------------------------工程模块Transfer---------------------------
-
+// (七段式SVPWM模块，计数50)---------------------------------------------------------
 void transfer_svpwm_loop(__LocalSvpwm *svpwm){
     #if VALUE_MODE_MATH>=VALUE_MODE_Q15
 
@@ -2030,10 +1951,7 @@ void transfer_svpwm_loop(__LocalSvpwm *svpwm){
     #endif // VALUE_MODE_MATH
 }
 
-// ---------------------------工程模块Transfer---------------------------
-
-
-
+// (电调PWM无感方波，计数51)----------------------------------------------------------
 void transfer_swpwm_loop(__LocalSwpwm *swpwm){
     #if VALUE_MODE_MATH>=VALUE_MODE_Q15
 
@@ -2042,9 +1960,8 @@ void transfer_swpwm_loop(__LocalSwpwm *swpwm){
     #endif // VALUE_MODE_MATH
 }
 
-// ---------------------------工程模块Transfer---------------------------
-
-void transfer_singlers_loop(__LocalSingleRs *singlers){
+// (单电阻采样函数，计数52)-----------------------------------------------------------
+void transfer_singlers_start_loop(__LocalSingleRs *singlers){
     #if VALUE_MODE_MATH>=VALUE_MODE_Q15
 
     #else // VALUE_MODE_MATH
@@ -2055,21 +1972,19 @@ void transfer_singlers_loop(__LocalSingleRs *singlers){
     #endif // VALUE_MODE_MATH
 }
 
-
-
-
-// ---------------------------工程模块Transfer---------------------------
-void transfer_reset_integrator(void *p){
+void transfer_singlers_end_loop(__LocalSingleRs *singlers){
     #if VALUE_MODE_MATH>=VALUE_MODE_Q15
 
     #else // VALUE_MODE_MATH
 
 
+    
 
     #endif // VALUE_MODE_MATH
 }
 
-// ================== 实例池（块实例统一住在这里，用户通过 _get() 拿指针）==================
+// ================================================================================
+// 4.实例获取静态池(实现)
 #if CONFIG_TRANSFER1
 static __LocalTransfer1 transfer1_pool[CONFIG_MOTOR][CONFIG_TRANSFER1];
 static __LocalTransfer1Data transfer1_data_pool[CONFIG_MOTOR][CONFIG_TRANSFER1];
@@ -2361,22 +2276,22 @@ __LocalSmo *__local_smo_get(uint8_t motor, int ch){
 }
 #endif
 #if CONFIG_NLFO
-static __LocalNlfo nlfo_pool[CONFIG_MOTOR][CONFIG_NLFO];
-static __LocalNlfoData nlfo_data_pool[CONFIG_MOTOR][CONFIG_NLFO];
-__LocalNlfo *__local_nlfo_get(uint8_t motor, int ch){
+static __LocalNfo nfo_pool[CONFIG_MOTOR][CONFIG_NLFO];
+static __LocalNfoData nfo_data_pool[CONFIG_MOTOR][CONFIG_NLFO];
+__LocalNfo *__local_nfo_get(uint8_t motor, int ch){
     if (motor >= CONFIG_MOTOR || ch >= CONFIG_NLFO) return 0;
-    __LocalNlfo *self = &nlfo_pool[motor][ch];
-    self->data = &nlfo_data_pool[motor][ch];
+    __LocalNfo *self = &nfo_pool[motor][ch];
+    self->data = &nfo_data_pool[motor][ch];
     return self;
 }
 #endif
 #if CONFIG_VCFO
-static __LocalVcfo vcfo_pool[CONFIG_MOTOR][CONFIG_VCFO];
-static __LocalVcfoData vcfo_data_pool[CONFIG_MOTOR][CONFIG_VCFO];
-__LocalVcfo *__local_vcfo_get(uint8_t motor, int ch){
+static __LocalAfo afo_pool[CONFIG_MOTOR][CONFIG_VCFO];
+static __LocalAfoData afo_data_pool[CONFIG_MOTOR][CONFIG_VCFO];
+__LocalAfo *__local_afo_get(uint8_t motor, int ch){
     if (motor >= CONFIG_MOTOR || ch >= CONFIG_VCFO) return 0;
-    __LocalVcfo *self = &vcfo_pool[motor][ch];
-    self->data = &vcfo_data_pool[motor][ch];
+    __LocalAfo *self = &afo_pool[motor][ch];
+    self->data = &afo_data_pool[motor][ch];
     return self;
 }
 #endif
@@ -2443,98 +2358,79 @@ __LocalDelay3 *__local_delay3_get(uint8_t motor, int ch){
 #endif
 
 
-// ==================== 单一功能模块实例（单实例） ====================
 static __LocalSine sine_pool[CONFIG_MOTOR];
 __LocalSine *__local_sine_get(uint8_t motor){
     if (motor >= CONFIG_MOTOR) return 0;
     return &sine_pool[motor];
 }
-
 static __LocalCosine cosine_pool[CONFIG_MOTOR];
 __LocalCosine *__local_cosine_get(uint8_t motor){
     if (motor >= CONFIG_MOTOR) return 0;
     return &cosine_pool[motor];
 }
-
 static __LocalSinCos sincos_pool[CONFIG_MOTOR];
 __LocalSinCos *__local_sincos_get(uint8_t motor){
     if (motor >= CONFIG_MOTOR) return 0;
     return &sincos_pool[motor];
 }
-
 static __LocalTan tan_pool[CONFIG_MOTOR];
 __LocalTan *__local_tan_get(uint8_t motor){
     if (motor >= CONFIG_MOTOR) return 0;
     return &tan_pool[motor];
 }
-
 static __LocalAtan atan_pool[CONFIG_MOTOR];
 __LocalAtan *__local_atan_get(uint8_t motor){
     if (motor >= CONFIG_MOTOR) return 0;
     return &atan_pool[motor];
 }
-
 static __LocalLimit limit_pool[CONFIG_MOTOR];
 __LocalLimit *__local_limit_get(uint8_t motor){
     if (motor >= CONFIG_MOTOR) return 0;
     return &limit_pool[motor];
 }
-
 static __LocalSign sign_pool[CONFIG_MOTOR];
 __LocalSign *__local_sign_get(uint8_t motor){
     if (motor >= CONFIG_MOTOR) return 0;
     return &sign_pool[motor];
 }
-
 static __LocalClarke clarke_pool[CONFIG_MOTOR];
 __LocalClarke *__local_clarke_get(uint8_t motor){
     if (motor >= CONFIG_MOTOR) return 0;
     return &clarke_pool[motor];
 }
-
 static __LocalPark park_pool[CONFIG_MOTOR];
 __LocalPark *__local_park_get(uint8_t motor){
     if (motor >= CONFIG_MOTOR) return 0;
     return &park_pool[motor];
 }
-
 static __LocalIpark ipark_pool[CONFIG_MOTOR];
 __LocalIpark *__local_ipark_get(uint8_t motor){
     if (motor >= CONFIG_MOTOR) return 0;
     return &ipark_pool[motor];
 }
-
-static __LocalSpwm0 spwm0_pool[CONFIG_MOTOR];
-__LocalSpwm0 *__local_spwm0_get(uint8_t motor){
-    if (motor >= CONFIG_MOTOR) return 0;
-    return &spwm0_pool[motor];
-}
-
 static __LocalSpwm spwm_pool[CONFIG_MOTOR];
 __LocalSpwm *__local_spwm_get(uint8_t motor){
     if (motor >= CONFIG_MOTOR) return 0;
     return &spwm_pool[motor];
 }
-
 static __LocalSvpwm svpwm_pool[CONFIG_MOTOR];
 __LocalSvpwm *__local_svpwm_get(uint8_t motor){
     if (motor >= CONFIG_MOTOR) return 0;
     return &svpwm_pool[motor];
 }
-
 static __LocalSwpwm swpwm_pool[CONFIG_MOTOR];
 __LocalSwpwm *__local_swpwm_get(uint8_t motor){
     if (motor >= CONFIG_MOTOR) return 0;
     return &swpwm_pool[motor];
 }
-
 static __LocalSingleRs singlers_pool[CONFIG_MOTOR];
 __LocalSingleRs *__local_singlers_get(uint8_t motor){
     if (motor >= CONFIG_MOTOR) return 0;
     return &singlers_pool[motor];
 }
 
-// ========================== 所有实例初始化 =====================
+// ================================================================================
+// 3.全局函数transfer初始化函数
 void transfer_init(Transfer *transfer){
 
 }

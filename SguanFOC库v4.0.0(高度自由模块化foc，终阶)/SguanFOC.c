@@ -10,21 +10,21 @@ static void __local_main_loop(SguanFoc *sguan);
 
 
 // 1. 先定义基础宏
-#define CONCAT(a, b) a##b
-#define EXPAND_MOTOR(n) CONCAT(LIST_, n)
+#define __LOCAL_CONCAT(a, b) a##b
+#define __LOCAL_EXPAND_MOTOR(n) __LOCAL_CONCAT(__LOCAL_LIST_, n)
 
-#define LIST_1  X(0)
-#define LIST_2  X(0) X(1)
-#define LIST_3  X(0) X(1) X(2)
-#define LIST_4  X(0) X(1) X(2) X(3)
-#define LIST_5  X(0) X(1) X(2) X(3) X(4)
-#define LIST_6  X(0) X(1) X(2) X(3) X(4) X(5)
+#define __LOCAL_LIST_1  X(0)
+#define __LOCAL_LIST_2  X(0) X(1)
+#define __LOCAL_LIST_3  X(0) X(1) X(2)
+#define __LOCAL_LIST_4  X(0) X(1) X(2) X(3)
+#define __LOCAL_LIST_5  X(0) X(1) X(2) X(3) X(4)
+#define __LOCAL_LIST_6  X(0) X(1) X(2) X(3) X(4) X(5)
 
 // 2. 定义 MOTOR_LIST
-#define MOTOR_LIST EXPAND_MOTOR(CONFIG_MOTOR)
+#define __LOCAL_MOTOR_LIST __LOCAL_EXPAND_MOTOR(CONFIG_MOTOR)
 
 // 3. 定义函数生成宏
-#define MAKE_MOTOR_FUNCS(n) \
+#define __LOCAL_MAKE_MOTOR_FUNCS(n) \
     static void high_loop_##n(void); \
     static void low_loop_##n(void); \
     static void main_loop_##n(void); \
@@ -43,8 +43,8 @@ static void __local_main_loop(SguanFoc *sguan);
     }
 
 // 4. 生成所有电机函数
-#define X(n) MAKE_MOTOR_FUNCS(n)
-MOTOR_LIST
+#define X(n) __LOCAL_MAKE_MOTOR_FUNCS(n)
+__LOCAL_MOTOR_LIST
 #undef X
 
 // 5. 结构体数组初始化
@@ -56,10 +56,9 @@ SguanFoc sguanfoc[CONFIG_MOTOR] = {
         .func_printf_loop = sguanfoc_printf_loop, \
         .func_main_loop = main_loop_##n \
     },
-    MOTOR_LIST
+    __LOCAL_MOTOR_LIST
     #undef X
 };
-
 
 static void sguanfoc_high_loop(SguanFoc *sguan){
     #if CONFIG_MOTOR >= 0x02

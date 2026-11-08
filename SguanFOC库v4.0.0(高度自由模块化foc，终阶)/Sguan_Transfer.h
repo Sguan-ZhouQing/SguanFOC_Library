@@ -4,6 +4,7 @@
 /* SguanFOC配置文件声明 */
 #include "Sguan_Config.h"
 
+
 // ================================================================
 // 半隐藏设计：
 //   In/Out/Params 结构体公开 —— 用户要直接读写（喂信号、配参数）
@@ -852,11 +853,11 @@ typedef struct __LocalSmo{
 // --------------------------- NLFO (无感)非线性磁链观测器 ---------------------------
 typedef struct{
     SguanQ input;
-}__LocalNlfoIn;
+}__LocalNfoIn;
 
 typedef struct{
     SguanQ output;
-}__LocalNlfoOut;
+}__LocalNfoOut;
 
 typedef struct{
     SguanQ t;
@@ -866,24 +867,24 @@ typedef struct{
     SguanQ k2;
 
     uint8_t recalculate_total_flag;
-}__LocalNlfoParams;
+}__LocalNfoParams;
 
-typedef struct __LocalNlfoData __LocalNlfoData;
+typedef struct __LocalNfoData __LocalNfoData;
 
-typedef struct __LocalNlfo{
-    __LocalNlfoIn in;
-    __LocalNlfoOut out;
-    __LocalNlfoParams params;
-    __LocalNlfoData *data;
-}__LocalNlfo;
+typedef struct __LocalNfo{
+    __LocalNfoIn in;
+    __LocalNfoOut out;
+    __LocalNfoParams params;
+    __LocalNfoData *data;
+}__LocalNfo;
 // --------------------------- NLFO (无感)非线性磁链观测器 ---------------------------
 typedef struct{
     SguanQ input;
-}__LocalVcfoIn;
+}__LocalAfoIn;
 
 typedef struct{
     SguanQ output;
-}__LocalVcfoOut;
+}__LocalAfoOut;
 
 typedef struct{
     SguanQ t;
@@ -893,16 +894,16 @@ typedef struct{
     SguanQ k2;
 
     uint8_t recalculate_total_flag;
-}__LocalVcfoParams;
+}__LocalAfoParams;
 
-typedef struct __LocalVcfoData __LocalVcfoData;
+typedef struct __LocalAfoData __LocalAfoData;
 
-typedef struct __LocalVcfo{
-    __LocalVcfoIn in;
-    __LocalVcfoOut out;
-    __LocalVcfoParams params;
-    __LocalVcfoData *data;
-}__LocalVcfo;
+typedef struct __LocalAfo{
+    __LocalAfoIn in;
+    __LocalAfoOut out;
+    __LocalAfoParams params;
+    __LocalAfoData *data;
+}__LocalAfo;
 // --------------------------- HFI (无感)高频正弦波注入 ---------------------------
 typedef struct{
     SguanQ input;
@@ -1192,20 +1193,6 @@ typedef struct __LocalIpark{
     __LocalIparkIn in;
     __LocalIparkOut out;
 }__LocalIpark;
-// --------------------------- Spwm0 零序注入的SPWM模块 ---------------------------
-typedef struct{
-    SguanQ we;
-    SguanQ wh;
-}__LocalSpwm0In;
-
-typedef struct{
-    SguanQ output;
-}__LocalSpwm0Out;
-
-typedef struct __LocalSpwm0{
-    __LocalSpwm0In in;
-    __LocalSpwm0Out out;
-}__LocalSpwm0;
 // --------------------------- Spwm 普通SPWM模块 ---------------------------
 typedef struct{
     SguanQ we;
@@ -1307,7 +1294,7 @@ typedef struct{
     __LocalCurve *curve_ch[CONFIG_CURVE];
     #endif // CONFIG_DFT
 
-    #if CONFIG_DFT // 快速傅里叶变换
+    #if CONFIG_DFT // 傅里叶变换
     __LocalDft *dft_ch[CONFIG_DFT];
     #endif // CONFIG_DFT
 
@@ -1392,11 +1379,11 @@ typedef struct{
     #endif // CONFIG_SMO
 
     #if CONFIG_NLFO // (无感)非线性磁链观测器
-    __LocalNlfo *nlfo_ch[CONFIG_NLFO];
+    __LocalNfo *nfo_ch[CONFIG_NLFO];
     #endif // CONFIG_NLFO
 
     #if CONFIG_VCFO // (无感)电压电流互补磁链观测器
-    __LocalVcfo *vcfo_ch[CONFIG_VCFO];
+    __LocalAfo *vcfo_ch[CONFIG_VCFO];
     #endif // CONFIG_VCFO
 
     #if CONFIG_HFI // (无感)高频正弦波注入
@@ -1437,14 +1424,11 @@ typedef struct{
     __LocalClarke *clarke;               // 克拉克变换
     __LocalPark *park;                   // 帕克变换
     __LocalIpark *ipark;                 // 帕克逆变换
-    __LocalSpwm0 *spwm0;                 // 零序注入的SPWM模块
-    __LocalSpwm *spwm;                   // 普通SPWM模块
+    __LocalSpwm *spwm;                   // 零序注入的SPWM模块
     __LocalSvpwm *svpwm;                 // 七段式SVPWM模块
     __LocalSwpwm *swpwm;                 // 电调PWM无感方波
     __LocalSingleRs *singlers;           // 单电阻采样函数
 }Transfer;
-
-void transfer_init(Transfer *transfer);
 
 void transfer_transfer1_loop(__LocalTransfer1 *transfer);
 void transfer_transfer2_loop(__LocalTransfer2 *transfer);
@@ -1475,8 +1459,8 @@ void transfer_tpnf_loop(__LocalTpnf *tpnf);
 void transfer_dob_loop(__LocalDob *dob);
 void transfer_rls_loop(__LocalRls *rls);
 void transfer_smo_loop(__LocalSmo *smo);
-void transfer_nlfo_loop(__LocalNlfo *nlfo);
-void transfer_vcfo_loop(__LocalVcfo *vcfo);
+void transfer_nfo_loop(__LocalNfo *nfo);
+void transfer_vcfo_loop(__LocalAfo *vcfo);
 void transfer_hfi_loop(__LocalHfi *hfi);
 void transfer_rolo_loop(__LocalRolo *rolo);
 void transfer_mars_loop(__LocalMars *mars);
@@ -1495,11 +1479,13 @@ void transfer_sign_loop(__LocalSign *sign);
 void transfer_clarke_loop(__LocalClarke *clarke);
 void transfer_park_loop(__LocalPark *park);
 void transfer_ipark_loop(__LocalIpark *ipark);
-void transfer_spwm0_loop(__LocalSpwm0 *spwm);
 void transfer_spwm_loop(__LocalSpwm *spwm);
 void transfer_svpwm_loop(__LocalSvpwm *svpwm);
 void transfer_swpwm_loop(__LocalSwpwm *swpwm);
-void transfer_singlers_loop(__LocalSingleRs *singlers);
+void transfer_singlers_start_loop(__LocalSingleRs *singlers);
+void transfer_singlers_end_loop(__LocalSingleRs *singlers);
+
+void transfer_init(Transfer *transfer);
 
 
 #endif // SGUAN_TRANSFER_H

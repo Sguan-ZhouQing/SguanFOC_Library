@@ -969,11 +969,11 @@ void *math_memcpy(void *dst, const void *src, size_t n){
 // (参数取模[0, 2π))
 SguanQ math_normalize(SguanQ angle){
     #if VALUE_MODE_MATH==VALUE_MODE_Q15
-    static SguanQ temp = VALUE_Q15_2PI;
+    const SguanQ temp = VALUE_Q15_2PI;
     #elif VALUE_MODE_MATH==VALUE_MODE_Q31
-    static SguanQ temp = VALUE_Q31_2PI;
+    const SguanQ temp = VALUE_Q31_2PI;
     #else // VALUE_MODE_MATH
-    static SguanQ temp = VALUE_F_2PI;
+    const SguanQ temp = VALUE_F_2PI;
     #endif // VALUE_MODE_MATH
 
     while (1){
@@ -996,14 +996,14 @@ void math_rad_loop(SguanQ *out, SguanQ in, SguanQ time){
 // (角度越位处理函数)
 void math_correct(SguanQ *angle, SguanQ error){
     #if VALUE_MODE_MATH==VALUE_MODE_Q15
-    static SguanQ temp0 = VALUE_Q15_2PI;
-    static SguanQ temp1 = VALUE_Q15_PI;
+    const SguanQ temp0 = VALUE_Q15_2PI;
+    const SguanQ temp1 = VALUE_Q15_PI;
     #elif VALUE_MODE_MATH==VALUE_MODE_Q31
-    static SguanQ temp0 = VALUE_Q31_2PI;
-    static SguanQ temp1 = VALUE_Q31_PI;
+    const SguanQ temp0 = VALUE_Q31_2PI;
+    const SguanQ temp1 = VALUE_Q31_PI;
     #else // VALUE_MODE_MATH
-    static SguanQ temp0 = VALUE_F_2PI;
-    static SguanQ temp1 = VALUE_F_PI;
+    const SguanQ temp0 = VALUE_F_2PI;
+    const SguanQ temp1 = VALUE_F_PI;
     #endif // VALUE_MODE_MATH
 
     if (error >= temp1){
@@ -1024,9 +1024,9 @@ SguanQ math_limit(SguanQ value, SguanQ max, SguanQ min){
 // (计算Sign的符号函数)
 SguanQ math_sign(SguanQ value, SguanF base_value){
     #if VALUE_MODE_MATH>=VALUE_MODE_Q15
-    SguanQ temp = math_from_float(1.0f, base_value);
+    const SguanQ temp = math_from_float(1.0f, base_value);
     #else // VALUE_MODE_MATH
-    static SguanQ temp = (SguanF)1.0;
+    const SguanQ temp = (SguanF)1.0;
     #endif // VALUE_MODE_MATH
 
     if (value > 0){
@@ -1037,7 +1037,7 @@ SguanQ math_sign(SguanQ value, SguanF base_value){
     }
 }
 
-// (开平方)
+// (快速开平方)
 SguanQ math_sqrt(SguanQ x){
     #if VALUE_MODE_MATH==VALUE_MODE_Q15
     // 1.BASE语义：送入base=64的值，开方结果为base=8（sqrt(64)=8）
@@ -1141,6 +1141,21 @@ SguanQ math_sqrt(SguanQ x){
     #endif // VALUE_MODE_MATH
 }
 
+// (快速求解绝对值)
+SguanQ math_ads(SguanQ x){
+    return (x < 0) ? -x : x;
+}
+
+// (快速求解max)
+SguanQ math_max(SguanQ a, SguanQ b){
+    return (a > b) ? a : b;
+}
+
+// (快速求解min)
+SguanQ math_min(SguanQ a, SguanQ b){
+    return (a < b) ? a : b;
+}
+
 // ================================================================================
 // 6.全局函数math电机
 // (等幅值克拉克变换)
@@ -1150,11 +1165,11 @@ void math_clarke(
     SguanQ i_a, 
     SguanQ i_b){
     #if VALUE_MODE_MATH==VALUE_MODE_Q15
-    static SguanQ temp = VALUE_Q15_INV_SQRT3;
+    const SguanQ temp = VALUE_Q15_INV_SQRT3;
     #elif VALUE_MODE_MATH==VALUE_MODE_Q31
-    static SguanQ temp = VALUE_Q31_INV_SQRT3;
+    const SguanQ temp = VALUE_Q31_INV_SQRT3;
     #else // VALUE_MODE_MATH
-    static SguanQ temp = VALUE_F_INV_SQRT3;
+    const SguanQ temp = VALUE_F_INV_SQRT3;
     #endif // VALUE_MODE_MATH
 
     (*i_alpha) = i_a;
@@ -1185,5 +1200,391 @@ void math_ipark(
     (*u_beta) = math_add(math_mul(u_q,cosine), math_mul(u_d,sine));
 }
 
+// (spwm函数“三次谐波/零序注入”)
+void math_spwm(SguanQ u_alpha, SguanQ u_beta, 
+    SguanQ *d_u, SguanQ *d_v, SguanQ *d_w){
+    #if VALUE_MODE_MATH==VALUE_MODE_Q15
+    const SguanQ sqrt_2 = VALUE_Q15_SQRT3_2;
+    const SguanQ half = VALUE_Q15_HALF;
 
+    #elif VALUE_MODE_MATH==VALUE_MODE_Q31
+    const SguanQ sqrt_2 = VALUE_Q31_SQRT3_2;
+    const SguanQ half = VALUE_Q31_HALF;
 
+    #else // VALUE_MODE_MATH
+    const SguanQ sqrt_2 = VALUE_F_SQRT3_2;
+    const SguanQ half = VALUE_F_HALF;
+    #endif // VALUE_MODE_MATH
+
+    SguanQ u_a = u_alpha;
+    SguanQ alpha_temp = math_mul(-half,u_alpha);
+    SguanQ beta_temp = math_mul(sqrt_2,u_beta);
+    SguanQ u_b = math_add(alpha_temp, beta_temp);
+    SguanQ u_c = math_sub(alpha_temp, beta_temp);
+    
+    SguanQ u_max = math_max(u_a, math_max(u_b, u_c));
+    SguanQ u_min = math_min(u_a, math_min(u_b, u_c));
+    SguanQ u_zero = math_mul(math_add(-u_max, -u_min), half);
+    
+    SguanQ v_a = u_a + u_zero + half;
+    SguanQ v_b = u_b + u_zero + half;
+    SguanQ v_c = u_c + u_zero + half;
+    
+    (*d_u) = v_a;
+    (*d_v) = v_b;
+    (*d_w) = v_c;
+}
+
+// (svpwm函数“六扇区判断_矢量作用时间”)
+uint8_t math_svpwm(SguanQ u_alpha, SguanQ u_beta, 
+    SguanQ *d_u, SguanQ *d_v, SguanQ *d_w){
+    #if VALUE_MODE_MATH==VALUE_MODE_Q15
+    const SguanQ ts = VALUE_Q15_MAX;
+    const SguanQ sqrt_2 = VALUE_Q15_SQRT3_2;
+    const SguanQ half = VALUE_Q15_HALF;
+    const int two = 2;
+
+    u_alpha = math_mul(u_alpha, VALUE_Q15_SQRT3_2);
+    u_beta = math_mul(u_beta, VALUE_Q15_SQRT3_2);
+    u_alpha = (SguanQ)((uint16_t)u_alpha << 1);
+    u_beta = (SguanQ)((uint16_t)u_beta << 1);
+    
+    #elif VALUE_MODE_MATH==VALUE_MODE_Q31
+    const SguanQ ts = VALUE_Q31_MAX;
+    const SguanQ sqrt_2 = VALUE_Q31_SQRT3_2;
+    const SguanQ half = VALUE_Q31_HALF;
+    const int two = 2;
+
+    u_alpha = math_mul(u_alpha, VALUE_Q31_SQRT3_2);
+    u_beta = math_mul(u_beta, VALUE_Q31_SQRT3_2);
+    u_alpha = (SguanQ)((uint32_t)u_alpha << 1);
+    u_beta = (SguanQ)((uint32_t)u_beta << 1);
+    #else // VALUE_MODE_MATH
+    const SguanQ ts = VALUE_F_ONE;
+    const SguanQ sqrt_2 = VALUE_F_SQRT3_2;
+    const SguanQ half = VALUE_F_HALF;
+    const SguanF two = (SguanF)2.0;
+
+    u_alpha = math_mul(u_alpha, VALUE_F_SQRT3);
+    u_beta = math_mul(u_beta, VALUE_F_SQRT3);
+    #endif // VALUE_MODE_MATH
+
+    SguanQ u1 = u_beta;
+    SguanQ u2 = math_sub(math_mul(-sqrt_2,u_alpha), math_mul(half,u_beta));
+    SguanQ u3 = math_sub(math_mul(sqrt_2,u_alpha), math_mul(half,u_beta));
+    
+    uint8_t sector = (u1 > 0) + ((u2 > 0) << 1) + ((u3 > 0) << 2);
+    
+    SguanQ t_a, t_b, t_c;
+    SguanQ k_svpwm;
+    uint8_t sector_svpwm = 0;
+    if (sector == 5) {
+        sector_svpwm = 1;
+
+        SguanQ t4 = u3;
+        SguanQ t6 = u1;
+        SguanQ sum = math_add(t4, t6);
+        if (sum > ts) {
+            k_svpwm = math_div(ts,sum);
+            t4 = math_mul(k_svpwm,t4);
+            t6 = math_mul(k_svpwm,t6);
+        }
+        SguanQ t7 = (ts - t4 - t6) / two;
+        t_a = t4 + t6 + t7;
+        t_b = t6 + t7;
+        t_c = t7;
+    } else if (sector == 1) {
+        sector_svpwm = 2;
+
+        SguanQ t2 = -u3;
+        SguanQ t6 = -u2;
+        SguanQ sum = math_add(t2, t6);
+        if (sum > ts) {
+            k_svpwm = math_div(ts,sum);
+            t2 = math_mul(k_svpwm,t2);
+            t6 = math_mul(k_svpwm,t6);
+        }
+        SguanQ t7 = (ts - t2 - t6) / two;
+        t_a = t6 + t7;
+        t_b = t2 + t6 + t7;
+        t_c = t7;
+    } else if (sector == 3) {
+        sector_svpwm = 3;
+
+        SguanQ t2 = u1;
+        SguanQ t3 = u2;
+        SguanQ sum = math_add(t2, t3);
+        if (sum > ts) {
+            k_svpwm = math_div(ts,sum);
+            t2 = math_mul(k_svpwm,t2);
+            t3 = math_mul(k_svpwm,t3);
+        }
+        SguanQ t7 = (ts - t2 - t3) / two;
+        t_a = t7;
+        t_b = t2 + t3 + t7;
+        t_c = t3 + t7;
+    } else if (sector == 2) {
+        sector_svpwm = 4;
+
+        SguanQ t1 = -u1;
+        SguanQ t3 = -u3;
+        SguanQ sum = math_add(t1, t3);
+        if (sum > ts) {
+            k_svpwm = math_div(ts,sum);
+            t1 = math_mul(k_svpwm,t1);
+            t3 = math_mul(k_svpwm,t3);
+        }
+        SguanQ t7 = (ts - t1 - t3) / two;
+        t_a = t7;
+        t_b = t3 + t7;
+        t_c = t1 + t3 + t7;
+    } else if (sector == 6) {
+        sector_svpwm = 5;
+
+        SguanQ t1 = u2;
+        SguanQ t5 = u3;
+        SguanQ sum = math_add(t1, t5);
+        if (sum > ts) {
+            k_svpwm = math_div(ts,sum);
+            t1 = math_mul(k_svpwm,t1);
+            t5 = math_mul(k_svpwm,t5);
+        }
+        SguanQ t7 = (ts - t1 - t5) / two;
+        t_a = t5 + t7;
+        t_b = t7;
+        t_c = t1 + t5 + t7;
+    } else if (sector == 4) {
+        sector_svpwm = 6;
+
+        SguanQ t4 = -u2;
+        SguanQ t5 = -u1;
+        SguanQ sum = math_add(t4, t5);
+        if (sum > ts) {
+            k_svpwm = math_div(ts,sum);
+            t4 = math_mul(k_svpwm,t4);
+            t5 = math_mul(k_svpwm,t5);
+        }
+        SguanQ t7 = (ts - t4 - t5) / two;
+        t_a = t4 + t5 + t7;
+        t_b = t7;
+        t_c = t5 + t7;
+    } else {
+        t_a = half;
+        t_b = half;
+        t_c = half;
+    }
+    
+    (*d_u) = t_a;
+    (*d_v) = t_b;
+    (*d_w) = t_c;
+    return sector_svpwm;
+}
+
+// (swpwm函数“纯六步换相”)
+uint8_t math_swpwm(int8_t *sector, uint32_t *num_count, 
+    SguanQ const_ubus, SguanQ const_we, uint32_t const_count, 
+    SguanQ ubus, SguanQ we, 
+    SguanQ ua, SguanQ ub, SguanQ uc, SguanQ umid, 
+    uint8_t key[3], SguanQ *d_u, SguanQ *d_v, SguanQ *d_w){
+    #if VALUE_MODE_MATH==VALUE_MODE_Q15
+    const SguanQ half = VALUE_Q15_HALF;
+    #elif VALUE_MODE_MATH==VALUE_MODE_Q31
+    const SguanQ half = VALUE_Q31_HALF;
+    #else // VALUE_MODE_MATH
+    const SguanQ half = VALUE_F_HALF;
+    #endif // VALUE_MODE_MATH
+
+    switch (*sector){
+    case 0:
+        // AB通电->C悬空
+        if ((uc >= umid) && (ubus >= 0)){
+            (*sector)++;
+            break;
+        }
+        if((uc <= umid) && (ubus < 0)){
+            (*sector)--;
+            break;
+        }
+        break;
+    case 1:
+        // AC通电->B悬空
+        if ((ub <= umid) && (ubus >= 0)){
+            (*sector)++;
+            break;
+        }
+        if((ub >= umid) && (ubus < 0)){
+            (*sector)--;
+            break;
+        }
+        break;
+    case 2:
+        // BC通电->A悬空
+        if ((ua >= umid) && (ubus >= 0)){
+            (*sector)++;
+            break;
+        }
+        if((ua <= umid) && (ubus < 0)){
+            (*sector)--;
+            break;
+        }
+        break;
+    case 3:
+        // BA通电->C悬空
+        if ((uc <= umid) && (ubus >= 0)){
+            (*sector)++;
+            break;
+        }
+        if((uc >= umid) && (ubus < 0)){
+            (*sector)--;
+            break;
+        }
+        break;
+    case 4:
+        // CA通电->B悬空
+        if ((ub >= umid) && (ubus >= 0)){
+            (*sector)++;
+            break;
+        }
+        if((ub <= umid) && (ubus < 0)){
+            (*sector)--;
+            break;
+        }
+        break;
+    case 5:
+        // CB通电->A悬空
+        if ((ua <= umid) && (ubus >= 0)){
+            (*sector)++;
+            break;
+        }
+        if((ua >= umid) && (ubus < 0)){
+            (*sector)--;
+            break;
+        }
+        break;
+    
+    default:
+        (*sector) = 0;
+        break;
+    }
+    
+    SguanQ abs_ubus = math_ads(ubus);
+    SguanQ abs_we = math_ads(we);
+    if ((abs_we <= const_we) && (abs_ubus >= const_ubus)){
+        (*num_count)++; // (如果电机卡住，count多少次刷新一下位置)
+        if ((*num_count) >= const_count){
+            if (ubus >= 0){
+                (*sector)++;
+            }
+            else{
+                (*sector)--;
+            }
+            (*num_count) = 0;
+        }
+    }
+    else{
+        // (转速正常，堵转计时器清零)
+        (*num_count) = 0;
+    }
+    // (扇区取模到0-5用于包含电机状态正常)
+    (*sector) = ((*sector) + 6) % 6;
+
+    SguanQ abs_ubus_half = math_mul(abs_ubus, half);
+    SguanQ duty_big = math_add(half, abs_ubus_half);
+    SguanQ duty_small = math_sub(half, abs_ubus_half);
+    uint8_t sector_swpwm = 0;
+	switch (*sector){
+	case 0:
+        sector_swpwm = 1;
+
+        // AB通电
+        (*d_u) = duty_big;
+        (*d_v) = duty_small;
+        key[0] = 1;
+        key[1] = 1;
+        // C悬空
+        (*d_w) = half;
+        key[2] = 0;
+		break;
+	case 1:
+        sector_swpwm = 2;
+
+        // AC通电
+        (*d_u) = duty_big;
+        (*d_w) = duty_small;
+        key[0] = 1;
+        key[2] = 1;
+        // B悬空
+        (*d_v) = half;
+        key[1] = 0;
+		break;
+	case 2:
+        sector_swpwm = 3;
+
+        // BC通电
+        (*d_v) = duty_big;
+        (*d_w) = duty_small;
+        key[1] = 1;
+        key[2] = 1;
+        // A悬空
+        (*d_u) = half;
+        key[0] = 0;
+		break;
+	case 3:
+        sector_swpwm = 4;
+
+        // BA通电
+        (*d_v) = duty_big;
+        (*d_u) = duty_small;
+        key[1] = 1;
+        key[0] = 1;
+        // C悬空
+        (*d_w) = half;
+        key[2] = 0;
+		break;
+	case 4:
+        sector_swpwm = 5;
+
+        // CA通电
+        (*d_w) = duty_big;
+        (*d_u) = duty_small;
+        key[2] = 1;
+        key[0] = 1;
+        // B悬空
+        (*d_v) = half;
+        key[1] = 0;
+		break;
+	case 5:
+        sector_swpwm = 6;
+
+        // CB通电
+        (*d_w) = duty_big;
+        (*d_v) = duty_small;
+        key[2] = 1;
+        key[1] = 1;
+        // A悬空
+        (*d_u) = half;
+        key[0] = 0;
+		break;
+	
+	default:
+        sector_swpwm = 0;
+        key[0] = 0;
+        key[1] = 0;
+        key[2] = 0;
+        (*d_u) = half;
+        (*d_v) = half;
+        (*d_w) = half;
+		break;
+	}
+    return sector_swpwm;
+}
+
+// (singlers函数“单电阻采样读取电流”)
+void math_singlers_start(void){
+
+}
+
+// (singlers函数“单电阻采样设置移相”)
+void math_singlers_end(void){
+
+}
