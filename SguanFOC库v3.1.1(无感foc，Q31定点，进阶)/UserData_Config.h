@@ -12,7 +12,7 @@
  * @reminder: 5->MODE_NLFO_Speed1       磁链速度-电流闭环    (速度-电流闭环“IF切磁链”)yes 目标模式
  * @return {*}
  */
-#define Define_Run_Mode 5
+#define Define_Run_Mode 3
 
 /**
  * @description: 宏定义0-1决定“电机是否开启电流偏置读取”(默认开启)

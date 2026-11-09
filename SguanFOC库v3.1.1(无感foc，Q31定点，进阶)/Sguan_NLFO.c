@@ -26,7 +26,7 @@ void NLFO_Init(NLFO_STRUCT *nlfo){
 
     nlfo->go.Gain = iqmath_from_float(
         nlfo->Gain, 
-        ((1.0f/(BASE_Time*BASE_Time*BASE_Time*BASE_Voltage*BASE_Voltage))*512.0f));
+        ((1.0f/(BASE_Time*BASE_Time*BASE_Time*BASE_Voltage*BASE_Voltage))*32.0f));
 
     // 2.初始化为零
     nlfo->go.alpha_o = 0;
@@ -61,7 +61,7 @@ void NLFO_Loop(NLFO_STRUCT *nlfo){
     Q31_t alpha_temp = iqmath_mul(
         iqmath_mul(nlfo->go.Gain, gain0), 
         flux_error_end);
-    Q31_t alpha_0 = (Q31_t)((uint32_t)alpha_temp << 6);
+    Q31_t alpha_0 = (Q31_t)((uint32_t)alpha_temp << 5);
     Q31_t alpha_1 = iqmath_mul(
         nlfo->go.Input_Ialpha, 
         nlfo->go.Rs);
@@ -72,7 +72,7 @@ void NLFO_Loop(NLFO_STRUCT *nlfo){
     Q31_t beta_temp = iqmath_mul(
         iqmath_mul(nlfo->go.Gain, gain1), 
         flux_error_end);
-    Q31_t beta_0 = (Q31_t)((uint32_t)beta_temp << 6);
+    Q31_t beta_0 = (Q31_t)((uint32_t)beta_temp << 5);
     Q31_t beta_1 = iqmath_mul(
         nlfo->go.Input_Ibeta, 
         nlfo->go.Rs);

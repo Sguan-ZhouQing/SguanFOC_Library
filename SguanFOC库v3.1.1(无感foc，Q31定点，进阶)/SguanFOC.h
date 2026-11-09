@@ -91,6 +91,11 @@ typedef struct{
     float Ld;                                   // (MOTOR)电机D轴电感
     float Lq;                                   // (MOTOR)电机Q轴电感
     float Flux;                                 // (MOTOR)电机磁链
+
+    Q31_t Rs_q31;                               // (MOTOR)电机相电阻
+    Q31_t Ld_q31;                               // (MOTOR)电机D轴电感
+    Q31_t Lq_q31;                               // (MOTOR)电机Q轴电感
+    Q31_t Flux_q31;                             // (MOTOR)电机磁链
 }Motor_STRUCT;
 
 typedef struct{

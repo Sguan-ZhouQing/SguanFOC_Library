@@ -18,9 +18,9 @@ void PLL_Init(PLL_STRUCT *pll){
     // 数值转换条件：
     // (pll->go.Error单位是1, pll->go.Io单位是s)
     // (pll->go.OutWe单位是Rad/s, pll->go.OutRe单位是Rad)
-    // (那么pll->go.Kp单位是Rad/s, pll->go.Ki单位是Rad/(s^2))
+    // (那么pll->go.Kp单位是Rad/s, pll->go.Ki单位是Rad/(s^2))f
     pll->go.Kp = iqmath_from_float(pll->Kp, BASE_Speed);
-    pll->go.Ki = iqmath_from_float(pll->Kp, (BASE_Speed/BASE_Time));
+    pll->go.Ki = iqmath_from_float(pll->Ki, (BASE_Speed/BASE_Time));
     
     pll->go.T = iqmath_from_float(pll->T, BASE_Time);;
 

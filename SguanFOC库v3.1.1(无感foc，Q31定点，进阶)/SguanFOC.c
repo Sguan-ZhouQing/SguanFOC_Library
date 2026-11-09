@@ -76,7 +76,7 @@ static void Transfer_NLFO_Loop(SguanFOC_System_STRUCT *sguan,
         iqmath_mul(sguan->Transfer.NLFO.go.Output_Cosine, sguan->Foc.Sine));
     #endif // CONFIG_Observation
 
-    pll->go.Error = (Q31_t)((uint32_t)Error << 9); // Sguan_NLFO中有缩放9倍
+    pll->go.Error = (Q31_t)((uint32_t)Error << 6); // Sguan_NLFO中有缩放7倍
 
     PLL_Loop(pll);
 }
@@ -118,59 +118,21 @@ static void Float_DataSwitch_Loop(SguanFOC_System_STRUCT *sguan){
 static void High_Current_Loop(SguanFOC_System_STRUCT *sguan){
     // 1.读取三相原始数值
     Q31_t Ia_temp,Ib_temp;
-    // #if CONFIG_CUR
-    // // 带入电流偏置计算
-    // if (sguan->Motor.Current_Dir == 1){        
-    //     sguan->Motor.Real_Ia = iqmath_current_raw_to_q31(
-    //         User_ReadADC_Raw(0) - sguan->Motor.Current_Offset0);
-    //     sguan->Motor.Real_Ib = iqmath_current_raw_to_q31(
-    //         User_ReadADC_Raw(1) - sguan->Motor.Current_Offset1);
-    //     // sguan->Motor.Real_Ic = iqmath_current_raw_to_q31(
-    //     //      User_ReadADC_Raw(2) - sguan->Motor.Current_Offset2);
-    //     // (注释掉Ic电流的读取，是为了节省运算)
-    // }
-    // else{
-    //     sguan->Motor.Real_Ia = -iqmath_current_raw_to_q31(
-    //         User_ReadADC_Raw(0) - sguan->Motor.Current_Offset0);
-    //     sguan->Motor.Real_Ib = -iqmath_current_raw_to_q31(
-    //         User_ReadADC_Raw(1) - sguan->Motor.Current_Offset1);
-    //     // sguan->Motor.Real_Ic = -iqmath_current_raw_to_q31(
-    //     //      User_ReadADC_Raw(2) - sguan->Motor.Current_Offset2);
-    // }
-    // #else // CONFIG_CUR
-    // // 不带入电流偏置计算
-    // if (sguan->Motor.Current_Dir == 1){
-    //     sguan->Motor.Real_Ia = iqmath_current_raw_to_q31(
-    //         User_ReadADC_Raw(0));
-    //     sguan->Motor.Real_Ib = iqmath_current_raw_to_q31(
-    //         User_ReadADC_Raw(1));
-    //     // sguan->Motor.Real_Ic = iqmath_current_raw_to_q31(
-    //     //     User_ReadADC_Raw(2));
-    //     // (注释掉Ic电流的读取，是为了节省运算)
-    // }
-    // else{
-    //     sguan->Motor.Real_Ia = -iqmath_current_raw_to_q31(
-    //         User_ReadADC_Raw(0));
-    //     sguan->Motor.Real_Ib = -iqmath_current_raw_to_q31(
-    //         User_ReadADC_Raw(1));
-    // }
-    // #endif // CONFIG_CUR
-
-    // ............................................................
     #if CONFIG_CUR
+    // 带入电流偏置计算
     if (sguan->Motor.Current_Dir == 1){        
-        Ia_temp = iqmath_current_raw_to_q31(
+        sguan->Motor.Real_Ia = iqmath_current_raw_to_q31(
             User_ReadADC_Raw(0) - sguan->Motor.Current_Offset0);
-        Ib_temp = iqmath_current_raw_to_q31(
+        sguan->Motor.Real_Ib = iqmath_current_raw_to_q31(
             User_ReadADC_Raw(1) - sguan->Motor.Current_Offset1);
         // sguan->Motor.Real_Ic = iqmath_current_raw_to_q31(
         //      User_ReadADC_Raw(2) - sguan->Motor.Current_Offset2);
         // (注释掉Ic电流的读取，是为了节省运算)
     }
     else{
-        Ia_temp = -iqmath_current_raw_to_q31(
+        sguan->Motor.Real_Ia = -iqmath_current_raw_to_q31(
             User_ReadADC_Raw(0) - sguan->Motor.Current_Offset0);
-        Ib_temp = -iqmath_current_raw_to_q31(
+        sguan->Motor.Real_Ib = -iqmath_current_raw_to_q31(
             User_ReadADC_Raw(1) - sguan->Motor.Current_Offset1);
         // sguan->Motor.Real_Ic = -iqmath_current_raw_to_q31(
         //      User_ReadADC_Raw(2) - sguan->Motor.Current_Offset2);
@@ -193,13 +155,51 @@ static void High_Current_Loop(SguanFOC_System_STRUCT *sguan){
             User_ReadADC_Raw(1));
     }
     #endif // CONFIG_CUR
-    sguan->Motor.Real_Ia = Transfer_LPF_Loop(
-        &sguan->Transfer.LPF_D, 
-        Ia_temp);
-    sguan->Motor.Real_Ib = Transfer_LPF_Loop(
-        &sguan->Transfer.LPF_Q, 
-        Ib_temp);
-    // ................................................................
+
+    // // ............................................................
+    // #if CONFIG_CUR
+    // if (sguan->Motor.Current_Dir == 1){        
+    //     Ia_temp = iqmath_current_raw_to_q31(
+    //         User_ReadADC_Raw(0) - sguan->Motor.Current_Offset0);
+    //     Ib_temp = iqmath_current_raw_to_q31(
+    //         User_ReadADC_Raw(1) - sguan->Motor.Current_Offset1);
+    //     // sguan->Motor.Real_Ic = iqmath_current_raw_to_q31(
+    //     //      User_ReadADC_Raw(2) - sguan->Motor.Current_Offset2);
+    //     // (注释掉Ic电流的读取，是为了节省运算)
+    // }
+    // else{
+    //     Ia_temp = -iqmath_current_raw_to_q31(
+    //         User_ReadADC_Raw(0) - sguan->Motor.Current_Offset0);
+    //     Ib_temp = -iqmath_current_raw_to_q31(
+    //         User_ReadADC_Raw(1) - sguan->Motor.Current_Offset1);
+    //     // sguan->Motor.Real_Ic = -iqmath_current_raw_to_q31(
+    //     //      User_ReadADC_Raw(2) - sguan->Motor.Current_Offset2);
+    // }
+    // #else // CONFIG_CUR
+    // // 不带入电流偏置计算
+    // if (sguan->Motor.Current_Dir == 1){
+    //     sguan->Motor.Real_Ia = iqmath_current_raw_to_q31(
+    //         User_ReadADC_Raw(0));
+    //     sguan->Motor.Real_Ib = iqmath_current_raw_to_q31(
+    //         User_ReadADC_Raw(1));
+    //     // sguan->Motor.Real_Ic = iqmath_current_raw_to_q31(
+    //     //     User_ReadADC_Raw(2));
+    //     // (注释掉Ic电流的读取，是为了节省运算)
+    // }
+    // else{
+    //     sguan->Motor.Real_Ia = -iqmath_current_raw_to_q31(
+    //         User_ReadADC_Raw(0));
+    //     sguan->Motor.Real_Ib = -iqmath_current_raw_to_q31(
+    //         User_ReadADC_Raw(1));
+    // }
+    // #endif // CONFIG_CUR
+    // sguan->Motor.Real_Ia = Transfer_LPF_Loop(
+    //     &sguan->Transfer.LPF_D, 
+    //     Ia_temp);
+    // sguan->Motor.Real_Ib = Transfer_LPF_Loop(
+    //     &sguan->Transfer.LPF_Q, 
+    //     Ib_temp);
+    // // ................................................................
 
 
     // 2.坐标变换计算
@@ -215,17 +215,17 @@ static void High_Current_Loop(SguanFOC_System_STRUCT *sguan){
         sguan->Foc.Cosine);
 
     // 3.电流DQ轴滤波
-    // sguan->Motor.Real_Id = Transfer_LPF_Loop(
-    //     &sguan->Transfer.LPF_D, 
-    //     sguan->Motor.Real_Id_temp);
-    // sguan->Motor.Real_Iq = Transfer_LPF_Loop(
-    //     &sguan->Transfer.LPF_Q, 
-    //     sguan->Motor.Real_Iq_temp);
+    sguan->Motor.Real_Id = Transfer_LPF_Loop(
+        &sguan->Transfer.LPF_D, 
+        sguan->Motor.Real_Id_temp);
+    sguan->Motor.Real_Iq = Transfer_LPF_Loop(
+        &sguan->Transfer.LPF_Q, 
+        sguan->Motor.Real_Iq_temp);
 
-    // ................................................
-    sguan->Motor.Real_Id = sguan->Motor.Real_Id_temp;
-    sguan->Motor.Real_Iq = sguan->Motor.Real_Iq_temp;
-    // ................................................
+    // // ................................................
+    // sguan->Motor.Real_Id = sguan->Motor.Real_Id_temp;
+    // sguan->Motor.Real_Iq = sguan->Motor.Real_Iq_temp;
+    // // ................................................
 }
 
 static void High_Encoder_Loop(SguanFOC_System_STRUCT *sguan){
@@ -235,7 +235,7 @@ static void High_Encoder_Loop(SguanFOC_System_STRUCT *sguan){
         &sguan->Transfer.LPF_Ltd, 
         sguan->Foc.Target_Uq);
 
-    sguan->Foc.Ud_in = 1897152;
+    sguan->Foc.Ud_in = 1874874;
     #else // CONFIG_MODE
     sguan->Foc.Speed_in = Transfer_LPF_Loop(
         &sguan->Transfer.LPF_Ltd, 
@@ -277,6 +277,13 @@ static void High_Encoder_Loop(SguanFOC_System_STRUCT *sguan){
 
     // (刷新电机角度相关信息)
     sguan->Motor.Real_Re = sguan->Transfer.PLL.go.OutRe;
+
+    // 角度补偿测试
+    // Q31_t temp = iqmath_mul(0, sguan->Motor.Real_Speed); // 0.7->100 962072674
+    // temp = (Q31_t)((uint32_t)temp << 3);        // 缩放3倍        // 0.82->100 1126999418
+    // // (刷新电机角度相关信息)                     // 0.5->100 687194767
+    // sguan->Motor.Real_Re = iqmath_normalize(    // 0.3->100 412316860  (Rad/s)*(s)
+    //     sguan->Transfer.PLL.go.OutRe + temp);
     #elif (CONFIG_MODE==MODE_NLFO_Speed0) || (CONFIG_MODE==MODE_NLFO_Speed1)
     // .................................................................
     Q31_t Speed, Re;
@@ -431,13 +438,13 @@ static void High_Control_Loop(SguanFOC_System_STRUCT *sguan){
     // 3.电流前馈计算
     sguan->Foc.Ud_in += Feedforward_CurrentD(
         sguan->Motor.Real_We, 
-        sguan->Motor.Lq, 
+        sguan->Motor.Lq_q31, 
         sguan->Motor.Real_Iq);
     sguan->Foc.Uq_in += Feedforward_CurrentQ(
         sguan->Motor.Real_We, 
-        sguan->Motor.Ld, 
+        sguan->Motor.Ld_q31, 
         sguan->Motor.Real_Id, 
-        sguan->Motor.Flux);
+        sguan->Motor.Flux_q31);
     #elif CONFIG_MODE==MODE_NLFO_Speed0
     // 1.转速环控制器求解
     if ((sguan->Status == STATUS_COM) && 
@@ -504,6 +511,9 @@ static void High_Control_Loop(SguanFOC_System_STRUCT *sguan){
 }
 
 static void High_PWM_Loop(SguanFOC_System_STRUCT *sguan){
+    iqmath_limit(&sguan->Foc.Ud_in, sguan->Foc.VBUS, -sguan->Foc.VBUS);
+    iqmath_limit(&sguan->Foc.Uq_in, sguan->Foc.VBUS, -sguan->Foc.VBUS);
+
     // 1.Park逆变换
     ipark(&sguan->Foc.Ualpha,
         &sguan->Foc.Ubeta,
@@ -574,6 +584,10 @@ static void main_Transfer_Init(SguanFOC_System_STRUCT *sguan){
     // 1.用户数据初始化
     User_MotorSet();
     User_ParameterSet();
+    sguan->Motor.Rs_q31 = iqmath_from_float(sguan->Motor.Rs, BASE_Resistor);
+    sguan->Motor.Ld_q31 = iqmath_from_float(sguan->Motor.Ld, BASE_Inductor);
+    sguan->Motor.Lq_q31 = iqmath_from_float(sguan->Motor.Lq, BASE_Inductor);
+    sguan->Motor.Flux_q31 = iqmath_from_float(sguan->Motor.Flux, BASE_Flux);
 
     // 2.Transfer传递函数初始化
     // (LPF)
