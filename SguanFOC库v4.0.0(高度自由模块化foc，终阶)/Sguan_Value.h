@@ -5,13 +5,14 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
-#include "UnitLib_Design.h"
-#include "UserData_Define.h"
+#include "UnitLib_Define0.h"    // (应用库UnitLib)
+#include "UserMotor_Define1.h"  // (电参库UserMotor)
+#include "Zone_Define2.h"       // (用户驱动层Zone)
 
 // ================================================================================
 // 1.局部定点化计算格式
-typedef int32_t Q31;    // 1位符号+0位整数+31位小数
-typedef int16_t Q15;    // 1位符号+0位整数+15位小数
+typedef int32_t Q31;            // 1位符号+0位整数+31位小数
+typedef int16_t Q15;            // 1位符号+0位整数+15位小数
 
 // ================================================================================
 // 2.数据格式宏定义
@@ -20,15 +21,15 @@ typedef int16_t Q15;    // 1位符号+0位整数+15位小数
 #define VALUE_MODE_Q15          0x02
 #define VALUE_MODE_Q31          0x03
 
-#ifndef DESIGN_MODE_MATH
-#define DESIGN_MODE_MATH    VALUE_MODE_FLOAT
+#ifndef DEFINE0_MOTOR_MATH
+#define DEFINE0_MOTOR_MATH       VALUE_MODE_FLOAT
 #endif
 
-#if !((DESIGN_MODE_MATH>=VALUE_MODE_FLOAT) && (DESIGN_MODE_MATH<=VALUE_MODE_Q31))
+#if !((DEFINE0_MOTOR_MATH>=VALUE_MODE_FLOAT) && (DEFINE0_MOTOR_MATH<=VALUE_MODE_Q31))
 #define VALUE_MODE_MATH         VALUE_MODE_FLOAT
-#else // DESIGN_MODE_MATH
-#define VALUE_MODE_MATH         DESIGN_MODE_MATH
-#endif // DESIGN_MODE_MATH
+#else // DEFINE0_MOTOR_MATH
+#define VALUE_MODE_MATH         DEFINE0_MOTOR_MATH
+#endif // DEFINE0_MOTOR_MATH
 
 // ================================================================================
 // 3.Value数值分类
@@ -73,8 +74,6 @@ typedef float                   SguanF;
 #define VALUE_F_INV_SQRT3       (SguanF)0.577350269189625764
 #define VALUE_F_ONE             (SguanF)1.0     // 数值壹
 #define VALUE_F_HALF            (SguanF)0.5     // 数值半
-#define VALUE_F_ZERO            (SguanF)0.0     // 数值零
-#define Value_F_INF             0xFF800000      // (负无穷数)
 
 #define VALUE_Q15_2PI           (Q15)25736      // BASE=8.0
 #define VALUE_Q15_PI            (Q15)12868      // BASE=8.0
@@ -102,29 +101,29 @@ typedef float                   SguanF;
 // RAD=8.0覆盖所有速度控制场景
 // 所有用到定点的场景都是速度控制
 // 位置控制精度要求高，不用定点
-#ifdef DESIGN_BASE_TIME
-#define VALUE_BASE_TIME         (float)DESIGN_BASE_TIME
-#else // DESIGN_BASE_TIME
+#ifdef DEFINE0_BASE_TIME
+#define VALUE_BASE_TIME         (float)DEFINE0_BASE_TIME
+#else // DEFINE0_BASE_TIME
 #define VALUE_BASE_TIME         0.001953125f
-#endif // DESIGN_BASE_TIME
+#endif // DEFINE0_BASE_TIME
 
-#ifdef DESIGN_BASE_VOLTAGE
-#define VALUE_BASE_VOLTAGE      (float)DESIGN_BASE_VOLTAGE
-#else // DESIGN_BASE_VOLTAGE
+#ifdef DEFINE0_BASE_VOLTAGE
+#define VALUE_BASE_VOLTAGE      (float)DEFINE0_BASE_VOLTAGE
+#else // DEFINE0_BASE_VOLTAGE
 #define VALUE_BASE_VOLTAGE      1024.0f
-#endif // DESIGN_BASE_VOLTAGE
+#endif // DEFINE0_BASE_VOLTAGE
 
-#ifdef DESIGN_BASE_CURRENT
-#define VALUE_BASE_CURRENT      (float)DESIGN_BASE_CURRENT
-#else // DESIGN_BASE_CURRENT
+#ifdef DEFINE0_BASE_CURRENT
+#define VALUE_BASE_CURRENT      (float)DEFINE0_BASE_CURRENT
+#else // DEFINE0_BASE_CURRENT
 #define VALUE_BASE_CURRENT      64.0f
-#endif // DESIGN_BASE_CURRENT
+#endif // DEFINE0_BASE_CURRENT
 
-#ifdef DESIGN_BASE_OTHER
-#define VALUE_BASE_OTHER        (float)DESIGN_BASE_OTHER
-#else // DESIGN_BASE_OTHER
+#ifdef DEFINE0_BASE_OTHER
+#define VALUE_BASE_OTHER        (float)DEFINE0_BASE_OTHER
+#else // DEFINE0_BASE_OTHER
 #define VALUE_BASE_OTHER        512.0f
-#endif // DESIGN_BASE_OTHER
+#endif // DEFINE0_BASE_OTHER
 
 #define VALUE_BASE_RAD          8.0f    // 固定BASE=8.0基值设计
 #define VALUE_BASE_HZ           1.0f/VALUE_BASE_TIME

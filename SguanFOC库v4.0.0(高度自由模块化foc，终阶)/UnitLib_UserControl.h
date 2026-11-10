@@ -2,7 +2,6 @@
 #define __UNITLIB_USERCONTROL_H
 
 /* SguanFOC配置文件声明 */
-#include "SguanFOC.h"
 #include "Sguan_Printf.h"
 
 void usercontrol_motor(float value);

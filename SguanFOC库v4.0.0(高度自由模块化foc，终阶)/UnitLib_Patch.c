@@ -1,13 +1,11 @@
 #include "UnitLib_Patch.h"
 
-
-
 void patch_transfer1_init(__LocalTransfer1 *transfer){
 
 }
 
 void patch_transfer2_init(__LocalTransfer2 *transfer){
-
+    
 }
 
 void patch_transfer3_init(__LocalTransfer3 *transfer){
@@ -119,11 +117,11 @@ void patch_smo_init(__LocalSmo *smo){
 
 }
 
-void patch_nlfo_init(__LocalNlfo *nlfo){
+void patch_nlfo_init(__LocalNfo *nlfo){
 
 }
 
-void patch_vcfo_init(__LocalVcfo *vcfo){
+void patch_vcfo_init(__LocalAfo *vcfo){
 
 }
 
@@ -260,11 +258,11 @@ void patch_smo_loop(__LocalSmo *smo){
 
 }
 
-void patch_nlfo_loop(__LocalNlfo *nlfo){
+void patch_nlfo_loop(__LocalNfo *nlfo){
 
 }
 
-void patch_vcfo_loop(__LocalVcfo *vcfo){
+void patch_vcfo_loop(__LocalAfo *vcfo){
 
 }
 

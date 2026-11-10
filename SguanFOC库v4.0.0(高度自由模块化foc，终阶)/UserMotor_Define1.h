@@ -1,0 +1,6 @@
+#ifndef __USERMOTOR_DEFINE1_H
+#define __USERMOTOR_DEFINE1_H
+
+
+
+#endif // USERMOTOR_DEFINE1_H

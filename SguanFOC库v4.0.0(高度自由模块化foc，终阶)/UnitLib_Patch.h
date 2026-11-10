@@ -1,6 +1,7 @@
 #ifndef __UNITLIB_PATCH_H
 #define __UNITLIB_PATCH_H
 
+/* SguanFOC配置文件声明 */
 #include "Sguan_Transfer.h"
 
 void patch_transfer1_init(__LocalTransfer1 *transfer);
@@ -32,8 +33,8 @@ void patch_tpnf_init(__LocalTpnf *tpnf);
 void patch_dob_init(__LocalDob *dob);
 void patch_rls_init(__LocalRls *rls);
 void patch_smo_init(__LocalSmo *smo);
-void patch_nlfo_init(__LocalNlfo *nlfo);
-void patch_vcfo_init(__LocalVcfo *vcfo);
+void patch_nlfo_init(__LocalNfo *nlfo);
+void patch_vcfo_init(__LocalAfo *vcfo);
 void patch_hfi_init(__LocalHfi *hfi);
 void patch_rolo_init(__LocalRolo *rolo);
 void patch_mars_init(__LocalMars *mars);
@@ -68,8 +69,8 @@ void patch_tpnf_loop(__LocalTpnf *tpnf);
 void patch_dob_loop(__LocalDob *dob);
 void patch_rls_loop(__LocalRls *rls);
 void patch_smo_loop(__LocalSmo *smo);
-void patch_nlfo_loop(__LocalNlfo *nlfo);
-void patch_vcfo_loop(__LocalVcfo *vcfo);
+void patch_nlfo_loop(__LocalNfo *nlfo);
+void patch_vcfo_loop(__LocalAfo *vcfo);
 void patch_hfi_loop(__LocalHfi *hfi);
 void patch_rolo_loop(__LocalRolo *rolo);
 void patch_mars_loop(__LocalMars *mars);

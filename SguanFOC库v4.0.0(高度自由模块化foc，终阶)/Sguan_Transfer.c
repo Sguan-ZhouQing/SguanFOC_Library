@@ -133,10 +133,10 @@ __LocalRls *__local_rls_get(uint8_t motor, int ch);
 #if CONFIG_SMO
 __LocalSmo *__local_smo_get(uint8_t motor, int ch);
 #endif
-#if CONFIG_NLFO
+#if CONFIG_NFO
 __LocalNfo *__local_nfo_get(uint8_t motor, int ch);
 #endif
-#if CONFIG_VCFO
+#if CONFIG_AFO
 __LocalAfo *__local_afo_get(uint8_t motor, int ch);
 #endif
 #if CONFIG_HFI
@@ -2275,21 +2275,21 @@ __LocalSmo *__local_smo_get(uint8_t motor, int ch){
     return self;
 }
 #endif
-#if CONFIG_NLFO
-static __LocalNfo nfo_pool[CONFIG_MOTOR][CONFIG_NLFO];
-static __LocalNfoData nfo_data_pool[CONFIG_MOTOR][CONFIG_NLFO];
+#if CONFIG_NFO
+static __LocalNfo nfo_pool[CONFIG_MOTOR][CONFIG_NFO];
+static __LocalNfoData nfo_data_pool[CONFIG_MOTOR][CONFIG_NFO];
 __LocalNfo *__local_nfo_get(uint8_t motor, int ch){
-    if (motor >= CONFIG_MOTOR || ch >= CONFIG_NLFO) return 0;
+    if (motor >= CONFIG_MOTOR || ch >= CONFIG_NFO) return 0;
     __LocalNfo *self = &nfo_pool[motor][ch];
     self->data = &nfo_data_pool[motor][ch];
     return self;
 }
 #endif
-#if CONFIG_VCFO
-static __LocalAfo afo_pool[CONFIG_MOTOR][CONFIG_VCFO];
-static __LocalAfoData afo_data_pool[CONFIG_MOTOR][CONFIG_VCFO];
+#if CONFIG_AFO
+static __LocalAfo afo_pool[CONFIG_MOTOR][CONFIG_AFO];
+static __LocalAfoData afo_data_pool[CONFIG_MOTOR][CONFIG_AFO];
 __LocalAfo *__local_afo_get(uint8_t motor, int ch){
-    if (motor >= CONFIG_MOTOR || ch >= CONFIG_VCFO) return 0;
+    if (motor >= CONFIG_MOTOR || ch >= CONFIG_AFO) return 0;
     __LocalAfo *self = &afo_pool[motor][ch];
     self->data = &afo_data_pool[motor][ch];
     return self;
@@ -2431,7 +2431,12 @@ __LocalSingleRs *__local_singlers_get(uint8_t motor){
 
 // ================================================================================
 // 5.全局函数transfer初始化函数
+// (初始化函数，拿指针)
 void transfer_init(Transfer *transfer){
 
 }
 
+// (失能函数，清空指针)
+void transfer_deinit(Transfer *transfer){
+
+}

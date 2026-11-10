@@ -1,6 +1,7 @@
 #include "Sguan_MotorStatus.h"
 
 /* SguanFOC配置文件声明 */
+#include "UnitLib_Main.h"
 #include "UnitLib_Situation.h"
 
 /* 内部宏定义设计 */
@@ -38,84 +39,84 @@ static void __local_null1(void){
 }
 
 static void __local_idle_init(SguanFoc *sguan){
-    sguan->motorstatus.data.error_code = 0x00;
-    main_standby_init(sguan);
+    // sguan->motorstatus.data.error_code = 0x00;
+    // main_standby_init(sguan);
 }
 
 static void __local_overvoltage_init(SguanFoc *sguan){
-    sguan->motorstatus.data.error_code = 0x01;
-    main_standby_init(sguan);
+    // sguan->motorstatus.data.error_code = 0x01;
+    // main_standby_init(sguan);
 }
 
 static void __local_undervoltage_init(SguanFoc *sguan){
-    sguan->motorstatus.data.error_code = 0x02;
-    main_standby_init(sguan);
+    // sguan->motorstatus.data.error_code = 0x02;
+    // main_standby_init(sguan);
 }
 
 static void __local_overcurrent_init(SguanFoc *sguan){
-    sguan->motorstatus.data.error_code = 0x03;
-    main_standby_init(sguan);
+    // sguan->motorstatus.data.error_code = 0x03;
+    // main_standby_init(sguan);
 }
 
 static void __local_overtemp_motor_init(SguanFoc *sguan){
-    sguan->motorstatus.data.error_code = 0x04;
-    main_standby_init(sguan);
+    // sguan->motorstatus.data.error_code = 0x04;
+    // main_standby_init(sguan);
 }
 
 static void __local_undertemp_motor_init(SguanFoc *sguan){
-    sguan->motorstatus.data.error_code = 0x05;
-    main_standby_init(sguan);
+    // sguan->motorstatus.data.error_code = 0x05;
+    // main_standby_init(sguan);
 }
 
 static void __local_overtemp_driver_init(SguanFoc *sguan){
-    sguan->motorstatus.data.error_code = 0x06;
-    main_standby_init(sguan);
+    // sguan->motorstatus.data.error_code = 0x06;
+    // main_standby_init(sguan);
 }
 
 static void __local_undertemp_driver_init(SguanFoc *sguan){
-    sguan->motorstatus.data.error_code = 0x07;
-    main_standby_init(sguan);
+    // sguan->motorstatus.data.error_code = 0x07;
+    // main_standby_init(sguan);
 }
 
 static void __local_overtemp_pcb_init(SguanFoc *sguan){
-    sguan->motorstatus.data.error_code = 0x08;
-    main_standby_init(sguan);
+    // sguan->motorstatus.data.error_code = 0x08;
+    // main_standby_init(sguan);
 }
 
 static void __local_undertemp_pcb_init(SguanFoc *sguan){
-    sguan->motorstatus.data.error_code = 0x09;
-    main_standby_init(sguan);
+    // sguan->motorstatus.data.error_code = 0x09;
+    // main_standby_init(sguan);
 }
 
 static void __local_stuck_init(SguanFoc *sguan){
-    sguan->motorstatus.data.error_code = 0x0A;
-    main_standby_init(sguan);
+    // sguan->motorstatus.data.error_code = 0x0A;
+    // main_standby_init(sguan);
 }
 
 static void __local_phase_loss_init(SguanFoc *sguan){
-    sguan->motorstatus.data.error_code = 0x0B;
-    main_standby_init(sguan);
+    // sguan->motorstatus.data.error_code = 0x0B;
+    // main_standby_init(sguan);
 }
 
 static void __local_fault_init(SguanFoc *sguan){
-    sguan->motorstatus.data.error_code = 0x0C;
-    main_standby_init(sguan);
+    // sguan->motorstatus.data.error_code = 0x0C;
+    // main_standby_init(sguan);
 }
 
-static const __LocalTab motor_tab[196] = {
+static const __LocalTab motor_tab[203] = {
     // 1.当前的状态机                    2.当前状态机可触发的事件              3.如果触发此事件，下一时刻的状态机
     {STATUS(status_standby),            EVENT(event_ready),                 STATUS(status_ready)},
 
-    // ======================================================================================
+    // (分割线)---------------------------------------------------------------------
     {STATUS(status_ready),              EVENT(event_initializing),          STATUS(status_initializing)},
     {STATUS(status_ready),              EVENT(event_standby0),              STATUS(status_standby)},
 
-    // ======================================================================================
-    {STATUS(status_initializing),       EVENT(event_success),               STATUS(status_gotoinit0_angle)},
-    {STATUS(status_gotoinit0_angle),    EVENT(event_success),               STATUS(status_gotoinit1_current)},
-    {STATUS(status_gotoinit1_current),  EVENT(event_success),               STATUS(status_idle)},
+    // (分割线)---------------------------------------------------------------------
+    // {STATUS(status_initializing),     EVENT(自动切换，初始化的时候判断),   STATUS(status_gotoinit0_angle)},
+    // {STATUS(status_gotoinit0_angle),  EVENT(自动切换，初始化的时候判断),   STATUS(status_gotoinit1_current)},
+    // {STATUS(status_gotoinit1_current),EVENT(自动切换，初始化的时候判断),   STATUS(status_idle)},
     
-    // =======================================================================================
+    // (分割线)---------------------------------------------------------------------
     {STATUS(status_idle),               EVENT(event_torque_hold),           STATUS(status_torque_hold)},
     {STATUS(status_idle),               EVENT(event_torque_increasing),     STATUS(status_torque_increasing)},
     {STATUS(status_idle),               EVENT(event_torque_decreasing),     STATUS(status_torque_decreasing)},
@@ -133,18 +134,19 @@ static const __LocalTab motor_tab[196] = {
 
     {STATUS(status_idle),               EVENT(event_overvoltage),           STATUS(status_overvoltage)},
     {STATUS(status_idle),               EVENT(event_undervoltage),          STATUS(status_undervoltage)},
-    {STATUS(status_idle),               EVENT(event_overcurrent),           STATUS(status_overcurrent)},
+    {STATUS(status_idle),               EVENT(event_overcurrent_moment),    STATUS(status_overcurrent_moment)},
+    {STATUS(status_idle),               EVENT(event_overcurrent_stable),    STATUS(status_overcurrent_stable)},
     {STATUS(status_idle),               EVENT(event_overtemp_motor),        STATUS(status_overtemp_motor)},
     {STATUS(status_idle),               EVENT(event_undertemp_motor),       STATUS(status_undertemp_motor)},
     {STATUS(status_idle),               EVENT(event_overtemp_driver),       STATUS(status_overtemp_driver)},
     {STATUS(status_idle),               EVENT(event_undertemp_driver),      STATUS(status_undertemp_driver)},
     {STATUS(status_idle),               EVENT(event_overtemp_pcb),          STATUS(status_overtemp_pcb)},
     {STATUS(status_idle),               EVENT(event_undertemp_pcb),         STATUS(status_undertemp_pcb)},
-
-    {STATUS(status_idle),               EVENT(event_phase_loss),            STATUS(status_phase_loss)},
-    {STATUS(status_idle),               EVENT(event_fault),                 STATUS(status_fault)},
+    {STATUS(status_idle),               EVENT(event_fault0),                STATUS(status_fault0)},
+    {STATUS(status_idle),               EVENT(event_fault1),                STATUS(status_fault1)},
+    {STATUS(status_idle),               EVENT(event_fault2),                STATUS(status_fault2)},
     
-    // =======================================================================================
+    // (分割线)---------------------------------------------------------------------
     {STATUS(status_torque_increasing),  EVENT(event_torque_hold),           STATUS(status_torque_hold)},
     {STATUS(status_torque_increasing),  EVENT(event_torque_decreasing),     STATUS(status_torque_decreasing)},
 
@@ -153,19 +155,19 @@ static const __LocalTab motor_tab[196] = {
     
     {STATUS(status_torque_increasing),  EVENT(event_overvoltage),           STATUS(status_overvoltage)},
     {STATUS(status_torque_increasing),  EVENT(event_undervoltage),          STATUS(status_undervoltage)},
-    {STATUS(status_torque_increasing),  EVENT(event_overcurrent),           STATUS(status_overcurrent)},
+    {STATUS(status_torque_increasing),  EVENT(event_overcurrent_moment),    STATUS(status_overcurrent_moment)},
+    {STATUS(status_torque_increasing),  EVENT(event_overcurrent_stable),    STATUS(status_overcurrent_stable)},
     {STATUS(status_torque_increasing),  EVENT(event_overtemp_motor),        STATUS(status_overtemp_motor)},
     {STATUS(status_torque_increasing),  EVENT(event_undertemp_motor),       STATUS(status_undertemp_motor)},
     {STATUS(status_torque_increasing),  EVENT(event_overtemp_driver),       STATUS(status_overtemp_driver)},
     {STATUS(status_torque_increasing),  EVENT(event_undertemp_driver),      STATUS(status_undertemp_driver)},
     {STATUS(status_torque_increasing),  EVENT(event_overtemp_pcb),          STATUS(status_overtemp_pcb)},
     {STATUS(status_torque_increasing),  EVENT(event_undertemp_pcb),         STATUS(status_undertemp_pcb)},
+    {STATUS(status_torque_increasing),  EVENT(event_fault0),                STATUS(status_fault0)},
+    {STATUS(status_torque_increasing),  EVENT(event_fault1),                STATUS(status_fault1)},
+    {STATUS(status_torque_increasing),  EVENT(event_fault2),                STATUS(status_fault2)},
 
-    {STATUS(status_torque_increasing),  EVENT(event_stuck),                 STATUS(status_stuck)},
-    {STATUS(status_torque_increasing),  EVENT(event_phase_loss),            STATUS(status_phase_loss)},
-    {STATUS(status_torque_increasing),  EVENT(event_fault),                 STATUS(status_fault)},
-
-    // =======================================================================================
+    // (分割线)---------------------------------------------------------------------
     {STATUS(status_torque_decreasing),  EVENT(event_torque_hold),           STATUS(status_torque_hold)},
     {STATUS(status_torque_decreasing),  EVENT(event_torque_increasing),     STATUS(status_torque_increasing)},
 
@@ -174,19 +176,19 @@ static const __LocalTab motor_tab[196] = {
     
     {STATUS(status_torque_decreasing),  EVENT(event_overvoltage),           STATUS(status_overvoltage)},
     {STATUS(status_torque_decreasing),  EVENT(event_undervoltage),          STATUS(status_undervoltage)},
-    {STATUS(status_torque_decreasing),  EVENT(event_overcurrent),           STATUS(status_overcurrent)},
+    {STATUS(status_torque_decreasing),  EVENT(event_overcurrent_moment),    STATUS(status_overcurrent_moment)},
+    {STATUS(status_torque_decreasing),  EVENT(event_overcurrent_stable),    STATUS(status_overcurrent_stable)},
     {STATUS(status_torque_decreasing),  EVENT(event_overtemp_motor),        STATUS(status_overtemp_motor)},
     {STATUS(status_torque_decreasing),  EVENT(event_undertemp_motor),       STATUS(status_undertemp_motor)},
     {STATUS(status_torque_decreasing),  EVENT(event_overtemp_driver),       STATUS(status_overtemp_driver)},
     {STATUS(status_torque_decreasing),  EVENT(event_undertemp_driver),      STATUS(status_undertemp_driver)},
     {STATUS(status_torque_decreasing),  EVENT(event_overtemp_pcb),          STATUS(status_overtemp_pcb)},
     {STATUS(status_torque_decreasing),  EVENT(event_undertemp_pcb),         STATUS(status_undertemp_pcb)},
+    {STATUS(status_torque_decreasing),  EVENT(event_fault0),                STATUS(status_fault0)},
+    {STATUS(status_torque_decreasing),  EVENT(event_fault1),                STATUS(status_fault1)},
+    {STATUS(status_torque_decreasing),  EVENT(event_fault2),                STATUS(status_fault2)},
 
-    {STATUS(status_torque_decreasing),  EVENT(event_stuck),                 STATUS(status_stuck)},
-    {STATUS(status_torque_decreasing),  EVENT(event_phase_loss),            STATUS(status_phase_loss)},
-    {STATUS(status_torque_decreasing),  EVENT(event_fault),                 STATUS(status_fault)},
-
-    // =======================================================================================
+    // (分割线)---------------------------------------------------------------------
     {STATUS(status_torque_hold),        EVENT(event_torque_increasing),     STATUS(status_torque_increasing)},
     {STATUS(status_torque_hold),        EVENT(event_torque_decreasing),     STATUS(status_torque_decreasing)},
 
@@ -195,19 +197,19 @@ static const __LocalTab motor_tab[196] = {
     
     {STATUS(status_torque_hold),        EVENT(event_overvoltage),           STATUS(status_overvoltage)},
     {STATUS(status_torque_hold),        EVENT(event_undervoltage),          STATUS(status_undervoltage)},
-    {STATUS(status_torque_hold),        EVENT(event_overcurrent),           STATUS(status_overcurrent)},
+    {STATUS(status_torque_hold),        EVENT(event_overcurrent_moment),    STATUS(status_overcurrent_moment)},
+    {STATUS(status_torque_hold),        EVENT(event_overcurrent_stable),    STATUS(status_overcurrent_stable)},
     {STATUS(status_torque_hold),        EVENT(event_overtemp_motor),        STATUS(status_overtemp_motor)},
     {STATUS(status_torque_hold),        EVENT(event_undertemp_motor),       STATUS(status_undertemp_motor)},
     {STATUS(status_torque_hold),        EVENT(event_overtemp_driver),       STATUS(status_overtemp_driver)},
     {STATUS(status_torque_hold),        EVENT(event_undertemp_driver),      STATUS(status_undertemp_driver)},
     {STATUS(status_torque_hold),        EVENT(event_overtemp_pcb),          STATUS(status_overtemp_pcb)},
     {STATUS(status_torque_hold),        EVENT(event_undertemp_pcb),         STATUS(status_undertemp_pcb)},
+    {STATUS(status_torque_hold),        EVENT(event_fault0),                STATUS(status_fault0)},
+    {STATUS(status_torque_hold),        EVENT(event_fault1),                STATUS(status_fault1)},
+    {STATUS(status_torque_hold),        EVENT(event_fault2),                STATUS(status_fault2)},
 
-    {STATUS(status_torque_hold),        EVENT(event_stuck),                 STATUS(status_stuck)},
-    {STATUS(status_torque_hold),        EVENT(event_phase_loss),            STATUS(status_phase_loss)},
-    {STATUS(status_torque_hold),        EVENT(event_fault),                 STATUS(status_fault)},
-
-    // =======================================================================================
+    // (分割线)---------------------------------------------------------------------
     {STATUS(status_velocity_increasing),EVENT(event_velocity_hold),         STATUS(status_velocity_hold)},
     {STATUS(status_velocity_increasing),EVENT(event_velocity_decreasing),   STATUS(status_velocity_decreasing)},
 
@@ -216,19 +218,18 @@ static const __LocalTab motor_tab[196] = {
     
     {STATUS(status_velocity_increasing),EVENT(event_overvoltage),           STATUS(status_overvoltage)},
     {STATUS(status_velocity_increasing),EVENT(event_undervoltage),          STATUS(status_undervoltage)},
-    {STATUS(status_velocity_increasing),EVENT(event_overcurrent),           STATUS(status_overcurrent)},
+    {STATUS(status_velocity_increasing),EVENT(event_overcurrent_moment),    STATUS(status_overcurrent_moment)},
+    {STATUS(status_velocity_increasing),EVENT(event_overcurrent_stable),    STATUS(status_overcurrent_stable)},
     {STATUS(status_velocity_increasing),EVENT(event_overtemp_motor),        STATUS(status_overtemp_motor)},
     {STATUS(status_velocity_increasing),EVENT(event_undertemp_motor),       STATUS(status_undertemp_motor)},
     {STATUS(status_velocity_increasing),EVENT(event_overtemp_driver),       STATUS(status_overtemp_driver)},
     {STATUS(status_velocity_increasing),EVENT(event_undertemp_driver),      STATUS(status_undertemp_driver)},
     {STATUS(status_velocity_increasing),EVENT(event_overtemp_pcb),          STATUS(status_overtemp_pcb)},
     {STATUS(status_velocity_increasing),EVENT(event_undertemp_pcb),         STATUS(status_undertemp_pcb)},
+    {STATUS(status_velocity_increasing),EVENT(event_fault0),                STATUS(status_fault0)},
+    {STATUS(status_velocity_increasing),EVENT(event_fault1),                STATUS(status_fault1)},
 
-    {STATUS(status_velocity_increasing),EVENT(event_stuck),                 STATUS(status_stuck)},
-    {STATUS(status_velocity_increasing),EVENT(event_phase_loss),            STATUS(status_phase_loss)},
-    {STATUS(status_velocity_increasing),EVENT(event_fault),                 STATUS(status_fault)},
-
-    // =======================================================================================
+    // (分割线)---------------------------------------------------------------------
     {STATUS(status_velocity_decreasing),EVENT(event_velocity_hold),         STATUS(status_velocity_hold)},
     {STATUS(status_velocity_decreasing),EVENT(event_velocity_increasing),   STATUS(status_velocity_increasing)},
 
@@ -237,19 +238,19 @@ static const __LocalTab motor_tab[196] = {
     
     {STATUS(status_velocity_decreasing),EVENT(event_overvoltage),           STATUS(status_overvoltage)},
     {STATUS(status_velocity_decreasing),EVENT(event_undervoltage),          STATUS(status_undervoltage)},
-    {STATUS(status_velocity_decreasing),EVENT(event_overcurrent),           STATUS(status_overcurrent)},
+    {STATUS(status_velocity_decreasing),EVENT(event_overcurrent_moment),    STATUS(status_overcurrent_moment)},
+    {STATUS(status_velocity_decreasing),EVENT(event_overcurrent_stable),    STATUS(status_overcurrent_stable)},
     {STATUS(status_velocity_decreasing),EVENT(event_overtemp_motor),        STATUS(status_overtemp_motor)},
     {STATUS(status_velocity_decreasing),EVENT(event_undertemp_motor),       STATUS(status_undertemp_motor)},
     {STATUS(status_velocity_decreasing),EVENT(event_overtemp_driver),       STATUS(status_overtemp_driver)},
     {STATUS(status_velocity_decreasing),EVENT(event_undertemp_driver),      STATUS(status_undertemp_driver)},
     {STATUS(status_velocity_decreasing),EVENT(event_overtemp_pcb),          STATUS(status_overtemp_pcb)},
     {STATUS(status_velocity_decreasing),EVENT(event_undertemp_pcb),         STATUS(status_undertemp_pcb)},
+    {STATUS(status_velocity_decreasing),EVENT(event_fault0),                STATUS(status_fault0)},
+    {STATUS(status_velocity_decreasing),EVENT(event_fault1),                STATUS(status_fault1)},
+    {STATUS(status_velocity_decreasing),EVENT(event_fault2),                STATUS(status_fault2)},
 
-    {STATUS(status_velocity_decreasing),EVENT(event_stuck),                 STATUS(status_stuck)},
-    {STATUS(status_velocity_decreasing),EVENT(event_phase_loss),            STATUS(status_phase_loss)},
-    {STATUS(status_velocity_decreasing),EVENT(event_fault),                 STATUS(status_fault)},
-
-    // =======================================================================================
+    // (分割线)---------------------------------------------------------------------
     {STATUS(status_velocity_hold),      EVENT(event_velocity_increasing),   STATUS(status_velocity_increasing)},
     {STATUS(status_velocity_hold),      EVENT(event_velocity_decreasing),   STATUS(status_velocity_decreasing)},
 
@@ -258,19 +259,19 @@ static const __LocalTab motor_tab[196] = {
     
     {STATUS(status_velocity_hold),      EVENT(event_overvoltage),           STATUS(status_overvoltage)},
     {STATUS(status_velocity_hold),      EVENT(event_undervoltage),          STATUS(status_undervoltage)},
-    {STATUS(status_velocity_hold),      EVENT(event_overcurrent),           STATUS(status_overcurrent)},
+    {STATUS(status_velocity_hold),      EVENT(event_overcurrent_moment),    STATUS(status_overcurrent_moment)},
+    {STATUS(status_velocity_hold),      EVENT(event_overcurrent_stable),    STATUS(status_overcurrent_stable)},
     {STATUS(status_velocity_hold),      EVENT(event_overtemp_motor),        STATUS(status_overtemp_motor)},
     {STATUS(status_velocity_hold),      EVENT(event_undertemp_motor),       STATUS(status_undertemp_motor)},
     {STATUS(status_velocity_hold),      EVENT(event_overtemp_driver),       STATUS(status_overtemp_driver)},
     {STATUS(status_velocity_hold),      EVENT(event_undertemp_driver),      STATUS(status_undertemp_driver)},
     {STATUS(status_velocity_hold),      EVENT(event_overtemp_pcb),          STATUS(status_overtemp_pcb)},
     {STATUS(status_velocity_hold),      EVENT(event_undertemp_pcb),         STATUS(status_undertemp_pcb)},
+    {STATUS(status_velocity_hold),      EVENT(event_fault0),                 STATUS(status_fault0)},
+    {STATUS(status_velocity_hold),      EVENT(event_fault1),                 STATUS(status_fault1)},
+    {STATUS(status_velocity_hold),      EVENT(event_fault2),                 STATUS(status_fault2)},
 
-    {STATUS(status_velocity_hold),      EVENT(event_stuck),                 STATUS(status_stuck)},
-    {STATUS(status_velocity_hold),      EVENT(event_phase_loss),            STATUS(status_phase_loss)},
-    {STATUS(status_velocity_hold),      EVENT(event_fault),                 STATUS(status_fault)},
-
-    // =======================================================================================
+    // (分割线)---------------------------------------------------------------------
     {STATUS(status_position_increasing),EVENT(event_position_hold),         STATUS(status_position_hold)},
     {STATUS(status_position_increasing),EVENT(event_position_decreasing),   STATUS(status_position_decreasing)},
 
@@ -279,19 +280,17 @@ static const __LocalTab motor_tab[196] = {
     
     {STATUS(status_position_increasing),EVENT(event_overvoltage),           STATUS(status_overvoltage)},
     {STATUS(status_position_increasing),EVENT(event_undervoltage),          STATUS(status_undervoltage)},
-    {STATUS(status_position_increasing),EVENT(event_overcurrent),           STATUS(status_overcurrent)},
+    {STATUS(status_position_increasing),EVENT(event_overcurrent_moment),    STATUS(status_overcurrent_moment)},
+    {STATUS(status_position_increasing),EVENT(event_overcurrent_stable),    STATUS(status_overcurrent_stable)},
     {STATUS(status_position_increasing),EVENT(event_overtemp_motor),        STATUS(status_overtemp_motor)},
     {STATUS(status_position_increasing),EVENT(event_undertemp_motor),       STATUS(status_undertemp_motor)},
     {STATUS(status_position_increasing),EVENT(event_overtemp_driver),       STATUS(status_overtemp_driver)},
     {STATUS(status_position_increasing),EVENT(event_undertemp_driver),      STATUS(status_undertemp_driver)},
     {STATUS(status_position_increasing),EVENT(event_overtemp_pcb),          STATUS(status_overtemp_pcb)},
     {STATUS(status_position_increasing),EVENT(event_undertemp_pcb),         STATUS(status_undertemp_pcb)},
+    {STATUS(status_position_increasing),EVENT(event_fault0),                STATUS(status_fault0)},
 
-    {STATUS(status_position_increasing),EVENT(event_stuck),                 STATUS(status_stuck)},
-    {STATUS(status_position_increasing),EVENT(event_phase_loss),            STATUS(status_phase_loss)},
-    {STATUS(status_position_increasing),EVENT(event_fault),                 STATUS(status_fault)},
-
-    // =======================================================================================
+    // (分割线)---------------------------------------------------------------------
     {STATUS(status_position_decreasing),EVENT(event_position_hold),         STATUS(status_position_hold)},
     {STATUS(status_position_decreasing),EVENT(event_position_increasing),   STATUS(status_position_increasing)},
 
@@ -300,19 +299,19 @@ static const __LocalTab motor_tab[196] = {
     
     {STATUS(status_position_decreasing),EVENT(event_overvoltage),           STATUS(status_overvoltage)},
     {STATUS(status_position_decreasing),EVENT(event_undervoltage),          STATUS(status_undervoltage)},
-    {STATUS(status_position_decreasing),EVENT(event_overcurrent),           STATUS(status_overcurrent)},
+    {STATUS(status_position_decreasing),EVENT(event_overcurrent_moment),    STATUS(status_overcurrent_moment)},
+    {STATUS(status_position_decreasing),EVENT(event_overcurrent_stable),    STATUS(status_overcurrent_stable)},
     {STATUS(status_position_decreasing),EVENT(event_overtemp_motor),        STATUS(status_overtemp_motor)},
     {STATUS(status_position_decreasing),EVENT(event_undertemp_motor),       STATUS(status_undertemp_motor)},
     {STATUS(status_position_decreasing),EVENT(event_overtemp_driver),       STATUS(status_overtemp_driver)},
     {STATUS(status_position_decreasing),EVENT(event_undertemp_driver),      STATUS(status_undertemp_driver)},
     {STATUS(status_position_decreasing),EVENT(event_overtemp_pcb),          STATUS(status_overtemp_pcb)},
     {STATUS(status_position_decreasing),EVENT(event_undertemp_pcb),         STATUS(status_undertemp_pcb)},
+    {STATUS(status_position_decreasing),EVENT(event_fault0),                STATUS(status_fault0)},
+    {STATUS(status_position_decreasing),EVENT(event_fault1),                STATUS(status_fault1)},
+    {STATUS(status_position_decreasing),EVENT(event_fault2),                STATUS(status_fault2)},
 
-    {STATUS(status_position_decreasing),EVENT(event_stuck),                 STATUS(status_stuck)},
-    {STATUS(status_position_decreasing),EVENT(event_phase_loss),            STATUS(status_phase_loss)},
-    {STATUS(status_position_decreasing),EVENT(event_fault),                 STATUS(status_fault)},
-
-    // =======================================================================================
+    // (分割线)---------------------------------------------------------------------
     {STATUS(status_position_hold),      EVENT(event_position_increasing),   STATUS(status_position_increasing)},
     {STATUS(status_position_hold),      EVENT(event_position_decreasing),   STATUS(status_position_decreasing)},
 
@@ -321,27 +320,30 @@ static const __LocalTab motor_tab[196] = {
     
     {STATUS(status_position_hold),      EVENT(event_overvoltage),           STATUS(status_overvoltage)},
     {STATUS(status_position_hold),      EVENT(event_undervoltage),          STATUS(status_undervoltage)},
-    {STATUS(status_position_hold),      EVENT(event_overcurrent),           STATUS(status_overcurrent)},
+    {STATUS(status_position_hold),      EVENT(event_overcurrent_moment),    STATUS(status_overcurrent_moment)},
+    {STATUS(status_position_hold),      EVENT(event_overcurrent_stable),    STATUS(status_overcurrent_stable)},
     {STATUS(status_position_hold),      EVENT(event_overtemp_motor),        STATUS(status_overtemp_motor)},
     {STATUS(status_position_hold),      EVENT(event_undertemp_motor),       STATUS(status_undertemp_motor)},
     {STATUS(status_position_hold),      EVENT(event_overtemp_driver),       STATUS(status_overtemp_driver)},
     {STATUS(status_position_hold),      EVENT(event_undertemp_driver),      STATUS(status_undertemp_driver)},
     {STATUS(status_position_hold),      EVENT(event_overtemp_pcb),          STATUS(status_overtemp_pcb)},
     {STATUS(status_position_hold),      EVENT(event_undertemp_pcb),         STATUS(status_undertemp_pcb)},
+    {STATUS(status_position_hold),      EVENT(event_fault0),                STATUS(status_fault0)},
+    {STATUS(status_position_hold),      EVENT(event_fault1),                STATUS(status_fault1)},
+    {STATUS(status_position_hold),      EVENT(event_fault2),                STATUS(status_fault2)},
 
-    {STATUS(status_position_hold),      EVENT(event_stuck),                 STATUS(status_stuck)},
-    {STATUS(status_position_hold),      EVENT(event_phase_loss),            STATUS(status_phase_loss)},
-    {STATUS(status_position_hold),      EVENT(event_fault),                 STATUS(status_fault)},
-
-    // =======================================================================================
+    // (分割线)---------------------------------------------------------------------
     {STATUS(status_overvoltage),        EVENT(event_standby0),              STATUS(status_standby)},
     {STATUS(status_overvoltage),        EVENT(event_standby1),              STATUS(status_standby)},
 
     {STATUS(status_undervoltage),       EVENT(event_standby0),              STATUS(status_standby)},
     {STATUS(status_undervoltage),       EVENT(event_standby1),              STATUS(status_standby)},
 
-    {STATUS(status_overcurrent),        EVENT(event_standby0),              STATUS(status_standby)},
-    {STATUS(status_overcurrent),        EVENT(event_standby1),              STATUS(status_standby)},
+    {STATUS(status_overcurrent_moment), EVENT(event_standby0),              STATUS(status_standby)},
+    {STATUS(status_overcurrent_moment), EVENT(event_standby1),              STATUS(status_standby)},
+
+    {STATUS(status_overcurrent_stable), EVENT(event_standby0),              STATUS(status_standby)},
+    {STATUS(status_overcurrent_stable), EVENT(event_standby1),              STATUS(status_standby)},
 
     {STATUS(status_overtemp_motor),     EVENT(event_standby0),              STATUS(status_standby)},
     {STATUS(status_overtemp_motor),     EVENT(event_standby1),              STATUS(status_standby)},
@@ -361,14 +363,14 @@ static const __LocalTab motor_tab[196] = {
     {STATUS(status_undertemp_pcb),      EVENT(event_standby0),              STATUS(status_standby)},
     {STATUS(status_undertemp_pcb),      EVENT(event_standby1),              STATUS(status_standby)},
 
-    {STATUS(status_stuck),              EVENT(event_standby0),              STATUS(status_standby)},
-    {STATUS(status_stuck),              EVENT(event_standby1),              STATUS(status_standby)},
+    {STATUS(status_fault0),             EVENT(event_standby0),              STATUS(status_standby)},
+    {STATUS(status_fault0),             EVENT(event_standby1),              STATUS(status_standby)},
 
-    {STATUS(status_phase_loss),         EVENT(event_standby0),              STATUS(status_standby)},
-    {STATUS(status_phase_loss),         EVENT(event_standby1),              STATUS(status_standby)},
+    {STATUS(status_fault1),             EVENT(event_standby0),              STATUS(status_standby)},
+    {STATUS(status_fault1),             EVENT(event_standby1),              STATUS(status_standby)},
 
-    {STATUS(status_fault),              EVENT(event_standby0),              STATUS(status_standby)},
-    {STATUS(status_fault),              EVENT(event_standby1),              STATUS(status_standby)}
+    {STATUS(status_fault2),             EVENT(event_standby0),              STATUS(status_standby)},
+    {STATUS(status_fault2),             EVENT(event_standby1),              STATUS(status_standby)}
 };
 
 static void (*const __local_initial_init[])(SguanFoc *) = {
@@ -438,25 +440,36 @@ static void (*const __local_action_loop[])(void) = {
 };
 
 static __LocalEvent __local_event_get(uint8_t run){
-    switch (run){
-    case RUN_READY: // 准备触发
-        return event_ready;
-    case RUN_INITIALIZING: // 初始化触发
-        return event_initializing;
-    case RUN_STANDBY: // 待机触发
-        return event_standby0;
-    case RUN_FAULT: // 错误触发
-        return event_fault;
-    case RUN_SUCCESS: // [特殊]初始化success触发
-        return event_success;
+    // switch (run){
+    // case SGUANFOC_RUN_READY:         // 准备触发
+    //     return event_ready;
+    // case __LOCAL_RUN_INITIALIZING:  // 初始化触发
+    //     return event_initializing;
+    // case __LOCAL_RUN_STANDBY:       // 待机触发
+    //     return event_standby0;
+    // case __LOCAL_RUN_FAULT:         // 错误触发
+    //     return event_fault;
+    // case __LOCAL_RUN_SUCCESS:       // [特殊]初始化success触发
+    //     return event_success;
     
-    default:
-        break;
-    }
-    return event_zero;
+    // default:
+    //     break;
+    // }
+    // return event_zero;
 }
 
-void motorstatus_loop(void *sguan){
+void motorstatus_init(MotorStatus *motorstatus){
+    if ((motorstatus->status >= status_initializing) && 
+        (motorstatus->status <= status_gotoinit1_current)){
+        motorstatus->status = (__LocalStatus)(motorstatus->status+1);
+    }
+}
+
+void motorstatus_loop(MotorStatus *motorstatus){
+
+}
+
+void motorstatus_loop00(void *sguan){
     // ==================================================================
     // 1.结构体类型转换(SguanFoc结构体)
     SguanFoc *p = (SguanFoc *)sguan;
@@ -512,72 +525,84 @@ void motorstatus_loop(void *sguan){
                 }
                 case event_standby1:{
                     // 此处有触发event的代码
-                    uint32_t tick = 
-                        p->motorstatus.data.tick_run - 
-                        p->motorstatus.data.tick_last;
+                    // uint32_t tick = 
+                    //     p->motorstatus.data.tick_run - 
+                    //     p->motorstatus.data.tick_last;
 
-                    if (tick >= p->motorstatus.data.fault_tick_delay){ // 自动触发
+                    // if (tick >= p->motorstatus.data.fault_tick_delay){ // 自动触发
                             
-                        p->motorstatus.status = 
-                            (__LocalStatus)motor_tab[i].status_future;
-                    }
+                    //     p->motorstatus.status = 
+                    //         (__LocalStatus)motor_tab[i].status_future;
+                    // }
+
+
+
                     break;
                 }
                 case event_torque_hold:{
                     // 此处有触发event的代码
-                    if (p->motorstatus.data.mode_flag == __LOCAL_MODE_TORQUE){
-                        SguanQ tor_target_min = iqmath_sub(
-                            p->motorstatus.data.tor_target, 
-                            p->motorstatus.data.tor_scope);
-                        SguanQ tor_target_max = iqmath_add(
-                            p->motorstatus.data.tor_target, 
-                            p->motorstatus.data.tor_scope);
-                        SguanQ tor_real_abs = iqmath_abs(
-                            p->motorstatus.data.tor_real);
+                    // if (p->motorstatus.data.mode_flag == __LOCAL_MODE_TORQUE){
+                    //     SguanQ tor_target_min = iqmath_sub(
+                    //         p->motorstatus.data.tor_target, 
+                    //         p->motorstatus.data.tor_interval);
+                    //     SguanQ tor_target_max = iqmath_add(
+                    //         p->motorstatus.data.tor_target, 
+                    //         p->motorstatus.data.tor_interval);
+                    //     SguanQ tor_real_abs = iqmath_abs(
+                    //         p->motorstatus.data.tor_real);
         
-                        if ((tor_real_abs >= tor_target_min) && 
-                            (tor_real_abs <= tor_target_max)){ // 自动触发
-                            p->motorstatus.data.stuck_tick_run = 
-                                p->motorstatus.data.tick_run;
+                    //     if ((tor_real_abs >= tor_target_min) && 
+                    //         (tor_real_abs <= tor_target_max)){ // 自动触发
+                    //         p->motorstatus.data.stuck_tick_run = 
+                    //             p->motorstatus.data.tick_run;
 
-                            p->motorstatus.status = 
-                                (__LocalStatus)motor_tab[i].status_future;
-                        }
-                    }
+                    //         p->motorstatus.status = 
+                    //             (__LocalStatus)motor_tab[i].status_future;
+                    //     }
+                    // }
+
+
+
                     break;
                 }
                 case event_torque_increasing:{
                     // 此处有触发event的代码
-                    if (p->motorstatus.data.mode_flag == __LOCAL_MODE_TORQUE){                    
-                        SguanQ tor_target_min = iqmath_sub(
-                            p->motorstatus.data.tor_target, 
-                            p->motorstatus.data.tor_scope);
-                        SguanQ tor_real_abs = iqmath_abs(
-                            p->motorstatus.data.tor_real);
+                    // if (p->motorstatus.data.mode_flag == __LOCAL_MODE_TORQUE){                    
+                    //     SguanQ tor_target_min = iqmath_sub(
+                    //         p->motorstatus.data.tor_target, 
+                    //         p->motorstatus.data.tor_interval);
+                    //     SguanQ tor_real_abs = iqmath_abs(
+                    //         p->motorstatus.data.tor_real);
         
-                        if (tor_real_abs <= tor_target_min){ // 自动触发
+                    //     if (tor_real_abs <= tor_target_min){ // 自动触发
                             
-                            p->motorstatus.status = 
-                                (__LocalStatus)motor_tab[i].status_future;
-                        }
-                    }
+                    //         p->motorstatus.status = 
+                    //             (__LocalStatus)motor_tab[i].status_future;
+                    //     }
+                    // }
+
+
+
                     break;
                 }
                 case event_torque_decreasing:{
                     // 此处有触发event的代码
-                    if (p->motorstatus.data.mode_flag == __LOCAL_MODE_TORQUE){
-                        SguanQ tor_target_max = iqmath_add(
-                            p->motorstatus.data.tor_target, 
-                            p->motorstatus.data.tor_scope);
-                        SguanQ tor_real_abs = iqmath_abs(
-                            p->motorstatus.data.tor_real);
+                    // if (p->motorstatus.data.mode_flag == __LOCAL_MODE_TORQUE){
+                    //     SguanQ tor_target_max = iqmath_add(
+                    //         p->motorstatus.data.tor_target, 
+                    //         p->motorstatus.data.tor_interval);
+                    //     SguanQ tor_real_abs = iqmath_abs(
+                    //         p->motorstatus.data.tor_real);
         
-                        if (tor_real_abs >= tor_target_max){ // 自动触发
+                    //     if (tor_real_abs >= tor_target_max){ // 自动触发
                             
-                            p->motorstatus.status = 
-                                (__LocalStatus)motor_tab[i].status_future;
-                        }
-                    }
+                    //         p->motorstatus.status = 
+                    //             (__LocalStatus)motor_tab[i].status_future;
+                    //     }
+                    // }
+
+
+                    
                     break;
                 }
                 case event_velocity_hold:{
@@ -585,17 +610,16 @@ void motorstatus_loop(void *sguan){
                     if (p->motorstatus.data.mode_flag == __LOCAL_MODE_VELOCITY){
                         SguanQ vel_target_min = iqmath_sub(
                             p->motorstatus.data.vel_target, 
-                            p->motorstatus.data.vel_scope);
+                            p->motorstatus.data.vel_interval);
                         SguanQ vel_target_max = iqmath_add(
                             p->motorstatus.data.vel_target, 
-                            p->motorstatus.data.vel_scope);
+                            p->motorstatus.data.vel_interval);
                         SguanQ vel_real_abs = iqmath_abs(
                             p->motorstatus.data.vel_real);
         
                         if ((vel_real_abs >= vel_target_min) && 
                             (vel_real_abs <= vel_target_max)){ // 自动触发
-                            p->motorstatus.data.stuck_tick_run = 
-                                p->motorstatus.data.tick_run;
+
                             
                             p->motorstatus.status = 
                                 (__LocalStatus)motor_tab[i].status_future;
@@ -608,7 +632,7 @@ void motorstatus_loop(void *sguan){
                     if (p->motorstatus.data.mode_flag == __LOCAL_MODE_VELOCITY){
                         SguanQ vel_target_min = iqmath_sub(
                             p->motorstatus.data.vel_target, 
-                            p->motorstatus.data.vel_scope);
+                            p->motorstatus.data.vel_interval);
                         SguanQ vel_real_abs = iqmath_abs(
                             p->motorstatus.data.vel_real);
         
@@ -625,7 +649,7 @@ void motorstatus_loop(void *sguan){
                     if (p->motorstatus.data.mode_flag == __LOCAL_MODE_VELOCITY){
                         SguanQ vel_target_max = iqmath_add(
                             p->motorstatus.data.vel_target, 
-                            p->motorstatus.data.vel_scope);
+                            p->motorstatus.data.vel_interval);
                         SguanQ vel_real_abs = iqmath_abs(
                             p->motorstatus.data.vel_real);
         
@@ -642,17 +666,15 @@ void motorstatus_loop(void *sguan){
                     if (p->motorstatus.data.mode_flag == __LOCAL_MODE_POSITION){
                         SguanQ pos_target_min = iqmath_sub(
                             p->motorstatus.data.pos_target, 
-                            p->motorstatus.data.pos_scope);
+                            p->motorstatus.data.pos_interval);
                         SguanQ pos_target_max = iqmath_add(
                             p->motorstatus.data.pos_target, 
-                            p->motorstatus.data.pos_scope);
+                            p->motorstatus.data.pos_interval);
                         SguanQ pos_real_abs = iqmath_abs(
                             p->motorstatus.data.pos_real);
         
                         if ((pos_real_abs >= pos_target_min) && 
                             (pos_real_abs <= pos_target_max)){ // 自动触发
-                            p->motorstatus.data.stuck_tick_run = 
-                                p->motorstatus.data.tick_run;
                             
                             p->motorstatus.status = 
                                 (__LocalStatus)motor_tab[i].status_future;
@@ -665,7 +687,7 @@ void motorstatus_loop(void *sguan){
                     if (p->motorstatus.data.mode_flag == __LOCAL_MODE_POSITION){
                         SguanQ pos_target_min = iqmath_sub(
                             p->motorstatus.data.pos_target, 
-                            p->motorstatus.data.pos_scope);
+                            p->motorstatus.data.pos_interval);
                         SguanQ pos_real_abs = iqmath_abs(
                             p->motorstatus.data.pos_real);
         
@@ -683,7 +705,7 @@ void motorstatus_loop(void *sguan){
                     if (p->motorstatus.data.mode_flag == __LOCAL_MODE_POSITION){
                         SguanQ pos_target_max = iqmath_add(
                             p->motorstatus.data.pos_target, 
-                            p->motorstatus.data.pos_scope);
+                            p->motorstatus.data.pos_interval);
                         SguanQ pos_real_abs = iqmath_abs(
                             p->motorstatus.data.pos_real);
         
@@ -715,29 +737,62 @@ void motorstatus_loop(void *sguan){
                     }
                     break;
                 }
-                case event_overcurrent:{
+                case event_overcurrent_moment:{
                     // 此处有触发event的代码
                     uint32_t tick = 0;
-                    if (p->motorstatus.data.ibus_real <= 
-                        p->motorstatus.data.ibus_stable_max){
+                    if (p->motorstatus.data.is_real <= 
+                        p->motorstatus.data.is_stable_max){
 
-                        p->motorstatus.data.ibus_tick_run = 
+                        p->motorstatus.data.is_tick_count = 
                             p->motorstatus.data.tick_run; 
                     }
                     else{
                         tick = iqmath_sub(
                             p->motorstatus.data.tick_run, 
-                            p->motorstatus.data.ibus_tick_run);
+                            p->motorstatus.data.is_tick_count);
                     }
 
-                    if ((p->motorstatus.data.ibus_real >= 
-                        p->motorstatus.data.ibus_instant_max) || 
+                    if ((p->motorstatus.data.is_real >= 
+                        p->motorstatus.data.is_moment_max) || 
                         // 过流保护“或”条件判断
-                        (tick >= p->motorstatus.data.ibus_tick_delay)){ // 自动触发
+                        (tick >= p->motorstatus.data.is_tick_delay)){ // 自动触发
                             
                         p->motorstatus.status = 
                             (__LocalStatus)motor_tab[i].status_future;
                     }
+                    /////////////////////////////////////////////////////////////////
+                    /////////////////////////////////////////////////////////////////
+                    /////////////////////////////////////////////////////////////////
+                    /////////////////////////////////////////////////////////////////
+                    break;
+                }
+                case event_overcurrent_stable:{
+                    // 此处有触发event的代码
+                    uint32_t tick = 0;
+                    if (p->motorstatus.data.is_real <= 
+                        p->motorstatus.data.is_stable_max){
+
+                        p->motorstatus.data.is_tick_count = 
+                            p->motorstatus.data.tick_run; 
+                    }
+                    else{
+                        tick = iqmath_sub(
+                            p->motorstatus.data.tick_run, 
+                            p->motorstatus.data.is_tick_count);
+                    }
+
+                    if ((p->motorstatus.data.is_real >= 
+                        p->motorstatus.data.is_moment_max) || 
+                        // 过流保护“或”条件判断
+                        (tick >= p->motorstatus.data.is_tick_delay)){ // 自动触发
+                            
+                        p->motorstatus.status = 
+                            (__LocalStatus)motor_tab[i].status_future;
+                    }
+                    /////////////////////////////////////////////////////////////////////
+                    /////////////////////////////////////////////////////////////////////
+                    /////////////////////////////////////////////////////////////////////
+                    /////////////////////////////////////////////////////////////////////
                     break;
                 }
                 case event_overtemp_motor:{
@@ -800,30 +855,29 @@ void motorstatus_loop(void *sguan){
                     }
                     break;
                 }
-                case event_stuck:{
+                case event_fault0:{
                     // 此处有触发event的代码
-                    uint32_t tick = 
-                        p->motorstatus.data.tick_run - 
-                        p->motorstatus.data.stuck_tick_run;
-
-                    if (tick >= p->motorstatus.data.stuck_tick_delay){ // 自动触发
+                    if (__local_event_get(p->run_flag) == 
+                        (__LocalStatus)motor_tab[i].event_now){ // 手动触发
+                        p->run_flag = 0;
                             
                         p->motorstatus.status = 
                             (__LocalStatus)motor_tab[i].status_future;
                     }
                     break;
                 }
-                case event_phase_loss:{
+                case event_fault1:{
                     // 此处有触发event的代码
-
-                    if (0){ // 自动触发
+                    if (__local_event_get(p->run_flag) == 
+                        (__LocalStatus)motor_tab[i].event_now){ // 手动触发
+                        p->run_flag = 0;
                             
                         p->motorstatus.status = 
                             (__LocalStatus)motor_tab[i].status_future;
                     }
                     break;
                 }
-                case event_fault:{
+                case event_fault2:{
                     // 此处有触发event的代码
                     if (__local_event_get(p->run_flag) == 
                         (__LocalStatus)motor_tab[i].event_now){ // 手动触发
@@ -845,7 +899,7 @@ void motorstatus_loop(void *sguan){
     // 3.运行init和loop函数
     if (p->motorstatus.last != p->motorstatus.status){
         // 状态机发送变化，记录变化时刻的tick时间
-        p->motorstatus.data.tick_last = p->motorstatus.data.tick_run;
+        p->motorstatus.data.tick_count = p->motorstatus.data.tick_run;
 
         // 仅在状态机变化开始，初始化一次init函数并更新last状态机
         __local_initial_init[p->motorstatus.status](p);

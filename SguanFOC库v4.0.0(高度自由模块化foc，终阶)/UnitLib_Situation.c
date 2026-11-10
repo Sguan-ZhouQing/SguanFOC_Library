@@ -1,5 +1,7 @@
 #include "UnitLib_Situation.h"
 
+/* SguanFOC配置文件声明 */
+#include "UnitLib_Main.h"
 
 void situation_standby_loop(void){
 

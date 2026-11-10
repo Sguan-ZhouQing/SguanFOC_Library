@@ -8,32 +8,30 @@
 #include "Sguan_Printf.h"
 #include "Sguan_Transfer.h"
 
-#define __LOCAL_RUN_READY           0x01
-#define __LOCAL_RUN_INITIALIZING    0x02
-#define __LOCAL_RUN_STANDBY         0x03
-#define __LOCAL_RUN_FAULT           0x04
-#define __LOCAL_RUN_SUCCESS         0x05
+// ================================================================================
+// 1.全局宏定义设计
+#define SGUANFOC_MOTOR_ONE              0X00    // 
+#define SGUANFOC_MOTOR_TWO              0X01    // 
+#define SGUANFOC_MOTOR_THREE            0X02    // 
+#define SGUANFOC_MOTOR_FOUR             0X03    // 
+#define SGUANFOC_MOTOR_FIVE             0X04    // 
+#define SGUANFOC_MOTOR_SIX              0X05    // 
 
-#define __LOCAL_MOTOR_ONE           0X00
-#define __LOCAL_MOTOR_TWO           0X01
-#define __LOCAL_MOTOR_THREE         0X02
-#define __LOCAL_MOTOR_FOUR          0X03
-#define __LOCAL_MOTOR_FIVE          0X04
-#define __LOCAL_MOTOR_SIX           0X05
+#define SGUANFOC_CONTROL_TORUE          0x00    // 
+#define SGUANFOC_CONTROL_VELOCITY       0x01    // 
+#define SGUANFOC_CONTROL_POSITION       0x02    // 
 
-#define __LOCAL_CONTROL_TORUE       0x00
-#define __LOCAL_CONTROL_VELOCITY    0x01
-#define __LOCAL_CONTROL_POSITION    0x02
+#define SGUANFOC_CURRENT_U              0x00    // 
+#define SGUANFOC_CURRENT_V              0x01    // 
+#define SGUANFOC_CURRENT_W              0x02    // 
+#define SGUANFOC_CURRENT_OTHER          0x03    // 
 
-#define __LOCAL_CURRENT_U           0x00
-#define __LOCAL_CURRENT_V           0x01
-#define __LOCAL_CURRENT_W           0x02
-#define __LOCAL_CURRENT_OTHER       0x03
+#define SGUANFOC_HALL_A                 0x00    // 
+#define SGUANFOC_HALL_B                 0x01    // 
+#define SGUANFOC_HALL_C                 0x02    // 
 
-#define __LOCAL_HALL_A              0x00
-#define __LOCAL_HALL_B              0x01
-#define __LOCAL_HALL_C              0x02
-
+// ================================================================================
+// 2.局部结构体(声明)
 typedef struct{
     SguanQ target_speed;                        // (期望速度)Target期望机械角速度
     SguanQ target_pos;                          // (期望角度)Target期望机械角度
@@ -46,7 +44,7 @@ typedef struct{
     SguanQ ud_in;                               // (输入量end)D轴电压输入
     SguanQ uq_in;                               // (输入值end)Q轴电压输入
 
-    // ================= 修改线(上面可修改，下面为自动计算量) =================
+    // (分割线)---------------------------------------------------------------------
     SguanQ ualpha;                              // (中间量)alpha轴电压
     SguanQ ubeta;                               // (中间量)beta轴电压
 
@@ -72,6 +70,7 @@ typedef struct{
 
     SguanQ real_offset;
 
+    // (分割线)---------------------------------------------------------------------
     SguanQ other_speed;
     SguanQ other_position;
     SguanQ other_We;
@@ -108,12 +107,12 @@ typedef struct{
 
     uint8_t poles;                              // (电机实体参数)电机极对数
     SguanQ vbus;                                // (电机实体参数)母线电压
-    SguanQ eta;                                 // (电机实体参数)母线电流计算中的效率
+    SguanQ eta;                                 // (电机实体参数)母线电流计算中的效率！！！
 
-    int8_t motor_dir;                           // (参数设计)电机的运行方向设计
-    int8_t encoder_dir;                         // (有感实体参数)编码器方向
-    int8_t pwm_dir;                             // (参数设计)PWM占空比高低对应
-    uint32_t duty;                              // (参数设计)PWM满占空比
+    int8_t motor_dir;                           // (参数设计)电机的运行方向设计zzz
+    int8_t encoder_dir;                         // (有感实体参数)编码器方向！！！
+    int8_t pwm_dir;                             // (参数设计)PWM占空比高低对应！！！硬件
+    uint32_t duty;                              // (参数设计)PWM满占空比           硬件
 
     int8_t current_dir0;                        // (参数设计)电流采样方向0
     int8_t current_dir1;                        // (参数设计)电流采样方向1
@@ -124,6 +123,8 @@ typedef struct{
     SguanQ sampling_rs;                         // (参数设计)采样电阻的阻值大小
 }Master;
 
+// ================================================================================
+// 3.全局结构体及函数(声明)
 typedef struct{
     uint8_t id_flag;                            // []
     uint8_t run_flag;                           // []
@@ -141,7 +142,6 @@ typedef struct{
     Foc foc;                                    // []
     Encoder encoder;                            // []
     Current current;                            // []
-    Master master;                              // []
 
     void (*func_high_loop)(void);               // []
     void (*func_low_loop)(void);                // []
@@ -149,7 +149,7 @@ typedef struct{
     void (*func_main_loop)(void);               // []
 }SguanFoc;
 
-extern SguanFoc sguanfoc[CONFIG_MOTOR];
+// extern SguanFoc sguanfoc[CONFIG_MOTOR];
 void __local_high_loop(const uint8_t *cmds, int count);
 
 

@@ -1,10 +1,6 @@
 #ifndef __UNITLIB_SITUATION_H
 #define __UNITLIB_SITUATION_H
 
-/* SguanFOC配置文件声明 */
-#include "SguanFOC.h"
-#include "UnitLib_main.h"
-
 void situation_standby_loop(void);
 void situation_ready_loop(void);
 void situation_initial_loop(void);

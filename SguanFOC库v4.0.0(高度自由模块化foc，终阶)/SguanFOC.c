@@ -3,10 +3,10 @@
 /* SguanFOC配置文件声明 */
 #include "UnitLib_main.h"
 
-static void __local_high_loop(SguanFoc *sguan);
-static void __local_low_loop(SguanFoc *sguan);
-static void __local_printf_loop(uint8_t *data, uint16_t length);
-static void __local_main_loop(SguanFoc *sguan);
+// static void __local_high_loop(SguanFoc *sguan);
+// static void __local_low_loop(SguanFoc *sguan);
+// static void __local_printf_loop(uint8_t *data, uint16_t length);
+// static void __local_main_loop(SguanFoc *sguan);
 
 
 // 1. 先定义基础宏

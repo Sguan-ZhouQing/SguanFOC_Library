@@ -1,5 +1,7 @@
 #include "UnitLib_UserControl.h"
 
+/* SguanFOC配置文件声明 */
+#include "SguanFOC.h"
 
 // 指令处理回调函数库->MOTOR
 void usercontrol_motor(float value){

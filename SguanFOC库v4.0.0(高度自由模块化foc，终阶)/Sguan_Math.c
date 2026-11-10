@@ -337,7 +337,7 @@ static const int64_t __LOCAL_Q31_MIN_64 = -2147483648LL;
 // (q15相关局部函数)
 static Q15 __local_q15_from_float(SguanF f, SguanF base_value){
     SguanF scaled;
-    if (base_value <= VALUE_F_ZERO || f != f){ 
+    if (base_value <= 0 || f != f){ 
         return 0;
     }
     else if(base_value != VALUE_F_ONE){
@@ -353,7 +353,7 @@ static Q15 __local_q15_from_float(SguanF f, SguanF base_value){
         scaled = f * __LOCAL_Q15_MAX_F1;
     }
 
-    if (scaled >= VALUE_F_ZERO){
+    if (scaled >= 0){
         scaled += VALUE_F_HALF;
     } else{
         scaled -= VALUE_F_HALF;
@@ -370,8 +370,8 @@ static Q15 __local_q15_from_float(SguanF f, SguanF base_value){
 
 // (q15相关局部函数)
 static SguanF __local_q15_to_float(Q15 q, SguanF base_value){
-    if (base_value <= VALUE_F_ZERO){
-        return VALUE_F_ZERO;
+    if (base_value <= 0){
+        return 0;
     }
 
     SguanF normalized = SGUAN_F(q)*(VALUE_F_ONE/__LOCAL_Q15_MAX_F1);
@@ -445,7 +445,7 @@ static Q15 __local_q15_div(Q15 a, Q15 b){
 
 // (q15相关局部函数)
 static Q15 __local_q15_convert_base(Q15 q, SguanF old_base, SguanF new_base){
-    if (old_base <= VALUE_F_ZERO || new_base <= VALUE_F_ZERO){
+    if (old_base <= 0 || new_base <= 0){
         return 0;
     }
     
@@ -475,7 +475,7 @@ static Q15 __local_q15_convert_base(Q15 q, SguanF old_base, SguanF new_base){
 // (局部函数q31)
 static Q31 __local_q31_from_float(SguanF f, SguanF base_value){
     SguanF scaled;
-    if (base_value <= VALUE_F_ZERO || f != f){ 
+    if (base_value <= 0 || f != f){ 
         return 0;
     }
     else if(base_value != VALUE_F_ONE){
@@ -491,7 +491,7 @@ static Q31 __local_q31_from_float(SguanF f, SguanF base_value){
         scaled = f * __LOCAL_Q31_MAX_F1;
     }
 
-    if (scaled >= VALUE_F_ZERO){
+    if (scaled >= 0){
         scaled += VALUE_F_HALF;
     } else{
         scaled -= VALUE_F_HALF;
@@ -508,8 +508,8 @@ static Q31 __local_q31_from_float(SguanF f, SguanF base_value){
 
 // (局部函数q31)
 static SguanF __local_q31_to_float(Q31 q, SguanF base_value){
-    if (base_value <= VALUE_F_ZERO){
-        return VALUE_F_ZERO;
+    if (base_value <= 0){
+        return 0;
     }
 
     SguanF normalized = SGUAN_F(q) * (VALUE_F_ONE/__LOCAL_Q31_MAX_F1);
@@ -583,7 +583,7 @@ static Q31 __local_q31_div(Q31 a, Q31 b){
 
 // (局部函数q31)
 static Q31 __local_q31_convert_base(Q31 q, SguanF old_base, SguanF new_base){
-    if (old_base <= VALUE_F_ZERO || new_base <= VALUE_F_ZERO){
+    if (old_base <= 0 || new_base <= 0){
         return 0;
     }
     
@@ -625,8 +625,8 @@ static SguanF __local_sin_f(SguanF x){
     int idx0 = (int)pos;
     SguanF frac = pos - (SguanF)idx0;
 
-    if (idx0 > 511){ idx0 = 511; frac = VALUE_F_ZERO; }
-    if (idx0 < 0){ idx0 = 0; frac = VALUE_F_ZERO; }
+    if (idx0 > 511){ idx0 = 511; frac = 0; }
+    if (idx0 < 0){ idx0 = 0; frac = 0; }
 
     int idx1 = idx0 + 1;
     if (idx1 >= 512) idx1 = 0;
@@ -644,7 +644,7 @@ static SguanF __local_atan_f(SguanF x){
     if (x != x){
       return x;
     }
-    if (x < VALUE_F_ZERO){
+    if (x < 0){
       return -__local_atan_f(-x);
     }
     if (x > VALUE_F_ONE){
@@ -1111,7 +1111,7 @@ SguanQ math_sqrt(SguanQ x){
     #elif VALUE_MODE_MATH==VALUE_MODE_DOUBLE
     // 3.double数值开平方，输入double，输出double
     // 用math_memcpy做位重解释，避开严格别名UB
-    if (x <= 0.0) return 0.0;
+    if (x <= 0) return 0;
 
     double y = x;
     uint64_t i;
@@ -1126,7 +1126,7 @@ SguanQ math_sqrt(SguanQ x){
 
     #else // VALUE_MODE_MATH (float)
     // 4.float 数值开平方，输入 float，输出 float
-    if (x <= 0.0f) return 0.0f;
+    if (x <= 0) return 0;
 
     float y = x;
     uint32_t i;

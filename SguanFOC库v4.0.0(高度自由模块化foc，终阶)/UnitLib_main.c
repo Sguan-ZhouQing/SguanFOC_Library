@@ -1,12 +1,13 @@
 #include "UnitLib_main.h"
 
 /* SguanFOC配置文件声明 */
-#include "UserData_Driver.h"
-#include "Zone_Master.h"
-#include "Zone_Parameter.h"
+#include "UserMotor_Parameter.h"
+#include "Zone_Driver.h"
 
-void main_standby_init(SguanFoc *sguanfoc){
+void main_standby_init(SguanFoc *sguan){
+    sguan->motorstatus.error_code = ((uint8_t)sguan->motorstatus.status)-100;
 
+    
 }
 
 void main_ready_init(SguanFoc *sguan){
@@ -16,19 +17,19 @@ void main_ready_init(SguanFoc *sguan){
 void main_initializing_init(SguanFoc *sguan){
 
     // 最后赋值run_flag，切换到下一个状态
-    sguan->run_flag = RUN_SUCCESS;
+    // sguan->run_flag = __LOCAL_RUN_SUCCESS;
 }
 
 void main_goinit0_angle_init(SguanFoc *sguan){
 
     // 最后赋值run_flag，切换到下一个状态
-    sguan->run_flag = RUN_SUCCESS;
+    // sguan->run_flag = __LOCAL_RUN_SUCCESS;
 }
 
 void main_goinit1_current_init(SguanFoc *sguan){
 
     // 最后赋值run_flag，切换到下一个状态
-    sguan->run_flag = RUN_SUCCESS;
+    // sguan->run_flag = __LOCAL_RUN_SUCCESS;
 }
 
 // ===============================================================================
@@ -71,7 +72,7 @@ void main_low_loop(SguanFoc *sguan){
     sguan->motorstatus.data.pos_real        = sguan->encoder.real_position;
     sguan->motorstatus.data.pos_target      = sguan->foc.target_pos;
     sguan->motorstatus.data.vbus_real       = driver_read_vbus(sguan->id_flag);
-    sguan->motorstatus.data.ibus_real       = driver_read_ibus(sguan->id_flag);
+    // sguan->motorstatus.data.is_real         = driver_read_ibus(sguan->id_flag);
     sguan->motorstatus.data.temp_motor_real = driver_read_temp_motor(sguan->id_flag);
     sguan->motorstatus.data.temp_driver_real= driver_read_temp_driver(sguan->id_flag);
     sguan->motorstatus.data.temp_pcb_real   = driver_read_temp_pcb(sguan->id_flag);
@@ -79,7 +80,7 @@ void main_low_loop(SguanFoc *sguan){
     
     // 2.根据电机状态给赋值参数
     // (现在默认给速度控制)
-    sguan->motorstatus.data.mode_flag       = CONTROL_VELOCITY;
+    // sguan->motorstatus.data.mode_flag       = __LOCAL_CONTROL_VELOCITY;
 
     // 3.运行状态机处理函数
     motorstatus_loop(sguan);
