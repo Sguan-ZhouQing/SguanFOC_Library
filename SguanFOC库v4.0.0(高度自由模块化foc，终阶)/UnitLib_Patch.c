@@ -29,14 +29,6 @@ void patch_derivative_init(__LocalDerivative *derivative){
 
 }
 
-void patch_curve_init(__LocalCurve *curve){
-
-}
-
-void patch_dft_init(__LocalDft *dft){
-
-}
-
 void patch_hall_init(__LocalHall *hall){
 
 }
@@ -167,14 +159,6 @@ void patch_integrator_loop(__LocalIntegrator *integrator){
 }
 
 void patch_derivative_loop(__LocalDerivative *derivative){
-
-}
-
-void patch_curve_loop(__LocalCurve *curve){
-
-}
-
-void patch_dft_loop(__LocalDft *dft){
 
 }
 

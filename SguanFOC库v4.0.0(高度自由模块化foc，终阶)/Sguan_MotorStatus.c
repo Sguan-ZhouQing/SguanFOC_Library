@@ -16,19 +16,6 @@
 static void __local_null0(SguanFoc *sguan);
 static void __local_null1(void);
 static void __local_idle_init(SguanFoc *sguan);
-static void __local_overvoltage_init(SguanFoc *sguan);
-static void __local_undervoltage_init(SguanFoc *sguan);
-static void __local_overcurrent_init(SguanFoc *sguan);
-static void __local_overtemp_motor_init(SguanFoc *sguan);
-static void __local_undertemp_motor_init(SguanFoc *sguan);
-static void __local_overtemp_driver_init(SguanFoc *sguan);
-static void __local_undertemp_driver_init(SguanFoc *sguan);
-static void __local_overtemp_pcb_init(SguanFoc *sguan);
-static void __local_undertemp_pcb_init(SguanFoc *sguan);
-static void __local_stuck_init(SguanFoc *sguan);
-static void __local_phase_loss_init(SguanFoc *sguan);
-static void __local_fault_init(SguanFoc *sguan);
-static __LocalEvent __local_event_get(uint8_t run);
 // ===================================================
 static void __local_null0(SguanFoc *sguan){
     // 空函数
@@ -40,66 +27,6 @@ static void __local_null1(void){
 
 static void __local_idle_init(SguanFoc *sguan){
     // sguan->motorstatus.data.error_code = 0x00;
-    // main_standby_init(sguan);
-}
-
-static void __local_overvoltage_init(SguanFoc *sguan){
-    // sguan->motorstatus.data.error_code = 0x01;
-    // main_standby_init(sguan);
-}
-
-static void __local_undervoltage_init(SguanFoc *sguan){
-    // sguan->motorstatus.data.error_code = 0x02;
-    // main_standby_init(sguan);
-}
-
-static void __local_overcurrent_init(SguanFoc *sguan){
-    // sguan->motorstatus.data.error_code = 0x03;
-    // main_standby_init(sguan);
-}
-
-static void __local_overtemp_motor_init(SguanFoc *sguan){
-    // sguan->motorstatus.data.error_code = 0x04;
-    // main_standby_init(sguan);
-}
-
-static void __local_undertemp_motor_init(SguanFoc *sguan){
-    // sguan->motorstatus.data.error_code = 0x05;
-    // main_standby_init(sguan);
-}
-
-static void __local_overtemp_driver_init(SguanFoc *sguan){
-    // sguan->motorstatus.data.error_code = 0x06;
-    // main_standby_init(sguan);
-}
-
-static void __local_undertemp_driver_init(SguanFoc *sguan){
-    // sguan->motorstatus.data.error_code = 0x07;
-    // main_standby_init(sguan);
-}
-
-static void __local_overtemp_pcb_init(SguanFoc *sguan){
-    // sguan->motorstatus.data.error_code = 0x08;
-    // main_standby_init(sguan);
-}
-
-static void __local_undertemp_pcb_init(SguanFoc *sguan){
-    // sguan->motorstatus.data.error_code = 0x09;
-    // main_standby_init(sguan);
-}
-
-static void __local_stuck_init(SguanFoc *sguan){
-    // sguan->motorstatus.data.error_code = 0x0A;
-    // main_standby_init(sguan);
-}
-
-static void __local_phase_loss_init(SguanFoc *sguan){
-    // sguan->motorstatus.data.error_code = 0x0B;
-    // main_standby_init(sguan);
-}
-
-static void __local_fault_init(SguanFoc *sguan){
-    // sguan->motorstatus.data.error_code = 0x0C;
     // main_standby_init(sguan);
 }
 
@@ -392,18 +319,19 @@ static void (*const __local_initial_init[])(SguanFoc *) = {
     __local_null0,
     __local_null0,
 
-    __local_overvoltage_init,
-    __local_undervoltage_init,
-    __local_overcurrent_init,
-    __local_overtemp_motor_init,
-    __local_undertemp_motor_init,
-    __local_overtemp_driver_init,
-    __local_undertemp_driver_init,
-    __local_overtemp_pcb_init,
-    __local_undertemp_pcb_init,
-    __local_stuck_init,
-    __local_phase_loss_init,
-    __local_fault_init
+    main_standby_init,
+    main_standby_init,
+    main_standby_init,
+    main_standby_init,
+    main_standby_init,
+    main_standby_init,
+    main_standby_init,
+    main_standby_init,
+    main_standby_init,
+    main_standby_init,
+    main_standby_init,
+    main_standby_init,
+    main_standby_init
 };
 
 static void (*const __local_action_loop[])(void) = {
@@ -427,16 +355,17 @@ static void (*const __local_action_loop[])(void) = {
 
     situation_overvoltage_loop,
     situation_undervoltage_loop,
-    situation_overcurrent_loop,
+    situation_overcurrent_moment_loop,
+    situation_overcurrent_stable_loop,
     situation_overtemp_motor_loop,
     situation_undertemp_motor_loop,
     situation_overtemp_driver_loop,
     situation_undertemp_driver_loop,
     situation_overtemp_pcb_loop,
     situation_undertemp_pcb_loop,
-    situation_stuck_loop,
-    situation_phase_loss_loop,
-    situation_fault_loop
+    situation_fault0_loop,
+    situation_fault1_loop,
+    situation_fault2_loop
 };
 
 static __LocalEvent __local_event_get(uint8_t run){

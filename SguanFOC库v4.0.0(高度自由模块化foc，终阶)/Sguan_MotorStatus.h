@@ -166,7 +166,7 @@ typedef struct{
     __LocalState state;                         // (state)状况标志位
     __LocalData data;                           // (data)实时数据
 
-    uint8_t run_flag;                           // (run_flag)手动状态切换
+    uint8_t run_code;                           // (run_flag)手动状态切换
     uint8_t error_code;                         // (error_code)错误码记录
 }MotorStatus;
 

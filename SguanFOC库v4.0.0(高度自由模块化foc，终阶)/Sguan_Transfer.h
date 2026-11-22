@@ -221,57 +221,6 @@ typedef struct __LocalDerivative{
 }__LocalDerivative;
 // (分割线)-------------------------------------------------------------------------
 typedef struct{
-    SguanQ input;
-}__LocalCurveIn;
-
-typedef struct{
-    SguanQ output;
-}__LocalCurveOut;
-
-typedef struct{
-    SguanQ t;
-    SguanQ wo;
-
-    SguanQ k1;
-    SguanQ k2;
-
-    uint8_t recalculate_total_flag;
-}__LocalCurveParams;
-
-typedef struct __LocalCurveData __LocalCurveData;
-
-typedef struct __LocalCurve{
-    __LocalCurveIn in;
-    __LocalCurveOut out;
-    __LocalCurveParams params;
-    __LocalCurveData *data;
-}__LocalCurve;
-// (分割线)-------------------------------------------------------------------------
-typedef struct{
-    SguanQ input;
-}__LocalDftIn;
-
-typedef struct{
-    SguanQ output;
-}__LocalDftOut;
-
-typedef struct{
-    SguanQ t;
-    SguanQ wc;
-
-    uint8_t recalculate_total_flag;
-}__LocalDftParams;
-
-typedef struct __LocalDftData __LocalDftData;
-
-typedef struct __LocalDft{
-    __LocalDftIn in;
-    __LocalDftOut out;
-    __LocalDftParams params;
-    __LocalDftData *data;
-}__LocalDft;
-// (分割线)-------------------------------------------------------------------------
-typedef struct{
     SguanQ ref;
     SguanQ fbk;
 }__LocalHallIn;
@@ -1287,14 +1236,6 @@ typedef struct{
     __LocalDerivative *derivative_ch[CONFIG_DERIVATIVE];
     #endif // CONFIG_DERIVATIVE
 
-    #if CONFIG_CURVE // S型曲线加减速函数
-    __LocalCurve *curve_ch[CONFIG_CURVE];
-    #endif // CONFIG_DFT
-
-    #if CONFIG_DFT // 傅里叶变换
-    __LocalDft *dft_ch[CONFIG_DFT];
-    #endif // CONFIG_DFT
-
     #if CONFIG_HALL // 霍尔编码器
     __LocalHall *hall_ch[CONFIG_HALL];
     #endif // CONFIG_HALL
@@ -1343,23 +1284,23 @@ typedef struct{
     __LocalHpf2 *hpf2_ch[CONFIG_HPF2];
     #endif // CONFIG_HPF2
 
-    #if CONFIG_BPF1 // 带通滤波器(一阶低通和高通串联)
+    #if CONFIG_BPF1 // 带通滤波器"一阶低通和高通串联"
     __LocalBpf1 *bpf1_ch[CONFIG_BPF1];
     #endif // CONFIG_BPF1
 
-    #if CONFIG_BPF2 // 带通滤波器(典型二阶系统改型)
+    #if CONFIG_BPF2 // 带通滤波器"典型二阶系统改型"
     __LocalBpf2 *bpf2_ch[CONFIG_BPF2];
     #endif // CONFIG_BPF2
 
-    #if CONFIG_SOGI // 广义积分器(典型二阶系统改型)
+    #if CONFIG_SOGI // 广义积分器"典型二阶系统改型"
     __LocalSogi *sogi_ch[CONFIG_SOGI];
     #endif // CONFIG_BPF2
 
-    #if CONFIG_NF // 陷波滤波器(典型二阶系统改型)
+    #if CONFIG_NF // 陷波滤波器"典型二阶系统改型"
     __LocalNf *nf_ch[CONFIG_NF];
     #endif // CONFIG_NF
 
-    #if CONFIG_TPNF // 陷波滤波器(三参数陷波滤波器)
+    #if CONFIG_TPNF // 陷波滤波器"三参数陷波滤波器"
     __LocalTpnf *tpnf_ch[CONFIG_TPNF];
     #endif // CONFIG_TPNF
 
@@ -1371,43 +1312,43 @@ typedef struct{
     __LocalRls *rls_ch[CONFIG_RLS];
     #endif // CONFIG_RLS
 
-    #if CONFIG_SMO // (无感)滑模观测器
+    #if CONFIG_SMO // "无感"滑模观测器
     __LocalSmo *smo_ch[CONFIG_SMO];
     #endif // CONFIG_SMO
 
-    #if CONFIG_NFO // (无感)非线性磁链观测器
+    #if CONFIG_NFO // "无感"非线性磁链观测器
     __LocalNfo *nfo_ch[CONFIG_NFO];
     #endif // CONFIG_NFO
 
-    #if CONFIG_AFO // (无感)电压电流互补磁链观测器
+    #if CONFIG_AFO // "无感"电压电流互补磁链观测器
     __LocalAfo *afo_ch[CONFIG_AFO];
     #endif // CONFIG_AFO
 
-    #if CONFIG_HFI // (无感)高频正弦波注入
+    #if CONFIG_HFI // "无感"高频正弦波注入
     __LocalHfi *hfi_ch[CONFIG_HFI];
     #endif // CONFIG_HFI
 
-    #if CONFIG_ROLO // (无感)降阶龙伯格观测器
+    #if CONFIG_ROLO // "无感"降阶龙伯格观测器
     __LocalRolo *rolo_ch[CONFIG_ROLO];
     #endif // CONFIG_ROLO
 
-    #if CONFIG_MARS // (无感)模型参考自适应观测器
+    #if CONFIG_MARS // "无感"模型参考自适应观测器
     __LocalMars *mars_ch[CONFIG_MARS];
     #endif // CONFIG_MARS
 
-    #if CONFIG_EKF // (无感)扩展卡尔曼滤波
+    #if CONFIG_EKF // "无感"扩展卡尔曼滤波
     __LocalEkf *ekf_ch[CONFIG_EKF];
     #endif // CONFIG_EKF
 
-    #if CONFIG_DELAY1 // 延时函数(延时一拍)
+    #if CONFIG_DELAY1 // 延时函数"延时一拍"
     __LocalDelay1 *delay1_ch[CONFIG_DELAY1];
     #endif // CONFIG_DELAY1
 
-    #if CONFIG_DELAY2 // 延时函数(延时两拍)
+    #if CONFIG_DELAY2 // 延时函数"延时两拍"
     __LocalDelay2 *delay2_ch[CONFIG_DELAY2];
     #endif // CONFIG_DELAY2
 
-    #if CONFIG_DELAY3 // 延时函数(延时三拍)
+    #if CONFIG_DELAY3 // 延时函数"延时三拍"
     __LocalDelay3 *delay3_ch[CONFIG_DELAY3];
     #endif // CONFIG_DELAY3
 
@@ -1436,8 +1377,6 @@ void transfer_transfer4_loop(__LocalTransfer4 *transfer);
 void transfer_transfer5_loop(__LocalTransfer5 *transfer);
 void transfer_integrator_loop(__LocalIntegrator *integrator);
 void transfer_derivative_loop(__LocalDerivative *derivative);
-void transfer_curve_loop(__LocalCurve *curve);
-void transfer_dft_loop(__LocalDft *dft);
 void transfer_hall_loop(__LocalHall *hall);
 void transfer_ladrc1_loop(__LocalLadrc1 *ladrc);
 void transfer_ladrc2_loop(__LocalLadrc2 *ladrc);
@@ -1484,8 +1423,10 @@ void transfer_swpwm_loop(__LocalSwpwm *swpwm);
 void transfer_singlers_start_loop(__LocalSingleRs *singlers);
 void transfer_singlers_end_loop(__LocalSingleRs *singlers);
 
-void transfer_init(Transfer *transfer);
-void transfer_deinit(Transfer *transfer);
+void transfer_init_0(Transfer *transfer);       // (指针)初始化
+void transfer_deinit_0(Transfer *transfer);     // (指针)失能
+void transfer_init_1(Transfer *transfer);       // (功能模块)初始化
+void transfer_deinit_1(Transfer *transfer);     // (功能模块)失能
 
 
 #endif // SGUAN_TRANSFER_H

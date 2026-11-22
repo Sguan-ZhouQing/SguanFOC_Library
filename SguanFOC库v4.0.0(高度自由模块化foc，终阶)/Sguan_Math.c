@@ -331,9 +331,64 @@ static const int64_t __LOCAL_Q31_MAX_64 = 2147483647LL;
 static const int64_t __LOCAL_Q31_MIN_64 = -2147483648LL;
 #define __LOCAL_Q31_MAX_F0 (SguanF)2147483647.0
 #define __LOCAL_Q31_MAX_F1 (SguanF)2147483648.0
+// (ln和log2相关常量定义)
+#define __LOCAL_LN_D_NAN_BITS   0x7FF8000000000000ULL
+#define __LOCAL_LN_D_INF_BITS   0x7FF0000000000000ULL
+#define __LOCAL_LN_F_NAN_BITS   0x7FC00000U
+#define __LOCAL_LN_F_INF_BITS   0x7F800000U
+#define __LOCAL_LN_D_EPS        1e-18
+#define __LOCAL_LN_F_EPS        1e-8f
 
 // ================================================================================
-// 3.局部函数__local基础
+// 3.局部函数__local所有声明
+static Q15 __local_q15_from_float(SguanF f, SguanF base_value);
+static SguanF __local_q15_to_float(Q15 q, SguanF base_value);
+static Q15 __local_q15_add(Q15 a, Q15 b);
+static Q15 __local_q15_sub(Q15 a, Q15 b);
+static Q15 __local_q15_mul(Q15 a, Q15 b);
+static Q15 __local_q15_div(Q15 a, Q15 b);
+static Q15 __local_q15_convert_base(Q15 q, SguanF old_base, SguanF new_base);
+static Q31 __local_q31_from_float(SguanF f, SguanF base_value);
+static SguanF __local_q31_to_float(Q31 q, SguanF base_value);
+static Q31 __local_q31_add(Q31 a, Q31 b);
+static Q31 __local_q31_sub(Q31 a, Q31 b);
+static Q31 __local_q31_mul(Q31 a, Q31 b);
+static Q31 __local_q31_div(Q31 a, Q31 b);
+static Q31 __local_q31_convert_base(Q31 q, SguanF old_base, SguanF new_base);
+static SguanF __local_sin_f(SguanF x);
+static SguanF __local_cos_f(SguanF x);
+static SguanF __local_atan_f(SguanF x);
+static Q15 __local_sin_q15(Q15 x);
+static Q15 __local_cos_q15(Q15 x);
+static Q15 __local_atan_q15(Q15 x, SguanF base);
+static Q31 __local_sin_q31(Q31 x);
+static Q31 __local_cos_q31(Q31 x);
+static Q31 __local_atan_q31(Q31 x, SguanF base);
+static float __local_ln_f_from_bits(uint32_t u);
+static uint32_t __local_ln_f_to_bits(float f);
+static float __local_ln_f_abs(float x);
+static int __local_ln_f_isnan(float x);
+static int __local_ln_f_isinf(float x);
+static float __local_ln_f_inf(void);
+static float __local_ln_f_nan(void);
+static float __local_ln_f_split(float x, int *e);
+static float __local_ln_f_of_m(float m);
+static float __local_log2_f(float x);
+static float __local_ln_f(float x);
+static double __local_ln_d_from_bits(uint64_t u);
+static uint64_t __local_ln_d_to_bits(double d);
+static double __local_ln_d_abs(double x);
+static int __local_ln_d_isnan(double x);
+static int __local_ln_d_isinf(double x);
+static double __local_ln_d_inf(void);
+static double __local_ln_d_nan(void);
+static double __local_ln_d_split(double x, int *e);
+static double __local_ln_d_of_m(double m);
+static double __local_log2_d(double x);
+static double __local_ln_d(double x);
+
+// ================================================================================
+// 4.局部函数__local基础
 // (q15相关局部函数)
 static Q15 __local_q15_from_float(SguanF f, SguanF base_value){
     SguanF scaled;
@@ -693,8 +748,34 @@ static Q15 __local_cos_q15(Q15 x){
 }
 
 // (q15相关的三角局部函数)
-static Q15 __local_atan_q15(Q15 x){
-    return 0;
+static Q15 __local_atan_q15(Q15 x, SguanF base){
+    int neg = 0;
+    if (x < 0){
+        neg = 1;
+        x = (x == VALUE_Q15_MIN) ? VALUE_Q15_MAX : (Q15)(-x);
+    }
+
+    int folded = 0;
+    int64_t u_q;
+    if ((double)x * (double)base > 32768.0){
+        u_q = (int64_t)(1073741824.0 / ((double)x * (double)base));
+        folded = 1;
+    } else {
+        u_q = (int64_t)((double)x * (double)base);
+    }
+
+    int64_t pos = (u_q * 90) >> 15;
+    Q15 frac = (Q15)((u_q * 90) & 0x7FFF);
+    int32_t idx0 = (int32_t)pos;
+    if (idx0 > 90){ idx0 = 90; frac = 0x7FFF; }
+    if (idx0 < 0){ idx0 = 0; frac = 0; }
+    int32_t idx1 = idx0 + 1;
+    if (idx1 > 90) idx1 = 90;
+
+    Q15 y = atan_tab[idx0] + (Q15)(((int32_t)(atan_tab[idx1]-atan_tab[idx0])*frac)>>15);
+    Q15 y8 = y / 8;
+    Q15 result = folded ? (Q15)(VALUE_Q15_PI_2 - y8) : y8;
+    return neg ? (Q15)(-result) : result;
 }
 
 // (q31相关的三角局部函数)
@@ -725,12 +806,234 @@ static Q31 __local_cos_q31(Q31 x){
     return __local_sin_q31(x_shift);
 }
 
-static Q31 __local_atan_q31(Q31 x){
-    return 0;
+static Q31 __local_atan_q31(Q31 x, SguanF base){
+    int neg = 0;
+    if (x < 0){
+        neg = 1;
+        x = (x == VALUE_Q31_MIN) ? VALUE_Q31_MAX : (Q31)(-x);
+    }
+
+    int folded = 0;
+    int64_t u_q;
+    if ((double)x * (double)base > 2147483648.0){
+        u_q = (int64_t)(4.611686018427387904e18 / ((double)x * (double)base));
+        folded = 1;
+    } else {
+        u_q = (int64_t)((double)x * (double)base);
+    }
+
+    int64_t pos = (u_q * 90) >> 31;
+    Q31 frac = (Q31)((u_q * 90) & 0x7FFFFFFF);
+    int32_t idx0 = (int32_t)pos;
+    if (idx0 > 90){ idx0 = 90; frac = 0x7FFFFFFF; }
+    if (idx0 < 0){ idx0 = 0; frac = 0; }
+    int32_t idx1 = idx0 + 1;
+    if (idx1 > 90) idx1 = 90;
+
+    Q31 y = atan_tab[idx0] + (Q31)(((int64_t)(atan_tab[idx1]-atan_tab[idx0])*frac)>>31);
+    Q31 y8 = y / 8;
+    Q31 result = folded ? (VALUE_Q31_PI_2 - y8) : y8;
+    return neg ? (Q31)(-result) : result;
 }
 
 // ================================================================================
-// 3.全局函数math基础
+// 5.局部函数_local私有log相关(float)
+// (float位模式转float值)
+static float __local_ln_f_from_bits(uint32_t u){
+    union { uint32_t u; float f; } v;
+    v.u = u;
+    return v.f;
+}
+
+// (float值转float位模式)
+static uint32_t __local_ln_f_to_bits(float f){
+    union { float f; uint32_t u; } v;
+    v.f = f;
+    return v.u;
+}
+
+// (float绝对值)
+static float __local_ln_f_abs(float x){
+    return __local_ln_f_from_bits(__local_ln_f_to_bits(x) & 0x7FFFFFFFu);
+}
+
+// (float是否NaN)
+static int __local_ln_f_isnan(float x){
+    uint32_t u = __local_ln_f_to_bits(x);
+    return ((u & 0x7F800000u) == 0x7F800000u)
+        && ((u & 0x007FFFFFu) != 0);
+}
+
+// (float是否无穷)
+static int __local_ln_f_isinf(float x){
+    uint32_t u = __local_ln_f_to_bits(x);
+    return (u & 0x7FFFFFFFu) == 0x7F800000u;
+}
+
+// (float正无穷构造)
+static float __local_ln_f_inf(void){ 
+    return __local_ln_f_from_bits(__LOCAL_LN_F_INF_BITS); 
+}
+
+// (float非数构造)
+static float __local_ln_f_nan(void){ 
+    return __local_ln_f_from_bits(__LOCAL_LN_F_NAN_BITS); 
+}
+
+// (float拆解x=m*2^e)
+static float __local_ln_f_split(float x, int *e){
+    uint32_t u = __local_ln_f_to_bits(x);
+    *e = (int)((u >> 23) & 0xFF) - 127;
+    uint32_t frac = (u & 0x007FFFFFu) | 0x3F800000u;
+    return __local_ln_f_from_bits(frac);
+}
+
+// (float求解ln(m))
+static float __local_ln_f_of_m(float m){
+    float z  = (m - 1.0f) / (m + 1.0f);
+    float z2 = z * z;
+    float term = z;
+    float sum  = 0.0f;
+    for (int k = 0; k < 30; k++){
+        float add = term / (float)(2 * k + 1);
+        sum += add;
+        if (__local_ln_f_abs(add) < __LOCAL_LN_F_EPS * (__local_ln_f_abs(sum) + 1.0f))
+            break;
+        term *= z2;
+    }
+    return VALUE_F_TWO * sum;
+}
+
+// (float底2对数log2)
+static float __local_log2_f(float x){
+    if (x <= 0.0f){
+        if (x == 0.0f) return -__local_ln_f_inf();
+        return __local_ln_f_nan();
+    }
+    if (__local_ln_f_isinf(x)) return __local_ln_f_inf();
+    if (__local_ln_f_isnan(x)) return __local_ln_f_nan();
+    if (x == 1.0f)               return 0.0f;
+    int e;
+    float m    = __local_ln_f_split(x, &e);
+    float ln_m = __local_ln_f_of_m(m);
+    return (float)e + ln_m * VALUE_F_INV_LN2;
+}
+
+// (float自然对数ln)
+static float __local_ln_f(float x){
+    if (x <= 0.0f){
+        if (x == 0.0f) return -__local_ln_f_inf();
+        return __local_ln_f_nan();
+    }
+    if (__local_ln_f_isinf(x)) return __local_ln_f_inf();
+    if (__local_ln_f_isnan(x)) return __local_ln_f_nan();
+    if (x == 1.0f)               return 0.0f;
+    int e;
+    float m    = __local_ln_f_split(x, &e);
+    float ln_m = __local_ln_f_of_m(m);
+    return (float)e * VALUE_F_LN2 + ln_m;
+}
+
+// ================================================================================
+// 6.局部函数_local私有log相关(double)
+// (double位模式转double值)
+static double __local_ln_d_from_bits(uint64_t u){
+    union { uint64_t u; double d; } v;
+    v.u = u;
+    return v.d;
+}
+
+// (double值转double位模式)
+static uint64_t __local_ln_d_to_bits(double d){
+    union { double d; uint64_t u; } v;
+    v.d = d;
+    return v.u;
+}
+
+// (double绝对值)
+static double __local_ln_d_abs(double x){
+    return __local_ln_d_from_bits(__local_ln_d_to_bits(x) & 0x7FFFFFFFFFFFFFFFull);
+}
+
+// (double是否NaN)
+static int __local_ln_d_isnan(double x){
+    uint64_t u = __local_ln_d_to_bits(x);
+    return ((u & 0x7FF0000000000000ull) == 0x7FF0000000000000ull)
+        && ((u & 0x000FFFFFFFFFFFFFull) != 0);
+}
+
+// (double是否无穷)
+static int __local_ln_d_isinf(double x){
+    uint64_t u = __local_ln_d_to_bits(x);
+    return (u & 0x7FFFFFFFFFFFFFFFull) == 0x7FF0000000000000ull;
+}
+
+// (double正无穷构造)
+static double __local_ln_d_inf(void){ 
+    return __local_ln_d_from_bits(__LOCAL_LN_D_INF_BITS); 
+}
+
+// (double非数构造)
+static double __local_ln_d_nan(void){ 
+    return __local_ln_d_from_bits(__LOCAL_LN_D_NAN_BITS); 
+}
+
+// (double拆解x=m*2^e)
+static double __local_ln_d_split(double x, int *e){
+    uint64_t u = __local_ln_d_to_bits(x);
+    *e = (int)((u >> 52) & 0x7FF) - 1023;
+    uint64_t frac = (u & 0x000FFFFFFFFFFFFFull) | 0x3FF0000000000000ull;
+    return __local_ln_d_from_bits(frac);
+}
+
+// (double求解ln(m))
+static double __local_ln_d_of_m(double m){
+    double z  = (m - 1.0) / (m + 1.0);
+    double z2 = z * z;
+    double term = z;
+    double sum  = 0.0;
+    for (int k = 0; k < 60; k++){
+        double add = term / (VALUE_F_TWO * k + 1.0);
+        sum += add;
+        if (__local_ln_d_abs(add) < __LOCAL_LN_D_EPS * (__local_ln_d_abs(sum) + 1.0))
+            break;
+        term *= z2;
+    }
+    return VALUE_F_TWO * sum;
+}
+
+// (double底2对数log2)
+static double __local_log2_d(double x){
+    if (x <= 0.0){
+        if (x == 0.0) return -__local_ln_d_inf();
+        return __local_ln_d_nan();
+    }
+    if (__local_ln_d_isinf(x)) return __local_ln_d_inf();
+    if (__local_ln_d_isnan(x)) return __local_ln_d_nan();
+    if (x == 1.0)               return 0.0;
+    int e;
+    double m    = __local_ln_d_split(x, &e);
+    double ln_m = __local_ln_d_of_m(m);
+    return (double)e + ln_m * VALUE_F_INV_LN2;
+}
+
+// (double自然对数ln)
+static double __local_ln_d(double x){
+    if (x <= 0.0){
+        if (x == 0.0) return -__local_ln_d_inf();
+        return __local_ln_d_nan();
+    }
+    if (__local_ln_d_isinf(x)) return __local_ln_d_inf();
+    if (__local_ln_d_isnan(x)) return __local_ln_d_nan();
+    if (x == 1.0)               return 0.0;
+    int e;
+    double m    = __local_ln_d_split(x, &e);
+    double ln_m = __local_ln_d_of_m(m);
+    return (double)e * VALUE_F_LN2 + ln_m;
+}
+
+// ================================================================================
+// 7.全局函数math基础
 // (浮点转定点)
 SguanQ math_from_float(SguanF f, SguanF base_value){
     #if VALUE_MODE_MATH==VALUE_MODE_Q15
@@ -889,10 +1192,14 @@ void math_sin_cos(SguanQ x, SguanQ *sin_x, SguanQ *cos_x){
 }
 
 // (快速求解tan函数)
-SguanQ math_tan(SguanQ x){
+SguanQ math_tan(SguanQ x, uint8_t base_out){
     SguanQ sine,cosine;
+    if (base_out == 0){
+        return 0;
+    }
+
     #if VALUE_MODE_MATH==VALUE_MODE_Q15
-    sine = __local_sin_q15(x);
+    sine = __local_sin_q15(x)/base_out;
     cosine = __local_cos_q15(x);
     (void)__local_sin_f;
     (void)__local_cos_f;
@@ -901,7 +1208,7 @@ SguanQ math_tan(SguanQ x){
     return __local_q15_div(sine, cosine);
 
     #elif VALUE_MODE_MATH==VALUE_MODE_Q31
-    sine = __local_sin_q31(x);
+    sine = __local_sin_q31(x)/base_out;
     cosine = __local_cos_q31(x);
     (void)__local_sin_f;
     (void)__local_cos_f;
@@ -921,16 +1228,16 @@ SguanQ math_tan(SguanQ x){
 }
 
 // (快速求解反三角tan函数)
-SguanQ math_atan(SguanQ x){
+SguanQ math_atan(SguanQ x, SguanF base_in){
     #if VALUE_MODE_MATH==VALUE_MODE_Q15
     (void)__local_atan_f;
     (void)__local_atan_q31;
-    return __local_atan_q15(x);
+    return __local_atan_q15(x, base_in);
 
     #elif VALUE_MODE_MATH==VALUE_MODE_Q31
     (void)__local_atan_f;
     (void)__local_atan_q15;
-    return __local_atan_q31(x);
+    return __local_atan_q31(x, base_in);
     
     #else // VALUE_MODE_MATH
     (void)__local_atan_q15;
@@ -940,7 +1247,7 @@ SguanQ math_atan(SguanQ x){
 }
 
 // ================================================================================
-// 5.全局函数math高级
+// 8.全局函数math高级
 // (自定义内存填充函数)
 void *math_memset(void *ptr, int value, size_t num){
     if (ptr == NULL || num == 0){
@@ -964,6 +1271,15 @@ void *math_memcpy(void *dst, const void *src, size_t n){
         *d++ = *s++;
     }
     return dst;
+}
+
+// (定时器延时函数)
+uint8_t math_delay(uint32_t ms, uint32_t *count){
+    (*count)++;
+    if ((*count) >= ms){
+        return 1;
+    }
+    return 0;
 }
 
 // (参数取模[0, 2π))
@@ -1141,11 +1457,6 @@ SguanQ math_sqrt(SguanQ x){
     #endif // VALUE_MODE_MATH
 }
 
-// (快速求解绝对值)
-SguanQ math_ads(SguanQ x){
-    return (x < 0) ? -x : x;
-}
-
 // (快速求解max)
 SguanQ math_max(SguanQ a, SguanQ b){
     return (a > b) ? a : b;
@@ -1156,8 +1467,68 @@ SguanQ math_min(SguanQ a, SguanQ b){
     return (a < b) ? a : b;
 }
 
+// (快速求解绝对值)
+SguanQ math_ads(SguanQ x){
+    return (x < 0) ? -x : x;
+}
+
+// (浮点底数，整数指数，快速幂)
+SguanF math_pow(SguanF base, int n){
+    if (n == 0) {
+        return VALUE_F_ONE;
+    }
+
+    int e = (n < 0) ? -n : n;
+    SguanF result = VALUE_F_ONE;
+    SguanF b = base;
+    while (e > 0){
+        if (e & 1){
+            result *= b;
+        }
+        e >>= 1;
+        if (e){
+            b *= b;
+        }
+    }
+    return (n < 0) ? (VALUE_F_ONE/result) : result;
+}
+
+// (自然对数ln(x))
+SguanF math_ln(SguanF x){
+    #if VALUE_MODE_MATH==VALUE_MODE_DOUBLE
+    return (SguanF)__local_ln_d((double)x);
+    #else // VALUE_MODE_MATH->VALUE_MODE_FLOAT
+    return (SguanF)__local_ln_f((float)x);
+    #endif // VALUE_MODE_MATH
+}
+
+// (底2对数log2(x))
+SguanF math_log2(SguanF x){
+    #if VALUE_MODE_MATH==VALUE_MODE_DOUBLE
+    return (SguanF)__local_log2_d((double)x);
+    #else // VALUE_MODE_MATH->VALUE_MODE_FLOAT
+    return (SguanF)__local_log2_f((float)x);
+    #endif // VALUE_MODE_MATH
+}
+
+// (求解不小于x的最小2的幂及对应指数n)
+SguanF math_find_base(SguanF x, int *n){
+    if (x <= 0){
+        *n = 0;
+        return 0;
+    }
+
+    int e = (int)math_log2(x);
+    if (math_pow(VALUE_F_TWO, e) < x){
+        e += 1;
+    }
+
+    *n = e;
+    return math_pow(VALUE_F_TWO, e);
+}
+
 // ================================================================================
-// 6.全局函数math电机
+// 9.全局函数math电机
 // (等幅值克拉克变换)
 void math_clarke(
     SguanQ *i_alpha, 
@@ -1263,7 +1634,7 @@ uint8_t math_svpwm(SguanQ u_alpha, SguanQ u_beta,
     const SguanQ ts = VALUE_F_ONE;
     const SguanQ sqrt_2 = VALUE_F_SQRT3_2;
     const SguanQ half = VALUE_F_HALF;
-    const SguanF two = (SguanF)2.0;
+    const SguanF two = VALUE_F_TWO;
 
     u_alpha = math_mul(u_alpha, VALUE_F_SQRT3);
     u_beta = math_mul(u_beta, VALUE_F_SQRT3);

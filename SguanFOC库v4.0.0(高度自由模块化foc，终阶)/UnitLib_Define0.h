@@ -8,8 +8,6 @@
 #define DEFINE0_NUM_TRANSFER5        1
 #define DEFINE0_NUM_INTEGRATOR       1
 #define DEFINE0_NUM_DERIVATIVE       1
-#define DEFINE0_NUM_CURVE            1
-#define DEFINE0_NUM_DFT              1
 #define DEFINE0_NUM_HALL             1
 #define DEFINE0_NUM_LADRC1           1
 #define DEFINE0_NUM_LADRC2           1
@@ -41,6 +39,7 @@
 #define DEFINE0_NUM_DELAY3           1
 
 #define DEFINE0_NUM_FLOAT            1
+#define DEFINE0_NUM_DOUBLE           1
 #define DEFINE0_NUM_INT8             1
 #define DEFINE0_NUM_UINT8            1
 #define DEFINE0_NUM_INT16            1
@@ -58,7 +57,7 @@
 
 #define DEFINE0_BASE_TIME            0.001953125
 #define DEFINE0_BASE_VOLTAGE         1024.0
-#define DEFINE0_BASE_CURRENT         64.0
+#define DEFINE0_BASE_CURRENT         128.0
 #define DEFINE0_BASE_OTHER           512.0
 
 

@@ -5,7 +5,9 @@
 #include "Zone_Driver.h"
 
 void main_standby_init(SguanFoc *sguan){
-    sguan->motorstatus.error_code = ((uint8_t)sguan->motorstatus.status)-100;
+    if (sguan->motorstatus.status >= status_overvoltage){
+        sguan->motorstatus.error_code = ((uint8_t)sguan->motorstatus.status)-100;
+    }
 
     
 }
@@ -14,23 +16,25 @@ void main_ready_init(SguanFoc *sguan){
 
 }
 
-void main_initializing_init(SguanFoc *sguan){
+// uint8_t main_initializing_init(SguanFoc *sguan){
 
-    // 最后赋值run_flag，切换到下一个状态
-    // sguan->run_flag = __LOCAL_RUN_SUCCESS;
-}
+//     static uint8_t count[CONFIG_MOTOR] = {0};
+//     math_delay(3200,200);
+//     // 最后赋值run_flag，切换到下一个状态
+//     // sguan->run_flag = __LOCAL_RUN_SUCCESS;
+// }
 
-void main_goinit0_angle_init(SguanFoc *sguan){
+// uint8_t main_goinit0_angle_init(SguanFoc *sguan){
 
-    // 最后赋值run_flag，切换到下一个状态
-    // sguan->run_flag = __LOCAL_RUN_SUCCESS;
-}
+//     // 最后赋值run_flag，切换到下一个状态
+//     // sguan->run_flag = __LOCAL_RUN_SUCCESS;
+// }
 
-void main_goinit1_current_init(SguanFoc *sguan){
+// uint8_t main_goinit1_current_init(SguanFoc *sguan){
 
-    // 最后赋值run_flag，切换到下一个状态
-    // sguan->run_flag = __LOCAL_RUN_SUCCESS;
-}
+//     // 最后赋值run_flag，切换到下一个状态
+//     // sguan->run_flag = __LOCAL_RUN_SUCCESS;
+// }
 
 // ===============================================================================
 void main_high_loop_one(SguanFoc *sguan){

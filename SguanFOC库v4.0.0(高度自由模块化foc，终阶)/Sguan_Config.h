@@ -48,18 +48,6 @@
 #define CONFIG_DERIVATIVE   0
 #endif // DEFINE0_NUM_DERIVATIVE
 
-#ifdef DEFINE0_NUM_CURVE
-#define CONFIG_CURVE        DEFINE0_NUM_CURVE
-#else // DEFINE0_NUM_CURVE
-#define CONFIG_CURVE        0
-#endif // DEFINE0_NUM_CURVE
-
-#ifdef DEFINE0_NUM_DFT
-#define CONFIG_DFT          DEFINE0_NUM_DFT
-#else // DEFINE0_NUM_DFT
-#define CONFIG_DFT          0
-#endif // DEFINE0_NUM_DFT
-
 #ifdef DEFINE0_NUM_HALL
 #define CONFIG_HALL         DEFINE0_NUM_HALL
 #else // DEFINE0_NUM_HALL

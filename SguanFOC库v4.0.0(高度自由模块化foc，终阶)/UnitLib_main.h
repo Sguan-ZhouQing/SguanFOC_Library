@@ -4,11 +4,11 @@
 /* SguanFOC配置文件声明 */
 #include "SguanFOC.h"
 
-void main_standby_init(SguanFoc *sguan);
-void main_ready_init(SguanFoc *sguan);
-void main_initializing_init(SguanFoc *sguan);
-void main_goinit0_angle_init(SguanFoc *sguan);
-void main_goinit1_current_init(SguanFoc *sguan);
+uint8_t main_standby_init(SguanFoc *sguan);
+uint8_t main_ready_init(SguanFoc *sguan);
+uint8_t main_initializing_init(SguanFoc *sguan);
+uint8_t main_goinit0_angle_init(SguanFoc *sguan);
+uint8_t main_goinit1_current_init(SguanFoc *sguan);
 // =====================================================
 void main_high_loop_one(SguanFoc *sguan);
 void main_high_loop_two(SguanFoc *sguan);

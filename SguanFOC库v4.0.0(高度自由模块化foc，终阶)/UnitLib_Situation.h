@@ -9,16 +9,17 @@ void situation_decreasing_loop(void);
 void situation_hold_loop(void);
 void situation_overvoltage_loop(void);
 void situation_undervoltage_loop(void);
-void situation_overcurrent_loop(void);
+void situation_overcurrent_moment_loop(void);
+void situation_overcurrent_stable_loop(void);
 void situation_overtemp_motor_loop(void);
 void situation_undertemp_motor_loop(void);
 void situation_overtemp_driver_loop(void);
 void situation_undertemp_driver_loop(void);
 void situation_overtemp_pcb_loop(void);
 void situation_undertemp_pcb_loop(void);
-void situation_stuck_loop(void);
-void situation_phase_loss_loop(void);
-void situation_fault_loop(void);
+void situation_fault0_loop(void);
+void situation_fault1_loop(void);
+void situation_fault2_loop(void);
 
 
 #endif // UNITLIB_SITUATION_H
