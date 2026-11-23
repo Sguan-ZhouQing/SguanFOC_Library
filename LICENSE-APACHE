@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: Apache-2.0
                                  Apache License
                            Version 2.0, January 2004
                         http://www.apache.org/licenses/
@@ -206,7 +205,7 @@
 附录：中文简译说明（仅供参考，不具法律效力，一切以英文原文为准）
 ================================================================================
 
-本软件（SguanFOC_v4）依据 Apache License 2.0 授权，核心要点如下：
+本软件（SguanFOC_v4 系列）依据 Apache License 2.0 授权，核心要点如下：
 
   1. 你可以自由地：使用、复制、修改、分发本软件及其衍生作品，
      包括用于商业目的，无需支付任何费用。

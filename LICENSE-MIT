@@ -1,7 +1,6 @@
-// SPDX-License-Identifier: MIT
 MIT License
 
-Copyright (c) 2026 星必尘Sguan<3464647102@qq.com>
+Copyright (c) 2026 星必尘Sguan <3464647102@qq.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -20,3 +19,28 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+
+================================================================================
+附录：中文简译说明（仅供参考，不具法律效力，一切以英文原文为准）
+================================================================================
+
+本软件（SguanFOC_v3 系列）依据 MIT License 授权，核心要点如下：
+
+  1. 你可以：免费使用、复制、修改、合并、出版、分发、再授权、
+     甚至销售本软件及其副本（含商业用途），无需支付任何费用。
+
+  2. 唯一条件：在软件的所有副本或主要部分中，必须保留上述
+     版权声明和本许可声明。
+
+  3. 免责声明：本软件按"现状"（AS IS）提供，不附带任何明示或
+     暗示的担保（包括但不限于适销性、特定用途适用性及不侵权）；
+     作者不对任何索赔、损害或其他责任负责（除非适用法律强制要求）。
+
+  4. 项目主页：https://github.com/Sguan-ZhouQing/SguanFOC_Library
+
+  5. 归属示例：分发本软件或衍生作品时，建议保留以下声明——
+     "Copyright (c) 2026 星必尘Sguan <3464647102@qq.com>，
+      依据 MIT License 授权使用。"
+
+================================================================================
