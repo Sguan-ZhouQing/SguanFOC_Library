@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GM6020 CAN 指令计算器</title>
+<style>
+  :root {
+    --bg: #f7f8fa;
+    --card: #ffffff;
+    --border: #e5e7eb;
+    --text: #1f2937;
+    --muted: #6b7280;
+    --accent: #2563eb;
+    --accent-soft: #eff6ff;
+    --warn: #dc2626;
+    --ok: #16a34a;
+    --mono: "Cascadia Code", Consolas, "Courier New", monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, "Segoe UI", "Microsoft YaHei", "PingFang SC", sans-serif;
+    line-height: 1.6;
+    padding: 24px 16px 48px;
+  }
+  .wrap { max-width: 660px; margin: 0 auto; }
+  h1 { font-size: 20px; font-weight: 600; margin-bottom: 4px; }
+  .sub { color: var(--muted); font-size: 13px; margin-bottom: 20px; }
+  .divider {
+    text-align: center; color: var(--muted); font-size: 12px;
+    margin: 22px 0 14px; letter-spacing: 2px;
+  }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 18px;
+    margin-bottom: 14px;
+  }
+  .card h2 {
+    font-size: 14px; font-weight: 600; margin-bottom: 12px;
+    color: var(--text);
+  }
+  .row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+  .row label { font-size: 13px; color: var(--muted); min-width: 88px; }
+  select, input[type="number"], input[type="text"] {
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-size: 14px;
+    background: #fff;
+    color: var(--text);
+    outline: none;
+  }
+  select:focus, input:focus { border-color: var(--accent); }
+  input[type="number"] { width: 130px; }
+  input[type="text"] { width: 100%; font-family: var(--mono); font-size: 13px; letter-spacing: 1px; }
+  .radio-group { display: flex; gap: 16px; }
+  .radio-group label { display: flex; align-items: center; gap: 6px; font-size: 14px; color: var(--text); cursor: pointer; }
+  .slots table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .slots th, .slots td { padding: 6px 8px; text-align: left; border-bottom: 1px solid var(--border); }
+  .slots th { color: var(--muted); font-weight: 500; }
+  .slots input { width: 110px; border: 1px solid var(--border); border-radius: 6px; padding: 4px 8px; font-size: 13px; }
+  .slots input:focus { border-color: var(--accent); outline: none; }
+  .slots tr.active td { background: var(--accent-soft); }
+  .slots .muted { color: var(--muted); }
+  .preset { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
+  .preset button {
+    border: 1px solid var(--border);
+    background: #fff;
+    color: var(--text);
+    border-radius: 6px;
+    padding: 5px 12px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .preset button:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+  .out {
+    background: #f9fafb;
+    border: 1px dashed var(--border);
+    border-radius: 8px;
+    padding: 12px 14px;
+  }
+  .out .line { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; flex-wrap: wrap; }
+  .out .label { font-size: 12px; color: var(--muted); min-width: 70px; }
+  .out .val {
+    font-family: var(--mono); font-size: 15px; letter-spacing: 1px;
+    background: #fff; border: 1px solid var(--border);
+    border-radius: 6px; padding: 4px 10px; flex: 1; min-width: 200px;
+  }
+  .copy {
+    border: none; background: var(--accent); color: #fff;
+    border-radius: 6px; padding: 6px 16px; font-size: 13px; cursor: pointer;
+  }
+  .copy:hover { opacity: .88; }
+  .copy.ok { background: var(--ok); }
+  .note { font-size: 12px; color: var(--muted); margin-top: 8px; }
+  .warn { color: var(--warn); font-size: 12px; margin-top: 6px; display: none; }
+  .est { font-size: 13px; color: var(--muted); margin-top: 8px; }
+  .est b { color: var(--text); }
+  .fbr { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 12px; }
+  .rblock {
+    background: #f9fafb; border: 1px solid var(--border);
+    border-radius: 8px; padding: 10px 12px;
+  }
+  .rblock .k { font-size: 12px; color: var(--muted); }
+  .rblock .v { font-family: var(--mono); font-size: 16px; font-weight: 600; margin-top: 2px; }
+  .rblock .s { font-size: 12px; color: var(--muted); }
+  .fb-id { display: inline-block; background: var(--accent-soft); color: var(--accent);
+    border-radius: 5px; padding: 2px 10px; font-size: 13px; font-weight: 600; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>GM6020 CAN 指令计算器</h1>
+  <div class="sub">指令生成 + 反馈解析 · 1 Mbps · 大端 · 填入 PCAN-View 直接可用</div>
+
+  <!-- 帧设置 -->
+  <div class="card">
+    <h2>① 帧设置（发送方向）</h2>
+    <div class="row">
+      <label for="mid">电机 ID</label>
+      <select id="mid">
+        <option value="1" selected>1</option><option value="2">2</option>
+        <option value="3">3</option><option value="4">4</option>
+        <option value="5">5</option><option value="6">6</option>
+        <option value="7">7</option>
+      </select>
+      <span class="note" id="fbInfo"></span>
+    </div>
+    <div class="row">
+      <label>控制模式</label>
+      <div class="radio-group">
+        <label><input type="radio" name="mode" value="volt" checked> 电压控制（±30000 = ±30V）</label>
+        <label><input type="radio" name="mode" value="cur"> 电流控制（±16384 = ±20A，i_q）</label>
+      </div>
+    </div>
+  </div>
+
+  <!-- 槽位输入 -->
+  <div class="card slots">
+    <h2>② 各槽位数值 <span class="note">（一帧可同时控多个电机，不用的填 0）</span></h2>
+    <table>
+      <thead><tr><th>槽位</th><th>数值（raw）</th><th>说明</th></tr></thead>
+      <tbody id="slotBody"></tbody>
+    </table>
+    <div class="preset" id="presets"></div>
+    <div class="est" id="est"></div>
+    <div class="warn" id="warn"></div>
+  </div>
+
+  <!-- 输出 -->
+  <div class="card">
+    <h2>③ 生成结果 <span class="note">（填入 PCAN-View 发送帧：ID / DLC=8 / Data）</span></h2>
+    <div class="out">
+      <div class="line">
+        <span class="label">CAN ID</span>
+        <span class="val" id="outId"></span>
+        <button class="copy" id="btnId">复制</button>
+      </div>
+      <div class="line">
+        <span class="label">DLC</span>
+        <span class="val">8</span>
+      </div>
+      <div class="line">
+        <span class="label">Data</span>
+        <span class="val" id="outData"></span>
+        <button class="copy" id="btnData">复制</button>
+      </div>
+    </div>
+    <div class="note" id="byteMap"></div>
+  </div>
+
+  <div class="divider">── 反 馈 帧 解 析（接收方向） ──</div>
+
+  <!-- 反馈解析 -->
+  <div class="card">
+    <h2>④ 反馈帧解析 <span class="note">（粘贴 PCAN-View 收到的 8 字节，自动换算物理量）</span></h2>
+    <div class="row">
+      <label for="fbIdIn">帧 CAN ID</label>
+      <input type="text" id="fbIdIn" placeholder="例：205" style="width:120px; text-align:center">
+      <span class="fb-id" id="fbMidOut">电机 ID：—</span>
+      <button class="copy" id="btnFbSample" style="background:#fff;color:var(--accent);border:1px solid var(--accent)">填入示例帧</button>
+    </div>
+    <div class="row">
+      <label for="fbDataIn">8 字节数据</label>
+      <input type="text" id="fbDataIn" placeholder="例：1E A1 00 00 FF 9F 18 00（空格/逗号随意）">
+    </div>
+    <div class="warn" id="fbWarn"></div>
+    <div class="fbr">
+      <div class="rblock"><div class="k">机械角度</div><div class="v" id="rAngle">—</div><div class="s" id="sAngle"></div></div>
+      <div class="rblock"><div class="k">转速</div><div class="v" id="rRpm">—</div><div class="s" id="sRpm"></div></div>
+      <div class="rblock"><div class="k">转矩电流</div><div class="v" id="rCur">—</div><div class="s" id="sCur"></div></div>
+      <div class="rblock"><div class="k">温度</div><div class="v" id="rTemp">—</div><div class="s"></div></div>
+    </div>
+    <div class="note" id="fbNote"></div>
+  </div>
+
+  <div class="note" style="text-align:center">
+    提示：PCAN-View 中 Cycle Time 填 10ms 循环发送；停止电机请发送全 0 帧。
+    本机标定 rpm ≈ (0.0808×V − 29.3)/6（正转）。详细说明见「手动输入PCAN控制电机电压.md」
+  </div>
+</div>
+
+<script>
+(function () {
+  const $ = (s) => document.querySelector(s);
+  const midSel = $("#mid"), slotBody = $("#slotBody"),
+        presetsEl = $("#presets"), estEl = $("#est"), warnEl = $("#warn"),
+        outId = $("#outId"), outData = $("#outData"), byteMap = $("#byteMap"),
+        fbInfo = $("#fbInfo");
+
+  const RANGE = { volt: 30000, cur: 16384 };
+
+  function mode() {
+    return document.querySelector('input[name="mode"]:checked').value;
+  }
+  function mid() { return +midSel.value; }
+  function frameId() {
+    const m = mode();
+    if (m === "volt") return mid() <= 4 ? 0x1FF : 0x2FF;
+    return mid() <= 4 ? 0x1FE : 0x2FE;
+  }
+  function slotIds() {
+    return mid() <= 4 ? [1, 2, 3, 4] : [5, 6, 7];
+  }
+  function range() { return RANGE[mode()]; }
+
+  /* 当前槽位的数值输入（由电机 ID 决定） */
+  function slotInputFor(id) {
+    return document.querySelector('input[data-slot="' + id + '"]');
+  }
+
+  function buildSlots() {
+    const ids = slotIds();
+    const m = mid();
+    const r = range();
+    slotBody.innerHTML = "";
+    ids.forEach((id) => {
+      const tr = document.createElement("tr");
+      if (id === m) tr.className = "active";
+      tr.innerHTML =
+        '<td>ID' + id + (id === m ? ' ◄ 目标' : '') + '</td>' +
+        '<td><input type="number" data-slot="' + id + '" value="' + (id === m ? 4000 : 0) +
+        '" step="100" min="' + (-r) + '" max="' + r + '"></td>' +
+        '<td class="muted">' + (mode() === "volt" ? '电压' : '电流') + '，±' + r + '</td>';
+      slotBody.appendChild(tr);
+      tr.querySelector("input").addEventListener("input", update);
+    });
+    buildPresets();
+    update();
+  }
+
+  function buildPresets() {
+    const presetVals = mode() === "volt"
+      ? [["停止 0", 0], ["微动 +2000", 2000], ["慢速 +4000", 4000],
+         ["中速 +6000", 6000], ["较快 +8000", 8000], ["快 +10000", 10000],
+         ["慢速反 −4000", -4000], ["中速反 −6000", -6000]]
+      : [["停止 0", 0], ["+500", 500], ["+1000", 1000], ["+3000", 3000],
+         ["−500", -500], ["−1000", -1000], ["−3000", -3000]];
+    presetsEl.innerHTML = "";
+    presetVals.forEach(([label, v]) => {
+      const b = document.createElement("button");
+      b.textContent = label;
+      b.addEventListener("click", () => {
+        const inp = slotInputFor(mid());
+        inp.value = v;
+        update();
+      });
+      presetsEl.appendChild(b);
+    });
+  }
+
+  function bytes() {
+    const ids = slotIds();
+    const data = [0, 0, 0, 0, 0, 0, 0, 0];
+    let over = false;
+    ids.forEach((id, i) => {
+      const inp = slotInputFor(id);
+      if (!inp) return;
+      let v = parseInt(inp.value, 10) || 0;
+      if (v > range()) { v = range(); over = true; }
+      if (v < -range()) { v = -range(); over = true; }
+      const u = v & 0xFFFF;
+      data[i * 2] = (u >> 8) & 0xFF;
+      data[i * 2 + 1] = u & 0xFF;
+    });
+    return { data, over };
+  }
+
+  function update() {
+    const fid = frameId();
+    const { data, over } = bytes();
+    const hex = data.map(b => b.toString(16).padStart(2, "0").toUpperCase()).join(" ");
+    outId.textContent = "0x" + fid.toString(16).toUpperCase();
+    outData.textContent = hex;
+    fbInfo.textContent = "反馈帧 = 0x" + (0x204 + mid()).toString(16).toUpperCase();
+
+    /* 字节映射说明 */
+    const ids = slotIds();
+    const parts = ids.map((id, i) =>
+      "ID" + id + "=" + hex.split(" ").slice(i * 2, i * 2 + 2).join(" "));
+    byteMap.textContent = "字节映射（大端）：" + parts.join("　") +
+      (mode() === "cur" && mid() > 4 ? "　保留=00 00" : "");
+
+    /* 转速估算（电压模式，作用于目标电机槽位） */
+    if (mode() === "volt") {
+      const inp = slotInputFor(mid());
+      const v = parseInt(inp.value, 10) || 0;
+      let rpm = 0;
+      if (v > 0) rpm = (0.0808 * v - 29.3) / 6;
+      else if (v < 0) rpm = (0.0808 * v + 29.3) / 6;
+      estEl.innerHTML = v === 0
+        ? "估算转速：<b>0 rpm（停止）</b>"
+        : "估算转速：约 <b>" + rpm.toFixed(0) + " rpm</b>（空载，本机标定估算值）";
+    } else {
+      const inp = slotInputFor(mid());
+      const v = parseInt(inp && inp.value, 10) || 0;
+      estEl.innerHTML = "电流模式：该值即 q 轴转矩电流参考（" +
+        (v / 16384 * 20).toFixed(1) + " A）";
+    }
+
+    warnEl.style.display = over ? "block" : "none";
+    warnEl.textContent = "⚠ 数值超出量程，已按 ±" + range() + " 截断";
+  }
+
+  /* ==================== 反馈帧解析 ==================== */
+  const fbIdIn = $("#fbIdIn"), fbDataIn = $("#fbDataIn"),
+        fbMidOut = $("#fbMidOut"), fbWarn = $("#fbWarn"),
+        rAngle = $("#rAngle"), rRpm = $("#rRpm"), rCur = $("#rCur"), rTemp = $("#rTemp"),
+        sAngle = $("#sAngle"), sRpm = $("#sRpm"), sCur = $("#sCur"), fbNote = $("#fbNote");
+
+  function hexToBytes(s) {
+    const clean = s.replace(/[^0-9a-fA-F]/g, "");
+    if (clean.length % 2 !== 0) return null;
+    const out = [];
+    for (let i = 0; i < clean.length; i += 2) {
+      out.push(parseInt(clean.substr(i, 2), 16));
+    }
+    return out;
+  }
+
+  function fbParse() {
+    const b = hexToBytes(fbDataIn.value);
+    const idTxt = fbIdIn.value.trim();
+
+    /* 帧 ID → 电机 ID */
+    if (idTxt) {
+      const fid = parseInt(idTxt, 16);
+      if (!isNaN(fid) && fid >= 0x205 && fid <= 0x20B) {
+        fbMidOut.textContent = "电机 ID：" + (fid - 0x204) + "（帧 0x" + fid.toString(16).toUpperCase() + "）";
+        fbMidOut.style.display = "inline-block";
+      } else {
+        fbMidOut.textContent = "帧 ID 需在 0x205~0x20B";
+        fbMidOut.style.display = "inline-block";
+      }
+    } else {
+      fbMidOut.style.display = "none";
+    }
+
+    /* 字节长度检查 */
+    if (b === null || b.length !== 8) {
+      fbWarn.style.display = "block";
+      fbWarn.textContent = "⚠ 请输入 8 字节（16 个十六进制字符），当前 " +
+        ((b === null ? 0 : b.length) + " 字节");
+      [rAngle, rRpm, rCur, rTemp].forEach(e => e.textContent = "—");
+      [sAngle, sRpm, sCur].forEach(e => e.textContent = "");
+      fbNote.textContent = "";
+      return;
+    }
+    fbWarn.style.display = "none";
+
+    const angle = (b[0] << 8) | b[1];
+    const rpmU = (b[2] << 8) | b[3];
+    const rpm = rpmU & 0x8000 ? rpmU - 65536 : rpmU;
+    const curU = (b[4] << 8) | b[5];
+    const cur = curU & 0x8000 ? curU - 65536 : curU;
+    const temp = b[6];
+    const resv = b[7];
+
+    rAngle.textContent = angle + " count";
+    sAngle.textContent = "≈ " + (angle / 8192 * 360).toFixed(1) + "°（8192/圈）";
+    rRpm.textContent = rpm + " rpm";
+    sRpm.textContent = "≈ " + (rpm * 0.10472).toFixed(2) + " rad/s";
+    rCur.textContent = cur + " raw";
+    sCur.textContent = "≈ " + (cur / 16384 * 20).toFixed(3) + " A（±16384=±20A）";
+    rTemp.textContent = temp + " °C";
+
+    const notes = [];
+    if (angle > 8191) notes.push("⚠ 角度 " + angle + " 超出 0~8191：字节顺序可能反了（应大端）");
+    if (resv !== 0) notes.push("保留字节 = " + resv + "（正常应为 0）");
+    fbNote.innerHTML = notes.join("　") ||
+      "解析正常 ✓（大端：角度高字节在前，转速/电流为带符号 int16）";
+  }
+
+  $("#btnFbSample").addEventListener("click", () => {
+    fbIdIn.value = "205";
+    fbDataIn.value = "1E A1 00 00 FF 9F 18 00";
+    fbParse();
+  });
+  fbIdIn.addEventListener("input", fbParse);
+  fbDataIn.addEventListener("input", fbParse);
+
+  /* ==================== 复制 ==================== */
+  function copy(text, btn) {
+    const done = () => {
+      btn.textContent = "已复制 ✓";
+      btn.classList.add("ok");
+      setTimeout(() => { btn.textContent = "复制"; btn.classList.remove("ok"); }, 1200);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done, () => fallback());
+    } else {
+      fallback();
+    }
+    function fallback() {
+      const ta = document.createElement("textarea");
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand("copy"); done(); } catch (e) {}
+      document.body.removeChild(ta);
+    }
+  }
+
+  $("#btnId").addEventListener("click", () => copy(outId.textContent, $("#btnId")));
+  $("#btnData").addEventListener("click", () => copy(outData.textContent, $("#btnData")));
+  midSel.addEventListener("change", buildSlots);
+  document.querySelectorAll('input[name="mode"]').forEach(r => r.addEventListener("change", buildSlots));
+
+  buildSlots();
+  fbParse();
+})();
+</script>
+</body>
+</html>
