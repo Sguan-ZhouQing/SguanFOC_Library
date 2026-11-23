@@ -1,6 +1,7 @@
 /* ===================================================================
  * 文件:     Sguan_Transfer.c
  * 项目:     SguanFOC_v4 —— 开源 FOC 电机控制框架
+ * 说明:     1.Sguan固件库_传函模块
  * 链接:     https://github.com/Sguan-ZhouQing/SguanFOC_Library
  * 版权:     Copyright 2026 星必尘Sguan <3464647102@qq.com>
  * 许可证:   Apache License, Version 2.0
@@ -20,7 +21,7 @@
  *   [JA] Apache License, Version 2.0 に基づき許諾されます。使用・複製・
  *        改変・再配布（商用を含む）が可能ですが、本著作権表示と
  *        ライセンス条項を保持する必要があります。
- * 完整许可文本: 参见本目录下的 LICENSE 文件。
+ * 完整许可文本: 参见仓库根目录下的 LICENSE-APACHE 文件。
  * =================================================================== */
 #include "Sguan_Transfer.h"
 
