@@ -63,8 +63,18 @@ uint8_t math_swpwm(int8_t *sector, uint32_t *num_count,
     SguanQ ubus, SguanQ we, 
     SguanQ ua, SguanQ ub, SguanQ uc, SguanQ umid, 
     uint8_t key[3], SguanQ *d_u, SguanQ *d_v, SguanQ *d_w);
-void math_singlers_start(void);
-void math_singlers_end(void);
+void math_singlers_start(
+    uint8_t sector_svpwm, 
+    int16_t motor_ix[3], 
+    uint16_t raw_ch0, 
+    uint16_t raw_ch1, 
+    uint16_t const_mid);
+uint8_t math_singlers_end(
+    SguanQ du, SguanQ dv, SguanQ dw,
+    SguanQ const_duty_sw,
+    SguanQ const_duty_adc,
+    SguanQ adc_value[2],
+    SguanQ duty_uvw[6]);
 CPLUSPLUS_C_END // C和C++配置文件声明_END
 
 

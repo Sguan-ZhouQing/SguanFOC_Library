@@ -386,6 +386,21 @@ static double __local_ln_d_split(double x, int *e);
 static double __local_ln_d_of_m(double m);
 static double __local_log2_d(double x);
 static double __local_ln_d(double x);
+static uint8_t __local_singlers_duty_loop(
+    SguanQ du, SguanQ dv, SguanQ dw,
+    SguanQ const_duty_min,
+    uint8_t *num_max, 
+    uint8_t *num_min, 
+    SguanQ *d_min, SguanQ *d_mid, SguanQ *d_max,
+    SguanQ *d_m, SguanQ *d_n);
+static SguanQ __local_singlers_calc_value(
+    SguanQ d_mn, SguanQ under_base, SguanQ clamp_base, 
+    SguanQ const_duty_sw,SguanQ const_duty_adc,
+    SguanQ multiple,
+    uint8_t clamp_flag);
+static void __local_duty_adjust(
+    SguanQ duty[6], uint8_t idx,
+    SguanQ base, SguanQ delta, uint8_t minus_first);
 
 // ================================================================================
 // 4.局部函数__local基础
@@ -1033,7 +1048,69 @@ static double __local_ln_d(double x){
 }
 
 // ================================================================================
-// 7.全局函数math基础
+// 7.局部函数__local单电阻采样
+// (三相占空比读取设计)
+static uint8_t __local_singlers_duty_loop(
+    SguanQ du, SguanQ dv, SguanQ dw,
+    SguanQ const_duty_min,
+    uint8_t *num_max, 
+    uint8_t *num_min, 
+    SguanQ *d_min, SguanQ *d_mid, SguanQ *d_max,
+    SguanQ *d_m, SguanQ *d_n){
+    /* num_max: 1=du最大 2=dv最大 3=dw最大
+       num_min: 1=du最小 2=dv最小 3=dw最小
+       相等时：max 按 du->dv->dw 优先，min 按 du->dv->dw 优先 */
+    SguanQ a = du, b = dv, c = dw, tmp;
+    if (a > b) { tmp = a; a = b; b = tmp; }
+    if (a > c) { tmp = a; a = c; c = tmp; }
+    if (b > c) { tmp = b; b = c; c = tmp; }
+
+    (*d_min) = a; (*d_mid) = b; (*d_max) = c;
+    (*d_m) = c - b;
+    (*d_n) = b - a;
+
+    if (!(dv > du) && !(dw > du))      (*num_max) = 1;
+    else if (!(du > dv) && !(dw > dv)) (*num_max) = 2;
+    else                               (*num_max) = 3;
+    if (!(du > dv) && !(du > dw))      (*num_min) = 1;
+    else if (!(dv > du) && !(dv > dw)) (*num_min) = 2;
+    else                               (*num_min) = 3;
+    return ((*d_m) > const_duty_min) && ((*d_n) > const_duty_min);
+}
+
+// (ADC采样位置设计)
+static SguanQ __local_singlers_calc_value(
+    SguanQ d_mn, SguanQ under_base, SguanQ clamp_base, 
+    SguanQ const_duty_sw,SguanQ const_duty_adc,
+    SguanQ multiple,
+    uint8_t clamp_flag){
+    // d_mn：d_m 或 d_n
+    // 非clamp时减法基准：d_max或d_mid
+    // clamp时加法基准：d_mid 或 d_min
+    if (clamp_flag && (d_mn <= math_add(const_duty_sw, const_duty_adc))){
+        return math_add(clamp_base, const_duty_adc);
+    }
+    return math_sub(
+        under_base,
+        math_add(const_duty_sw,
+                (d_mn - math_add(const_duty_sw, const_duty_adc))/multiple));
+}
+
+// (内联uvw占空比设置，偏移函数)
+static void __local_duty_adjust(
+    SguanQ duty[6], uint8_t idx,
+    SguanQ base, SguanQ delta, uint8_t minus_first){
+    if (minus_first){
+        duty[idx]     = base - delta;
+        duty[idx + 1] = base + delta;
+    } else{
+        duty[idx]     = base + delta;
+        duty[idx + 1] = base - delta;
+    }
+}
+
+// ================================================================================
+// 8.全局函数math基础
 // (浮点转定点)
 SguanQ math_from_float(SguanF f, SguanF base_value){
     #if VALUE_MODE_MATH==VALUE_MODE_Q15
@@ -1247,7 +1324,7 @@ SguanQ math_atan(SguanQ x, SguanF base_in){
 }
 
 // ================================================================================
-// 8.全局函数math高级
+// 9.全局函数math高级
 // (自定义内存填充函数)
 void *math_memset(void *ptr, int value, size_t num){
     if (ptr == NULL || num == 0){
@@ -1528,7 +1605,7 @@ SguanF math_find_base(SguanF x, int *n){
 }
 
 // ================================================================================
-// 9.全局函数math电机
+// 10.全局函数math电机
 // (等幅值克拉克变换)
 void math_clarke(
     SguanQ *i_alpha, 
@@ -1951,11 +2028,106 @@ uint8_t math_swpwm(int8_t *sector, uint32_t *num_count,
 }
 
 // (singlers函数“单电阻采样读取电流”)
-void math_singlers_start(void){
-
+void math_singlers_start(
+    uint8_t sector_svpwm, 
+    int16_t motor_ix[3], 
+    uint16_t raw_ch0, 
+    uint16_t raw_ch1, 
+    uint16_t const_mid){
+    switch (sector_svpwm){
+    case 1:
+        motor_ix[2] = -((int16_t)raw_ch0-(int16_t)const_mid); // V110 -IC
+        motor_ix[0] = ((int16_t)raw_ch1-(int16_t)const_mid);  // V100  IA
+        motor_ix[1] = -motor_ix[2]-motor_ix[0];
+        break;
+    case 2:
+        motor_ix[2] = -((int16_t)raw_ch0-(int16_t)const_mid); // V110 -IC
+        motor_ix[1] = ((int16_t)raw_ch1-(int16_t)const_mid);  // V010  IB
+        motor_ix[0] = -motor_ix[2]-motor_ix[1];
+        break;
+    case 3:
+        motor_ix[0] = -((int16_t)raw_ch0-(int16_t)const_mid); // V011 -IA
+        motor_ix[1] = ((int16_t)raw_ch1-(int16_t)const_mid);  // V010  IB
+        motor_ix[2] = -motor_ix[0]-motor_ix[1];
+        break;
+    case 4:
+        motor_ix[0] = -((int16_t)raw_ch0-(int16_t)const_mid); // V011 -IA
+        motor_ix[2] = ((int16_t)raw_ch1-(int16_t)const_mid);  // V001  IC
+        motor_ix[1] = -motor_ix[0]-motor_ix[2];
+        break;
+    case 5:
+        motor_ix[1] = -((int16_t)raw_ch0-(int16_t)const_mid); // V101 -IB
+        motor_ix[2] = ((int16_t)raw_ch1-(int16_t)const_mid);  // V001  IC
+        motor_ix[0] = -motor_ix[1]-motor_ix[2];
+        break;
+    case 6:
+        motor_ix[1] = -((int16_t)raw_ch0-(int16_t)const_mid); // V101 -IB
+        motor_ix[0] = ((int16_t)raw_ch1-(int16_t)const_mid);  // V100  IA
+        motor_ix[2] = -motor_ix[1]-motor_ix[0];
+        break;
+    
+    default:
+        motor_ix[0] = (int16_t)const_mid;   // 原始数据A相电流
+        motor_ix[1] = (int16_t)const_mid;   // 原始数据B相电流
+        motor_ix[2] = (int16_t)const_mid;   // 原始数据C相电流
+        break;
+    }
 }
 
-// (singlers函数“单电阻采样设置移相”)
-void math_singlers_end(void){
+// (singlers函数“单电阻采样设置移相和ADC采样位置”)
+uint8_t math_singlers_end(
+    SguanQ du, SguanQ dv, SguanQ dw,
+    SguanQ const_duty_sw,
+    SguanQ const_duty_adc,
+    SguanQ adc_value[2],
+    SguanQ duty_uvw[6]){
+    #if VALUE_MODE_MATH>=VALUE_MODE_Q15
+    const SguanQ temp = 3;
+    #else // VALUE_MODE_MATH
+    const SguanQ temp = (SguanQ)3.0;
+    #endif // VALUE_MODE_MATH
 
+    uint8_t num_max = 0, num_min = 0;
+    SguanQ  d_min = 0, d_mid = 0, d_max = 0;
+    SguanQ  d_m   = 0, d_n   = 0;
+    const SguanQ const_duty_min = math_add(
+        const_duty_sw, 
+        const_duty_adc);
+    uint8_t adc_flag = __local_singlers_duty_loop(
+        du, dv, dw,
+        const_duty_min,
+        &num_max, &num_min,
+        &d_min, &d_mid, &d_max,
+        &d_m, &d_n);
+
+    /* count=0: d_mn=d_m, under_base=d_max, clamp_base=d_mid */
+    adc_value[0] = __local_singlers_calc_value(
+        d_m, d_max, d_mid,
+        const_duty_sw, const_duty_adc, temp, !adc_flag);
+    /* count=1: d_mn=d_n, under_base=d_mid, clamp_base=d_min */
+    adc_value[1] = __local_singlers_calc_value(
+        d_n, d_mid, d_min,
+        const_duty_sw, const_duty_adc, temp, !adc_flag);
+
+    if (adc_flag) {
+        duty_uvw[0] = duty_uvw[1] = du;
+        duty_uvw[2] = duty_uvw[3] = dv;
+        duty_uvw[4] = duty_uvw[5] = dw;
+    }
+    else {
+        const SguanQ bases[3] = { du, dv, dw };
+        if (d_m <= const_duty_min){
+            const SguanQ t = const_duty_min - d_m;
+            if (num_max == 1) __local_duty_adjust(duty_uvw, 0, bases[0], t, 1);
+            if (num_max == 2) __local_duty_adjust(duty_uvw, 2, bases[1], t, 1);
+            if (num_max == 3) __local_duty_adjust(duty_uvw, 4, bases[2], t, 1);
+        }
+        if (d_n <= const_duty_min){
+            const SguanQ t = const_duty_min - d_n;
+            if (num_min == 1) __local_duty_adjust(duty_uvw, 0, bases[0], t, 0);
+            if (num_min == 2) __local_duty_adjust(duty_uvw, 2, bases[1], t, 0);
+            if (num_min == 3) __local_duty_adjust(duty_uvw, 4, bases[2], t, 0);
+        }
+    }
+    return adc_flag;
 }

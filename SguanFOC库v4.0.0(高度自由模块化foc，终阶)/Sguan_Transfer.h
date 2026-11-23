@@ -1370,6 +1370,7 @@ typedef struct{
 
 // ================================================================================
 // 3.全局函数init和loop(声明)
+CPLUSPLUS_C_BEGIN // C和C++配置文件声明_BEGIN
 void transfer_transfer1_loop(__LocalTransfer1 *transfer);
 void transfer_transfer2_loop(__LocalTransfer2 *transfer);
 void transfer_transfer3_loop(__LocalTransfer3 *transfer);
@@ -1427,6 +1428,7 @@ void transfer_init_0(Transfer *transfer);       // (指针)初始化
 void transfer_deinit_0(Transfer *transfer);     // (指针)失能
 void transfer_init_1(Transfer *transfer);       // (功能模块)初始化
 void transfer_deinit_1(Transfer *transfer);     // (功能模块)失能
+CPLUSPLUS_C_END // C和C++配置文件声明_END
 
 
 #endif // SGUAN_TRANSFER_H

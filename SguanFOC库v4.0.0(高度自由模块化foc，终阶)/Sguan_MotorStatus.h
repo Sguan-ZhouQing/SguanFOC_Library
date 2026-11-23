@@ -170,8 +170,10 @@ typedef struct{
     uint8_t error_code;                         // (error_code)错误码记录
 }MotorStatus;
 
+CPLUSPLUS_C_BEGIN // C和C++配置文件声明_BEGIN
 void motorstatus_init(MotorStatus *motorstatus);
 void motorstatus_loop(MotorStatus *motorstatus);
+CPLUSPLUS_C_END // C和C++配置文件声明_END
 
 
 #endif // SGUAN_MOTORSTATUS_H

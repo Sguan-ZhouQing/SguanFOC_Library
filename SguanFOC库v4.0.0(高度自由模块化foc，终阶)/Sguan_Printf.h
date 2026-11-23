@@ -18,12 +18,14 @@ typedef struct{
     float fdata[LOCAL_CH_COUNT];
 }Printf;
 
+CPLUSPLUS_C_BEGIN // C和C++配置文件声明_BEGIN
 extern uint8_t sguan_printfbuff[64];
 
 void printf_tx_init(Printf *str);
 void printf_tx_loop(Printf *str);
 void printf_rx_init(void);
 void printf_rx_loop(uint8_t *data, uint16_t length);
+CPLUSPLUS_C_END // C和C++配置文件声明_END
 
 
 #endif // SGUAN_PRINTF_H
