@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>双线性变换：频率畸变与预畸变 · 交互计算</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            background: #f5f7fb;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+        .card {
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
+            padding: 24px 28px 28px 28px;
+            max-width: 1000px;
+            width: fit-content;
+        }
+        h2 {
+            margin: 0 0 8px 0;
+            font-weight: 500;
+            color: #1e2b3c;
+            font-size: 1.7rem;
+        }
+        .sub {
+            color: #4a5b6e;
+            margin-top: -5px;
+            margin-bottom: 20px;
+            font-size: 0.95rem;
+            border-left: 4px solid #3b82f6;
+            padding-left: 16px;
+            background: #f0f7ff;
+            border-radius: 0 8px 8px 0;
+            line-height: 1.5;
+        }
+        .canvas-wrapper {
+            display: flex;
+            justify-content: center;
+            background: #ffffff;
+            border-radius: 18px;
+            padding: 8px;
+        }
+        canvas {
+            display: block;
+            border-radius: 16px;
+            background: #ffffff;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+            width: 100%;
+            height: auto;
+            max-width: 900px;
+        }
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 24px;
+            margin-top: 20px;
+            padding-top: 12px;
+            border-top: 1px solid #e2e8f0;
+            font-size: 0.9rem;
+            color: #2c3e50;
+            justify-content: center;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .color-dot {
+            width: 14px;
+            height: 14px;
+            border-radius: 4px;
+        }
+        .dot-red {
+            background: #dc2626;
+            box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.2);
+        }
+        .dot-blue {
+            background: #2563eb;
+            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+        }
+        .dot-green {
+            background: #16a34a;
+            box-shadow: 0 0 0 2px rgba(22, 163, 74, 0.2);
+        }
+        .note {
+            background: #f8fafc;
+            padding: 12px 18px;
+            border-radius: 14px;
+            margin-top: 18px;
+            font-size: 0.9rem;
+            color: #334155;
+            border: 1px solid #e9eef3;
+            line-height: 1.5;
+        }
+        .note b {
+            color: #0f172a;
+        }
+        .highlight {
+            background: #fef9c3;
+            padding: 2px 6px;
+            border-radius: 6px;
+            font-weight: 500;
+            color: #854d0e;
+        }
+        .formula {
+            font-family: 'Courier New', monospace;
+            background: #eef2f6;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+
+        /* 交互面板样式 */
+        .interactive-panel {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 16px 24px;
+            margin: 18px 0 8px 0;
+            padding: 16px 20px;
+            background: #f9fcff;
+            border-radius: 18px;
+            border: 1px solid #dbeafe;
+        }
+        .param-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            background: #ffffff;
+            padding: 6px 14px 6px 16px;
+            border-radius: 40px;
+            border: 1px solid #e2e8f0;
+        }
+        .param-group label {
+            font-weight: 500;
+            color: #1e3a8a;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            white-space: nowrap;
+        }
+        .param-group input {
+            width: 100px;
+            padding: 6px 10px;
+            border: 1.5px solid #cbd5e1;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            font-family: 'Segoe UI', monospace;
+            outline: none;
+            transition: 0.2s;
+            background: white;
+        }
+        .param-group input:focus {
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+        }
+        .unit {
+            color: #475569;
+            font-size: 0.85rem;
+            margin-left: -2px;
+        }
+        .result-badge {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px 20px;
+            align-items: center;
+            background: white;
+            padding: 8px 18px;
+            border-radius: 40px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+            border: 1px solid #e2e8f0;
+        }
+        .res-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.9rem;
+            white-space: nowrap;
+        }
+        .res-label {
+            color: #475569;
+            font-weight: 400;
+        }
+        .res-value {
+            font-weight: 600;
+            color: #1e40af;
+            font-family: 'Courier New', monospace;
+            background: #eff6ff;
+            padding: 3px 10px;
+            border-radius: 20px;
+        }
+        .btn-calc {
+            background: #2563eb;
+            border: none;
+            color: white;
+            font-weight: 500;
+            padding: 8px 20px;
+            border-radius: 40px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: 0.15s;
+            box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            letter-spacing: 0.3px;
+            white-space: nowrap;
+        }
+        .btn-calc:hover {
+            background: #1d4ed8;
+            box-shadow: 0 6px 14px rgba(37, 99, 235, 0.4);
+        }
+        .btn-calc:active {
+            transform: scale(0.97);
+        }
+        .example-hint {
+            font-size: 0.8rem;
+            color: #64748b;
+            border-left: 3px solid #94a3b8;
+            padding-left: 12px;
+            margin-left: 5px;
+            flex-basis: 100%;
+            line-height: 1.4;
+        }
+        .flex-break {
+            flex-basis: 100%;
+            height: 0;
+        }
+        .divider {
+            width: 1px;
+            height: 24px;
+            background: #dbeafe;
+            margin: 0 4px;
+        }
+    </style>
+</head>
+<body>
+<div class="card">
+    <h2>📐 双线性变换：频率畸变与预畸变补偿</h2>
+    <div class="sub">
+        ⚡ 采样频率 f<sub>s</sub> 可调 · 奈奎斯特频率 = f<sub>s</sub>/2<br>
+        红线：连续频率 ω 直接映射到离散频率 ω<sub>d</sub> 发生<span class="highlight">弯折压缩</span>；蓝线：预畸变后，关键频率精确落在目标位置。
+    </div>
+    <div class="canvas-wrapper">
+        <canvas id="frequencyCanvas" width="900" height="480"></canvas>
+    </div>
+
+    <!-- 交互输入区：新增功能（Ts/fs 可调 + 角频率同步计算） -->
+    <div class="interactive-panel">
+        <!-- 采样参数组 -->
+        <div class="param-group" style="background:#f0f7ff;">
+            <label for="samplePeriodInput">⏱️ 离散周期 T<sub>s</sub></label>
+            <input type="number" id="samplePeriodInput" value="0.0001" step="any" min="0.000001">
+            <span class="unit">s</span>
+        </div>
+        <div class="param-group" style="background:#f0f7ff;">
+            <label for="sampleFreqInput">🔁 采样频率 f<sub>s</sub></label>
+            <input type="number" id="sampleFreqInput" value="10000" step="any" min="1">
+            <span class="unit">Hz</span>
+        </div>
+        <div class="divider"></div>
+        <!-- 截止参数组 -->
+        <div class="param-group">
+            <label for="cutoffFreqInput">📌 截止频率 f<sub>c</sub></label>
+            <input type="number" id="cutoffFreqInput" value="1000" step="any" min="0.1">
+            <span class="unit">Hz</span>
+        </div>
+        <div class="param-group">
+            <label for="cutoffOmegaInput">📌 截止角频率 ω<sub>c</sub></label>
+            <input type="number" id="cutoffOmegaInput" value="6283.19" step="any" min="0.1">
+            <span class="unit">rad/s</span>
+        </div>
+        <button class="btn-calc" id="calcBtn">▶ 计算预畸变</button>
+        <div class="result-badge">
+            <div class="res-item">
+                <span class="res-label">预畸变后 f<sub>c</sub>' =</span>
+                <span class="res-value" id="prewarpFreqResult">1034.0 Hz</span>
+            </div>
+            <div class="res-item">
+                <span class="res-label">ω<sub>c</sub>' =</span>
+                <span class="res-value" id="prewarpOmegaResult">6497.5 rad/s</span>
+            </div>
+        </div>
+        <div class="flex-break"></div>
+        <div class="example-hint">
+            💡 输入截止频率或角频率，自动同步计算预畸变后的连续原型频率。可修改 T<sub>s</sub> 或 f<sub>s</sub> 以适配不同采样场景（二者联动）。
+        </div>
+    </div>
+
+    <div class="legend">
+        <div class="legend-item"><span class="color-dot dot-red"></span> 双线性变换（无补偿）: ω<sub>d</sub> = 2/T<sub>s</sub>·arctan(ωT<sub>s</sub>/2)</div>
+        <div class="legend-item"><span class="color-dot dot-blue"></span> 预畸变补偿: ω<sub>c</sub>' = 2/T<sub>s</sub>·tan(ω<sub>c</sub>T<sub>s</sub>/2)</div>
+        <div class="legend-item"><span class="color-dot dot-green"></span> 理想线性映射 (参考)</div>
+    </div>
+    <div class="note">
+        <b>📌 例子：</b>连续截止频率 f<sub>c</sub> = 1 kHz，采样 10 kHz。无补偿时双线性变换把离散截止频率拉低到 <b>≈ 970 Hz</b>（偏差30 Hz）。<br>
+        <b>✅ 预畸变：</b>先把连续原型截止频率抬高到 f<sub>c</sub>' ≈ 1034 Hz，再做双线性变换，离散后精确回到 <b>1 kHz</b>。<br>
+        <span style="font-size:0.85rem; color:#475569;">图中蓝点表示预畸变后的对应点，与目标频率完美对齐；红点显示未补偿时向低频偏移。上方计算器可实时调整参数并刷新图表。</span>
+    </div>
+</div>
+<script>
+    (function() {
+        const canvas = document.getElementById('frequencyCanvas');
+        const ctx = canvas.getContext('2d');
+        const W = canvas.width;
+        const H = canvas.height;
+
+        // 采样参数（可变）
+        let fs = 10000;          // 10 kHz
+        let Ts = 1 / fs;         // 0.0001 s
+
+        // 坐标系定义（固定显示范围，不随 fs 变化，便于对比）
+        const f_cont_max = 12000;     // 横轴连续频率 max 12 kHz
+        const f_disc_max = 5500;      // 纵轴离散频率 max 5.5 kHz
+
+        // 像素边距
+        const padLeft = 70;
+        const padRight = 50;
+        const padTop = 40;
+        const padBottom = 60;
+        const plotW = W - padLeft - padRight;
+        const plotH = H - padTop - padBottom;
+
+        // 坐标映射函数
+        function mapX(f_cont) {
+            return padLeft + (f_cont / f_cont_max) * plotW;
+        }
+        function mapY(f_disc) {
+            return padTop + plotH - (f_disc / f_disc_max) * plotH;
+        }
+
+        // 双线性无补偿映射: f_cont (Hz) -> f_disc (Hz)
+        function discreteFreqFromContFreq(f_cont) {
+            const omega = 2 * Math.PI * f_cont;
+            const omega_d = (2 / Ts) * Math.atan(omega * Ts / 2);
+            return omega_d / (2 * Math.PI);
+        }
+
+        // 预畸变连续原型频率: 给定目标离散频率 f_d_target (Hz)，返回需要的连续域频率 f_pre (Hz)
+        function prewarpedContFreq(f_d_target) {
+            return (fs / Math.PI) * Math.tan(Math.PI * f_d_target / fs);
+        }
+
+        // 预畸变连续原型角频率: 给定目标离散角频率 ω_d_target (rad/s)，返回 ω_pre (rad/s)
+        // 或者直接从 f_pre 转换
+        function prewarpedContOmegaFromFreq(f_d_target) {
+            return 2 * Math.PI * prewarpedContFreq(f_d_target);
+        }
+
+        // 交互元素
+        const inputTs = document.getElementById('samplePeriodInput');
+        const inputFs = document.getElementById('sampleFreqInput');
+        const inputFreqHz = document.getElementById('cutoffFreqInput');
+        const inputOmegaRad = document.getElementById('cutoffOmegaInput');
+        const calcBtn = document.getElementById('calcBtn');
+        const resultFreqSpan = document.getElementById('prewarpFreqResult');
+        const resultOmegaSpan = document.getElementById('prewarpOmegaResult');
+
+        // 当前用于高亮显示的目标截止频率 (Hz) —— 来自交互输入，默认 1000 Hz
+        let currentTargetFreq = 1000;   // Hz
+
+        // 更新结果展示
+        function updateResults() {
+            const f_pre = prewarpedContFreq(currentTargetFreq);
+            const omega_pre = 2 * Math.PI * f_pre;
+            resultFreqSpan.textContent = f_pre.toFixed(2) + ' Hz';
+            resultOmegaSpan.textContent = omega_pre.toFixed(2) + ' rad/s';
+        }
+
+        // 同步输入框（从 Hz 更新角频率）
+        function syncOmegaFromHz() {
+            const fHz = parseFloat(inputFreqHz.value);
+            if (!isNaN(fHz) && fHz > 0) {
+                inputOmegaRad.value = (2 * Math.PI * fHz).toFixed(2);
+            }
+        }
+
+        // 同步输入框（从角频率更新 Hz）
+        function syncHzFromOmega() {
+            const omega = parseFloat(inputOmegaRad.value);
+            if (!isNaN(omega) && omega > 0) {
+                inputFreqHz.value = (omega / (2 * Math.PI)).toFixed(2);
+            }
+        }
+
+        // 同步采样参数（Ts <-> fs）
+        function syncFsFromTs() {
+            const tsVal = parseFloat(inputTs.value);
+            if (!isNaN(tsVal) && tsVal > 0) {
+                fs = 1 / tsVal;
+                Ts = tsVal;
+                inputFs.value = fs.toFixed(2);
+                // 同时更新全局 fs Ts 变量
+                // 注意：fs 和 Ts 已在外部声明，此处直接修改
+            }
+        }
+
+        function syncTsFromFs() {
+            const fsVal = parseFloat(inputFs.value);
+            if (!isNaN(fsVal) && fsVal > 0) {
+                fs = fsVal;
+                Ts = 1 / fsVal;
+                inputTs.value = Ts.toFixed(8);
+            }
+        }
+
+        // 重绘全部内容
+        function redrawAll() {
+            // 清除画布
+            ctx.clearRect(0, 0, W, H);
+
+            // 绘制背景网格
+            ctx.save();
+            ctx.strokeStyle = '#e2e8f0';
+            ctx.lineWidth = 1;
+            ctx.setLineDash([]);
+
+            for (let f = 0; f <= f_cont_max; f += 1000) {
+                const x = mapX(f);
+                ctx.beginPath();
+                ctx.moveTo(x, padTop);
+                ctx.lineTo(x, H - padBottom);
+                ctx.strokeStyle = '#e9eef3';
+                ctx.stroke();
+            }
+            for (let f = 0; f <= f_disc_max; f += 1000) {
+                const y = mapY(f);
+                ctx.beginPath();
+                ctx.moveTo(padLeft, y);
+                ctx.lineTo(W - padRight, y);
+                ctx.strokeStyle = '#e9eef3';
+                ctx.stroke();
+            }
+
+            // 绘制坐标轴
+            ctx.strokeStyle = '#94a3b8';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.moveTo(padLeft, padTop);
+            ctx.lineTo(padLeft, H - padBottom);
+            ctx.lineTo(W - padRight, H - padBottom);
+            ctx.stroke();
+
+            // 奈奎斯特频率线（基于当前 fs，画在 5kHz 位置，但若 fs 改变，奈奎斯特频率改变，这里为了展示固定画 5k 还是动态？）
+            // 为了一致性，我们画当前 fs/2 对应的线，但坐标范围仍显示 0~5.5k，如果 fs/2 超过 5.5k 则不画；如果低于则画。
+            const f_nyq = fs / 2;
+            if (f_nyq <= f_disc_max && f_nyq >= 0) {
+                const nyqY = mapY(f_nyq);
+                ctx.save();
+                ctx.beginPath();
+                ctx.setLineDash([6, 5]);
+                ctx.strokeStyle = '#d97706';
+                ctx.lineWidth = 1.8;
+                ctx.moveTo(padLeft, nyqY);
+                ctx.lineTo(W - padRight, nyqY);
+                ctx.stroke();
+                ctx.fillStyle = '#b45309';
+                ctx.font = 'bold 13px "Segoe UI", monospace';
+                ctx.fillText(`奈奎斯特频率 ${(f_nyq/1000).toFixed(2)} kHz`, W - padRight - 180, nyqY - 8);
+                ctx.restore();
+            }
+
+            // 理想线性映射参考线（只在奈奎斯特范围内）
+            ctx.save();
+            ctx.beginPath();
+            ctx.setLineDash([5, 4]);
+            ctx.strokeStyle = '#16a34a';
+            ctx.lineWidth = 1.8;
+            ctx.globalAlpha = 0.7;
+            ctx.moveTo(mapX(0), mapY(0));
+            const endLinear = Math.min(f_nyq, f_cont_max);
+            ctx.lineTo(mapX(endLinear), mapY(endLinear));
+            ctx.stroke();
+            ctx.fillStyle = '#15803d';
+            ctx.font = '12px "Segoe UI"';
+            ctx.fillText('理想线性映射 f_d = f_c', mapX(3500), mapY(4200) - 10);
+            ctx.restore();
+
+            // 绘制双线性变换无补偿曲线 (红色) —— 基于当前 Ts/fs
+            ctx.save();
+            ctx.beginPath();
+            ctx.strokeStyle = '#dc2626';
+            ctx.lineWidth = 3.2;
+            ctx.setLineDash([]);
+            const steps = 400;
+            for (let i = 0; i <= steps; i++) {
+                const f_cont = (i / steps) * f_cont_max;
+                const f_disc = discreteFreqFromContFreq(f_cont);
+                const x = mapX(f_cont);
+                // 离散频率可能超过 5k，但绘图限制在 f_disc_max 内
+                const y = mapY(Math.min(f_disc, f_disc_max));
+                if (i === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            }
+            ctx.stroke();
+            ctx.restore();
+
+            // 绘制固定的预畸变补偿对应点 (蓝点) —— 使用当前 fs 重新计算
+            const fixedTargets = [1000, 2000, 3000, 4000, 4800];
+            ctx.save();
+            fixedTargets.forEach(f_d_target => {
+                if (f_d_target >= fs/2) return; // 超过奈奎斯特频率不绘制
+                const f_cont_pre = prewarpedContFreq(f_d_target);
+                if (f_cont_pre <= f_cont_max && f_d_target <= f_disc_max) {
+                    const x = mapX(f_cont_pre);
+                    const y = mapY(f_d_target);
+                    ctx.beginPath();
+                    ctx.fillStyle = '#2563eb';
+                    ctx.shadowColor = '#3b82f6';
+                    ctx.shadowBlur = 10;
+                    ctx.arc(x, y, 6, 0, 2 * Math.PI);
+                    ctx.fill();
+                    ctx.shadowBlur = 0;
+                    ctx.fillStyle = '#1e40af';
+                    ctx.font = 'bold 11px "Segoe UI"';
+                    ctx.fillText(`${(f_d_target/1000).toFixed(1)}k`, x - 15, y - 12);
+                }
+            });
+            ctx.restore();
+
+            // ---- 高亮显示当前交互输入的目标频率点 ----
+            const f_target = currentTargetFreq;
+            if (f_target > 0 && f_target < fs/2) { // 必须小于奈奎斯特频率才有效
+                const f_pre = prewarpedContFreq(f_target);
+                if (f_pre <= f_cont_max && f_target <= f_disc_max) {
+                    const x_pre = mapX(f_pre);
+                    const y_target = mapY(f_target);
+                    ctx.save();
+                    ctx.shadowColor = '#3b82f6';
+                    ctx.shadowBlur = 16;
+                    ctx.beginPath();
+                    ctx.fillStyle = '#1e3a8a';
+                    ctx.arc(x_pre, y_target, 9, 0, 2 * Math.PI);
+                    ctx.fill();
+                    ctx.shadowBlur = 0;
+                    ctx.beginPath();
+                    ctx.fillStyle = '#2563eb';
+                    ctx.arc(x_pre, y_target, 7, 0, 2 * Math.PI);
+                    ctx.fill();
+                    ctx.beginPath();
+                    ctx.fillStyle = '#ffffff';
+                    ctx.arc(x_pre, y_target, 3.5, 0, 2 * Math.PI);
+                    ctx.fill();
+
+                    ctx.fillStyle = '#1e3a8a';
+                    ctx.font = 'bold 12px "Segoe UI"';
+                    ctx.fillText(`f_c' = ${f_pre.toFixed(1)}Hz`, x_pre + 14, y_target - 14);
+
+                    // 在红色曲线上标出无补偿离散频率（取连续频率=目标频率时的离散值）
+                    const f_disc_red = discreteFreqFromContFreq(f_target);
+                    const x_red = mapX(f_target);
+                    const y_red = mapY(Math.min(f_disc_red, f_disc_max));
+                    ctx.beginPath();
+                    ctx.fillStyle = '#b91c1c';
+                    ctx.shadowColor = '#dc2626';
+                    ctx.shadowBlur = 8;
+                    ctx.arc(x_red, y_red, 6.5, 0, 2 * Math.PI);
+                    ctx.fill();
+                    ctx.shadowBlur = 0;
+                    ctx.fillStyle = '#7f1d1d';
+                    ctx.font = 'bold 11px "Segoe UI"';
+                    ctx.fillText(`≈${f_disc_red.toFixed(0)}Hz`, x_red + 12, y_red - 10);
+                    ctx.restore();
+                }
+            } else {
+                // 如果目标频率超过奈奎斯特，提示无效
+                ctx.save();
+                ctx.fillStyle = '#b91c1c';
+                ctx.font = 'bold 14px "Segoe UI"';
+                ctx.fillText('⚠️ 目标频率超过奈奎斯特频率', W/2 - 120, 80);
+                ctx.restore();
+            }
+
+            // 标注坐标轴标题
+            ctx.save();
+            ctx.fillStyle = '#1e2b3c';
+            ctx.font = 'bold 14px "Segoe UI"';
+            ctx.fillText('连续域频率 f_c (Hz)', W/2 - 70, H - 15);
+            ctx.translate(22, H/2);
+            ctx.rotate(-Math.PI/2);
+            ctx.fillText('离散域频率 f_d (Hz)', -70, 0);
+            ctx.restore();
+
+            // 标注刻度数值
+            ctx.save();
+            ctx.fillStyle = '#475569';
+            ctx.font = '12px "Segoe UI"';
+            ctx.textAlign = 'center';
+            for (let f = 0; f <= f_cont_max; f += 2000) {
+                const x = mapX(f);
+                ctx.fillText(f/1000 + 'k', x, H - padBottom + 20);
+            }
+            ctx.textAlign = 'right';
+            for (let f = 0; f <= f_disc_max; f += 1000) {
+                const y = mapY(f);
+                ctx.fillText(f/1000 + 'k', padLeft - 12, y + 5);
+            }
+            ctx.restore();
+
+            // 曲线旁文字说明
+            ctx.save();
+            ctx.fillStyle = '#b91c1c';
+            ctx.font = 'bold 13px "Segoe UI"';
+            ctx.fillText('双线性变换映射曲线 (无补偿)', mapX(4500), mapY(4600) + 5);
+            ctx.beginPath();
+            ctx.moveTo(mapX(3800), mapY(4750));
+            ctx.lineTo(mapX(4300), mapY(4400));
+            ctx.strokeStyle = '#dc2626';
+            ctx.lineWidth = 1.8;
+            ctx.stroke();
+
+            ctx.fillStyle = '#1e40af';
+            ctx.font = '12px "Segoe UI"';
+            ctx.fillText('蓝点：预畸变后', mapX(3000), mapY(4700));
+            ctx.fillText('关键频率对齐', mapX(3000), mapY(4450));
+            ctx.restore();
+
+            // 阴影区域
+            ctx.save();
+            ctx.globalAlpha = 0.06;
+            ctx.fillStyle = '#dc2626';
+            ctx.beginPath();
+            let first = true;
+            for (let i = 0; i <= steps; i++) {
+                const f_cont = (i / steps) * f_cont_max;
+                const f_disc = discreteFreqFromContFreq(f_cont);
+                if (f_cont <= 5000) {
+                    const x = mapX(f_cont);
+                    const y = mapY(Math.min(f_disc, f_disc_max));
+                    if (first) { ctx.moveTo(x, y); first = false; }
+                    else ctx.lineTo(x, y);
+                }
+            }
+            ctx.lineTo(mapX(5000), mapY(5000));
+            ctx.lineTo(mapX(5000), mapY(discreteFreqFromContFreq(5000)));
+            ctx.closePath();
+            ctx.fillStyle = '#dc2626';
+            ctx.fill();
+            ctx.restore();
+
+            // 角落公式
+            ctx.save();
+            ctx.font = '13px "Courier New", monospace';
+            ctx.fillStyle = '#1f2937';
+            ctx.fillText('预畸变: ω_c\' = (2/Ts)·tan(ω_c·Ts/2)', W - 340, 60);
+            ctx.restore();
+
+            // 绘制当前采样参数信息
+            ctx.save();
+            ctx.font = '12px "Segoe UI", monospace';
+            ctx.fillStyle = '#475569';
+            ctx.fillText(`当前: fs = ${(fs/1000).toFixed(2)} kHz, Ts = ${Ts.toExponential(2)} s`, W - 340, 85);
+            ctx.restore();
+        }
+
+        // ----- 事件处理 -----
+
+        // 当 Hz 输入变化：更新 currentTargetFreq，同步角频率，更新结果，重绘
+        function onFreqHzChange() {
+            let val = parseFloat(inputFreqHz.value);
+            if (isNaN(val) || val <= 0) return;
+            currentTargetFreq = val;
+            syncOmegaFromHz();
+            updateResults();
+            redrawAll();
+        }
+
+        // 当角频率输入变化：更新 currentTargetFreq，同步 Hz，更新结果，重绘
+        function onOmegaChange() {
+            let omega = parseFloat(inputOmegaRad.value);
+            if (isNaN(omega) || omega <= 0) return;
+            const freqHz = omega / (2 * Math.PI);
+            currentTargetFreq = freqHz;
+            syncHzFromOmega();
+            updateResults();
+            redrawAll();
+        }
+
+        // 采样参数变化
+        function onTsChange() {
+            syncFsFromTs();
+            // 重新计算所有结果，因为 fs 变了
+            updateResults();
+            redrawAll();
+        }
+
+        function onFsChange() {
+            syncTsFromFs();
+            updateResults();
+            redrawAll();
+        }
+
+        // 按钮点击
+        function onCalcClick() {
+            // 优先以 Hz 输入框为准
+            let val = parseFloat(inputFreqHz.value);
+            if (isNaN(val) || val <= 0) {
+                let omega = parseFloat(inputOmegaRad.value);
+                if (!isNaN(omega) && omega > 0) {
+                    val = omega / (2 * Math.PI);
+                } else {
+                    return;
+                }
+            }
+            currentTargetFreq = val;
+            inputFreqHz.value = val.toFixed(2);
+            inputOmegaRad.value = (2 * Math.PI * val).toFixed(2);
+            updateResults();
+            redrawAll();
+        }
+
+        // 绑定事件
+        inputFreqHz.addEventListener('input', onFreqHzChange);
+        inputOmegaRad.addEventListener('input', onOmegaChange);
+        inputTs.addEventListener('input', onTsChange);
+        inputFs.addEventListener('input', onFsChange);
+        calcBtn.addEventListener('click', onCalcClick);
+
+        // 初始化
+        (function init() {
+            // 设置初始值
+            fs = 10000;
+            Ts = 1 / fs;
+            inputTs.value = Ts.toFixed(8);
+            inputFs.value = fs.toFixed(2);
+
+            currentTargetFreq = 1000;
+            inputFreqHz.value = '1000.00';
+            inputOmegaRad.value = (2 * Math.PI * 1000).toFixed(2);
+
+            updateResults();
+            redrawAll();
+        })();
+
+    })();
+</script>
+</body>
+</html>
