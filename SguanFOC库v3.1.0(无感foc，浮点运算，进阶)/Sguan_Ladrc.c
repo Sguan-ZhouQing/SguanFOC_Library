@@ -1,14 +1,26 @@
-/*
- * @Author: 星必尘Sguan
- * @GitHub: https://github.com/Sguan-ZhouQing
- * @Date: 2026-02-16  00:27:53
- * @LastEditors: 星必尘Sguan|3464647102@qq.com
- * @LastEditTime: 2026-06-05 03:47:21
- * @FilePath: \SguanFOC_Debug\SguanFOC\Sguan_Ladrc.c
- * @Description: SguanFOC库的“二阶线性自适应抗干扰控制(LADRC)算法”实现
- * 
- * Copyright (c) 2026 by 星必尘Sguan, All Rights Reserved. 
- */
+/* ===================================================================
+ * 文件:     Sguan_Ladrc.c
+ * 项目:     SguanFOC_v3.1.0 —— 开源 FOC 电机控制框架（无感FOC · 浮点运算 · 进阶）
+ * 链接:     https://github.com/Sguan-ZhouQing/SguanFOC_Library
+ * 版权:     Copyright 2026 星必尘Sguan <3464647102@qq.com>
+ * 许可证:   MIT License
+ * SPDX:     SPDX-License-Identifier: MIT
+ *
+ * 许可说明:
+ *   [EN] Permission is hereby granted, free of charge, to use, copy,
+ *        modify, merge, publish, distribute, sublicense, and/or sell
+ *        copies of this software, provided this notice is retained.
+ *   [中文] 本软件依据 MIT 许可证授权：可免费使用、复制、修改、合并、
+ *        出版、分发、再授权及销售，仅须保留本版权与许可声明。
+ *   [DE] Hiermit wird jeder Person kostenlos erlaubt, diese Software zu
+ *        nutzen, zu kopieren, zu veraendern, zu veroeffentlichen, zu
+ *        vertreiben, zu unterlizenzieren und/oder zu verkaufen, sofern
+ *        dieser Hinweis erhalten bleibt.
+ *   [JA] 本ソフトウェアは MIT ライセンスに基づき、無償で使用・複製・
+ *        改変・公開・配布・再許諾・販売が許可されます。ただし本表示を
+ *        保持する必要があります。
+ * 完整许可文本: 参见仓库根目录下的 LICENSE-MIT 文件。
+ * =================================================================== */
 #include "Sguan_Ladrc.h"
 
 // 静态函数声明->LADRC核心算法的三个步骤
