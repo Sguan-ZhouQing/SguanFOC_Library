@@ -1,3 +1,27 @@
+/* ===================================================================
+ * 文件:     Sguan_Math.c
+ * 项目:     SguanFOC_v4 —— 开源 FOC 电机控制框架
+ * 链接:     https://github.com/Sguan-ZhouQing/SguanFOC_Library
+ * 版权:     Copyright 2026 星必尘Sguan <3464647102@qq.com>
+ * 许可证:   Apache License, Version 2.0
+ * SPDX:     SPDX-License-Identifier: Apache-2.0
+ *
+ * 许可说明:
+ *   [EN] Licensed under the Apache License, Version 2.0. You may use,
+ *        copy, modify, and distribute this software, including for
+ *        commercial purposes, provided you retain this copyright
+ *        notice and the terms of the License.
+ *   [中文] 本软件依据 Apache License 2.0 授权：可自由使用、复制、修改、
+ *        分发（含商业用途），但必须保留本版权声明与许可证条款。
+ *   [DE] Lizenziert unter der Apache License, Version 2.0. Nutzung,
+ *        Vervielfaeltigung, Aenderung und Weitergabe (auch kommerziell)
+ *        sind erlaubt, sofern dieser Urheberrechtshinweis und die
+ *        Lizenzbedingungen erhalten bleiben.
+ *   [JA] Apache License, Version 2.0 に基づき許諾されます。使用・複製・
+ *        改変・再配布（商用を含む）が可能ですが、本著作権表示と
+ *        ライセンス条項を保持する必要があります。
+ * 完整许可文本: 参见本目录下的 LICENSE 文件。
+ * =================================================================== */
 #include "Sguan_Math.h"
 
 // ================================================================================
@@ -1350,6 +1374,18 @@ void *math_memcpy(void *dst, const void *src, size_t n){
     return dst;
 }
 
+// (自定义字符串比较)
+int math_strcmp(const char *s1, const char *s2){
+    const uint8_t *p1 = (const uint8_t *)s1;
+    const uint8_t *p2 = (const uint8_t *)s2;
+
+    while (*p1 && (*p1 == *p2)){
+        p1++;
+        p2++;
+    }
+    return (int)(*p1) - (int)(*p2);
+}
+
 // (定时器延时函数)
 uint8_t math_delay(uint32_t ms, uint32_t *count){
     (*count)++;
@@ -1602,6 +1638,38 @@ SguanF math_find_base(SguanF x, int *n){
 
     *n = e;
     return math_pow(VALUE_F_TWO, e);
+}
+
+// (浮点数值的单位转换函数)
+SguanF math_find_unit(SguanF in, const char *unit){
+    if (unit == NULL) {
+        return in;
+    }
+
+    if (math_strcmp(unit, "Hz->Rad/s") == 0){
+        return in * VALUE_F_2PI;
+    }
+    if (math_strcmp(unit, "Rad/s->Hz") == 0){
+        return in / VALUE_F_2PI;
+    }
+    if (math_strcmp(unit, "Rad/s->Rpm") == 0){
+        return in * (SguanF)60.0 / VALUE_F_2PI;
+    }
+    if (math_strcmp(unit, "Rpm->Rad/s") == 0){
+        return in * VALUE_F_2PI / (SguanF)60.0;
+    }
+    if (math_strcmp(unit, "Hz->Rpm") == 0){
+        return in * (SguanF)60.0;
+    }
+    if (math_strcmp(unit, "Rpm->Hz") == 0){
+        return in / (SguanF)60.0;
+    }
+    return in; // 未知单位，不转换
+}
+
+// (求解双线性变换“预畸变”截止频率)
+SguanF math_find_wo(SguanF wo, SguanF ts){
+    return (VALUE_F_TWO/ts)*math_tan(wo*ts/VALUE_F_TWO, 1);
 }
 
 // ================================================================================
