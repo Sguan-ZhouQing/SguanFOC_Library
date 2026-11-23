@@ -42,7 +42,7 @@ void BPF_Init(BPF_STRUCT *bpf){
     bpf->filter.Output = 0;
 }
 
-// 定时器1ms中断服务函数
+// 定时器中断服务函数
 void BPF_Loop(BPF_STRUCT *bpf){
     // 更新历史输入和输出数值
     for (int n = 2; n > 0; n--){
