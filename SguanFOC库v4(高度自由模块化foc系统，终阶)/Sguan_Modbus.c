@@ -25,6 +25,47 @@
  * =================================================================== */
 #include "Sguan_Modbus.h"
 
+static uint16_t __local_crc16_calc(const uint8_t data[6]);
+static void __local_crc16_get(uint8_t data[8]);
+static uint8_t __local_crc16_read(const uint8_t data[8]);
+
+// ()
+static uint16_t __local_crc16_calc(const uint8_t data[6]){
+    uint16_t crc = 0xFFFF;
+    uint8_t i, j;
+
+    for (i = 0; i < 6; i++){
+        crc ^= data[i];
+        for (j = 0; j < 8; j++){
+            if (crc & 0x0001){
+                crc >>= 1;
+                crc ^= 0xA001;
+            } else {
+                crc >>= 1;
+            }
+        }
+    }
+    return crc;
+}
+
+// ()
+static void __local_crc16_get(uint8_t data[8]){
+    uint16_t crc = __local_crc16_calc(data);
+    data[6] = crc & 0xFF;          // CRC 低字节
+    data[7] = (crc >> 8) & 0xFF;   // CRC 高字节
+}
+
+// ()
+static uint8_t __local_crc16_read(const uint8_t data[8]){
+    uint16_t crc_calc = __local_crc16_calc(data);
+    uint16_t crc_recv = (uint16_t)data[6] | ((uint16_t)data[7] << 8);
+
+    return (crc_calc == crc_recv) ? 1 : 0;
+}
+
+
+
+
 void modbus_master_send(void){
 
 }

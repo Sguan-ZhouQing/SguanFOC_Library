@@ -26,64 +26,63 @@
 #ifndef __UNITLIB_DEFINE0_H
 #define __UNITLIB_DEFINE0_H
 
-#define DEFINE0_NUM_TRANSFER1        5
-#define DEFINE0_NUM_TRANSFER2        2
-#define DEFINE0_NUM_TRANSFER3        1
-#define DEFINE0_NUM_TRANSFER4        1
-#define DEFINE0_NUM_TRANSFER5        1
-#define DEFINE0_NUM_INTEGRATOR       1
-#define DEFINE0_NUM_DERIVATIVE       1
-#define DEFINE0_NUM_HALL             1
-#define DEFINE0_NUM_LADRC1           1
-#define DEFINE0_NUM_LADRC2           1
-#define DEFINE0_NUM_SMC              1
-#define DEFINE0_NUM_DPCC             1
-#define DEFINE0_NUM_PIR              1
-#define DEFINE0_NUM_PID              1
-#define DEFINE0_NUM_PLL              1
-#define DEFINE0_NUM_LPF1             1
-#define DEFINE0_NUM_LPF2             1
-#define DEFINE0_NUM_HPF1             1
-#define DEFINE0_NUM_HPF2             1
-#define DEFINE0_NUM_BPF1             1
-#define DEFINE0_NUM_BPF2             1
-#define DEFINE0_NUM_SOGI             1
-#define DEFINE0_NUM_NF               1
-#define DEFINE0_NUM_TPNF             1
-#define DEFINE0_NUM_DOB              1
-#define DEFINE0_NUM_RLS              1
-#define DEFINE0_NUM_SMO              1
-#define DEFINE0_NUM_NFO              1
-#define DEFINE0_NUM_AFO              1
-#define DEFINE0_NUM_HFI              1
-#define DEFINE0_NUM_ROLO             1
-#define DEFINE0_NUM_MARS             1
-#define DEFINE0_NUM_EKF              1
-#define DEFINE0_NUM_DELAY1           1
-#define DEFINE0_NUM_DELAY2           1
-#define DEFINE0_NUM_DELAY3           1
+#define DEFINE0_NUM0_TRANSFER1  5                   // (uint8_t)典型一阶传递函数
+#define DEFINE0_NUM0_TRANSFER2  2                   // (uint8_t)典型二阶传递函数
+#define DEFINE0_NUM0_TRANSFER3  1                   // (uint8_t)典型三阶传递函数
+#define DEFINE0_NUM0_TRANSFER4  1                   // (uint8_t)典型四阶传递函数
+#define DEFINE0_NUM0_TRANSFER5  1                   // (uint8_t)典型五阶传递函数
+#define DEFINE0_NUM0_INTEGRATOR 1                   // (uint8_t)积分器
+#define DEFINE0_NUM0_DERIVATIVE 1                   // (uint8_t)微分器
+#define DEFINE0_NUM0_HALL       1                   // (uint8_t)霍尔编码器
+#define DEFINE0_NUM0_LADRC1     1                   // (uint8_t)一阶线性自适应抗干扰控制
+#define DEFINE0_NUM0_LADRC2     1                   // (uint8_t)二阶线性自适应抗干扰控制
+#define DEFINE0_NUM0_SMC        1                   // (uint8_t)传统指数型趋近率的滑模控制
+#define DEFINE0_NUM0_DPCC       1                   // (uint8_t)增量式电流预测控制
+#define DEFINE0_NUM0_PIR        1                   // (uint8_t)比例积分谐振调节器
+#define DEFINE0_NUM0_PID        1                   // (uint8_t)传统闭环控制器
+#define DEFINE0_NUM0_PLL        1                   // (uint8_t)开环锁相环
+#define DEFINE0_NUM0_LPF1       1                   // (uint8_t)一阶低通滤波器
+#define DEFINE0_NUM0_LPF2       1                   // (uint8_t)二阶低通滤波器
+#define DEFINE0_NUM0_HPF1       1                   // (uint8_t)一阶高通滤波器
+#define DEFINE0_NUM0_HPF2       1                   // (uint8_t)二阶高通滤波器
+#define DEFINE0_NUM0_BPF1       1                   // (uint8_t)带通滤波器"一阶低通和高通串联"
+#define DEFINE0_NUM0_BPF2       1                   // (uint8_t)带通滤波器"典型二阶系统改型"
+#define DEFINE0_NUM0_SOGI       1                   // (uint8_t)广义积分器"典型二阶系统改型"
+#define DEFINE0_NUM0_NF         1                   // (uint8_t)陷波滤波器"典型二阶系统改型"
+#define DEFINE0_NUM0_TPNF       1                   // (uint8_t)陷波滤波器"三参数陷波滤波器"
+#define DEFINE0_NUM0_DOB        1                   // (uint8_t)超螺旋滑模扰动观测器
+#define DEFINE0_NUM0_RLS        1                   // (uint8_t)电机参数在线辨识观测器
+#define DEFINE0_NUM0_SMO        1                   // (uint8_t)"无感"滑模观测器
+#define DEFINE0_NUM0_NFO        1                   // (uint8_t)"无感"非线性磁链观测器
+#define DEFINE0_NUM0_AFO        1                   // (uint8_t)"无感"有效磁链观测器
+#define DEFINE0_NUM0_HFI        1                   // (uint8_t)"无感"高频正弦波注入
+#define DEFINE0_NUM0_ROLO       1                   // (uint8_t)"无感"降阶龙伯格观测器
+#define DEFINE0_NUM0_MARS       1                   // (uint8_t)"无感"模型参考自适应观测器
+#define DEFINE0_NUM0_EKF        1                   // (uint8_t)"无感"扩展卡尔曼滤波
+#define DEFINE0_NUM0_DELAY1     1                   // (uint8_t)延时函数"延时一拍"
+#define DEFINE0_NUM0_DELAY2     1                   // (uint8_t)延时函数"延时二拍"
+#define DEFINE0_NUM0_DELAY3     1                   // (uint8_t)延时函数"延时三拍"
 
-#define DEFINE0_NUM_FLOAT            1
-#define DEFINE0_NUM_DOUBLE           1
-#define DEFINE0_NUM_INT8             1
-#define DEFINE0_NUM_UINT8            1
-#define DEFINE0_NUM_INT16            1
-#define DEFINE0_NUM_UINT16           1
-#define DEFINE0_NUM_INT32            1
-#define DEFINE0_NUM_UINT32           1
+#define DEFINE0_NUM1_FLOAT      1                   // (uint8_t)扩展单精度浮点数
+#define DEFINE0_NUM1_DOUBLE     1                   // (uint8_t)扩展双精度浮点数
+#define DEFINE0_NUM1_INT8       1                   // (uint8_t)扩展8位有符号数
+#define DEFINE0_NUM1_UINT8      1                   // (uint8_t)扩展8位无符号数
+#define DEFINE0_NUM1_INT16      1                   // (uint8_t)扩展16位有符号数
+#define DEFINE0_NUM1_UINT16     1                   // (uint8_t)扩展16位无符号数
+#define DEFINE0_NUM1_INT32      1                   // (uint8_t)扩展32位有符号数
+#define DEFINE0_NUM1_UINT32     1                   // (uint8_t)扩展32位无符号数
 
 // 1-6
-#define DEFINE0_MOTOR_COUNT          1
-
-#define DEFINE0_MOTOR_MODE           0
-
+// 0-n
 // 宏定义(0指float，1指double，2指Q15，3指Q31)
-#define DEFINE0_MOTOR_MATH           0
+#define DEFINE0_MOTOR_COUNT     1                   // (uint8_t)
+#define DEFINE0_MOTOR_MODE      0                   // (uint8_t)
+#define DEFINE0_MOTOR_MATH      0                   // (uint8_t)
 
-#define DEFINE0_BASE_TIME            0.001953125
-#define DEFINE0_BASE_VOLTAGE         1024.0
-#define DEFINE0_BASE_CURRENT         128.0
-#define DEFINE0_BASE_OTHER           512.0
+#define DEFINE0_BASE_TIME       0.001953125         // (double)
+#define DEFINE0_BASE_VOLTAGE    1024.0              // (double)
+#define DEFINE0_BASE_CURRENT    128.0               // (double)
+#define DEFINE0_BASE_OTHER      512.0               // (double)
 
 
 #endif // UNITLIB_DEFINE0_H

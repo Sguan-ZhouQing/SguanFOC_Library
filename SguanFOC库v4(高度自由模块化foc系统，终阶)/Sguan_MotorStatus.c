@@ -55,6 +55,12 @@ static void __local_idle_init(SguanFoc *sguan){
     // main_standby_init(sguan);
 }
 
+typedef struct{
+    uint8_t status_now;                         // (now)现在状态机
+    uint8_t event_now;                          // (now)当前状态机可触发的事件
+    uint8_t status_future;                      // (future)下一时刻状态机
+}__LocalTab;
+
 static const __LocalTab motor_tab[203] = {
     // 1.当前的状态机                    2.当前状态机可触发的事件              3.如果触发此事件，下一时刻的状态机
     {STATUS(status_standby),            EVENT(event_ready),                 STATUS(status_ready)},
@@ -64,9 +70,9 @@ static const __LocalTab motor_tab[203] = {
     {STATUS(status_ready),              EVENT(event_standby0),              STATUS(status_standby)},
 
     // (分割线)---------------------------------------------------------------------
-    // {STATUS(status_initializing),     EVENT(自动切换，初始化的时候判断),   STATUS(status_gotoinit0_angle)},
-    // {STATUS(status_gotoinit0_angle),  EVENT(自动切换，初始化的时候判断),   STATUS(status_gotoinit1_current)},
-    // {STATUS(status_gotoinit1_current),EVENT(自动切换，初始化的时候判断),   STATUS(status_idle)},
+    {STATUS(status_initializing),       EVENT(event_next),                  STATUS(status_gotoinit0_current)},
+    {STATUS(status_gotoinit0_current),  EVENT(event_next),                  STATUS(status_gotoinit1_angle)},
+    {STATUS(status_gotoinit1_angle),    EVENT(event_next),                  STATUS(status_idle)},
     
     // (分割线)---------------------------------------------------------------------
     {STATUS(status_idle),               EVENT(event_torque_hold),           STATUS(status_torque_hold)},
@@ -393,35 +399,119 @@ static void (*const __local_action_loop[])(void) = {
     situation_fault2_loop
 };
 
-static __LocalEvent __local_event_get(uint8_t run){
-    // switch (run){
-    // case SGUANFOC_RUN_READY:         // 准备触发
-    //     return event_ready;
-    // case __LOCAL_RUN_INITIALIZING:  // 初始化触发
-    //     return event_initializing;
-    // case __LOCAL_RUN_STANDBY:       // 待机触发
-    //     return event_standby0;
-    // case __LOCAL_RUN_FAULT:         // 错误触发
-    //     return event_fault;
-    // case __LOCAL_RUN_SUCCESS:       // [特殊]初始化success触发
-    //     return event_success;
-    
-    // default:
-    //     break;
-    // }
-    // return event_zero;
+void motorstatus_ready_init(MotorStatus *motorstatus){
+
 }
 
-void motorstatus_init(MotorStatus *motorstatus){
-    if ((motorstatus->status >= status_initializing) && 
-        (motorstatus->status <= status_gotoinit1_current)){
-        motorstatus->status = (__LocalStatus)(motorstatus->status+1);
-    }
+void motorstatus_initializing_init(MotorStatus *motorstatus){
+
+}
+
+void motorstatus_standby_init(MotorStatus *motorstatus){
+
 }
 
 void motorstatus_loop(MotorStatus *motorstatus){
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 void motorstatus_loop00(void *sguan){
     // ==================================================================

@@ -41,10 +41,10 @@ SguanQ driver_read_temp_driver(uint8_t CH);
 SguanQ driver_read_temp_pcb(uint8_t CH);
 void driver_read_adc(uint8_t motor, uint16_t x);
 void driver_set_pwm(uint8_t motor, 
-    uint16_t du_0, uint16_t du_1, 
-    uint16_t dv_0, uint16_t dv_1, 
-    uint16_t dw_0, uint16_t dw_1,
-    uint16_t dx_0, uint16_t dx_1);
+    uint32_t du_0, uint32_t du_1, 
+    uint32_t dv_0, uint32_t dv_1, 
+    uint32_t dw_0, uint32_t dw_1,
+    uint32_t dx_0, uint32_t dx_1);
 void driver_send_uart(uint8_t *ch, uint16_t size);
 
 

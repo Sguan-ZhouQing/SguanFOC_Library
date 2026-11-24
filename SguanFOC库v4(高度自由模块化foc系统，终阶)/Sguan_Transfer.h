@@ -30,7 +30,7 @@
 #include "Sguan_Config.h"
 
 
-// ================================================================================
+// =================================================|==============================
 // 1.半隐藏设计(声明)
 //   In/Out/Params 结构体公开 —— 用户要直接读写（喂信号、配参数）
 //   Data 为不透明类型 —— 运行状态定义在 Sguan_Transfer.c，外部不可见
@@ -63,7 +63,7 @@ typedef struct __LocalTransfer1{
     __LocalTransfer1Params params;
     __LocalTransfer1Data *data;
 }__LocalTransfer1;
-// (分割线)-------------------------------------------------------------------------
+// (分割线)-----------------------------------------|-------------------------------
 typedef struct{
     SguanQ input;
 }__LocalTransfer2In;
@@ -94,7 +94,7 @@ typedef struct __LocalTransfer2{
     __LocalTransfer2Params params;
     __LocalTransfer2Data *data;
 }__LocalTransfer2;
-// (分割线)-------------------------------------------------------------------------
+// (分割线)-----------------------------------------|-------------------------------
 typedef struct{
     SguanQ input;
 }__LocalTransfer3In;
@@ -127,7 +127,7 @@ typedef struct __LocalTransfer3{
     __LocalTransfer3Params params;
     __LocalTransfer3Data *data;
 }__LocalTransfer3;
-// (分割线)-------------------------------------------------------------------------
+// (分割线)-----------------------------------------|-------------------------------
 typedef struct{
     SguanQ input;
 }__LocalTransfer4In;
@@ -162,7 +162,7 @@ typedef struct __LocalTransfer4{
     __LocalTransfer4Params params;
     __LocalTransfer4Data *data;
 }__LocalTransfer4;
-// (分割线)-------------------------------------------------------------------------
+// (分割线)-----------------------------------------|-------------------------------
 typedef struct{
     SguanQ input;
 }__LocalTransfer5In;
@@ -199,7 +199,7 @@ typedef struct __LocalTransfer5{
     __LocalTransfer5Params params;
     __LocalTransfer5Data *data;
 }__LocalTransfer5;
-// (分割线)-------------------------------------------------------------------------
+// (分割线)-----------------------------------------|-------------------------------
 typedef struct{
     SguanQ input;
 }__LocalIntegratorIn;
@@ -220,7 +220,7 @@ typedef struct __LocalIntegrator{
     __LocalIntegratorParams params;
     __LocalIntegratorData *data;
 }__LocalIntegrator;
-// (分割线)-------------------------------------------------------------------------
+// (分割线)-----------------------------------------|-------------------------------
 typedef struct{
     SguanQ input;
 }__LocalDerivativeIn;
@@ -244,7 +244,7 @@ typedef struct __LocalDerivative{
     __LocalDerivativeParams params;
     __LocalDerivativeData *data;
 }__LocalDerivative;
-// (分割线)-------------------------------------------------------------------------
+// (分割线)-----------------------------------------|-------------------------------
 typedef struct{
     SguanQ ref;
     SguanQ fbk;
@@ -279,7 +279,7 @@ typedef struct __LocalHall{
     __LocalHallParams params;
     __LocalHallData *data;
 }__LocalHall;
-// (分割线)-------------------------------------------------------------------------
+// (分割线)-----------------------------------------|-------------------------------
 typedef struct{
     SguanQ ref;
     SguanQ fbk;
@@ -314,7 +314,7 @@ typedef struct __LocalLadrc1{
     __LocalLadrc1Params params;
     __LocalLadrc1Data *data;
 }__LocalLadrc1;
-// (分割线)-------------------------------------------------------------------------
+// (分割线)-----------------------------------------|-------------------------------
 typedef struct{
     SguanQ ref;
     SguanQ fbk;
@@ -349,7 +349,7 @@ typedef struct __LocalLadrc2{
     __LocalLadrc2Params params;
     __LocalLadrc2Data *data;
 }__LocalLadrc2;
-// (分割线)-------------------------------------------------------------------------
+// (分割线)-----------------------------------------|-------------------------------
 typedef struct{
     SguanQ ref;
     SguanQ fbk;
@@ -384,7 +384,7 @@ typedef struct __LocalSmc{
     __LocalSmcParams params;
     __LocalSmcData *data;
 }__LocalSmc;
-// (分割线)-------------------------------------------------------------------------
+// (分割线)-----------------------------------------|-------------------------------
 typedef struct{
     SguanQ ref;
     SguanQ fbk;
@@ -419,7 +419,7 @@ typedef struct __LocalDpcc{
     __LocalDpccParams params;
     __LocalDpccData *data;
 }__LocalDpcc;
-// (分割线)-------------------------------------------------------------------------
+// (分割线)-----------------------------------------|-------------------------------
 typedef struct{
     SguanQ ref;
     SguanQ fbk;
@@ -454,7 +454,7 @@ typedef struct __LocalPir{
     __LocalPirParams params;
     __LocalPirData *data;
 }__LocalPir;
-// (分割线)-------------------------------------------------------------------------
+// (分割线)-----------------------------------------|-------------------------------
 typedef struct{
     SguanQ ref;
     SguanQ fbk;
@@ -489,7 +489,7 @@ typedef struct __LocalPid{
     __LocalPidParams params;
     __LocalPidData *data;
 }__LocalPid;
-// (分割线)-------------------------------------------------------------------------
+// (分割线)-----------------------------------------|-------------------------------
 typedef struct{
     SguanQ error;
 }__LocalPllIn;
@@ -517,7 +517,7 @@ typedef struct __LocalPll{
     __LocalPllParams params;
     __LocalPllData *data;
 }__LocalPll;
-// (分割线)-------------------------------------------------------------------------
+// (分割线)-----------------------------------------|-------------------------------
 typedef struct{
     SguanQ input;
 }__LocalLpf1In;
@@ -541,7 +541,7 @@ typedef struct __LocalLpf1{
     __LocalLpf1Params params;
     __LocalLpf1Data *data;
 }__LocalLpf1;
-// (分割线)-------------------------------------------------------------------------
+// (分割线)-----------------------------------------|-------------------------------
 typedef struct{
     SguanQ input;
 }__LocalLpf2In;
@@ -565,7 +565,7 @@ typedef struct __LocalLpf2{
     __LocalLpf2Params params;
     __LocalLpf2Data *data;
 }__LocalLpf2;
-// (分割线)-------------------------------------------------------------------------
+// (分割线)-----------------------------------------|-------------------------------
 typedef struct{
     SguanQ input;
 }__LocalHpf1In;
@@ -589,7 +589,7 @@ typedef struct __LocalHpf1{
     __LocalHpf1Params params;
     __LocalHpf1Data *data;
 }__LocalHpf1;
-// (分割线)-------------------------------------------------------------------------
+// (分割线)-----------------------------------------|-------------------------------
 typedef struct{
     SguanQ input;
 }__LocalHpf2In;
@@ -613,7 +613,7 @@ typedef struct __LocalHpf2{
     __LocalHpf2Params params;
     __LocalHpf2Data *data;
 }__LocalHpf2;
-// (分割线)-------------------------------------------------------------------------
+// (分割线)-----------------------------------------|-------------------------------
 typedef struct{
     SguanQ input;
 }__LocalBpf1In;
@@ -638,7 +638,7 @@ typedef struct __LocalBpf1{
     __LocalBpf1Params params;
     __LocalBpf1Data *data;
 }__LocalBpf1;
-// (分割线)-------------------------------------------------------------------------
+// (分割线)-----------------------------------------|-------------------------------
 typedef struct{
     SguanQ input;
 }__LocalBpf2In;
@@ -663,7 +663,7 @@ typedef struct __LocalBpf2{
     __LocalBpf2Params params;
     __LocalBpf2Data *data;
 }__LocalBpf2;
-// (分割线)-------------------------------------------------------------------------
+// (分割线)-----------------------------------------|-------------------------------
 typedef struct{
     SguanQ input;
 }__LocalSogiIn;
@@ -688,7 +688,7 @@ typedef struct __LocalSogi{
     __LocalSogiParams params;
     __LocalSogiData *data;
 }__LocalSogi;
-// (分割线)-------------------------------------------------------------------------
+// (分割线)-----------------------------------------|-------------------------------
 typedef struct{
     SguanQ input;
 }__LocalNfIn;
@@ -713,7 +713,7 @@ typedef struct __LocalNf{
     __LocalNfParams params;
     __LocalNfData *data;
 }__LocalNf;
-// (分割线)-------------------------------------------------------------------------
+// (分割线)-----------------------------------------|-------------------------------
 typedef struct{
     SguanQ input;
 }__LocalTpnfIn;
@@ -740,7 +740,7 @@ typedef struct __LocalTpnf{
     __LocalTpnfParams params;
     __LocalTpnfData *data;
 }__LocalTpnf;
-// (分割线)-------------------------------------------------------------------------
+// (分割线)-----------------------------------------|-------------------------------
 typedef struct{
     SguanQ input;
 }__LocalDobIn;
@@ -767,7 +767,7 @@ typedef struct __LocalDob{
     __LocalDobParams params;
     __LocalDobData *data;
 }__LocalDob;
-// (分割线)-------------------------------------------------------------------------
+// (分割线)-----------------------------------------|-------------------------------
 typedef struct{
     SguanQ input;
 }__LocalRlsIn;
@@ -794,7 +794,7 @@ typedef struct __LocalRls{
     __LocalRlsParams params;
     __LocalRlsData *data;
 }__LocalRls;
-// (分割线)-------------------------------------------------------------------------
+// (分割线)-----------------------------------------|-------------------------------
 typedef struct{
     SguanQ input;
 }__LocalSmoIn;
@@ -821,7 +821,7 @@ typedef struct __LocalSmo{
     __LocalSmoParams params;
     __LocalSmoData *data;
 }__LocalSmo;
-// (分割线)-------------------------------------------------------------------------
+// (分割线)-----------------------------------------|-------------------------------
 typedef struct{
     SguanQ input;
 }__LocalNfoIn;
@@ -848,7 +848,7 @@ typedef struct __LocalNfo{
     __LocalNfoParams params;
     __LocalNfoData *data;
 }__LocalNfo;
-// (分割线)-------------------------------------------------------------------------
+// (分割线)-----------------------------------------|-------------------------------
 typedef struct{
     SguanQ input;
 }__LocalAfoIn;
@@ -875,7 +875,7 @@ typedef struct __LocalAfo{
     __LocalAfoParams params;
     __LocalAfoData *data;
 }__LocalAfo;
-// (分割线)-------------------------------------------------------------------------
+// (分割线)-----------------------------------------|-------------------------------
 typedef struct{
     SguanQ input;
 }__LocalHfiIn;
@@ -902,7 +902,7 @@ typedef struct __LocalHfi{
     __LocalHfiParams params;
     __LocalHfiData *data;
 }__LocalHfi;
-// (分割线)-------------------------------------------------------------------------
+// (分割线)-----------------------------------------|-------------------------------
 typedef struct{
     SguanQ input;
 }__LocalRoloIn;
@@ -929,7 +929,7 @@ typedef struct __LocalRolo{
     __LocalRoloParams params;
     __LocalRoloData *data;
 }__LocalRolo;
-// (分割线)-------------------------------------------------------------------------
+// (分割线)-----------------------------------------|-------------------------------
 typedef struct{
     SguanQ input;
 }__LocalMarsIn;
@@ -956,7 +956,7 @@ typedef struct __LocalMars{
     __LocalMarsParams params;
     __LocalMarsData *data;
 }__LocalMars;
-// (分割线)-------------------------------------------------------------------------
+// (分割线)-----------------------------------------|-------------------------------
 typedef struct{
     SguanQ input;
 }__LocalEkfIn;
@@ -983,7 +983,7 @@ typedef struct __LocalEkf{
     __LocalEkfParams params;
     __LocalEkfData *data;
 }__LocalEkf;
-// (分割线)-------------------------------------------------------------------------
+// (分割线)-----------------------------------------|-------------------------------
 typedef struct{
     SguanQ input;
 }__LocalDelay1In;
@@ -996,7 +996,7 @@ typedef struct __LocalDelay1{
     __LocalDelay1In in;
     __LocalDelay1Out out;
 }__LocalDelay1;
-// (分割线)-------------------------------------------------------------------------
+// (分割线)-----------------------------------------|-------------------------------
 typedef struct{
     SguanQ input;
 }__LocalDelay2In;
@@ -1009,7 +1009,7 @@ typedef struct __LocalDelay2{
     __LocalDelay2In in;
     __LocalDelay2Out out;
 }__LocalDelay2;
-// (分割线)-------------------------------------------------------------------------
+// (分割线)-----------------------------------------|-------------------------------
 typedef struct{
     SguanQ input;
 }__LocalDelay3In;
@@ -1022,7 +1022,7 @@ typedef struct __LocalDelay3{
     __LocalDelay3In in;
     __LocalDelay3Out out;
 }__LocalDelay3;
-// (分割线)-------------------------------------------------------------------------
+// (分割线)-----------------------------------------|-------------------------------
 typedef struct{
     SguanQ input;
 }__LocalSineIn;
@@ -1035,7 +1035,7 @@ typedef struct __LocalSine{
     __LocalSineIn in;
     __LocalSineOut out;
 }__LocalSine;
-// (分割线)-------------------------------------------------------------------------
+// (分割线)-----------------------------------------|-------------------------------
 typedef struct{
     SguanQ input;
 }__LocalCosineIn;
@@ -1048,7 +1048,7 @@ typedef struct __LocalCosine{
     __LocalCosineIn in;
     __LocalCosineOut out;
 }__LocalCosine;
-// (分割线)-------------------------------------------------------------------------
+// (分割线)-----------------------------------------|-------------------------------
 typedef struct{
     SguanQ input;
 }__LocalSinCosIn;
@@ -1062,7 +1062,7 @@ typedef struct __LocalSinCos{
     __LocalSinCosIn in;
     __LocalSinCosOut out;
 }__LocalSinCos;
-// (分割线)-------------------------------------------------------------------------
+// (分割线)-----------------------------------------|-------------------------------
 typedef struct{
     SguanQ input;
 }__LocalTanIn;
@@ -1075,7 +1075,7 @@ typedef struct __LocalTan{
     __LocalTanIn in;
     __LocalTanOut out;
 }__LocalTan;
-// (分割线)-------------------------------------------------------------------------
+// (分割线)-----------------------------------------|-------------------------------
 typedef struct{
     SguanQ input;
 }__LocalAtanIn;
@@ -1088,7 +1088,7 @@ typedef struct __LocalAtan{
     __LocalAtanIn in;
     __LocalAtanOut out;
 }__LocalAtan;
-// (分割线)-------------------------------------------------------------------------
+// (分割线)-----------------------------------------|-------------------------------
 typedef struct{
     SguanQ input;
 }__LocalLimitIn;
@@ -1107,7 +1107,7 @@ typedef struct __LocalLimit{
     __LocalLimitOut out;
     __LocalLimitParams params;
 }__LocalLimit;
-// (分割线)-------------------------------------------------------------------------
+// (分割线)-----------------------------------------|-------------------------------
 typedef struct{
     SguanQ we;
     SguanQ wh;
@@ -1121,7 +1121,7 @@ typedef struct __LocalSign{
     __LocalSignIn in;
     __LocalSignOut out;
 }__LocalSign;
-// (分割线)-------------------------------------------------------------------------
+// (分割线)-----------------------------------------|-------------------------------
 typedef struct{
     SguanQ we;
     SguanQ wh;
@@ -1135,7 +1135,7 @@ typedef struct __LocalClarke{
     __LocalClarkeIn in;
     __LocalClarkeOut out;
 }__LocalClarke;
-// (分割线)-------------------------------------------------------------------------
+// (分割线)-----------------------------------------|-------------------------------
 typedef struct{
     SguanQ we;
     SguanQ wh;
@@ -1149,7 +1149,7 @@ typedef struct __LocalPark{
     __LocalParkIn in;
     __LocalParkOut out;
 }__LocalPark;
-// (分割线)-------------------------------------------------------------------------
+// (分割线)-----------------------------------------|-------------------------------
 typedef struct{
     SguanQ we;
     SguanQ wh;
@@ -1163,7 +1163,7 @@ typedef struct __LocalIpark{
     __LocalIparkIn in;
     __LocalIparkOut out;
 }__LocalIpark;
-// (分割线)-------------------------------------------------------------------------
+// (分割线)-----------------------------------------|-------------------------------
 typedef struct{
     SguanQ we;
     SguanQ wh;
@@ -1177,7 +1177,7 @@ typedef struct __LocalSpwm{
     __LocalSpwmIn in;
     __LocalSpwmOut out;
 }__LocalSpwm;
-// (分割线)-------------------------------------------------------------------------
+// (分割线)-----------------------------------------|-------------------------------
 typedef struct{
     SguanQ we;
     SguanQ wh;
@@ -1191,7 +1191,7 @@ typedef struct __LocalSvpwm{
     __LocalSvpwmIn in;
     __LocalSvpwmOut out;
 }__LocalSvpwm;
-// (分割线)-------------------------------------------------------------------------
+// (分割线)-----------------------------------------|-------------------------------
 typedef struct{
     SguanQ we;
     SguanQ wh;
@@ -1205,7 +1205,7 @@ typedef struct __LocalSwpwm{
     __LocalSwpwmIn in;
     __LocalSwpwmOut out;
 }__LocalSwpwm;
-// (分割线)-------------------------------------------------------------------------
+// (分割线)-----------------------------------------|-------------------------------
 typedef struct{
     SguanQ input;
 }__LocalSingleRsIn;
@@ -1230,7 +1230,7 @@ typedef struct __LocalSingleRs{
     __LocalSingleRsParams params;
 }__LocalSingleRs;
 
-// ================================================================================
+// =================================================|==============================
 // 2.全局结构体Transfer定义
 typedef struct{
     #if CONFIG_TRANSFER1 // 典型一阶传递函数
@@ -1377,23 +1377,23 @@ typedef struct{
     __LocalDelay3 *delay3_ch[CONFIG_DELAY3];
     #endif // CONFIG_DELAY3
 
-    __LocalSine *sine;                   // 正弦发生器
-    __LocalCosine *cosine;               // 余弦发生器
-    __LocalSinCos *sincos;               // 正余弦发生器
-    __LocalTan *tan;                     // 正切求解器
-    __LocalAtan *atan;                   // 反正切求解器
-    __LocalLimit *limit;                 // 限幅函数
-    __LocalSign *sign;                   // 符号函数
-    __LocalClarke *clarke;               // 克拉克变换
-    __LocalPark *park;                   // 帕克变换
-    __LocalIpark *ipark;                 // 帕克逆变换
-    __LocalSpwm *spwm;                   // 零序注入的SPWM模块
-    __LocalSvpwm *svpwm;                 // 七段式SVPWM模块
-    __LocalSwpwm *swpwm;                 // 电调PWM无感方波
-    __LocalSingleRs *singlers;           // 单电阻采样函数
+    __LocalSine *sine;                              // 正弦发生器
+    __LocalCosine *cosine;                          // 余弦发生器
+    __LocalSinCos *sincos;                          // 正余弦发生器
+    __LocalTan *tan;                                // 正切求解器
+    __LocalAtan *atan;                              // 反正切求解器
+    __LocalLimit *limit;                            // 限幅函数
+    __LocalSign *sign;                              // 符号函数
+    __LocalClarke *clarke;                          // 克拉克变换
+    __LocalPark *park;                              // 帕克变换
+    __LocalIpark *ipark;                            // 帕克逆变换
+    __LocalSpwm *spwm;                              // 零序注入的SPWM模块
+    __LocalSvpwm *svpwm;                            // 七段式SVPWM模块
+    __LocalSwpwm *swpwm;                            // 电调PWM无感方波
+    __LocalSingleRs *singlers;                      // 单电阻采样函数
 }Transfer;
 
-// ================================================================================
+// =================================================|==============================
 // 3.全局函数init和loop(声明)
 CPLUSPLUS_C_BEGIN // C和C++配置文件声明_BEGIN
 void transfer_transfer1_loop(__LocalTransfer1 *transfer);

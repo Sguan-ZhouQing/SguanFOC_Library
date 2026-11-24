@@ -27,35 +27,35 @@
 #define __SGUAN_VALUE_H
 
 /* SguanFOC配置文件声明 */
-#include <stdint.h>             // (C标准库......)
-#include <stdio.h>              // (C标准库......)
-#include <string.h>             // (C标准库......)
-#include "UnitLib_Define0.h"    // (应用库UnitLib)
-#include "UnitLib_Define1.h"    // (应用库UnitLib)
-#include "UserMotor_Define2.h"  // (电参库UserMotor)
-#include "Zone_Define3.h"       // (用户驱动层Zone)
+#include <stdint.h>                                 // (C标准库......)
+#include <stdio.h>                                  // (C标准库......)
+#include <string.h>                                 // (C标准库......)
+#include "UnitLib_Define0.h"                        // (应用库UnitLib)
+#include "UnitLib_Define1.h"                        // (应用库UnitLib)
+#include "UserMotor_Define2.h"                      // (电参库UserMotor)
+#include "Zone_Define3.h"                           // (用户驱动层Zone)
 
-// ================================================================================
+// =================================================|==============================
 // 1.C和C++配置文件声明
 #ifdef __cplusplus
-#define CPLUSPLUS_C_BEGIN extern "C" {
-#define CPLUSPLUS_C_END   }
+#define CPLUSPLUS_C_BEGIN extern "C" {              // (C和C++配置,可在C++中运行)
+#define CPLUSPLUS_C_END   }                         // (C和C++配置,可在C++中运行)
 #else
 #define CPLUSPLUS_C_BEGIN
 #define CPLUSPLUS_C_END
 #endif
 
-// ================================================================================
+// =================================================|==============================
 // 2.局部定点化计算格式
-typedef int32_t Q31;            // 1位符号+0位整数+31位小数
-typedef int16_t Q15;            // 1位符号+0位整数+15位小数
+typedef int32_t Q31;                                // 1位符号+0位整数+31位小数
+typedef int16_t Q15;                                // 1位符号+0位整数+15位小数
 
-// ================================================================================
+// =================================================|==============================
 // 3.数据格式宏定义
-#define VALUE_MODE_FLOAT        0x00 // 全局运算单精度浮点
-#define VALUE_MODE_DOUBLE       0x01 // 全局运算双精度浮点
-#define VALUE_MODE_Q15          0x02 // 全局运算Q15定点
-#define VALUE_MODE_Q31          0x03 // 全局运算Q31定点
+#define VALUE_MODE_FLOAT        0x00                // 全局运算单精度浮点
+#define VALUE_MODE_DOUBLE       0x01                // 全局运算双精度浮点
+#define VALUE_MODE_Q15          0x02                // 全局运算Q15定点
+#define VALUE_MODE_Q31          0x03                // 全局运算Q31定点
 
 #ifndef DEFINE0_MOTOR_MATH
 #define DEFINE0_MOTOR_MATH      VALUE_MODE_FLOAT
@@ -67,7 +67,7 @@ typedef int16_t Q15;            // 1位符号+0位整数+15位小数
 #define VALUE_MODE_MATH         DEFINE0_MOTOR_MATH
 #endif // DEFINE0_MOTOR_MATH
 
-// ================================================================================
+// =================================================|==============================
 // 4.Value数值分类
 // (SguanF必然是浮点数)
 // (只出现在Sguan_IQmath.c和少数其他函数中)
@@ -90,7 +90,7 @@ typedef float                   SguanF;
 #define SGUAN_Q(x) ((SguanQ)(x))
 #define SGUAN_F(x) ((SguanF)(x))
 
-// ================================================================================
+// =================================================|==============================
 // 5.常用数值宏定义
 // (若是定点，Rad例程代码按照8.0归一化)
 /* 以下定义分别是浮点的：
@@ -132,7 +132,7 @@ typedef float                   SguanF;
 #define VALUE_Q31_MIN           (Q31)(-2147483648)  // 表示最小值-1.0
 #define VALUE_Q31_HALF          (Q31)1073741824     // 表示0.5(特殊场景会用到)
 
-// ================================================================================
+// =================================================|==============================
 // 6.基值设计Q15或者Q31
 // (前面时间、弧度角度、电压和电流自变量)
 // (后面频率、角速度、电阻、电感和磁链是因变量)

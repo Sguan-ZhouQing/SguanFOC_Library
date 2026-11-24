@@ -25,7 +25,10 @@
  * =================================================================== */
 #include "Zone_Driver.h"
 
-
+// (分割线)-------------------------------------------------------------------------
+// 用户驱动文件包含，如有则include驱动
+// 代码包含在此处：
+// (分割线)-------------------------------------------------------------------------
 
 void driver_initial_init(void){
 
@@ -494,10 +497,10 @@ void driver_read_adc(uint8_t motor, uint16_t x){
 }
 
 void driver_set_pwm(uint8_t motor, 
-    uint16_t du_0, uint16_t du_1, 
-    uint16_t dv_0, uint16_t dv_1, 
-    uint16_t dw_0, uint16_t dw_1,
-    uint16_t dx_0, uint16_t dx_1){
+    uint32_t du_0, uint32_t du_1, 
+    uint32_t dv_0, uint32_t dv_1, 
+    uint32_t dw_0, uint32_t dw_1,
+    uint32_t dx_0, uint32_t dx_1){
     switch (motor){
     // 此处放置您的UserData函数
     case SGUANFOC_MOTOR_ONE:
