@@ -29,7 +29,7 @@
 // 1.各类型的sin表和atan表
 // (float double Q15 Q31)
 #if VALUE_MODE_MATH==VALUE_MODE_Q15
-static const Q15 sin_tab[512] = {
+static const Q15 __local_sin_tab[512] = {
     0,      402,    804,    1206,   1608,   2009,   2411,   2811,   3212,   3612,   4011,
     4410,   4808,   5205,   5602,   5998,   6393,   6787,   7180,   7571,   7962,   8351,
     8740,   9127,   9512,   9896,   10279,  10660,  11039,  11417,  11793,  12167,  12540,
@@ -79,7 +79,7 @@ static const Q15 sin_tab[512] = {
     -2411,  -2009,  -1608,  -1206,  -804,   -402
 };
 
-static const Q15 atan_tab[91] = {
+static const Q15 __local_atan_tab[91] = {
         0,   364,   728,  1092,  1455,  1819,  2181,  2544,  2905,  3266,  3626,
      3985,  4343,  4701,  5057,  5412,  5765,  6117,  6468,  6818,  7165,  7511,
      7856,  8199,  8539,  8878,  9215,  9550,  9883, 10214, 10543, 10870, 11194,
@@ -92,7 +92,7 @@ static const Q15 atan_tab[91] = {
 };
 
 #elif VALUE_MODE_MATH==VALUE_MODE_Q31
-static const Q31 sin_tab[512] = {
+static const Q31 __local_sin_tab[512] = {
     0,           26352928,    52701887,    79042909,    105372028,   131685278,   157978697,
     184248325,   210490206,   236700388,   262874923,   289009871,   315101295,   341145265,
     367137861,   393075166,   418953276,   444768294,   470516330,   496193509,   521795963,
@@ -169,7 +169,7 @@ static const Q31 sin_tab[512] = {
     -26352928
 };
 
-static const Q31 atan_tab[91] = {
+static const Q31 __local_atan_tab[91] = {
              0,   23859948,   47714006,   71556294,   95380948,  119182133,  142954043,
      166690921,  190387057,  214036801,  237634573,  261174864,  284652248,  308061390,
      331397048,  354654084,  377827469,  400912285,  423903737,  446797152,  469587986,
@@ -186,7 +186,7 @@ static const Q31 atan_tab[91] = {
 };
 
 #else // VALUE_MODE_MATH
-static const SguanF sin_tab[512] = {
+static const SguanF __local_sin_tab[512] = {
     0.000000000000000000,  0.012271538285719926,  0.024541228522912288,  0.036807222941358832,
     0.049067674327418014,  0.061320736302208578,  0.073564563599667424,  0.085797312344439890,
     0.098017140329560602,  0.110222207293883059,  0.122410675199216198,  0.134580708507126186,
@@ -317,7 +317,7 @@ static const SguanF sin_tab[512] = {
     -0.049067674327418014, -0.036807222941358832, -0.024541228522912288, -0.012271538285719926
 };
 
-static const SguanF atan_tab[91] = {
+static const SguanF __local_atan_tab[91] = {
     0.000000000000000000, 0.011110653897607473, 0.022218565326719061, 0.033320995878247196,
     0.044415215246910840, 0.055498505245716832, 0.066568163775823808, 0.077621508737393485,
     0.088655881867437475, 0.099668652491162038, 0.110657221173895630, 0.121619023261346580,
@@ -726,7 +726,7 @@ static SguanF __local_sin_f(SguanF x){
     int idx1 = idx0 + 1;
     if (idx1 >= 512) idx1 = 0;
 
-    return sin_tab[idx0] + (sin_tab[idx1] - sin_tab[idx0]) * frac;
+    return __local_sin_tab[idx0] + (__local_sin_tab[idx1] - __local_sin_tab[idx0]) * frac;
 }
 
 // (浮点相关的三角局部函数)
@@ -749,12 +749,12 @@ static SguanF __local_atan_f(SguanF x){
     SguanF pos = x*SGUAN_F(90.0);
     int i = (int)pos;
     if (i >= 90){
-      return atan_tab[90];
+      return __local_atan_tab[90];
     }
 
     SguanF t = pos - (SguanF)i;
-    SguanF y0 = atan_tab[i];
-    SguanF y1 = atan_tab[i + 1];
+    SguanF y0 = __local_atan_tab[i];
+    SguanF y1 = __local_atan_tab[i + 1];
     return y0 + (y1 - y0)*t;
 }
 
@@ -773,7 +773,7 @@ static Q15 __local_sin_q15(Q15 x){
     int32_t idx1 = idx0 + 1;
     if (idx1 >= 512) idx1 = 0;
 
-    return sin_tab[idx0] + (Q15)(((int32_t)(sin_tab[idx1]-sin_tab[idx0])*frac)>>15);
+    return __local_sin_tab[idx0] + (Q15)(((int32_t)(__local_sin_tab[idx1]-__local_sin_tab[idx0])*frac)>>15);
 }
 
 // (q15相关的三角局部函数)
@@ -812,7 +812,7 @@ static Q15 __local_atan_q15(Q15 x, SguanF base){
     int32_t idx1 = idx0 + 1;
     if (idx1 > 90) idx1 = 90;
 
-    Q15 y = atan_tab[idx0] + (Q15)(((int32_t)(atan_tab[idx1]-atan_tab[idx0])*frac)>>15);
+    Q15 y = __local_atan_tab[idx0] + (Q15)(((int32_t)(__local_atan_tab[idx1]-__local_atan_tab[idx0])*frac)>>15);
     Q15 y8 = y / 8;
     Q15 result = folded ? (Q15)(VALUE_Q15_PI_2 - y8) : y8;
     return neg ? (Q15)(-result) : result;
@@ -833,7 +833,7 @@ static Q31 __local_sin_q31(Q31 x){
     int32_t idx1 = idx0 + 1;
     if (idx1 >= 512) idx1 = 0;
 
-    return sin_tab[idx0] + (Q31)(((int64_t)(sin_tab[idx1]-sin_tab[idx0])*frac)>>31);
+    return __local_sin_tab[idx0] + (Q31)(((int64_t)(__local_sin_tab[idx1]-__local_sin_tab[idx0])*frac)>>31);
 }
 
 // (q31相关的三角局部函数)
@@ -870,7 +870,7 @@ static Q31 __local_atan_q31(Q31 x, SguanF base){
     int32_t idx1 = idx0 + 1;
     if (idx1 > 90) idx1 = 90;
 
-    Q31 y = atan_tab[idx0] + (Q31)(((int64_t)(atan_tab[idx1]-atan_tab[idx0])*frac)>>31);
+    Q31 y = __local_atan_tab[idx0] + (Q31)(((int64_t)(__local_atan_tab[idx1]-__local_atan_tab[idx0])*frac)>>31);
     Q31 y8 = y / 8;
     Q31 result = folded ? (VALUE_Q31_PI_2 - y8) : y8;
     return neg ? (Q31)(-result) : result;

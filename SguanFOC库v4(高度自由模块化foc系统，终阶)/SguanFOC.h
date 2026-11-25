@@ -127,13 +127,9 @@ typedef struct{
 // =================================================|==============================
 // 3.全局结构体及函数(声明)
 typedef struct{
-    uint8_t id_flag;                                // []
-    uint8_t run_flag;                               // []
-    uint8_t uart_flag;                              // []
+    uint8_t run;                                    // []
+    uint8_t id;                                     // []
 
-    uint32_t tick_run;                              // []
-    uint32_t tick_last;                             // []
-    
     Method method;                                  // []
     Modbus modbus;                                  // []
     MotorStatus motorstatus;                        // []

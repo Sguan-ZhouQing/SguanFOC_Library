@@ -1,7 +1,7 @@
 /* ===================================================================
  * 文件:     Zone_Driver.h
  * 项目:     SguanFOC_v4 —— 开源 FOC 电机控制框架
- * 说明:     4.Zone用户驱动层_用户驱动
+ * 说明:     4.Zone用户驱动层_用户驱动（精炼版1：表驱动直接调用）
  * 链接:     https://github.com/Sguan-ZhouQing/SguanFOC_Library
  * 版权:     Copyright 2026 星必尘Sguan <3464647102@qq.com>
  * 许可证:   Apache License, Version 2.0
@@ -29,23 +29,52 @@
 /* SguanFOC配置文件声明 */
 #include "SguanFOC.h"
 
-void driver_initial_init(void);
-void driver_start_init(void);
-void driver_stop_init(void);
+// =================================================|==============================
+// 1.电机驱动能力表(局部)
+typedef struct{
+    void   (*set_pwm)(const uint32_t duty[8]);      // (输出)PWM占空比下发
+    SguanQ (*read_adc0)(void);                      // (输入)ADC0采样值
+    SguanQ (*read_adc1)(void);                      // (输入)ADC1采样值
+    SguanQ (*read_adc2)(void);                      // (输入)ADC2采样值
+    SguanQ (*read_adc3)(void);                      // (输入)ADC3采样值
+    SguanQ (*read_vbus)(void);                      // (输入)母线电压采样值
+    SguanQ (*read_temp_motor)(void);                // (输入)电机温度采样值
+    SguanQ (*read_temp_driver)(void);               // (输入)驱动器件温度采样值
+    SguanQ (*read_temp_pcb)(void);                  // (输入)电路板温度采样值
+    void (*start)(void);                            // (动作)启动
+    void (*stop)(void);                             // (动作)停止
+    void (*standby_loop)(void);                     // (状态)待机
+    void (*ready_loop)(void);                       // (状态)就绪
+    void (*initial_loop)(void);                     // (状态)初始化
+    void (*increasing_loop)(void);                  // (状态)加速
+    void (*decreasing_loop)(void);                  // (状态)减速
+    void (*hold_loop)(void);                        // (状态)保持
+    void (*overvoltage_loop)(void);                 // (故障)过压
+    void (*undervoltage_loop)(void);                // (故障)欠压
+    void (*overcurrent_moment_loop)(void);          // (故障)瞬态过流
+    void (*overcurrent_stable_loop)(void);          // (故障)稳态过流
+    void (*overtemp_motor_loop)(void);              // (故障)电机过温
+    void (*undertemp_motor_loop)(void);             // (故障)电机欠温
+    void (*overtemp_driver_loop)(void);             // (故障)驱动器件过温
+    void (*undertemp_driver_loop)(void);            // (故障)驱动器件欠温
+    void (*overtemp_pcb_loop)(void);                // (故障)电路板过温
+    void (*undertemp_pcb_loop)(void);               // (故障)电路板欠温
+    void (*fault0_loop)(void);                      // (故障)故障0
+    void (*fault1_loop)(void);                      // (故障)故障1
+    void (*fault2_loop)(void);                      // (故障)故障2
+}__LocalOps;
+
+// =================================================|==============================
+// 2.全局驱动函数和结构体变量声明
+CPLUSPLUS_C_BEGIN // C和C++配置文件声明_BEGIN
+extern const __LocalOps driver_ops[CONFIG_MOTOR];
 
 uint32_t driver_read_tick(void);
-SguanQ driver_read_vbus(uint8_t CH);
-SguanQ driver_read_ibus(uint8_t CH);
-SguanQ driver_read_temp_motor(uint8_t CH);
-SguanQ driver_read_temp_driver(uint8_t CH);
-SguanQ driver_read_temp_pcb(uint8_t CH);
-void driver_read_adc(uint8_t motor, uint16_t x);
-void driver_set_pwm(uint8_t motor, 
-    uint32_t du_0, uint32_t du_1, 
-    uint32_t dv_0, uint32_t dv_1, 
-    uint32_t dw_0, uint32_t dw_1,
-    uint32_t dx_0, uint32_t dx_1);
+void driver_delay_ms(uint32_t ms);
 void driver_send_uart(uint8_t *ch, uint16_t size);
+void driver_send_modbus(uint8_t data[8]);
+void driver_initial(void);
+CPLUSPLUS_C_END // C和C++配置文件声明_END
 
 
-#endif // ZONE_DRIVER_H
+#endif // __ZONE_DRIVER_H

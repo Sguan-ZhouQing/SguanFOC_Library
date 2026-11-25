@@ -1,7 +1,7 @@
 /* ===================================================================
  * 文件:     Zone_Driver.c
  * 项目:     SguanFOC_v4 —— 开源 FOC 电机控制框架
- * 说明:     4.Zone用户驱动层_用户驱动
+ * 说明:     4.Zone用户驱动层_用户驱动（精炼版1：表驱动直接调用）
  * 链接:     https://github.com/Sguan-ZhouQing/SguanFOC_Library
  * 版权:     Copyright 2026 星必尘Sguan <3464647102@qq.com>
  * 许可证:   Apache License, Version 2.0
@@ -30,503 +30,471 @@
 // 代码包含在此处：
 // (分割线)-------------------------------------------------------------------------
 
-void driver_initial_init(void){
+// ================================================================================
+// 1.电机数量裁剪(m1~m6)
+#if CONFIG_MOTOR > SGUANFOC_MOTOR_TWO
+#define __LOCAL_MOTOR_2(f)     f(2)
+#else
+#define __LOCAL_MOTOR_2(f)
+#endif
+#if CONFIG_MOTOR > SGUANFOC_MOTOR_THREE
+#define __LOCAL_MOTOR_3(f)     f(3)
+#else
+#define __LOCAL_MOTOR_3(f)
+#endif
+#if CONFIG_MOTOR > SGUANFOC_MOTOR_FOUR
+#define __LOCAL_MOTOR_4(f)     f(4)
+#else
+#define __LOCAL_MOTOR_4(f)
+#endif
+#if CONFIG_MOTOR > SGUANFOC_MOTOR_FIVE
+#define __LOCAL_MOTOR_5(f)     f(5)
+#else
+#define __LOCAL_MOTOR_5(f)
+#endif
+#if CONFIG_MOTOR > SGUANFOC_MOTOR_SIX
+#define __LOCAL_MOTOR_6(f)     f(6)
+#else
+#define __LOCAL_MOTOR_6(f)
+#endif
 
-}
+// ================================================================================
+// 2.生成宏和本地驱动函数声明
+// (电机遍历宏定义)
+#define __LOCAL_MOTOR_FOREACH(f) \
+    f(1) __LOCAL_MOTOR_2(f) __LOCAL_MOTOR_3(f) \
+    __LOCAL_MOTOR_4(f) __LOCAL_MOTOR_5(f) __LOCAL_MOTOR_6(f)
 
-void driver_start_init(void){
+// (本地函数声明宏)
+#define __LOCAL_DECLARE(n) \
+    static void   __local_set_pwm_m##n(const uint32_t duty[8]); \
+    static SguanQ __local_read_adc0_m##n(void); \
+    static SguanQ __local_read_adc1_m##n(void); \
+    static SguanQ __local_read_adc2_m##n(void); \
+    static SguanQ __local_read_adc3_m##n(void); \
+    static SguanQ __local_read_vbus_m##n(void); \
+    static SguanQ __local_read_temp_motor_m##n(void); \
+    static SguanQ __local_read_temp_driver_m##n(void); \
+    static SguanQ __local_read_temp_pcb_m##n(void); \
+    static void   __local_start_m##n(void); \
+    static void   __local_stop_m##n(void); \
+    static void   __local_standby_loop_m##n(void); \
+    static void   __local_ready_loop_m##n(void); \
+    static void   __local_initial_loop_m##n(void); \
+    static void   __local_increasing_loop_m##n(void); \
+    static void   __local_decreasing_loop_m##n(void); \
+    static void   __local_hold_loop_m##n(void); \
+    static void   __local_overvoltage_loop_m##n(void); \
+    static void   __local_undervoltage_loop_m##n(void); \
+    static void   __local_overcurrent_moment_loop_m##n(void); \
+    static void   __local_overcurrent_stable_loop_m##n(void); \
+    static void   __local_overtemp_motor_loop_m##n(void); \
+    static void   __local_undertemp_motor_loop_m##n(void); \
+    static void   __local_overtemp_driver_loop_m##n(void); \
+    static void   __local_undertemp_driver_loop_m##n(void); \
+    static void   __local_overtemp_pcb_loop_m##n(void); \
+    static void   __local_undertemp_pcb_loop_m##n(void); \
+    static void   __local_fault0_loop_m##n(void); \
+    static void   __local_fault1_loop_m##n(void); \
+    static void   __local_fault2_loop_m##n(void);
 
-}
+// (展开全部函数声明)
+__LOCAL_MOTOR_FOREACH(__LOCAL_DECLARE)
 
-void driver_stop_init(void){
+// ================================================================================
+// 3.局部电机的驱动能力表
+// (能力表项生成宏)
+#define __LOCAL_OPS_ENTRY(n) { \
+    __local_set_pwm_m##n, \
+    __local_read_adc0_m##n, \
+    __local_read_adc1_m##n, \
+    __local_read_adc2_m##n, \
+    __local_read_adc3_m##n, \
+    __local_read_vbus_m##n, \
+    __local_read_temp_motor_m##n, \
+    __local_read_temp_driver_m##n, \
+    __local_read_temp_pcb_m##n, \
+    __local_start_m##n, \
+    __local_stop_m##n, \
+    __local_standby_loop_m##n, \
+    __local_ready_loop_m##n, \
+    __local_initial_loop_m##n, \
+    __local_increasing_loop_m##n, \
+    __local_decreasing_loop_m##n, \
+    __local_hold_loop_m##n, \
+    __local_overvoltage_loop_m##n, \
+    __local_undervoltage_loop_m##n, \
+    __local_overcurrent_moment_loop_m##n, \
+    __local_overcurrent_stable_loop_m##n, \
+    __local_overtemp_motor_loop_m##n, \
+    __local_undertemp_motor_loop_m##n, \
+    __local_overtemp_driver_loop_m##n, \
+    __local_undertemp_driver_loop_m##n, \
+    __local_overtemp_pcb_loop_m##n, \
+    __local_undertemp_pcb_loop_m##n, \
+    __local_fault0_loop_m##n, \
+    __local_fault1_loop_m##n, \
+    __local_fault2_loop_m##n \
+},
 
-}
+// (驱动能力表总表)
+const __LocalOps driver_ops[] = {
+    __LOCAL_MOTOR_FOREACH(__LOCAL_OPS_ENTRY)
+};
 
+// ================================================================================
+// 4.用户驱动代码书写
+// (读取运行节拍)
 uint32_t driver_read_tick(void){
-    // 此处放置您的tick函数
+    // Write_your_driver_code
     return 0;
 }
 
-SguanQ driver_read_encoder(uint8_t motor){
-    SguanQ encoder_raw = iqmath_zero();
-    switch (motor){
-    case SGUANFOC_MOTOR_ONE:
-        // 此处放置您的UserData函数
-    
-        break;
-    case SGUANFOC_MOTOR_TWO:
-        // 此处放置您的UserData函数
-    
-        break;
-    case SGUANFOC_MOTOR_THREE:
-        // 此处放置您的UserData函数
-    
-        break;
-    case SGUANFOC_MOTOR_FOUR:
-        // 此处放置您的UserData函数
-    
-        break;
-    case SGUANFOC_MOTOR_FIVE:
-        // 此处放置您的UserData函数
-    
-        break;
-    case SGUANFOC_MOTOR_SIX:
-        // 此处放置您的UserData函数
-    
-        break;
-    
-    default:
-        break;
-    }
-    return encoder_raw;
+// (毫秒延时函数)
+void driver_delay_ms(uint32_t ms){
+    // Write_your_driver_code
+    (void)ms;
 }
 
-uint8_t driver_read_hall(uint8_t motor, uint8_t ch){
-    uint8_t hall_raw = 0;
-    switch (motor){
-    case SGUANFOC_MOTOR_ONE:
-        // 此处放置您的UserData函数
-        switch (ch){
-        case SGUANFOC_HALL_A:
-
-            break;
-        case SGUANFOC_HALL_B:
-
-            break;
-        case SGUANFOC_HALL_C:
-
-            break;
-        
-        default:
-            break;
-        }
-        break;
-    case SGUANFOC_MOTOR_TWO:
-        // 此处放置您的UserData函数
-        switch (ch){
-        case SGUANFOC_HALL_A:
-
-            break;
-        case SGUANFOC_HALL_B:
-
-            break;
-        case SGUANFOC_HALL_C:
-
-            break;
-        
-        default:
-            break;
-        }
-        break;
-    case SGUANFOC_MOTOR_THREE:
-        // 此处放置您的UserData函数
-        switch (ch){
-        case SGUANFOC_HALL_A:
-
-            break;
-        case SGUANFOC_HALL_B:
-
-            break;
-        case SGUANFOC_HALL_C:
-
-            break;
-        
-        default:
-            break;
-        }
-        break;
-    case SGUANFOC_MOTOR_FOUR:
-        // 此处放置您的UserData函数
-        switch (ch){
-        case SGUANFOC_HALL_A:
-
-            break;
-        case SGUANFOC_HALL_B:
-
-            break;
-        case SGUANFOC_HALL_C:
-
-            break;
-        
-        default:
-            break;
-        }
-        break;
-    case SGUANFOC_MOTOR_FIVE:
-        // 此处放置您的UserData函数
-        switch (ch){
-        case SGUANFOC_HALL_A:
-
-            break;
-        case SGUANFOC_HALL_B:
-
-            break;
-        case SGUANFOC_HALL_C:
-
-            break;
-        
-        default:
-            break;
-        }
-        break;
-    case SGUANFOC_MOTOR_SIX:
-        // 此处放置您的UserData函数
-        switch (ch){
-        case SGUANFOC_HALL_A:
-
-            break;
-        case SGUANFOC_HALL_B:
-
-            break;
-        case SGUANFOC_HALL_C:
-
-            break;
-        
-        default:
-            break;
-        }
-        break;
-    
-    default:
-        break;
-    }
-}
-
-uint16_t driver_read_iabc(uint8_t motor, uint8_t ch){
-    uint16_t iabc_raw = 0;
-    switch (motor){
-    case SGUANFOC_MOTOR_ONE:
-        // 此处放置您的UserData函数
-        switch (ch){
-        case SGUANFOC_CURRENT_U:
-
-            break;
-        case SGUANFOC_CURRENT_V:
-
-            break;
-        case SGUANFOC_CURRENT_W:
-
-            break;
-        case SGUANFOC_CURRENT_OTHER:
-
-            break;
-        
-        default:
-            break;
-        }
-        break;
-    case SGUANFOC_MOTOR_TWO:
-        // 此处放置您的UserData函数
-        switch (ch){
-        case SGUANFOC_CURRENT_U:
-
-            break;
-        case SGUANFOC_CURRENT_V:
-
-            break;
-        case SGUANFOC_CURRENT_W:
-
-            break;
-        case SGUANFOC_CURRENT_OTHER:
-
-            break;
-        
-        default:
-            break;
-        }
-        break;
-    case SGUANFOC_MOTOR_THREE:
-        // 此处放置您的UserData函数
-        switch (ch){
-        case SGUANFOC_CURRENT_U:
-
-            break;
-        case SGUANFOC_CURRENT_V:
-
-            break;
-        case SGUANFOC_CURRENT_W:
-
-            break;
-        case SGUANFOC_CURRENT_OTHER:
-
-            break;
-        
-        default:
-            break;
-        }
-        break;
-    case SGUANFOC_MOTOR_FOUR:
-        // 此处放置您的UserData函数
-        switch (ch){
-        case SGUANFOC_CURRENT_U:
-
-            break;
-        case SGUANFOC_CURRENT_V:
-
-            break;
-        case SGUANFOC_CURRENT_W:
-
-            break;
-        case SGUANFOC_CURRENT_OTHER:
-
-            break;
-        
-        default:
-            break;
-        }
-        break;
-    case SGUANFOC_MOTOR_FIVE:
-        // 此处放置您的UserData函数
-        switch (ch){
-        case SGUANFOC_CURRENT_U:
-
-            break;
-        case SGUANFOC_CURRENT_V:
-
-            break;
-        case SGUANFOC_CURRENT_W:
-
-            break;
-        case SGUANFOC_CURRENT_OTHER:
-
-            break;
-        
-        default:
-            break;
-        }
-        break;
-    case SGUANFOC_MOTOR_SIX:
-        // 此处放置您的UserData函数
-        switch (ch){
-        case SGUANFOC_CURRENT_U:
-
-            break;
-        case SGUANFOC_CURRENT_V:
-
-            break;
-        case SGUANFOC_CURRENT_W:
-
-            break;
-        case SGUANFOC_CURRENT_OTHER:
-
-            break;
-        
-        default:
-            break;
-        }
-        break;
-    
-    default:
-        break;
-    }
-    return iabc_raw;
-}
-
-SguanQ driver_read_vbus(uint8_t motor){
-    SguanQ vbus_raw = iqmath_zero();
-    switch (motor){
-    case SGUANFOC_MOTOR_ONE:
-        // 此处放置您的UserData函数
-    
-        break;
-    case SGUANFOC_MOTOR_TWO:
-        // 此处放置您的UserData函数
-    
-        break;
-    case SGUANFOC_MOTOR_THREE:
-        // 此处放置您的UserData函数
-    
-        break;
-    case SGUANFOC_MOTOR_FOUR:
-        // 此处放置您的UserData函数
-    
-        break;
-    case SGUANFOC_MOTOR_FIVE:
-        // 此处放置您的UserData函数
-    
-        break;
-    case SGUANFOC_MOTOR_SIX:
-        // 此处放置您的UserData函数
-    
-        break;
-    
-    default:
-        break;
-    }
-    return vbus_raw;
-}
-
-SguanQ driver_read_ibus(uint8_t motor){
-    SguanQ ibus_raw = iqmath_zero();
-    switch (motor){
-    case SGUANFOC_MOTOR_ONE:
-        // 此处放置您的UserData函数
-    
-        break;
-    case SGUANFOC_MOTOR_TWO:
-        // 此处放置您的UserData函数
-    
-        break;
-    case SGUANFOC_MOTOR_THREE:
-        // 此处放置您的UserData函数
-    
-        break;
-    case SGUANFOC_MOTOR_FOUR:
-        // 此处放置您的UserData函数
-    
-        break;
-    case SGUANFOC_MOTOR_FIVE:
-        // 此处放置您的UserData函数
-    
-        break;
-    case SGUANFOC_MOTOR_SIX:
-        // 此处放置您的UserData函数
-    
-        break;
-    
-    default:
-        break;
-    }
-    return ibus_raw;
-}
-
-SguanQ driver_read_temp_motor(uint8_t motor){
-    SguanQ temp_motor = iqmath_zero();
-    switch (motor){
-    case SGUANFOC_MOTOR_ONE:
-        // 此处放置您的UserData函数
-    
-        break;
-    case SGUANFOC_MOTOR_TWO:
-        // 此处放置您的UserData函数
-    
-        break;
-    case SGUANFOC_MOTOR_THREE:
-        // 此处放置您的UserData函数
-    
-        break;
-    case SGUANFOC_MOTOR_FOUR:
-        // 此处放置您的UserData函数
-    
-        break;
-    case SGUANFOC_MOTOR_FIVE:
-        // 此处放置您的UserData函数
-    
-        break;
-    case SGUANFOC_MOTOR_SIX:
-        // 此处放置您的UserData函数
-    
-        break;
-    
-    default:
-        break;
-    }
-    return temp_motor;
-}
-
-SguanQ driver_read_temp_driver(uint8_t motor){
-    SguanQ temp_driver = iqmath_zero();
-    switch (motor){
-    case SGUANFOC_MOTOR_ONE:
-        // 此处放置您的UserData函数
-    
-        break;
-    case SGUANFOC_MOTOR_TWO:
-        // 此处放置您的UserData函数
-    
-        break;
-    case SGUANFOC_MOTOR_THREE:
-        // 此处放置您的UserData函数
-    
-        break;
-    case SGUANFOC_MOTOR_FOUR:
-        // 此处放置您的UserData函数
-    
-        break;
-    case SGUANFOC_MOTOR_FIVE:
-        // 此处放置您的UserData函数
-    
-        break;
-    case SGUANFOC_MOTOR_SIX:
-        // 此处放置您的UserData函数
-    
-        break;
-    
-    default:
-        break;
-    }
-    return temp_driver;
-}
-
-SguanQ driver_read_temp_pcb(uint8_t motor){
-    SguanQ temp_pcb_raw = iqmath_zero();
-    switch (motor){
-    case SGUANFOC_MOTOR_ONE:
-        // 此处放置您的UserData函数
-    
-        break;
-    case SGUANFOC_MOTOR_TWO:
-        // 此处放置您的UserData函数
-    
-        break;
-    case SGUANFOC_MOTOR_THREE:
-        // 此处放置您的UserData函数
-    
-        break;
-    case SGUANFOC_MOTOR_FOUR:
-        // 此处放置您的UserData函数
-    
-        break;
-    case SGUANFOC_MOTOR_FIVE:
-        // 此处放置您的UserData函数
-    
-        break;
-    case SGUANFOC_MOTOR_SIX:
-        // 此处放置您的UserData函数
-    
-        break;
-    
-    default:
-        break;
-    }
-    return temp_pcb_raw;
-}
-
-void driver_read_adc(uint8_t motor, uint16_t x){
-
-}
-
-void driver_set_pwm(uint8_t motor, 
-    uint32_t du_0, uint32_t du_1, 
-    uint32_t dv_0, uint32_t dv_1, 
-    uint32_t dw_0, uint32_t dw_1,
-    uint32_t dx_0, uint32_t dx_1){
-    switch (motor){
-    // 此处放置您的UserData函数
-    case SGUANFOC_MOTOR_ONE:
-    
-        break;
-    case SGUANFOC_MOTOR_TWO:
-    
-        break;
-    case SGUANFOC_MOTOR_THREE:
-    
-        break;
-    case SGUANFOC_MOTOR_FOUR:
-    
-        break;
-    case SGUANFOC_MOTOR_FIVE:
-    
-        break;
-    case SGUANFOC_MOTOR_SIX:
-    
-        break;
-    
-    default:
-        break;
-    }
-}
-
+// (串口发送数据)
 void driver_send_uart(uint8_t *ch, uint16_t size){
-    
+    // Write_your_driver_code
+    (void)ch;
+    (void)size;
 }
+
+// (Modbus帧发送)
+void driver_send_modbus(uint8_t data[8]){
+    // Write_your_driver_code
+    (void)data;
+}
+
+// (驱动层初始化)
+void driver_initial(void){
+    // Write_your_driver_code
+}
+
+// (分割线)-------------------------------------------------------------------------
+// (下发三相PWM)
+static void __local_set_pwm_m1(const uint32_t duty[8]){ 
+    // Write_your_driver_code
+    (void)duty; 
+}
+
+// (ADC0采样值)
+static SguanQ __local_read_adc0_m1(void){ 
+    // Write_your_driver_code
+    return (SguanQ)0; 
+}
+
+// (ADC1采样值)
+static SguanQ __local_read_adc1_m1(void){ 
+    // Write_your_driver_code
+    return (SguanQ)0; 
+}
+
+// (ADC2采样值)
+static SguanQ __local_read_adc2_m1(void){ 
+    // Write_your_driver_code
+    return (SguanQ)0; 
+}
+
+// (ADC3采样值)
+static SguanQ __local_read_adc3_m1(void){ 
+    // Write_your_driver_code
+    return (SguanQ)0; 
+}
+
+// (母线电压采样)
+static SguanQ __local_read_vbus_m1(void){ 
+    // Write_your_driver_code
+    return (SguanQ)0; 
+}
+
+// (电机温度采样)
+static SguanQ __local_read_temp_motor_m1(void){ 
+    // Write_your_driver_code
+    return (SguanQ)0; 
+}
+
+// (驱动温度采样)
+static SguanQ __local_read_temp_driver_m1(void){ 
+    // Write_your_driver_code
+    return (SguanQ)0; 
+}
+
+// (电路板温度采样)
+static SguanQ __local_read_temp_pcb_m1(void){ 
+    // Write_your_driver_code
+    return (SguanQ)0; 
+}
+
+// (启动电机输出)
+static void __local_start_m1(void){ 
+    // Write_your_driver_code
+}
+
+// (停止电机输出)
+static void __local_stop_m1(void){ 
+    // Write_your_driver_code
+}
+
+// (待机状态循环)
+static void __local_standby_loop_m1(void){ 
+    // Write_your_driver_code
+}
+
+// (就绪状态循环)
+static void __local_ready_loop_m1(void){ 
+    // Write_your_driver_code
+}
+
+// (初始化状态循环)
+static void __local_initial_loop_m1(void){ 
+    // Write_your_driver_code
+}
+
+// (加速状态循环)
+static void __local_increasing_loop_m1(void){ 
+    // Write_your_driver_code
+}
+
+// (减速状态循环)
+static void __local_decreasing_loop_m1(void){ 
+    // Write_your_driver_code
+}
+
+// (保持状态循环)
+static void __local_hold_loop_m1(void){ 
+    // Write_your_driver_code
+}
+
+// (过压故障处理)
+static void __local_overvoltage_loop_m1(void){ 
+    // Write_your_driver_code
+}
+
+// (欠压故障处理)
+static void __local_undervoltage_loop_m1(void){ 
+    // Write_your_driver_code
+}
+
+// (瞬态过流处理)
+static void __local_overcurrent_moment_loop_m1(void){ 
+    // Write_your_driver_code
+}
+
+// (稳态过流处理)
+static void __local_overcurrent_stable_loop_m1(void){ 
+    // Write_your_driver_code
+}
+
+// (电机过温处理)
+static void __local_overtemp_motor_loop_m1(void){ 
+    // Write_your_driver_code
+}
+
+// (电机欠温处理)
+static void __local_undertemp_motor_loop_m1(void){ 
+    // Write_your_driver_code
+}
+
+// (驱动过温处理)
+static void __local_overtemp_driver_loop_m1(void){ 
+    // Write_your_driver_code
+}
+
+// (驱动欠温处理)
+static void __local_undertemp_driver_loop_m1(void){ 
+    // Write_your_driver_code
+}
+
+// (电路板过温处理)
+static void __local_overtemp_pcb_loop_m1(void){ 
+    // Write_your_driver_code
+}
+
+// (电路板欠温处理)
+static void __local_undertemp_pcb_loop_m1(void){ 
+    // Write_your_driver_code
+}
+
+// (故障0处理)
+static void __local_fault0_loop_m1(void){ 
+    // Write_your_driver_code
+}
+
+// (故障1处理)
+static void __local_fault1_loop_m1(void){ 
+    // Write_your_driver_code
+}
+
+// (故障2处理)
+static void __local_fault2_loop_m1(void){ 
+    // Write_your_driver_code
+}
+
+#if CONFIG_MOTOR > SGUANFOC_MOTOR_TWO
+static void   __local_set_pwm_m2(const uint32_t duty[8]){ (void)duty; }
+static SguanQ __local_read_adc0_m2(void){ return (SguanQ)0; }
+static SguanQ __local_read_adc1_m2(void){ return (SguanQ)0; }
+static SguanQ __local_read_adc2_m2(void){ return (SguanQ)0; }
+static SguanQ __local_read_adc3_m2(void){ return (SguanQ)0; }
+static SguanQ __local_read_vbus_m2(void){ return (SguanQ)0; }
+static SguanQ __local_read_temp_motor_m2(void){ return (SguanQ)0; }
+static SguanQ __local_read_temp_driver_m2(void){ return (SguanQ)0; }
+static SguanQ __local_read_temp_pcb_m2(void){ return (SguanQ)0; }
+static void   __local_start_m2(void){ }
+static void   __local_stop_m2(void){ }
+static void   __local_standby_loop_m2(void){ }
+static void   __local_ready_loop_m2(void){ }
+static void   __local_initial_loop_m2(void){ }
+static void   __local_increasing_loop_m2(void){ }
+static void   __local_decreasing_loop_m2(void){ }
+static void   __local_hold_loop_m2(void){ }
+static void   __local_overvoltage_loop_m2(void){ }
+static void   __local_undervoltage_loop_m2(void){ }
+static void   __local_overcurrent_moment_loop_m2(void){ }
+static void   __local_overcurrent_stable_loop_m2(void){ }
+static void   __local_overtemp_motor_loop_m2(void){ }
+static void   __local_undertemp_motor_loop_m2(void){ }
+static void   __local_overtemp_driver_loop_m2(void){ }
+static void   __local_undertemp_driver_loop_m2(void){ }
+static void   __local_overtemp_pcb_loop_m2(void){ }
+static void   __local_undertemp_pcb_loop_m2(void){ }
+static void   __local_fault0_loop_m2(void){ }
+static void   __local_fault1_loop_m2(void){ }
+static void   __local_fault2_loop_m2(void){ }
+#endif
+
+#if CONFIG_MOTOR > SGUANFOC_MOTOR_THREE
+static void   __local_set_pwm_m3(const uint32_t duty[8]){ (void)duty; }
+static SguanQ __local_read_adc0_m3(void){ return (SguanQ)0; }
+static SguanQ __local_read_adc1_m3(void){ return (SguanQ)0; }
+static SguanQ __local_read_adc2_m3(void){ return (SguanQ)0; }
+static SguanQ __local_read_adc3_m3(void){ return (SguanQ)0; }
+static SguanQ __local_read_vbus_m3(void){ return (SguanQ)0; }
+static SguanQ __local_read_temp_motor_m3(void){ return (SguanQ)0; }
+static SguanQ __local_read_temp_driver_m3(void){ return (SguanQ)0; }
+static SguanQ __local_read_temp_pcb_m3(void){ return (SguanQ)0; }
+static void   __local_start_m3(void){ }
+static void   __local_stop_m3(void){ }
+static void   __local_standby_loop_m3(void){ }
+static void   __local_ready_loop_m3(void){ }
+static void   __local_initial_loop_m3(void){ }
+static void   __local_increasing_loop_m3(void){ }
+static void   __local_decreasing_loop_m3(void){ }
+static void   __local_hold_loop_m3(void){ }
+static void   __local_overvoltage_loop_m3(void){ }
+static void   __local_undervoltage_loop_m3(void){ }
+static void   __local_overcurrent_moment_loop_m3(void){ }
+static void   __local_overcurrent_stable_loop_m3(void){ }
+static void   __local_overtemp_motor_loop_m3(void){ }
+static void   __local_undertemp_motor_loop_m3(void){ }
+static void   __local_overtemp_driver_loop_m3(void){ }
+static void   __local_undertemp_driver_loop_m3(void){ }
+static void   __local_overtemp_pcb_loop_m3(void){ }
+static void   __local_undertemp_pcb_loop_m3(void){ }
+static void   __local_fault0_loop_m3(void){ }
+static void   __local_fault1_loop_m3(void){ }
+static void   __local_fault2_loop_m3(void){ }
+#endif
+
+#if CONFIG_MOTOR > SGUANFOC_MOTOR_FOUR
+static void   __local_set_pwm_m4(const uint32_t duty[8]){ (void)duty; }
+static SguanQ __local_read_adc0_m4(void){ return (SguanQ)0; }
+static SguanQ __local_read_adc1_m4(void){ return (SguanQ)0; }
+static SguanQ __local_read_adc2_m4(void){ return (SguanQ)0; }
+static SguanQ __local_read_adc3_m4(void){ return (SguanQ)0; }
+static SguanQ __local_read_vbus_m4(void){ return (SguanQ)0; }
+static SguanQ __local_read_temp_motor_m4(void){ return (SguanQ)0; }
+static SguanQ __local_read_temp_driver_m4(void){ return (SguanQ)0; }
+static SguanQ __local_read_temp_pcb_m4(void){ return (SguanQ)0; }
+static void   __local_start_m4(void){ }
+static void   __local_stop_m4(void){ }
+static void   __local_standby_loop_m4(void){ }
+static void   __local_ready_loop_m4(void){ }
+static void   __local_initial_loop_m4(void){ }
+static void   __local_increasing_loop_m4(void){ }
+static void   __local_decreasing_loop_m4(void){ }
+static void   __local_hold_loop_m4(void){ }
+static void   __local_overvoltage_loop_m4(void){ }
+static void   __local_undervoltage_loop_m4(void){ }
+static void   __local_overcurrent_moment_loop_m4(void){ }
+static void   __local_overcurrent_stable_loop_m4(void){ }
+static void   __local_overtemp_motor_loop_m4(void){ }
+static void   __local_undertemp_motor_loop_m4(void){ }
+static void   __local_overtemp_driver_loop_m4(void){ }
+static void   __local_undertemp_driver_loop_m4(void){ }
+static void   __local_overtemp_pcb_loop_m4(void){ }
+static void   __local_undertemp_pcb_loop_m4(void){ }
+static void   __local_fault0_loop_m4(void){ }
+static void   __local_fault1_loop_m4(void){ }
+static void   __local_fault2_loop_m4(void){ }
+#endif
+
+#if CONFIG_MOTOR > SGUANFOC_MOTOR_FIVE
+static void   __local_set_pwm_m5(const uint32_t duty[8]){ (void)duty; }
+static SguanQ __local_read_adc0_m5(void){ return (SguanQ)0; }
+static SguanQ __local_read_adc1_m5(void){ return (SguanQ)0; }
+static SguanQ __local_read_adc2_m5(void){ return (SguanQ)0; }
+static SguanQ __local_read_adc3_m5(void){ return (SguanQ)0; }
+static SguanQ __local_read_vbus_m5(void){ return (SguanQ)0; }
+static SguanQ __local_read_temp_motor_m5(void){ return (SguanQ)0; }
+static SguanQ __local_read_temp_driver_m5(void){ return (SguanQ)0; }
+static SguanQ __local_read_temp_pcb_m5(void){ return (SguanQ)0; }
+static void   __local_start_m5(void){ }
+static void   __local_stop_m5(void){ }
+static void   __local_standby_loop_m5(void){ }
+static void   __local_ready_loop_m5(void){ }
+static void   __local_initial_loop_m5(void){ }
+static void   __local_increasing_loop_m5(void){ }
+static void   __local_decreasing_loop_m5(void){ }
+static void   __local_hold_loop_m5(void){ }
+static void   __local_overvoltage_loop_m5(void){ }
+static void   __local_undervoltage_loop_m5(void){ }
+static void   __local_overcurrent_moment_loop_m5(void){ }
+static void   __local_overcurrent_stable_loop_m5(void){ }
+static void   __local_overtemp_motor_loop_m5(void){ }
+static void   __local_undertemp_motor_loop_m5(void){ }
+static void   __local_overtemp_driver_loop_m5(void){ }
+static void   __local_undertemp_driver_loop_m5(void){ }
+static void   __local_overtemp_pcb_loop_m5(void){ }
+static void   __local_undertemp_pcb_loop_m5(void){ }
+static void   __local_fault0_loop_m5(void){ }
+static void   __local_fault1_loop_m5(void){ }
+static void   __local_fault2_loop_m5(void){ }
+#endif
+
+#if CONFIG_MOTOR > SGUANFOC_MOTOR_SIX
+static void   __local_set_pwm_m6(const uint32_t duty[8]){ (void)duty; }
+static SguanQ __local_read_adc0_m6(void){ return (SguanQ)0; }
+static SguanQ __local_read_adc1_m6(void){ return (SguanQ)0; }
+static SguanQ __local_read_adc2_m6(void){ return (SguanQ)0; }
+static SguanQ __local_read_adc3_m6(void){ return (SguanQ)0; }
+static SguanQ __local_read_vbus_m6(void){ return (SguanQ)0; }
+static SguanQ __local_read_temp_motor_m6(void){ return (SguanQ)0; }
+static SguanQ __local_read_temp_driver_m6(void){ return (SguanQ)0; }
+static SguanQ __local_read_temp_pcb_m6(void){ return (SguanQ)0; }
+static void   __local_start_m6(void){ }
+static void   __local_stop_m6(void){ }
+static void   __local_standby_loop_m6(void){ }
+static void   __local_ready_loop_m6(void){ }
+static void   __local_initial_loop_m6(void){ }
+static void   __local_increasing_loop_m6(void){ }
+static void   __local_decreasing_loop_m6(void){ }
+static void   __local_hold_loop_m6(void){ }
+static void   __local_overvoltage_loop_m6(void){ }
+static void   __local_undervoltage_loop_m6(void){ }
+static void   __local_overcurrent_moment_loop_m6(void){ }
+static void   __local_overcurrent_stable_loop_m6(void){ }
+static void   __local_overtemp_motor_loop_m6(void){ }
+static void   __local_undertemp_motor_loop_m6(void){ }
+static void   __local_overtemp_driver_loop_m6(void){ }
+static void   __local_undertemp_driver_loop_m6(void){ }
+static void   __local_overtemp_pcb_loop_m6(void){ }
+static void   __local_undertemp_pcb_loop_m6(void){ }
+static void   __local_fault0_loop_m6(void){ }
+static void   __local_fault1_loop_m6(void){ }
+static void   __local_fault2_loop_m6(void){ }
+#endif

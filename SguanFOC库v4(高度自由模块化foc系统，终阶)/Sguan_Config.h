@@ -319,7 +319,7 @@
 
 // ================================================================================
 // 5.控制系统离散周期的宏定义
-#define PMSM_RUN_T          math_from_float((SguanF)DEFINE2_TIM_T,VALUE_BASE_TIME)
+#define PMSM_RUN_T          math_from_float((SguanF)DEFINE3_TIM_T,VALUE_BASE_TIME)
 
 
 #endif // SGUAN_CONFIG_H

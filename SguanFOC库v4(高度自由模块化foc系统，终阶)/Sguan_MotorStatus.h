@@ -30,11 +30,15 @@
 #include "Sguan_Config.h"
 
 // =================================================|==============================
-// 1.运行标志位run_flag宏定义
+// 1.各种标志位宏定义
 #define MOTORSTATUS_RUN_READY                0x01   // (run_flag)准备
 #define MOTORSTATUS_RUN_INITIALIZING         0x02   // (run_flag)初始化
 #define MOTORSTATUS_RUN_NEXT                 0x03   // (run_flag)传递
 #define MOTORSTATUS_RUN_STANDBY              0x04   // (run_flag)待机
+
+#define __LOCAL_MODE_TORQUE                  0x00   // (mode_flag)力矩控制
+#define __LOCAL_MODE_VELOCITY                0x01   // (mode_flag)速度控制
+#define __LOCAL_MODE_POSITION                0x02   // (mode_flag)位置控制
 
 #define MOTORSTATUS_ERROR_OVERVOLTAGE        0x01   // (error_code)错误码
 #define MOTORSTATUS_ERROR_UNDERVOLTAGE       0x02   // (error_code)错误码
@@ -51,14 +55,14 @@
 #define MOTORSTATUS_ERROR_FAULT2             0x0D   // (error_code)错误码
 
 // =================================================|==============================
-// 2.局部结构体__Local(声明)
+// 2.局部结构体__Local声明
 typedef enum{
     status_standby = 0,                             // (待机状态)待机
 
     status_ready,                                   // (初始化状态)准备
-    status_initializing,                            // (初始化状态)开始初始
-    status_gotoinit0_current,                       // (初始化状态)电流专项
-    status_gotoinit1_angle,                         // (初始化状态)角度专项
+    status_initializing,                            // (初始化状态)启动初始
+    status_start0_current,                          // (初始化状态)电流开始
+    status_start1_angle,                            // (初始化状态)角度开始
 
     status_idle,                                    // (正常状态)空闲
     status_torque_increasing,                       // (正常状态)力矩增加中
@@ -71,7 +75,7 @@ typedef enum{
     status_position_decreasing,                     // (正常状态)位置减少中
     status_position_hold,                           // (正常状态)位置保持
 
-    status_overvoltage = 101,                       // (错误状态)过压
+    status_overvoltage,                             // (错误状态)过压
     status_undervoltage,                            // (错误状态)欠压
     status_overcurrent_moment,                      // (错误状态)瞬态过流
     status_overcurrent_stable,                      // (错误状态)稳态过流
@@ -90,9 +94,9 @@ typedef enum{
     // 电流偏置计算->开PWM和栅极驱动||->电流计算开始->角度计算开始->控制器
     state_standby = 0,                              // (standby)待机
     state_ready,                                    // (ready)准备
-    state_initializing,                             // (initializing)开始初始
-    state_gotoinit0_current,                        // (current)电流初始
-    state_gotoinit1_angle,                          // (angle)角度初始
+    state_initializing,                             // (initializing)启动初始
+    state_start0_current,                           // (current)电流开始
+    state_start1_angle,                             // (angle)角度开始
     state_com,                                      // (com)正常
     state_fault                                     // (fault)错误
 }__LocalState;
@@ -153,12 +157,10 @@ typedef struct{
 
     // (分割线)-------------------------------------|-------------------------------
     uint32_t is_tick_now;                           // (临时数据)稳态计数器
-    uint32_t is_tick_count;                         // (参数)稳态最大维持时间
-
     uint32_t fault_tick_now;                        // (临时数据)稳态计数器
-    uint32_t fault_tick_count;                      // (参数)稳态最大维持时间
 
     // (分割线)-------------------------------------|-------------------------------
+    uint8_t system_run_flag;                        // (实时输入数据)手动状态切换
     uint32_t system_tick_now;                       // (实时输入数据)实时运行时间
 }__LocalData;
 
@@ -181,11 +183,16 @@ typedef struct{
     SguanQ temp_pcb_min;                            // (参数)硬件电路板温度下限
 
     // (分割线)-------------------------------------|-------------------------------
-    uint8_t mode_flag;                              // (固定输入参数)电机运行模式
+    uint32_t is_tick_count;                         // (参数)稳态最大维持时间
+    uint32_t fault_tick_count;                      // (参数)稳态最大维持时间
+
+    // (分割线)-------------------------------------|-------------------------------
+    uint8_t motor_id;                               // (参数)电机当前排序0-n
+    uint8_t mode_flag;                              // (参数)电机运行模式0-2
 }__LocalParams;
 
 // =================================================|==============================
-// 3.全局结构体及函数(声明)
+// 3.全局结构体及函数声明
 typedef struct{
     __LocalStatus status;                           // (status)现在状态
     __LocalData data;                               // (data)动态实时数据
@@ -194,13 +201,13 @@ typedef struct{
     __LocalStatus last;                             // (last)过去状态...仅用于判断触发一次“status的init”
     __LocalState state;                             // (state)状况标志位...用于sguanfoc电机判断当前状态
 
-    uint8_t run_code;                               // (run_flag)手动状态切换
     uint8_t error_code;                             // (error_code)错误码记录
 }MotorStatus;
 
 CPLUSPLUS_C_BEGIN // C和C++配置文件声明_BEGIN
 void motorstatus_ready_init(MotorStatus *motorstatus);
 void motorstatus_initializing_init(MotorStatus *motorstatus);
+void motorstatus_next_init(MotorStatus *motorstatus);
 void motorstatus_standby_init(MotorStatus *motorstatus);
 void motorstatus_loop(MotorStatus *motorstatus);
 CPLUSPLUS_C_END // C和C++配置文件声明_END

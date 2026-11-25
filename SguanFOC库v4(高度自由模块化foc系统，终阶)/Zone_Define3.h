@@ -26,11 +26,6 @@
 #ifndef __ZONE_DEFINE3_H
 #define __ZONE_DEFINE3_H
 
-// (分割线)-------------------------------------------------------------------------
-// 用户驱动文件包含，如有则include驱动
-// (Zone_Define.h一般没有，但DEFINE2_TIM_T和单片机有关系，也需要意思意思)
-// (分割线)-------------------------------------------------------------------------
-
 #define DEFINE3_MC_VBUS         24.0                // (double)
 #define DEFINE3_MC_ETA          1.0                 // (double)
 
@@ -48,7 +43,7 @@
 #define DEFINE3_ADC_SAMPLING_RS 0.015               // (double)
 
 // 定时器中断参数设计
-#define DEFINE2_TIM_T 5e-5                           // 最大频率的控制周期
+#define DEFINE3_TIM_T 5e-5                           // 最大频率的控制周期
 
 
 #endif // ZONE_DEFINE3_H

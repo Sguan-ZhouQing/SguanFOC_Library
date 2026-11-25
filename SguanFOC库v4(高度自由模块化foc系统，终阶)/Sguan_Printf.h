@@ -32,12 +32,12 @@
 // =================================================|==============================
 // 1.全局结构体相关定义
 #define LOCAL_CH_COUNT      10                      // JustFloat通道数
-typedef void (*Cmd_Callback)(float value);
+typedef void (*CmdCallback)(float value);
 
 typedef struct{
     const char* name;                               // 指令名称
     uint32_t hash_val;                              // 哈希值 (运行时计算并缓存)
-    Cmd_Callback callback;                          // 对应的处理函数
+    CmdCallback callback;                          // 对应的处理函数
 }__LocalMap;
 
 typedef struct{
