@@ -26,7 +26,6 @@
 #include "Sguan_MotorStatus.h"
 
 /* SguanFOC配置文件声明 */
-#include "UnitLib_Main.h"
 #include "Zone_Driver.h"
 
 // ================================================================================
@@ -81,44 +80,7 @@ typedef struct{
 }__LocalTab;
 
 // ================================================================================
-// 2.局部静态函数__local实现
-// ()
-static void __local_standby_init(MotorStatus *motorstatus){
-
-}
-
-// ()
-static void __local_ready_init(MotorStatus *motorstatus){
-    
-}
-
-// ()
-static void __local_initializing_init(MotorStatus *motorstatus){
-
-}
-
-// ()
-static void __local_start0_current_init(MotorStatus *motorstatus){
-    
-}
-
-// ()
-static void __local_start1_angle_init(MotorStatus *motorstatus){
-
-}
-
-// ()
-static void __local_com_init(MotorStatus *motorstatus){
-
-}
-
-// ()
-static void __local_fault_init(MotorStatus *motorstatus){
-
-}
-
-// ================================================================================
-// 3.状态转移表和函数表
+// 2.状态转移表和函数表
 // ()
 static const __LocalTab __local_motor_tab[206] = {
     // ①.当前的状态机                    ②.当前状态机可触发的事件           ③.如果触发此事件，下一时刻的状态机
@@ -461,6 +423,43 @@ static void (*const __local_action_loop[])(uint8_t id) = {
 };
 
 // ================================================================================
+// 3.局部静态函数__local实现
+// ()
+static void __local_standby_init(MotorStatus *motorstatus){
+
+}
+
+// ()
+static void __local_ready_init(MotorStatus *motorstatus){
+    
+}
+
+// ()
+static void __local_initializing_init(MotorStatus *motorstatus){
+
+}
+
+// ()
+static void __local_start0_current_init(MotorStatus *motorstatus){
+    
+}
+
+// ()
+static void __local_start1_angle_init(MotorStatus *motorstatus){
+
+}
+
+// ()
+static void __local_com_init(MotorStatus *motorstatus){
+
+}
+
+// ()
+static void __local_fault_init(MotorStatus *motorstatus){
+
+}
+
+// ================================================================================
 // 4.全局函数motorstatus实现
 void motorstatus_ready_init(MotorStatus *motorstatus){
 
@@ -479,7 +478,157 @@ void motorstatus_standby_init(MotorStatus *motorstatus){
 }
 
 void motorstatus_loop(MotorStatus *motorstatus){
+    for (uint16_t i = 0; i < 184; i++){
+        if (__local_motor_tab[i].status_now == motorstatus->status){
+            switch ((__LocalEvent)__local_motor_tab[i].event_now){
+                case event_ready:{
+                    // 此处有触发event的代码
 
+                    break;
+                }
+                case event_initializing:{
+                    // 此处有触发event的代码
+
+                    break;
+                }
+                case event_next:{
+                    // 此处有触发event的代码
+
+                    break;
+                }
+                case event_standby0:{
+                    // 此处有触发event的代码
+
+                    break;
+                }
+                case event_standby1:{
+                    // 此处有触发event的代码
+
+                    break;
+                }
+                case event_torque_hold:{
+                    // 此处有触发event的代码
+
+                    break;
+                }
+                case event_torque_increasing:{
+                    // 此处有触发event的代码
+
+                    break;
+                }
+                case event_torque_decreasing:{
+                    // 此处有触发event的代码
+
+                    break;
+                }
+                case event_velocity_hold:{
+                    // 此处有触发event的代码
+
+                    break;
+                }
+                case event_velocity_increasing:{
+                    // 此处有触发event的代码
+
+                    break;
+                }
+                case event_velocity_decreasing:{
+                    // 此处有触发event的代码
+
+                    break;
+                }
+                case event_position_hold:{
+                    // 此处有触发event的代码
+
+                    break;
+                }
+                case event_position_increasing:{
+                    // 此处有触发event的代码
+
+                    break;
+                }
+                case event_position_decreasing:{
+                    // 此处有触发event的代码
+
+                    break;
+                }
+                case event_overvoltage:{
+                    // 此处有触发event的代码
+
+                    break;
+                }
+                case event_undervoltage:{
+                    // 此处有触发event的代码
+
+                    break;
+                }
+                case event_overcurrent_moment:{
+                    // 此处有触发event的代码
+
+                    break;
+                }
+                case event_overcurrent_stable:{
+                    // 此处有触发event的代码
+
+                    break;
+                }
+                case event_overtemp_motor:{
+                    // 此处有触发event的代码
+
+                    break;
+                }
+                case event_undertemp_motor:{
+                    // 此处有触发event的代码
+
+                    break;
+                }
+                case event_overtemp_driver:{
+                    // 此处有触发event的代码
+
+                    break;
+                }
+                case event_undertemp_driver:{
+                    // 此处有触发event的代码
+
+                    break;
+                }
+                case event_overtemp_pcb:{
+                    // 此处有触发event的代码
+
+                    break;
+                }
+                case event_undertemp_pcb:{
+                    // 此处有触发event的代码
+
+                    break;
+                }
+                case event_fault0:{
+                    // 此处有触发event的代码
+
+                    break;
+                }
+                case event_fault1:{
+                    // 此处有触发event的代码
+
+                    break;
+                }
+                case event_fault2:{
+                    // 此处有触发event的代码
+
+                    break;
+                }
+
+                default:
+                    break;
+            }
+        }
+    }
+
+    if (motorstatus->last != motorstatus->status){
+        // 仅在状态机变化开始，初始化一次init函数并更新last状态机
+        __local_action_init[motorstatus->status](motorstatus);
+        motorstatus->last = motorstatus->status;
+    }
+    __local_action_loop[motorstatus->status](motorstatus->params.motor_id);
 }
 
 
@@ -588,49 +737,49 @@ void motorstatus_loop(MotorStatus *motorstatus){
 //     // ==================================================================
 //     // 2.遍历状态转换表，给触发事件的条件
 //     for (uint16_t i = 0; i < 184; i++){
-//         if (motor_tab[i].status_now == p->motorstatus.status){
-//             switch ((__LocalEvent)motor_tab[i].event_now){
+//         if (__local_motor_tab[i].status_now == p->motorstatus.status){
+//             switch ((__LocalEvent)__local_motor_tab[i].event_now){
 //                 case event_ready:{
 //                     // 此处有触发event的代码
 //                     if (__local_event_get(p->run_flag) == 
-//                         (__LocalEvent)motor_tab[i].event_now){ // 手动触发
+//                         (__LocalEvent)__local_motor_tab[i].event_now){ // 手动触发
 //                         p->run_flag = 0;
 
 //                         p->motorstatus.status = 
-//                             (__LocalStatus)motor_tab[i].status_future;
+//                             (__LocalStatus)__local_motor_tab[i].status_future;
 //                     }
 //                     break;
 //                 }
 //                 case event_initializing:{
 //                     // 此处有触发event的代码
 //                     if (__local_event_get(p->run_flag) == 
-//                         (__LocalEvent)motor_tab[i].event_now){ // 手动触发
+//                         (__LocalEvent)__local_motor_tab[i].event_now){ // 手动触发
 //                         p->run_flag = 0;
                             
 //                         p->motorstatus.status = 
-//                             (__LocalStatus)motor_tab[i].status_future;
+//                             (__LocalStatus)__local_motor_tab[i].status_future;
 //                     }
 //                     break;
 //                 }
 //                 case event_success:{
 //                     // 此处有触发event的代码
 //                     if (__local_event_get(p->run_flag) == 
-//                         (__LocalEvent)motor_tab[i].event_now){ // 手动触发
+//                         (__LocalEvent)__local_motor_tab[i].event_now){ // 手动触发
 //                         p->run_flag = 0;
                             
 //                         p->motorstatus.status = 
-//                             (__LocalStatus)motor_tab[i].status_future;
+//                             (__LocalStatus)__local_motor_tab[i].status_future;
 //                     }
 //                     break;
 //                 }
 //                 case event_standby0:{
 //                     // 此处有触发event的代码
 //                     if (__local_event_get(p->run_flag) == 
-//                         (__LocalStatus)motor_tab[i].event_now){ // 手动触发
+//                         (__LocalStatus)__local_motor_tab[i].event_now){ // 手动触发
 //                         p->run_flag = 0;
                             
 //                         p->motorstatus.status = 
-//                             (__LocalStatus)motor_tab[i].status_future;
+//                             (__LocalStatus)__local_motor_tab[i].status_future;
 //                     }
 //                     break;
 //                 }
@@ -643,7 +792,7 @@ void motorstatus_loop(MotorStatus *motorstatus){
 //                     // if (tick >= p->motorstatus.data.fault_tick_delay){ // 自动触发
                             
 //                     //     p->motorstatus.status = 
-//                     //         (__LocalStatus)motor_tab[i].status_future;
+//                     //         (__LocalStatus)__local_motor_tab[i].status_future;
 //                     // }
 
 
@@ -668,7 +817,7 @@ void motorstatus_loop(MotorStatus *motorstatus){
 //                     //             p->motorstatus.data.tick_run;
 
 //                     //         p->motorstatus.status = 
-//                     //             (__LocalStatus)motor_tab[i].status_future;
+//                     //             (__LocalStatus)__local_motor_tab[i].status_future;
 //                     //     }
 //                     // }
 
@@ -688,7 +837,7 @@ void motorstatus_loop(MotorStatus *motorstatus){
 //                     //     if (tor_real_abs <= tor_target_min){ // 自动触发
                             
 //                     //         p->motorstatus.status = 
-//                     //             (__LocalStatus)motor_tab[i].status_future;
+//                     //             (__LocalStatus)__local_motor_tab[i].status_future;
 //                     //     }
 //                     // }
 
@@ -708,7 +857,7 @@ void motorstatus_loop(MotorStatus *motorstatus){
 //                     //     if (tor_real_abs >= tor_target_max){ // 自动触发
                             
 //                     //         p->motorstatus.status = 
-//                     //             (__LocalStatus)motor_tab[i].status_future;
+//                     //             (__LocalStatus)__local_motor_tab[i].status_future;
 //                     //     }
 //                     // }
 
@@ -733,7 +882,7 @@ void motorstatus_loop(MotorStatus *motorstatus){
 
                             
 //                             p->motorstatus.status = 
-//                                 (__LocalStatus)motor_tab[i].status_future;
+//                                 (__LocalStatus)__local_motor_tab[i].status_future;
 //                         }
 //                     }
 //                     break;
@@ -750,7 +899,7 @@ void motorstatus_loop(MotorStatus *motorstatus){
 //                         if (vel_real_abs <= vel_target_min){ // 自动触发
                             
 //                             p->motorstatus.status = 
-//                                 (__LocalStatus)motor_tab[i].status_future;
+//                                 (__LocalStatus)__local_motor_tab[i].status_future;
 //                         }
 //                     }
 //                     break;
@@ -767,7 +916,7 @@ void motorstatus_loop(MotorStatus *motorstatus){
 //                         if (vel_real_abs >= vel_target_max){ // 自动触发
                             
 //                             p->motorstatus.status = 
-//                                 (__LocalStatus)motor_tab[i].status_future;
+//                                 (__LocalStatus)__local_motor_tab[i].status_future;
 //                         }
 //                     }
 //                     break;
@@ -788,7 +937,7 @@ void motorstatus_loop(MotorStatus *motorstatus){
 //                             (pos_real_abs <= pos_target_max)){ // 自动触发
                             
 //                             p->motorstatus.status = 
-//                                 (__LocalStatus)motor_tab[i].status_future;
+//                                 (__LocalStatus)__local_motor_tab[i].status_future;
 //                         }
 //                     }
 //                     break;
@@ -806,7 +955,7 @@ void motorstatus_loop(MotorStatus *motorstatus){
         
                             
 //                             p->motorstatus.status = 
-//                                 (__LocalStatus)motor_tab[i].status_future;
+//                                 (__LocalStatus)__local_motor_tab[i].status_future;
 //                         }
 //                     }
 //                     break;
@@ -823,7 +972,7 @@ void motorstatus_loop(MotorStatus *motorstatus){
 //                         if (pos_real_abs >= pos_target_max){ // 自动触发
                             
 //                             p->motorstatus.status = 
-//                                 (__LocalStatus)motor_tab[i].status_future;
+//                                 (__LocalStatus)__local_motor_tab[i].status_future;
 //                         }
 //                     }
 //                     break;
@@ -834,7 +983,7 @@ void motorstatus_loop(MotorStatus *motorstatus){
 //                         p->motorstatus.data.vbus_max){ // 自动触发
                             
 //                         p->motorstatus.status = 
-//                             (__LocalStatus)motor_tab[i].status_future;
+//                             (__LocalStatus)__local_motor_tab[i].status_future;
 //                     }
 //                     break;
 //                 }
@@ -844,7 +993,7 @@ void motorstatus_loop(MotorStatus *motorstatus){
 //                         p->motorstatus.data.vbus_min){ // 自动触发
                             
 //                         p->motorstatus.status = 
-//                             (__LocalStatus)motor_tab[i].status_future;
+//                             (__LocalStatus)__local_motor_tab[i].status_future;
 //                     }
 //                     break;
 //                 }
@@ -869,7 +1018,7 @@ void motorstatus_loop(MotorStatus *motorstatus){
 //                         (tick >= p->motorstatus.data.is_tick_delay)){ // 自动触发
                             
 //                         p->motorstatus.status = 
-//                             (__LocalStatus)motor_tab[i].status_future;
+//                             (__LocalStatus)__local_motor_tab[i].status_future;
 //                     }
 //                     /////////////////////////////////////////////////////////////////
 //                     /////////////////////////////////////////////////////////////////
@@ -898,7 +1047,7 @@ void motorstatus_loop(MotorStatus *motorstatus){
 //                         (tick >= p->motorstatus.data.is_tick_delay)){ // 自动触发
                             
 //                         p->motorstatus.status = 
-//                             (__LocalStatus)motor_tab[i].status_future;
+//                             (__LocalStatus)__local_motor_tab[i].status_future;
 //                     }
 //                     /////////////////////////////////////////////////////////////////////
 //                     /////////////////////////////////////////////////////////////////////
@@ -912,7 +1061,7 @@ void motorstatus_loop(MotorStatus *motorstatus){
 //                         p->motorstatus.data.temp_motor_max){ // 自动触发
                             
 //                         p->motorstatus.status = 
-//                             (__LocalStatus)motor_tab[i].status_future;
+//                             (__LocalStatus)__local_motor_tab[i].status_future;
 //                     }
 //                     break;
 //                 }
@@ -922,7 +1071,7 @@ void motorstatus_loop(MotorStatus *motorstatus){
 //                         p->motorstatus.data.temp_motor_min){ // 自动触发
                             
 //                         p->motorstatus.status = 
-//                             (__LocalStatus)motor_tab[i].status_future;
+//                             (__LocalStatus)__local_motor_tab[i].status_future;
 //                     }
 //                     break;
 //                 }
@@ -932,7 +1081,7 @@ void motorstatus_loop(MotorStatus *motorstatus){
 //                         p->motorstatus.data.temp_driver_max){ // 自动触发
                             
 //                         p->motorstatus.status = 
-//                             (__LocalStatus)motor_tab[i].status_future;
+//                             (__LocalStatus)__local_motor_tab[i].status_future;
 //                     }
 //                     break;
 //                 }
@@ -942,7 +1091,7 @@ void motorstatus_loop(MotorStatus *motorstatus){
 //                         p->motorstatus.data.temp_driver_min){ // 自动触发
                             
 //                         p->motorstatus.status = 
-//                             (__LocalStatus)motor_tab[i].status_future;
+//                             (__LocalStatus)__local_motor_tab[i].status_future;
 //                     }
 //                     break;
 //                 }
@@ -952,7 +1101,7 @@ void motorstatus_loop(MotorStatus *motorstatus){
 //                         p->motorstatus.data.temp_pcb_max){ // 自动触发
                             
 //                         p->motorstatus.status = 
-//                             (__LocalStatus)motor_tab[i].status_future;
+//                             (__LocalStatus)__local_motor_tab[i].status_future;
 //                     }
 //                     break;
 //                 }
@@ -962,40 +1111,40 @@ void motorstatus_loop(MotorStatus *motorstatus){
 //                         p->motorstatus.data.temp_pcb_min){ // 自动触发
                             
 //                         p->motorstatus.status = 
-//                             (__LocalStatus)motor_tab[i].status_future;
+//                             (__LocalStatus)__local_motor_tab[i].status_future;
 //                     }
 //                     break;
 //                 }
 //                 case event_fault0:{
 //                     // 此处有触发event的代码
 //                     if (__local_event_get(p->run_flag) == 
-//                         (__LocalStatus)motor_tab[i].event_now){ // 手动触发
+//                         (__LocalStatus)__local_motor_tab[i].event_now){ // 手动触发
 //                         p->run_flag = 0;
                             
 //                         p->motorstatus.status = 
-//                             (__LocalStatus)motor_tab[i].status_future;
+//                             (__LocalStatus)__local_motor_tab[i].status_future;
 //                     }
 //                     break;
 //                 }
 //                 case event_fault1:{
 //                     // 此处有触发event的代码
 //                     if (__local_event_get(p->run_flag) == 
-//                         (__LocalStatus)motor_tab[i].event_now){ // 手动触发
+//                         (__LocalStatus)__local_motor_tab[i].event_now){ // 手动触发
 //                         p->run_flag = 0;
                             
 //                         p->motorstatus.status = 
-//                             (__LocalStatus)motor_tab[i].status_future;
+//                             (__LocalStatus)__local_motor_tab[i].status_future;
 //                     }
 //                     break;
 //                 }
 //                 case event_fault2:{
 //                     // 此处有触发event的代码
 //                     if (__local_event_get(p->run_flag) == 
-//                         (__LocalStatus)motor_tab[i].event_now){ // 手动触发
+//                         (__LocalStatus)__local_motor_tab[i].event_now){ // 手动触发
 //                         p->run_flag = 0;
                             
 //                         p->motorstatus.status = 
-//                             (__LocalStatus)motor_tab[i].status_future;
+//                             (__LocalStatus)__local_motor_tab[i].status_future;
 //                     }
 //                     break;
 //                 }

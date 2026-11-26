@@ -102,9 +102,7 @@ typedef enum{
 }__LocalState;
 
 typedef enum{
-    event_zero = 0,                                 // (自动事件)零事件
-
-    event_ready,                                    // (手动)用户触发准备
+    event_ready = 0,                                // (手动)用户触发准备
     event_initializing,                             // (手动)用户触发初始化
     event_next,                                     // (手动)用户触发初始化
     event_standby0,                                 // (手动)用户触发待机
@@ -160,8 +158,8 @@ typedef struct{
     uint32_t fault_tick_now;                        // (临时数据)稳态计数器
 
     // (分割线)-------------------------------------|-------------------------------
-    uint8_t system_run_flag;                        // (实时输入数据)手动状态切换
     uint32_t system_tick_now;                       // (实时输入数据)实时运行时间
+    uint8_t system_run_flag;                        // (实时输入数据)手动状态切换
 }__LocalData;
 
 typedef struct{
