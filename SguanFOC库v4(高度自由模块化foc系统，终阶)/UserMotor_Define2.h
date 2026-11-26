@@ -37,6 +37,4 @@
 
 
 
-
-
 #endif // USERMOTOR_DEFINE2_H

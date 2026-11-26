@@ -63,8 +63,7 @@
 #define DEFINE0_NUM0_DELAY2     1                   // (uint8_t)延时函数"延时二拍"
 #define DEFINE0_NUM0_DELAY3     1                   // (uint8_t)延时函数"延时三拍"
 
-#define DEFINE0_NUM1_FLOAT      1                   // (uint8_t)扩展单精度浮点数
-#define DEFINE0_NUM1_DOUBLE     1                   // (uint8_t)扩展双精度浮点数
+#define DEFINE0_NUM1_SGUANQ      1                  // (uint8_t)扩展SguanQ浮点数
 #define DEFINE0_NUM1_INT8       1                   // (uint8_t)扩展8位有符号数
 #define DEFINE0_NUM1_UINT8      1                   // (uint8_t)扩展8位无符号数
 #define DEFINE0_NUM1_INT16      1                   // (uint8_t)扩展16位有符号数

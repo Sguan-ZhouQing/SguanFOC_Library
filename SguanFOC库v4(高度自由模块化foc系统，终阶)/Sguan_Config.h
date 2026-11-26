@@ -251,11 +251,11 @@
 
 // ================================================================================
 // 2.Method模块使用的宏定义
-#ifdef DEFINE0_NUM1_FLOAT
-#define CONFIG_FLOAT        DEFINE0_NUM1_FLOAT
-#else // DEFINE0_NUM1_FLOAT
-#define CONFIG_FLOAT        0
-#endif // DEFINE0_NUM1_FLOAT
+#ifdef DEFINE0_NUM1_SGUANQ
+#define CONFIG_SGUANQ       DEFINE0_NUM1_SGUANQ
+#else // DEFINE0_NUM1_SGUANQ
+#define CONFIG_SGUANQ       0
+#endif // DEFINE0_NUM1_SGUANQ
 
 #ifdef DEFINE0_NUM1_INT8
 #define CONFIG_INT8         DEFINE0_NUM1_INT8

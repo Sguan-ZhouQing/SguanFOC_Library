@@ -31,15 +31,12 @@
 
 // =================================================|==============================
 // 1.各种标志位宏定义
-#define MOTORSTATUS_RUN_READY                0x01   // (run_flag)准备
-#define MOTORSTATUS_RUN_INITIALIZING         0x02   // (run_flag)初始化
-#define MOTORSTATUS_RUN_NEXT                 0x03   // (run_flag)传递
-#define MOTORSTATUS_RUN_STANDBY              0x04   // (run_flag)待机
+#define MOTORSTATUS_RUN_READY                0x01   // (system_run_flag)准备
+#define MOTORSTATUS_RUN_INITIALIZING         0x02   // (system_run_flag)初始化
+#define MOTORSTATUS_RUN_NEXT                 0x03   // (system_run_flag)传递
+#define MOTORSTATUS_RUN_STANDBY              0x04   // (system_run_flag)待机
 
-#define __LOCAL_MODE_TORQUE                  0x00   // (mode_flag)力矩控制
-#define __LOCAL_MODE_VELOCITY                0x01   // (mode_flag)速度控制
-#define __LOCAL_MODE_POSITION                0x02   // (mode_flag)位置控制
-
+#define MOTORSTATUS_ERROR_ZERO               0x00   // (error_code)错误码
 #define MOTORSTATUS_ERROR_OVERVOLTAGE        0x01   // (error_code)错误码
 #define MOTORSTATUS_ERROR_UNDERVOLTAGE       0x02   // (error_code)错误码
 #define MOTORSTATUS_ERROR_OVERCURRENT_MOMENT 0x03   // (error_code)错误码
@@ -65,15 +62,9 @@ typedef enum{
     status_start1_angle,                            // (初始化状态)角度开始
 
     status_idle,                                    // (正常状态)空闲
-    status_torque_increasing,                       // (正常状态)力矩增加中
-    status_torque_decreasing,                       // (正常状态)力矩减少中
-    status_torque_hold,                             // (正常状态)力矩保持
-    status_velocity_increasing,                     // (正常状态)速度增加中
-    status_velocity_decreasing,                     // (正常状态)速度减少中
-    status_velocity_hold,                           // (正常状态)速度保持
-    status_position_increasing,                     // (正常状态)位置增加中
-    status_position_decreasing,                     // (正常状态)位置减少中
-    status_position_hold,                           // (正常状态)位置保持
+    status_value_holding,                           // (正常状态)数值保持中
+    status_value_above,                             // (正常状态)数值高于控制值
+    status_value_below,                             // (正常状态)数值低于控制值
 
     status_overvoltage,                             // (错误状态)过压
     status_undervoltage,                            // (错误状态)欠压
@@ -91,7 +82,12 @@ typedef enum{
 }__LocalStatus;
 
 typedef enum{
-    // 电流偏置计算->开PWM和栅极驱动||->电流计算开始->角度计算开始->控制器
+    // (分割线)-------------------------------------|-------------------------------
+    // standby      ready          start0_current  start1_angle
+    // 电流偏置计算||开PWM和栅极驱动||->电流计算开始->角度计算开始->控制器
+    // ...........................||->角度偏置计算->xxxxxxxxxxx->xxxxx
+
+    // (分割线)-------------------------------------|-------------------------------
     state_standby = 0,                              // (standby)待机
     state_ready,                                    // (ready)准备
     state_initializing,                             // (initializing)启动初始
@@ -108,15 +104,9 @@ typedef enum{
     event_standby0,                                 // (手动)用户触发待机
     event_standby1,                                 // (自动事件)待机事件
 
-    event_torque_increasing,                        // (自动事件)力矩增加事件
-    event_torque_decreasing,                        // (自动事件)力矩减少事件
-    event_torque_hold,                              // (自动事件)力矩保持事件
-    event_velocity_increasing,                      // (自动事件)速度增加事件
-    event_velocity_decreasing,                      // (自动事件)速度减少事件
-    event_velocity_hold,                            // (自动事件)速度保持事件
-    event_position_increasing,                      // (自动事件)位置增加事件
-    event_position_decreasing,                      // (自动事件)位置减少事件
-    event_position_hold,                            // (自动事件)位置保持事件
+    event_value_holding,                            // (自动事件)数值保持事件
+    event_value_above,                              // (自动事件)数值高事件
+    event_value_below,                              // (自动事件)数值低事件
     
     event_overvoltage,                              // (自动事件)过压事件
     event_undervoltage,                             // (自动事件)欠压事件
@@ -134,16 +124,11 @@ typedef enum{
 }__LocalEvent;
 
 typedef struct{
-    SguanQ tor_real;                                // (实时输入数据)实际力矩
-    SguanQ tor_target;                              // (实时输入数据)期望力矩
-    SguanQ vel_real;                                // (实时输入数据)实际速度
-    SguanQ vel_target;                              // (实时输入数据)期望速度
-    SguanQ pos_real;                                // (实时输入数据)实际位置
-    SguanQ pos_target;                              // (实时输入数据)期望位置
+    SguanQ value_real;                              // (实时输入数据)实际控制数值
+    SguanQ value_target;                            // (实时输入数据)期望控制数值
 
     SguanQ vbus_real;                               // (实时输入数据)实际母线电压
-
-    SguanQ is_real;                                 // (实时输入数据)实际线峰值电压
+    SguanQ is_real;                                 // (实时输入数据)实际xx电流
 
     SguanQ temp_motor_real;                         // (实时输入数据)电机温度
     SguanQ temp_driver_real;                        // (实时输入数据)驱动功率器件温度
@@ -154,8 +139,8 @@ typedef struct{
     uint8_t fault_flag2;                            // (实时输入数据)未知错误2
 
     // (分割线)-------------------------------------|-------------------------------
-    uint32_t is_tick_now;                           // (临时数据)稳态计数器
-    uint32_t fault_tick_now;                        // (临时数据)稳态计数器
+    uint32_t is_tick_now;                           // (临时数据)xx电流稳态过流计数器
+    uint32_t fault_tick_now;                        // (临时数据)错误状态延时计数器
 
     // (分割线)-------------------------------------|-------------------------------
     uint32_t system_tick_now;                       // (实时输入数据)实时运行时间
@@ -163,9 +148,7 @@ typedef struct{
 }__LocalData;
 
 typedef struct{
-    SguanQ tor_interval;                            // (参数)力矩浮动区间
-    SguanQ vel_interval;                            // (参数)速度浮动区间
-    SguanQ pos_interval;                            // (参数)位置浮动区间
+    SguanQ value_interval;                          // (参数)数值浮动区间
 
     SguanQ vbus_max;                                // (参数)母线电压浮动上限
     SguanQ vbus_min;                                // (参数)母线电压浮动下限

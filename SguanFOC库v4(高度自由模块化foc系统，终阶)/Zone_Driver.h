@@ -46,9 +46,9 @@ typedef struct{
     void (*standby_loop)(void);                     // (状态)待机
     void (*ready_loop)(void);                       // (状态)就绪
     void (*initial_loop)(void);                     // (状态)初始化
-    void (*increasing_loop)(void);                  // (状态)加速
-    void (*decreasing_loop)(void);                  // (状态)减速
-    void (*hold_loop)(void);                        // (状态)保持
+    void (*holding_loop)(void);                     // (状态)数值保持
+    void (*above_loop)(void);                       // (状态)数值高
+    void (*below_loop)(void);                       // (状态)数值低
     void (*overvoltage_loop)(void);                 // (故障)过压
     void (*undervoltage_loop)(void);                // (故障)欠压
     void (*overcurrent_moment_loop)(void);          // (故障)瞬态过流

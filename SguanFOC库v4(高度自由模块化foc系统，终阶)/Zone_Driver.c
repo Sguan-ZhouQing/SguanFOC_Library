@@ -81,9 +81,9 @@
     static void   __local_standby_loop_m##n(void); \
     static void   __local_ready_loop_m##n(void); \
     static void   __local_initial_loop_m##n(void); \
-    static void   __local_increasing_loop_m##n(void); \
-    static void   __local_decreasing_loop_m##n(void); \
-    static void   __local_hold_loop_m##n(void); \
+    static void   __local_holding_loop_m##n(void); \
+    static void   __local_above_loop_m##n(void); \
+    static void   __local_below_loop_m##n(void); \
     static void   __local_overvoltage_loop_m##n(void); \
     static void   __local_undervoltage_loop_m##n(void); \
     static void   __local_overcurrent_moment_loop_m##n(void); \
@@ -119,9 +119,9 @@ __LOCAL_MOTOR_FOREACH(__LOCAL_DECLARE)
     __local_standby_loop_m##n, \
     __local_ready_loop_m##n, \
     __local_initial_loop_m##n, \
-    __local_increasing_loop_m##n, \
-    __local_decreasing_loop_m##n, \
-    __local_hold_loop_m##n, \
+    __local_holding_loop_m##n, \
+    __local_above_loop_m##n, \
+    __local_below_loop_m##n, \
     __local_overvoltage_loop_m##n, \
     __local_undervoltage_loop_m##n, \
     __local_overcurrent_moment_loop_m##n, \
@@ -254,18 +254,19 @@ static void __local_initial_loop_m1(void){
     // Write_your_driver_code
 }
 
+// (保持状态循环)
+static void __local_holding_loop_m1(void){ 
+    // Write_your_driver_code
+}
+
+
 // (加速状态循环)
-static void __local_increasing_loop_m1(void){ 
+static void __local_above_loop_m1(void){ 
     // Write_your_driver_code
 }
 
 // (减速状态循环)
-static void __local_decreasing_loop_m1(void){ 
-    // Write_your_driver_code
-}
-
-// (保持状态循环)
-static void __local_hold_loop_m1(void){ 
+static void __local_below_loop_m1(void){ 
     // Write_your_driver_code
 }
 
@@ -349,9 +350,9 @@ static void   __local_stop_m2(void){ }
 static void   __local_standby_loop_m2(void){ }
 static void   __local_ready_loop_m2(void){ }
 static void   __local_initial_loop_m2(void){ }
-static void   __local_increasing_loop_m2(void){ }
-static void   __local_decreasing_loop_m2(void){ }
-static void   __local_hold_loop_m2(void){ }
+static void   __local_holding_loop_m2(void){ }
+static void   __local_above_loop_m2(void){ }
+static void   __local_below_loop_m2(void){ }
 static void   __local_overvoltage_loop_m2(void){ }
 static void   __local_undervoltage_loop_m2(void){ }
 static void   __local_overcurrent_moment_loop_m2(void){ }
@@ -382,9 +383,9 @@ static void   __local_stop_m3(void){ }
 static void   __local_standby_loop_m3(void){ }
 static void   __local_ready_loop_m3(void){ }
 static void   __local_initial_loop_m3(void){ }
-static void   __local_increasing_loop_m3(void){ }
-static void   __local_decreasing_loop_m3(void){ }
-static void   __local_hold_loop_m3(void){ }
+static void   __local_holding_loop_m3(void){ }
+static void   __local_above_loop_m3(void){ }
+static void   __local_below_loop_m3(void){ }
 static void   __local_overvoltage_loop_m3(void){ }
 static void   __local_undervoltage_loop_m3(void){ }
 static void   __local_overcurrent_moment_loop_m3(void){ }
@@ -415,9 +416,9 @@ static void   __local_stop_m4(void){ }
 static void   __local_standby_loop_m4(void){ }
 static void   __local_ready_loop_m4(void){ }
 static void   __local_initial_loop_m4(void){ }
-static void   __local_increasing_loop_m4(void){ }
-static void   __local_decreasing_loop_m4(void){ }
-static void   __local_hold_loop_m4(void){ }
+static void   __local_holding_loop_m4(void){ }
+static void   __local_above_loop_m4(void){ }
+static void   __local_below_loop_m4(void){ }
 static void   __local_overvoltage_loop_m4(void){ }
 static void   __local_undervoltage_loop_m4(void){ }
 static void   __local_overcurrent_moment_loop_m4(void){ }
@@ -448,9 +449,9 @@ static void   __local_stop_m5(void){ }
 static void   __local_standby_loop_m5(void){ }
 static void   __local_ready_loop_m5(void){ }
 static void   __local_initial_loop_m5(void){ }
-static void   __local_increasing_loop_m5(void){ }
-static void   __local_decreasing_loop_m5(void){ }
-static void   __local_hold_loop_m5(void){ }
+static void   __local_holding_loop_m5(void){ }
+static void   __local_above_loop_m5(void){ }
+static void   __local_below_loop_m5(void){ }
 static void   __local_overvoltage_loop_m5(void){ }
 static void   __local_undervoltage_loop_m5(void){ }
 static void   __local_overcurrent_moment_loop_m5(void){ }
@@ -481,9 +482,9 @@ static void   __local_stop_m6(void){ }
 static void   __local_standby_loop_m6(void){ }
 static void   __local_ready_loop_m6(void){ }
 static void   __local_initial_loop_m6(void){ }
-static void   __local_increasing_loop_m6(void){ }
-static void   __local_decreasing_loop_m6(void){ }
-static void   __local_hold_loop_m6(void){ }
+static void   __local_holding_loop_m6(void){ }
+static void   __local_above_loop_m6(void){ }
+static void   __local_below_loop_m6(void){ }
 static void   __local_overvoltage_loop_m6(void){ }
 static void   __local_undervoltage_loop_m6(void){ }
 static void   __local_overcurrent_moment_loop_m6(void){ }

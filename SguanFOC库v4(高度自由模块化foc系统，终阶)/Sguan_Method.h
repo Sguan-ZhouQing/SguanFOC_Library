@@ -30,35 +30,36 @@
 #include "Sguan_Config.h"
 
 typedef struct{
-    #if CONFIG_FLOAT // 浮点数
-    SguanQ             float_ch[CONFIG_FLOAT];
-    #endif // CONFIG_FLOAT
+    #if CONFIG_SGUANQ // 扩展SguanQ浮点数
+    SguanQ             sguanq_ch[CONFIG_SGUANQ];
+    #endif // CONFIG_SGUANQ
 
-    #if CONFIG_INT8 // 8位数据
+    #if CONFIG_INT8 // 扩展8位有符号数
     int8_t              int8_ch[CONFIG_INT8];
     #endif // CONFIG_INT8
 
-    #if CONFIG_UINT8 // 8位数据
+    #if CONFIG_UINT8 // 扩展8位无符号数
     uint8_t             uint8_ch[CONFIG_UINT8];
     #endif // CONFIG_UINT8
 
-    #if CONFIG_INT16 // 16位数据
+    #if CONFIG_INT16 // 扩展16位有符号数
     int16_t             int16_ch[CONFIG_INT16];
     #endif // CONFIG_INT16
 
-    #if CONFIG_UINT16 // 16位数据
+    #if CONFIG_UINT16 // 扩展16位无符号数
     uint16_t            uint16_ch[CONFIG_UINT16];
     #endif // CONFIG_UINT16
 
-    #if CONFIG_INT32 // 32位数据
+    #if CONFIG_INT32 // 扩展32位有符号数
     int32_t             int32_ch[CONFIG_INT32];
     #endif // CONFIG_INT32
 
-    #if CONFIG_UINT32 // 32位数据
+    #if CONFIG_UINT32 // 扩展32位无符号数
     uint32_t            uint32_ch[CONFIG_UINT32];
     #endif // CONFIG_UINT32
 
-    uint8_t response;                           // (环路倍率)内外环控制倍率
+    // (分割线)-------------------------------------|-------------------------------
+    uint8_t response;                               // (环路倍率)内外环控制倍率
 }Method;
 
 
