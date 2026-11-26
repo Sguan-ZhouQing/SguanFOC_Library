@@ -97,32 +97,6 @@ typedef enum{
     state_fault                                     // (fault)错误
 }__LocalState;
 
-typedef enum{
-    event_ready = 0,                                // (手动)用户触发准备
-    event_initializing,                             // (手动)用户触发初始化
-    event_next,                                     // (手动)用户触发初始化
-    event_standby0,                                 // (手动)用户触发待机
-    event_standby1,                                 // (自动事件)待机事件
-
-    event_value_holding,                            // (自动事件)数值保持事件
-    event_value_above,                              // (自动事件)数值高事件
-    event_value_below,                              // (自动事件)数值低事件
-    
-    event_overvoltage,                              // (自动事件)过压事件
-    event_undervoltage,                             // (自动事件)欠压事件
-    event_overcurrent_moment,                       // (自动事件)瞬态过流事件
-    event_overcurrent_stable,                       // (自动事件)稳态过流事件
-    event_overtemp_motor,                           // (自动事件)电机过温事件
-    event_undertemp_motor,                          // (自动事件)电机过冷事件
-    event_overtemp_driver,                          // (自动事件)功率器件过温事件
-    event_undertemp_driver,                         // (自动事件)功率器件过冷事件
-    event_overtemp_pcb,                             // (自动事件)驱动器过温事件
-    event_undertemp_pcb,                            // (自动事件)驱动器过冷事件
-    event_fault0,                                   // (手动)未知错误0
-    event_fault1,                                   // (手动)未知错误1
-    event_fault2                                    // (手动)未知错误2
-}__LocalEvent;
-
 typedef struct{
     SguanQ value_real;                              // (实时输入数据)实际控制数值
     SguanQ value_target;                            // (实时输入数据)期望控制数值

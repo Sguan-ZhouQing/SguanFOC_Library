@@ -35,6 +35,33 @@
 #define EVENT(x)  ((uint8_t)(x))    // uint8_t强制类型转换
 #define RUN(x)    ((uint8_t)(x))    // uint8_t强制类型转换
 
+// (触发事件的枚举量)
+typedef enum{
+    event_ready = 0,                                // (手动)用户触发准备
+    event_initializing,                             // (手动)用户触发初始化
+    event_next,                                     // (手动)用户触发初始化
+    event_standby0,                                 // (手动)用户触发待机
+    event_standby1,                                 // (自动事件)待机事件
+
+    event_value_holding,                            // (自动事件)数值保持事件
+    event_value_above,                              // (自动事件)数值高事件
+    event_value_below,                              // (自动事件)数值低事件
+    
+    event_overvoltage,                              // (自动事件)过压事件
+    event_undervoltage,                             // (自动事件)欠压事件
+    event_overcurrent_moment,                       // (自动事件)瞬态过流事件
+    event_overcurrent_stable,                       // (自动事件)稳态过流事件
+    event_overtemp_motor,                           // (自动事件)电机过温事件
+    event_undertemp_motor,                          // (自动事件)电机过冷事件
+    event_overtemp_driver,                          // (自动事件)功率器件过温事件
+    event_undertemp_driver,                         // (自动事件)功率器件过冷事件
+    event_overtemp_pcb,                             // (自动事件)驱动器过温事件
+    event_undertemp_pcb,                            // (自动事件)驱动器过冷事件
+    event_fault0,                                   // (手动)未知错误0
+    event_fault1,                                   // (手动)未知错误1
+    event_fault2                                    // (手动)未知错误2
+}__LocalEvent;
+
 // (状态转移表结构体)
 typedef struct{
     uint8_t status_now;             // (now)现在状态机
@@ -42,6 +69,13 @@ typedef struct{
     uint8_t status_future;          // (future)下一时刻状态机
 }__LocalTab;
 
+// (for循环跳出的枚举量)
+typedef enum {
+    __LOCAL_CONTINUE = 0,           // (状态机，继续for循环)
+    __LOCAL_BREAK_LOOP              // (状态机，跳出for循环)
+} __LocalLoopFlag;
+
+// (分割线)-------------------------------------------------------------------------
 // (空函数与前置声明)
 static void __local_null_loop(uint8_t id);
 static void __local_null_init(MotorStatus *motorstatus);
@@ -63,6 +97,13 @@ static void __local_start0_current_init(MotorStatus *motorstatus);
 static void __local_start1_angle_init(MotorStatus *motorstatus);
 static void __local_com_init(MotorStatus *motorstatus);
 static void __local_fault_init(MotorStatus *motorstatus);
+static __LocalLoopFlag __local_event_handler(
+    MotorStatus *motorstatus,
+    const __LocalTab *tab,
+    uint32_t standby1_temp,
+    SguanQ value_temp_max,
+    SguanQ value_temp_min,
+    uint32_t overcurrent_stable_temp);
 
 // (数组元素个数宏)
 #define __LOCAL_ARRAY_SIZE(a) (sizeof(a)/sizeof((a)[0]))
@@ -362,6 +403,199 @@ static void __local_fault_init(MotorStatus *motorstatus){
     motorstatus->state = state_fault;
 }
 
+// (分割线)-------------------------------------------------------------------------
+// (局部函数for循环跳出处理)
+static __LocalLoopFlag __local_event_handler(
+    MotorStatus *motorstatus,
+    const __LocalTab *tab,
+    uint32_t standby1_temp,
+    SguanQ value_temp_max,
+    SguanQ value_temp_min,
+    uint32_t overcurrent_stable_temp){
+    switch ((__LocalEvent)tab->event_now) {
+        case event_ready:
+            // 手动触发
+            __local_event_manual0(
+                motorstatus, 
+                RUN(MOTORSTATUS_RUN_READY), 
+                tab);
+            break;
+
+        case event_initializing:
+            // 手动触发
+            __local_event_manual0(
+                motorstatus, 
+                RUN(MOTORSTATUS_RUN_INITIALIZING), 
+                tab);
+            break;
+
+        case event_next:
+            // 手动触发
+            __local_event_manual0(
+                motorstatus, 
+                RUN(MOTORSTATUS_RUN_NEXT), 
+                tab);
+            break;
+
+        case event_standby0:
+            // 手动触发
+            __local_event_manual0(
+                motorstatus, 
+                RUN(MOTORSTATUS_RUN_STANDBY), 
+                tab);
+            break;
+
+        case event_standby1:
+            // 自动event的事件
+            if (standby1_temp >= 
+                motorstatus->params.fault_tick_count) {
+                motorstatus->status = __local_next_init(tab);
+            }
+            break;
+
+        case event_value_holding:
+            // 自动event的事件
+            if ((motorstatus->data.value_real < value_temp_max) &&
+                (motorstatus->data.value_real > value_temp_min)) {
+                motorstatus->status = __local_next_init(tab);
+            }
+            break;
+
+        case event_value_above:
+            // 自动event的事件
+            if (motorstatus->data.value_real >= value_temp_max) {
+                motorstatus->status = __local_next_init(tab);
+            }
+            break;
+
+        case event_value_below:
+            // 自动event的事件
+            if (motorstatus->data.value_real <= value_temp_min) {
+                motorstatus->status = __local_next_init(tab);
+            }
+            break;
+
+        case event_overvoltage:
+            // 自动event的事件
+            if (motorstatus->data.vbus_real >= 
+                motorstatus->params.vbus_max) {
+                motorstatus->status = __local_next_init(tab);
+            }
+            break;
+
+        case event_undervoltage:
+            // 自动event的事件
+            if (motorstatus->data.vbus_real <= 
+                motorstatus->params.vbus_min) {
+                motorstatus->status = __local_next_init(tab);
+            }
+            break;
+
+        case event_overcurrent_moment:
+            // 自动event的事件
+            if (motorstatus->data.is_real >= 
+                motorstatus->params.is_moment_max) {
+                motorstatus->status = __local_next_init(tab);
+            }
+            break;
+
+        case event_overcurrent_stable:
+            // 自动event的事件
+            if ((motorstatus->data.is_real >= 
+                motorstatus->params.is_stable_max) &&
+                // (俩条件，需要同时满足)
+                (overcurrent_stable_temp >= 
+                motorstatus->params.is_tick_count)) {
+                motorstatus->status = __local_next_init(tab);
+            }
+            break;
+
+        case event_overtemp_motor:
+            // 自动event的事件
+            if (motorstatus->data.temp_motor_real >= 
+                motorstatus->params.temp_motor_max) {
+                motorstatus->status = __local_next_init(tab);
+            }
+            break;
+
+        case event_undertemp_motor:
+            // 自动event的事件
+            if (motorstatus->data.temp_motor_real <= 
+                motorstatus->params.temp_motor_min) {
+                motorstatus->status = __local_next_init(tab);
+            }
+            break;
+
+        case event_overtemp_driver:
+            // 自动event的事件
+            if (motorstatus->data.temp_driver_real >= 
+                motorstatus->params.temp_driver_max) {
+                motorstatus->status = __local_next_init(tab);
+            }
+            break;
+
+        case event_undertemp_driver:
+            // 自动event的事件
+            if (motorstatus->data.temp_driver_real <= 
+                motorstatus->params.temp_driver_min) {
+                motorstatus->status = __local_next_init(tab);
+            }
+            break;
+
+        case event_overtemp_pcb:
+            // 自动event的事件
+            if (motorstatus->data.temp_pcb_real >= 
+                motorstatus->params.temp_pcb_max) {
+                motorstatus->status = __local_next_init(tab);
+            }
+            break;
+
+        case event_undertemp_pcb:
+            // 自动event的事件
+            if (motorstatus->data.temp_pcb_real <= 
+                motorstatus->params.temp_pcb_min) {
+                motorstatus->status = __local_next_init(tab);
+            }
+            break;
+
+        case event_fault0:
+            // 手动触发
+            __local_event_manual1(
+                motorstatus, 
+                &motorstatus->data.fault_flag0, 
+                tab);
+            break;
+
+        case event_fault1:
+            // 手动触发
+            __local_event_manual1(
+                motorstatus, 
+                &motorstatus->data.fault_flag1, 
+                tab);
+            break;
+
+        case event_fault2:
+            // 手动触发
+            __local_event_manual1(
+                motorstatus, 
+                &motorstatus->data.fault_flag2, 
+                tab);
+            break;
+
+        default:
+            break;
+    }
+
+    if (motorstatus->last != motorstatus->status){
+        // 仅在状态机变化开始，初始化一次init函数并更新last状态机
+        __local_action_init[motorstatus->status](motorstatus);
+        motorstatus->last = motorstatus->status;
+        // 并跳出整个for循环
+        return __LOCAL_BREAK_LOOP;
+    }
+    return __LOCAL_CONTINUE;
+}
+
 // ================================================================================
 // 4.全局函数motorstatus实现
 // (就绪标志置位)
@@ -409,201 +643,15 @@ void motorstatus_loop(MotorStatus *motorstatus){
     // (分割线)---------------------------------------------------------------------
     for (uint16_t i = 0; i < __LOCAL_ARRAY_SIZE(__local_motor_tab); i++){
         if (__local_motor_tab[i].status_now == motorstatus->status){
-            switch ((__LocalEvent)__local_motor_tab[i].event_now){
-                case event_ready:{
-                    // 手动触发
-                    __local_event_manual0(
-                        motorstatus, 
-                        MOTORSTATUS_RUN_READY,
-                        &__local_motor_tab[i]);
-                    break;
-                }
-                case event_initializing:{
-                    // 手动触发
-                    __local_event_manual0(
-                        motorstatus, 
-                        MOTORSTATUS_RUN_INITIALIZING,
-                        &__local_motor_tab[i]);
-                    break;
-                }
-                case event_next:{
-                    // 手动触发
-                    __local_event_manual0(
-                        motorstatus, 
-                        MOTORSTATUS_RUN_NEXT,
-                        &__local_motor_tab[i]);
-                    break;
-                }
-                case event_standby0:{
-                    // 手动触发
-                    __local_event_manual0(
-                        motorstatus, 
-                        MOTORSTATUS_RUN_STANDBY,
-                        &__local_motor_tab[i]);
-                    break;
-                }
-                case event_standby1:{
-                    // 自动event的事件
-                    if (standby1_temp >= 
-                        motorstatus->params.fault_tick_count){
-                        motorstatus->status = 
-                            __local_next_init(&__local_motor_tab[i]);
-                    }
-                    break;
-                }
-                case event_value_holding:{
-                    // 自动event的事件
-                    if ((motorstatus->data.value_real < value_temp_max) && 
-                        (motorstatus->data.value_real > value_temp_min)){
-                        motorstatus->status = 
-                            __local_next_init(&__local_motor_tab[i]);
-                    }
-                    break;
-                }
-                case event_value_above:{
-                    // 自动event的事件
-                    if (motorstatus->data.value_real >= value_temp_max){
-                        motorstatus->status = 
-                            __local_next_init(&__local_motor_tab[i]);
-                    }
-                    break;
-                }
-                case event_value_below:{
-                    // 自动event的事件
-                    if (motorstatus->data.value_real <= value_temp_min){
-                        motorstatus->status = 
-                            __local_next_init(&__local_motor_tab[i]);
-                    }
-                    break;
-                }
-                case event_overvoltage:{
-                    // 自动event的事件
-                    if (motorstatus->data.vbus_real >= 
-                        motorstatus->params.vbus_max){
-                        motorstatus->status = 
-                            __local_next_init(&__local_motor_tab[i]);
-                    }
-                    break;
-                }
-                case event_undervoltage:{
-                    // 自动event的事件
-                    if (motorstatus->data.vbus_real <= 
-                        motorstatus->params.vbus_min){
-                        motorstatus->status = 
-                            __local_next_init(&__local_motor_tab[i]);
-                    }
-                    break;
-                }
-                case event_overcurrent_moment:{
-                    // 自动event的事件
-                    if (motorstatus->data.is_real >= 
-                        motorstatus->params.is_moment_max){
-                        motorstatus->status = 
-                            __local_next_init(&__local_motor_tab[i]);
-                    }
-                    break;
-                }
-                case event_overcurrent_stable:{
-                    // 自动event的事件
-                    if ((motorstatus->data.is_real >= 
-                        motorstatus->params.is_stable_max) && 
-                        // (俩条件，同时满足)
-                        (overcurrent_stable_temp >= 
-                        motorstatus->params.is_tick_count)){
-                        motorstatus->status = 
-                            __local_next_init(&__local_motor_tab[i]);
-                    }
-                    break;
-                }
-                case event_overtemp_motor:{
-                    // 自动event的事件
-                    if (motorstatus->data.temp_motor_real >= 
-                        motorstatus->params.temp_motor_max){
-                        motorstatus->status = 
-                            __local_next_init(&__local_motor_tab[i]);
-                    }
-                    break;
-                }
-                case event_undertemp_motor:{
-                    // 自动event的事件
-                    if (motorstatus->data.temp_motor_real <= 
-                        motorstatus->params.temp_motor_min){
-                        motorstatus->status = 
-                            __local_next_init(&__local_motor_tab[i]);
-                    }
-                    break;
-                }
-                case event_overtemp_driver:{
-                    // 自动event的事件
-                    if (motorstatus->data.temp_driver_real >= 
-                        motorstatus->params.temp_driver_max){
-                        motorstatus->status = 
-                            __local_next_init(&__local_motor_tab[i]);
-                    }
-                    break;
-                }
-                case event_undertemp_driver:{
-                    // 自动event的事件
-                    if (motorstatus->data.temp_driver_real <= 
-                        motorstatus->params.temp_driver_min){
-                        motorstatus->status = 
-                            __local_next_init(&__local_motor_tab[i]);
-                    }
-                    break;
-                }
-                case event_overtemp_pcb:{
-                    // 自动event的事件
-                    if (motorstatus->data.temp_pcb_real >= 
-                        motorstatus->params.temp_pcb_max){
-                        motorstatus->status = 
-                            __local_next_init(&__local_motor_tab[i]);
-                    }
-                    break;
-                }
-                case event_undertemp_pcb:{
-                    // 自动event的事件
-                    if (motorstatus->data.temp_pcb_real <= 
-                        motorstatus->params.temp_pcb_min){
-                        motorstatus->status = 
-                            __local_next_init(&__local_motor_tab[i]);
-                    }
-                    break;
-                }
-                case event_fault0:{
-                    // 手动触发
-                    __local_event_manual1(
-                        motorstatus, 
-                        &motorstatus->data.fault_flag0,
-                        &__local_motor_tab[i]);
-                    break;
-                }
-                case event_fault1:{
-                    // 手动触发
-                    __local_event_manual1(
-                        motorstatus, 
-                        &motorstatus->data.fault_flag1,
-                        &__local_motor_tab[i]);
-                    break;
-                }
-                case event_fault2:{
-                    // 手动触发
-                    __local_event_manual1(
-                        motorstatus, 
-                        &motorstatus->data.fault_flag2,
-                        &__local_motor_tab[i]);
-                    break;
-                }
-
-                default:
-                    break;
+            if (__local_event_handler(
+                    motorstatus,
+                    &__local_motor_tab[i],
+                    standby1_temp,
+                    value_temp_max,
+                    value_temp_min,
+                    overcurrent_stable_temp) == __LOCAL_BREAK_LOOP){
+                break;
             }
-        }
-
-        // (分割线)-----------------------------------------------------------------
-        if (motorstatus->last != motorstatus->status){
-            // 仅在状态机变化开始，初始化一次init函数并更新last状态机
-            __local_action_init[motorstatus->status](motorstatus);
-            motorstatus->last = motorstatus->status;
         }
     }
 
