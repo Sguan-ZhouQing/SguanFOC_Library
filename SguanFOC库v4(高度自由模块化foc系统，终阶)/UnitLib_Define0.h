@@ -33,6 +33,9 @@
 #define DEFINE0_NUM0_TRANSFER5  1                   // (uint8_t)典型五阶传递函数
 #define DEFINE0_NUM0_INTEGRATOR 1                   // (uint8_t)积分器
 #define DEFINE0_NUM0_DERIVATIVE 1                   // (uint8_t)微分器
+#define DEFINE0_NUM0_DELAY1     1                   // (uint8_t)延时函数"延时一拍"
+#define DEFINE0_NUM0_DELAY2     1                   // (uint8_t)延时函数"延时二拍"
+#define DEFINE0_NUM0_DELAY3     1                   // (uint8_t)延时函数"延时三拍"
 #define DEFINE0_NUM0_HALL       1                   // (uint8_t)霍尔编码器
 #define DEFINE0_NUM0_LADRC1     1                   // (uint8_t)一阶线性自适应抗干扰控制
 #define DEFINE0_NUM0_LADRC2     1                   // (uint8_t)二阶线性自适应抗干扰控制
@@ -59,9 +62,6 @@
 #define DEFINE0_NUM0_ROLO       1                   // (uint8_t)"无感"降阶龙伯格观测器
 #define DEFINE0_NUM0_MARS       1                   // (uint8_t)"无感"模型参考自适应观测器
 #define DEFINE0_NUM0_EKF        1                   // (uint8_t)"无感"扩展卡尔曼滤波
-#define DEFINE0_NUM0_DELAY1     1                   // (uint8_t)延时函数"延时一拍"
-#define DEFINE0_NUM0_DELAY2     1                   // (uint8_t)延时函数"延时二拍"
-#define DEFINE0_NUM0_DELAY3     1                   // (uint8_t)延时函数"延时三拍"
 
 #define DEFINE0_NUM1_SGUANQ      1                  // (uint8_t)扩展SguanQ浮点数
 #define DEFINE0_NUM1_INT8       1                   // (uint8_t)扩展8位有符号数
@@ -71,6 +71,7 @@
 #define DEFINE0_NUM1_INT32      1                   // (uint8_t)扩展32位有符号数
 #define DEFINE0_NUM1_UINT32     1                   // (uint8_t)扩展32位无符号数
 
+// (分割线)-----------------------------------------|-------------------------------
 // 1-6
 // 0-n
 // 宏定义(0指float，1指double，2指Q15，3指Q31)
@@ -78,6 +79,7 @@
 #define DEFINE0_MOTOR_MODE      0                   // (uint8_t)
 #define DEFINE0_MOTOR_MATH      0                   // (uint8_t)
 
+// (分割线)-----------------------------------------|-------------------------------
 #define DEFINE0_BASE_TIME       0.001953125         // (double)
 #define DEFINE0_BASE_VOLTAGE    1024.0              // (double)
 #define DEFINE0_BASE_CURRENT    128.0               // (double)

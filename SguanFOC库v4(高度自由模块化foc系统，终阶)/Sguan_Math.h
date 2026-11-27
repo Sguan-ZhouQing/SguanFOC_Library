@@ -46,6 +46,7 @@ SguanQ math_atan(SguanQ x, SguanF base_in);
 void *math_memset(void *ptr, int value, size_t num);
 void *math_memcpy(void *dst, const void *src, size_t n);
 int math_strcmp(const char *s1, const char *s2);
+void math_matrix3_inv(const SguanF mat[3][3], SguanF inv[3][3]);
 uint8_t math_delay(uint32_t ms, uint32_t *count);
 SguanQ math_normalize(SguanQ angle);
 void math_rad_loop(SguanQ *out, SguanQ in, SguanQ time);
@@ -63,11 +64,17 @@ SguanF math_find_base(SguanF x, int *n);
 SguanF math_find_unit(SguanF in, const char *unit);
 SguanF math_find_wo(SguanF wo, SguanF ts);
 
-void math_clarke(
+void math_clarke0(
     SguanQ *i_alpha, 
     SguanQ *i_beta, 
     SguanQ i_a, 
     SguanQ i_b);
+void math_clarke1(
+    SguanQ *i_alpha, 
+    SguanQ *i_beta, 
+    SguanQ i_a, 
+    SguanQ i_b,
+    SguanQ i_c);
 void math_park(
     SguanQ *i_d, 
     SguanQ *i_q, 

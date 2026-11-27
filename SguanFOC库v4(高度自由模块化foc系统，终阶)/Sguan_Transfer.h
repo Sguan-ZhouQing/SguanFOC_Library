@@ -29,7 +29,6 @@
 /* SguanFOC配置文件声明 */
 #include "Sguan_Config.h"
 
-
 // =================================================|==============================
 // 1.半隐藏设计(声明)
 //   In/Out/Params 结构体公开 —— 用户要直接读写（喂信号、配参数）
@@ -246,29 +245,23 @@ typedef struct __LocalDerivative{
 }__LocalDerivative;
 // (分割线)-----------------------------------------|-------------------------------
 typedef struct{
-    SguanQ ref;
-    SguanQ fbk;
+    uint8_t gpio_a;
+    uint8_t gpio_b;
+    uint8_t gpio_c;
 }__LocalHallIn;
 
 typedef struct{
-    SguanQ output;
+    SguanQ re;
 }__LocalHallOut;
 
 typedef struct{
     SguanQ t;
     SguanQ wc;
 
-    SguanQ kp;
-    SguanQ ki;
-    SguanQ kd;
-
-    SguanQ out_max;
-    SguanQ out_min;
-    SguanQ int_max;
-    SguanQ int_min;
+    SguanQ hall_high;
+    SguanQ hall_low;
 
     uint8_t recalculate_total_flag;
-    uint8_t integral_frozen_flag;
 }__LocalHallParams;
 
 typedef struct __LocalHallData __LocalHallData;
@@ -292,18 +285,13 @@ typedef struct{
 typedef struct{
     SguanQ t;
     SguanQ wc;
-
-    SguanQ kp;
-    SguanQ ki;
-    SguanQ kd;
+    SguanQ wo;
+    SguanQ b0;
 
     SguanQ out_max;
     SguanQ out_min;
-    SguanQ int_max;
-    SguanQ int_min;
 
     uint8_t recalculate_total_flag;
-    uint8_t integral_frozen_flag;
 }__LocalLadrc1Params;
 
 typedef struct __LocalLadrc1Data __LocalLadrc1Data;
@@ -327,18 +315,13 @@ typedef struct{
 typedef struct{
     SguanQ t;
     SguanQ wc;
-
-    SguanQ kp;
-    SguanQ ki;
-    SguanQ kd;
+    SguanQ wo;
+    SguanQ b0;
 
     SguanQ out_max;
     SguanQ out_min;
-    SguanQ int_max;
-    SguanQ int_min;
 
     uint8_t recalculate_total_flag;
-    uint8_t integral_frozen_flag;
 }__LocalLadrc2Params;
 
 typedef struct __LocalLadrc2Data __LocalLadrc2Data;
@@ -992,9 +975,12 @@ typedef struct{
     SguanQ output;
 }__LocalDelay1Out;
 
+typedef struct __LocalDelay1Data __LocalDelay1Data;
+
 typedef struct __LocalDelay1{
     __LocalDelay1In in;
     __LocalDelay1Out out;
+    __LocalDelay1Data *data;
 }__LocalDelay1;
 // (分割线)-----------------------------------------|-------------------------------
 typedef struct{
@@ -1005,9 +991,12 @@ typedef struct{
     SguanQ output;
 }__LocalDelay2Out;
 
+typedef struct __LocalDelay2Data __LocalDelay2Data;
+
 typedef struct __LocalDelay2{
     __LocalDelay2In in;
     __LocalDelay2Out out;
+    __LocalDelay2Data *data;
 }__LocalDelay2;
 // (分割线)-----------------------------------------|-------------------------------
 typedef struct{
@@ -1018,9 +1007,12 @@ typedef struct{
     SguanQ output;
 }__LocalDelay3Out;
 
+typedef struct __LocalDelay3Data __LocalDelay3Data;
+
 typedef struct __LocalDelay3{
     __LocalDelay3In in;
     __LocalDelay3Out out;
+    __LocalDelay3Data *data;
 }__LocalDelay3;
 // (分割线)-----------------------------------------|-------------------------------
 typedef struct{
@@ -1065,6 +1057,7 @@ typedef struct __LocalSinCos{
 // (分割线)-----------------------------------------|-------------------------------
 typedef struct{
     SguanQ input;
+    SguanQ base;
 }__LocalTanIn;
 
 typedef struct{
@@ -1078,6 +1071,7 @@ typedef struct __LocalTan{
 // (分割线)-----------------------------------------|-------------------------------
 typedef struct{
     SguanQ input;
+    SguanQ base;
 }__LocalAtanIn;
 
 typedef struct{
@@ -1088,147 +1082,6 @@ typedef struct __LocalAtan{
     __LocalAtanIn in;
     __LocalAtanOut out;
 }__LocalAtan;
-// (分割线)-----------------------------------------|-------------------------------
-typedef struct{
-    SguanQ input;
-}__LocalLimitIn;
-
-typedef struct{
-    SguanQ output;
-}__LocalLimitOut;
-
-typedef struct{
-    SguanQ out_max;
-    SguanQ out_min;
-}__LocalLimitParams;
-
-typedef struct __LocalLimit{
-    __LocalLimitIn in;
-    __LocalLimitOut out;
-    __LocalLimitParams params;
-}__LocalLimit;
-// (分割线)-----------------------------------------|-------------------------------
-typedef struct{
-    SguanQ we;
-    SguanQ wh;
-}__LocalSignIn;
-
-typedef struct{
-    SguanQ output;
-}__LocalSignOut;
-
-typedef struct __LocalSign{
-    __LocalSignIn in;
-    __LocalSignOut out;
-}__LocalSign;
-// (分割线)-----------------------------------------|-------------------------------
-typedef struct{
-    SguanQ we;
-    SguanQ wh;
-}__LocalClarkeIn;
-
-typedef struct{
-    SguanQ output;
-}__LocalClarkeOut;
-
-typedef struct __LocalClarke{
-    __LocalClarkeIn in;
-    __LocalClarkeOut out;
-}__LocalClarke;
-// (分割线)-----------------------------------------|-------------------------------
-typedef struct{
-    SguanQ we;
-    SguanQ wh;
-}__LocalParkIn;
-
-typedef struct{
-    SguanQ output;
-}__LocalParkOut;
-
-typedef struct __LocalPark{
-    __LocalParkIn in;
-    __LocalParkOut out;
-}__LocalPark;
-// (分割线)-----------------------------------------|-------------------------------
-typedef struct{
-    SguanQ we;
-    SguanQ wh;
-}__LocalIparkIn;
-
-typedef struct{
-    SguanQ output;
-}__LocalIparkOut;
-
-typedef struct __LocalIpark{
-    __LocalIparkIn in;
-    __LocalIparkOut out;
-}__LocalIpark;
-// (分割线)-----------------------------------------|-------------------------------
-typedef struct{
-    SguanQ we;
-    SguanQ wh;
-}__LocalSpwmIn;
-
-typedef struct{
-    SguanQ output;
-}__LocalSpwmOut;
-
-typedef struct __LocalSpwm{
-    __LocalSpwmIn in;
-    __LocalSpwmOut out;
-}__LocalSpwm;
-// (分割线)-----------------------------------------|-------------------------------
-typedef struct{
-    SguanQ we;
-    SguanQ wh;
-}__LocalSvpwmIn;
-
-typedef struct{
-    SguanQ output;
-}__LocalSvpwmOut;
-
-typedef struct __LocalSvpwm{
-    __LocalSvpwmIn in;
-    __LocalSvpwmOut out;
-}__LocalSvpwm;
-// (分割线)-----------------------------------------|-------------------------------
-typedef struct{
-    SguanQ we;
-    SguanQ wh;
-}__LocalSwpwmIn;
-
-typedef struct{
-    SguanQ output;
-}__LocalSwpwmOut;
-
-typedef struct __LocalSwpwm{
-    __LocalSwpwmIn in;
-    __LocalSwpwmOut out;
-}__LocalSwpwm;
-// (分割线)-----------------------------------------|-------------------------------
-typedef struct{
-    SguanQ input;
-}__LocalSingleRsIn;
-
-typedef struct{
-    SguanQ output;
-}__LocalSingleRsOut;
-
-typedef struct{
-    SguanQ t;
-    SguanQ wo;
-
-    SguanQ k1;
-    SguanQ k2;
-
-    uint8_t recalculate_total_flag;
-}__LocalSingleRsParams;
-
-typedef struct __LocalSingleRs{
-    __LocalSingleRsIn in;
-    __LocalSingleRsOut out;
-    __LocalSingleRsParams params;
-}__LocalSingleRs;
 
 // =================================================|==============================
 // 2.全局结构体Transfer定义
@@ -1365,6 +1218,7 @@ typedef struct{
     __LocalEkf *ekf_ch[CONFIG_EKF];
     #endif // CONFIG_EKF
 
+    // (分割线)-------------------------------------|------------------------------
     #if CONFIG_DELAY1 // 延时函数"延时一拍"
     __LocalDelay1 *delay1_ch[CONFIG_DELAY1];
     #endif // CONFIG_DELAY1
@@ -1377,20 +1231,12 @@ typedef struct{
     __LocalDelay3 *delay3_ch[CONFIG_DELAY3];
     #endif // CONFIG_DELAY3
 
+    // (分割线)-------------------------------------|------------------------------
     __LocalSine *sine;                              // 正弦发生器
     __LocalCosine *cosine;                          // 余弦发生器
     __LocalSinCos *sincos;                          // 正余弦发生器
     __LocalTan *tan;                                // 正切求解器
     __LocalAtan *atan;                              // 反正切求解器
-    __LocalLimit *limit;                            // 限幅函数
-    __LocalSign *sign;                              // 符号函数
-    __LocalClarke *clarke;                          // 克拉克变换
-    __LocalPark *park;                              // 帕克变换
-    __LocalIpark *ipark;                            // 帕克逆变换
-    __LocalSpwm *spwm;                              // 零序注入的SPWM模块
-    __LocalSvpwm *svpwm;                            // 七段式SVPWM模块
-    __LocalSwpwm *swpwm;                            // 电调PWM无感方波
-    __LocalSingleRs *singlers;                      // 单电阻采样函数
 }Transfer;
 
 // =================================================|==============================
@@ -1429,26 +1275,17 @@ void transfer_hfi_loop(__LocalHfi *hfi);
 void transfer_rolo_loop(__LocalRolo *rolo);
 void transfer_mars_loop(__LocalMars *mars);
 void transfer_ekf_loop(__LocalEkf *ekf);
+// (分割线)-----------------------------------------|------------------------------
 void transfer_delay1_loop(__LocalDelay1 *delay);
 void transfer_delay2_loop(__LocalDelay2 *delay);
 void transfer_delay3_loop(__LocalDelay3 *delay);
-
+// (分割线)-----------------------------------------|------------------------------
 void transfer_sine_loop(__LocalSine *sine);
 void transfer_cosine_loop(__LocalCosine *cosine);
 void transfer_sincos_loop(__LocalSinCos *sincos);
 void transfer_tan_loop(__LocalTan *tan);
 void transfer_atan_loop(__LocalAtan *atan);
-void transfer_limit_loop(__LocalLimit *limit);
-void transfer_sign_loop(__LocalSign *sign);
-void transfer_clarke_loop(__LocalClarke *clarke);
-void transfer_park_loop(__LocalPark *park);
-void transfer_ipark_loop(__LocalIpark *ipark);
-void transfer_spwm_loop(__LocalSpwm *spwm);
-void transfer_svpwm_loop(__LocalSvpwm *svpwm);
-void transfer_swpwm_loop(__LocalSwpwm *swpwm);
-void transfer_singlers_start_loop(__LocalSingleRs *singlers);
-void transfer_singlers_end_loop(__LocalSingleRs *singlers);
-
+// (分割线)-----------------------------------------|------------------------------
 void transfer_init_0(Transfer *transfer);       // (指针)初始化
 void transfer_deinit_0(Transfer *transfer);     // (指针)失能
 void transfer_init_1(Transfer *transfer);       // (功能模块)初始化

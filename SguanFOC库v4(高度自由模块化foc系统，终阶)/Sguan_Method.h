@@ -29,6 +29,7 @@
 /* SguanFOC配置文件声明 */
 #include "Sguan_Config.h"
 
+// =================================================|==============================
 typedef struct{
     #if CONFIG_SGUANQ // 扩展SguanQ浮点数
     SguanQ             sguanq_ch[CONFIG_SGUANQ];
@@ -62,7 +63,10 @@ typedef struct{
     uint8_t response;                               // (环路倍率)内外环控制倍率
 }Method;
 
+// =================================================|==============================
+CPLUSPLUS_C_BEGIN // C和C++配置文件声明_BEGIN
 
+CPLUSPLUS_C_END // C和C++配置文件声明_END
 
 
 #endif // SGUAN_METHOD

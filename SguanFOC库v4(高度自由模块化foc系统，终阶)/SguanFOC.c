@@ -75,7 +75,7 @@ __LOCAL_MOTOR_LIST
 // 5. 结构体数组初始化
 SguanFoc sguanfoc[CONFIG_MOTOR] = {
     #define X(n) { \
-        .id_flag = n, \
+        .id = n, \
         .func_high_loop = high_loop_##n, \
         .func_low_loop = low_loop_##n, \
         .func_printf_loop = sguanfoc_printf_loop, \

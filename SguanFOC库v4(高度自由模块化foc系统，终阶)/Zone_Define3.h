@@ -29,19 +29,23 @@
 #define DEFINE3_MC_VBUS         24.0                // (double)
 #define DEFINE3_MC_ETA          1.0                 // (double)
 
+// (分割线)-----------------------------------------|-------------------------------
 #define DEFINE3_DUTY_MAX        4249                // (uint32_t)
 
+// (分割线)-----------------------------------------|-------------------------------
 #define DEFINE3_DIR_ENCODER     1                   // (int8_t)
 #define DEFINE3_DIR_PWM         1                   // (int8_t)
 #define DEFINE3_DIR_CURRENT0    1                   // (int8_t)
 #define DEFINE3_DIR_CURRENT1    1                   // (int8_t)
 #define DEFINE3_DIR_CURRENT2    1                   // (int8_t)
 
+// (分割线)-----------------------------------------|-------------------------------
 #define DEFINE3_ADC_PRECISION   4096                // (uint32_t)
 #define DEFINE3_ADC_AMPLIFIER   10.0                // (double)
 #define DEFINE3_ADC_VOLTAGE     3.3                 // (double)
 #define DEFINE3_ADC_SAMPLING_RS 0.015               // (double)
 
+// (分割线)-----------------------------------------|-------------------------------
 // 定时器中断参数设计
 #define DEFINE3_TIM_T 5e-5                           // 最大频率的控制周期
 

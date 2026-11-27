@@ -26,13 +26,13 @@
 #ifndef __USERMOTOR_DEFINE2_H
 #define __USERMOTOR_DEFINE2_H
 
-
 #define DEFINE2_MC_RS           0.185               // (double)
 #define DEFINE2_MC_LD           0.00003740297       // (double)
 #define DEFINE2_MC_LQ           0.00006319703       // (double)
 #define DEFINE2_MC_FLUX         0.0024143           // (double)
 #define DEFINE2_MC_POLES        7                   // (uint8_t)
 
+// (分割线)-----------------------------------------|-------------------------------
 #define DEFINE2_DIR_MOTOR       1                   // (int8_t)
 
 

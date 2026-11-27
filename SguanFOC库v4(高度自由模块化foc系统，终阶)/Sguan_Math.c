@@ -773,7 +773,7 @@ static Q15 __local_sin_q15(Q15 x){
     int32_t idx1 = idx0 + 1;
     if (idx1 >= 512) idx1 = 0;
 
-    return __local_sin_tab[idx0] + (Q15)(((int32_t)(__local_sin_tab[idx1]-__local_sin_tab[idx0])*frac)>>15);
+    return __local_sin_tab[idx0]+(Q15)(((int32_t)(__local_sin_tab[idx1]-__local_sin_tab[idx0])*frac)>>15);
 }
 
 // (q15相关的三角局部函数)
@@ -812,7 +812,8 @@ static Q15 __local_atan_q15(Q15 x, SguanF base){
     int32_t idx1 = idx0 + 1;
     if (idx1 > 90) idx1 = 90;
 
-    Q15 y = __local_atan_tab[idx0] + (Q15)(((int32_t)(__local_atan_tab[idx1]-__local_atan_tab[idx0])*frac)>>15);
+    Q15 y = __local_atan_tab[idx0] + 
+        (Q15)(((int32_t)(__local_atan_tab[idx1]-__local_atan_tab[idx0])*frac)>>15);
     Q15 y8 = y / 8;
     Q15 result = folded ? (Q15)(VALUE_Q15_PI_2 - y8) : y8;
     return neg ? (Q15)(-result) : result;
@@ -833,7 +834,7 @@ static Q31 __local_sin_q31(Q31 x){
     int32_t idx1 = idx0 + 1;
     if (idx1 >= 512) idx1 = 0;
 
-    return __local_sin_tab[idx0] + (Q31)(((int64_t)(__local_sin_tab[idx1]-__local_sin_tab[idx0])*frac)>>31);
+    return __local_sin_tab[idx0]+(Q31)(((int64_t)(__local_sin_tab[idx1]-__local_sin_tab[idx0])*frac)>>31);
 }
 
 // (q31相关的三角局部函数)
@@ -870,7 +871,8 @@ static Q31 __local_atan_q31(Q31 x, SguanF base){
     int32_t idx1 = idx0 + 1;
     if (idx1 > 90) idx1 = 90;
 
-    Q31 y = __local_atan_tab[idx0] + (Q31)(((int64_t)(__local_atan_tab[idx1]-__local_atan_tab[idx0])*frac)>>31);
+    Q31 y = __local_atan_tab[idx0] + 
+        (Q31)(((int64_t)(__local_atan_tab[idx1]-__local_atan_tab[idx0])*frac)>>31);
     Q31 y8 = y / 8;
     Q31 result = folded ? (VALUE_Q31_PI_2 - y8) : y8;
     return neg ? (Q31)(-result) : result;
@@ -1387,6 +1389,34 @@ int math_strcmp(const char *s1, const char *s2){
     return (int)(*p1) - (int)(*p2);
 }
 
+// (三阶方阵求逆)
+void math_matrix3_inv(const SguanF mat[3][3], SguanF inv[3][3]){
+    SguanF det;
+    uint8_t i, j;
+    det = mat[0][0]*(mat[1][1]*mat[2][2] - mat[1][2]*mat[2][1]) - 
+          mat[0][1]*(mat[1][0]*mat[2][2] - mat[1][2]*mat[2][0]) + 
+          mat[0][2]*(mat[1][0]*mat[2][1] - mat[1][1]*mat[2][0]);
+
+    if ((det > -SGUAN_F(1e-20)) && (det < SGUAN_F(1e-20))){
+        for (i = 0; i < 3; i++){
+            for (j = 0; j < 3; j++){
+                inv[i][j] = (i == j) ? VALUE_F_ONE : 0;
+            } // 奇异保护(退化为单位阵，避免除零)
+        }
+        return;
+    }
+
+    inv[0][0] = ( mat[1][1]*mat[2][2] - mat[1][2]*mat[2][1])/det;
+    inv[0][1] = ( mat[0][2]*mat[2][1] - mat[0][1]*mat[2][2])/det;
+    inv[0][2] = ( mat[0][1]*mat[1][2] - mat[0][2]*mat[1][1])/det;
+    inv[1][0] = ( mat[1][2]*mat[2][0] - mat[1][0]*mat[2][2])/det;
+    inv[1][1] = ( mat[0][0]*mat[2][2] - mat[0][2]*mat[2][0])/det;
+    inv[1][2] = ( mat[0][2]*mat[1][0] - mat[0][0]*mat[1][2])/det;
+    inv[2][0] = ( mat[1][0]*mat[2][1] - mat[1][1]*mat[2][0])/det;
+    inv[2][1] = ( mat[0][1]*mat[2][0] - mat[0][0]*mat[2][1])/det;
+    inv[2][2] = ( mat[0][0]*mat[1][1] - mat[0][1]*mat[1][0])/det;
+}
+
 // (定时器延时函数)
 uint8_t math_delay(uint32_t ms, uint32_t *count){
     (*count)++;
@@ -1675,8 +1705,8 @@ SguanF math_find_wo(SguanF wo, SguanF ts){
 
 // ================================================================================
 // 10.全局函数math电机
-// (等幅值克拉克变换)
-void math_clarke(
+// (等幅值克拉克变换，仅两相电流)
+void math_clarke0(
     SguanQ *i_alpha, 
     SguanQ *i_beta, 
     SguanQ i_a, 
@@ -1691,6 +1721,35 @@ void math_clarke(
 
     (*i_alpha) = i_a;
     (*i_beta) = math_mul(math_add(i_a,(2*i_b)), temp);
+}
+
+// (等幅值克拉克变换，三相电流)
+void math_clarke1(
+    SguanQ *i_alpha, 
+    SguanQ *i_beta, 
+    SguanQ i_a, 
+    SguanQ i_b,
+    SguanQ i_c){
+    #if VALUE_MODE_MATH==VALUE_MODE_Q15
+    const SguanQ temp_half = VALUE_Q15_HALF;
+    const SguanQ temp_2_3 = VALUE_Q15_2_3;
+    const SguanQ temp_inv_sqrt3 = VALUE_Q15_INV_SQRT3;
+    #elif VALUE_MODE_MATH==VALUE_MODE_Q31
+    const SguanQ temp_half = VALUE_Q31_HALF;
+    const SguanQ temp_2_3 = VALUE_Q31_2_3;
+    const SguanQ temp_inv_sqrt3 = VALUE_Q31_INV_SQRT3;
+    #else // VALUE_MODE_MATH
+    const SguanQ temp_half = VALUE_F_HALF;
+    const SguanQ temp_2_3 = VALUE_F_2_3;
+    const SguanQ temp_inv_sqrt3 = VALUE_F_INV_SQRT3;
+    #endif // VALUE_MODE_MATH
+
+    SguanQ temp_alpha0 = math_mul(i_b, temp_half);
+    SguanQ temp_alpha1 = math_mul(i_c, temp_half);
+    SguanQ temp_alpha_all = 
+        math_sub(i_a, math_add(temp_alpha0,temp_alpha1));
+    (*i_alpha) = math_mul(temp_alpha_all, temp_2_3);
+    (*i_beta) = math_mul(math_sub(i_b,i_c), temp_inv_sqrt3);
 }
 
 // (帕克变换)

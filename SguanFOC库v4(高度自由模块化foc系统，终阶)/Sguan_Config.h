@@ -75,6 +75,24 @@
 #define CONFIG_DERIVATIVE   0
 #endif // DEFINE0_NUM0_DERIVATIVE
 
+#ifdef DEFINE0_NUM0_DELAY1
+#define CONFIG_DELAY1       DEFINE0_NUM0_DELAY1
+#else // DEFINE0_NUM0_DELAY1
+#define CONFIG_DELAY1       0
+#endif // DEFINE0_NUM0_DELAY1
+
+#ifdef DEFINE0_NUM0_DELAY2
+#define CONFIG_DELAY2       DEFINE0_NUM0_DELAY2
+#else // DEFINE0_NUM0_DELAY2
+#define CONFIG_DELAY2       0
+#endif // DEFINE0_NUM0_DELAY2
+
+#ifdef DEFINE0_NUM0_DELAY3
+#define CONFIG_DELAY3       DEFINE0_NUM0_DELAY3
+#else // DEFINE0_NUM0_DELAY3
+#define CONFIG_DELAY3       0
+#endif // DEFINE0_NUM0_DELAY3
+
 #ifdef DEFINE0_NUM0_HALL
 #define CONFIG_HALL         DEFINE0_NUM0_HALL
 #else // DEFINE0_NUM0_HALL
@@ -230,24 +248,6 @@
 #else // DEFINE0_NUM0_EKF
 #define CONFIG_EKF          0
 #endif // DEFINE0_NUM0_EKF
-
-#ifdef DEFINE0_NUM0_DELAY1
-#define CONFIG_DELAY1       DEFINE0_NUM0_DELAY1
-#else // DEFINE0_NUM0_DELAY1
-#define CONFIG_DELAY1       0
-#endif // DEFINE0_NUM0_DELAY1
-
-#ifdef DEFINE0_NUM0_DELAY2
-#define CONFIG_DELAY2       DEFINE0_NUM0_DELAY2
-#else // DEFINE0_NUM0_DELAY2
-#define CONFIG_DELAY2       0
-#endif // DEFINE0_NUM0_DELAY2
-
-#ifdef DEFINE0_NUM0_DELAY3
-#define CONFIG_DELAY3       DEFINE0_NUM0_DELAY3
-#else // DEFINE0_NUM0_DELAY3
-#define CONFIG_DELAY3       0
-#endif // DEFINE0_NUM0_DELAY3
 
 // ================================================================================
 // 2.Method模块使用的宏定义

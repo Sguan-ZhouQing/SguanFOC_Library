@@ -29,7 +29,43 @@
 #include "UnitLib_Patch.h"
 
 // ================================================================================
-// 1.局部函数__local基础
+// 1.局部量__local声明
+// ()
+static void __local_transfer1_initial(__LocalTransfer1 *transfer);
+static void __local_transfer2_initial(__LocalTransfer2 *transfer);
+static void __local_transfer3_initial(__LocalTransfer3 *transfer);
+static void __local_transfer4_initial(__LocalTransfer4 *transfer);
+static void __local_transfer5_initial(__LocalTransfer5 *transfer);
+// __local_integrator_initial...........此函数无需定义
+static void __local_derivative_initial(__LocalDerivative *derivative);
+// __local_hall_initial.................此函数无需定义
+static void __local_ladrc1_initial(__LocalLadrc1 *ladrc);
+static void __local_ladrc2_initial(__LocalLadrc2 *ladrc);
+static void __local_smc_initial(__LocalSmc *smc);
+static void __local_dpcc_initial(__LocalDpcc *dpcc);
+static void __local_pir_initial(__LocalPir *pir);
+static void __local_pid_initial(__LocalPid *pid);
+static void __local_pll_initial(__LocalPll *pll);
+static void __local_lpf1_initial(__LocalLpf1 *lpf);
+static void __local_lpf2_initial(__LocalLpf2 *lpf);
+static void __local_hpf1_initial(__LocalHpf1 *hpf);
+static void __local_hpf2_initial(__LocalHpf2 *hpf);
+static void __local_bpf1_initial(__LocalBpf1 *bpf);
+static void __local_bpf2_initial(__LocalBpf2 *bpf);
+static void __local_sogi_initial(__LocalSogi *sogi);
+static void __local_nf_initial(__LocalNf *nf);
+static void __local_tpnf_initial(__LocalTpnf *tpnf);
+static void __local_dob_initial(__LocalDob *dob);
+static void __local_rls_initial(__LocalRls *rls);
+static void __local_smo_initial(__LocalSmo *smo);
+static void __local_nfo_initial(__LocalNfo *nfo);
+static void __local_afo_initial(__LocalAfo *afo);
+static void __local_hfi_initial(__LocalHfi *hfi);
+static void __local_rolo_initial(__LocalRolo *rolo);
+static void __local_mars_initial(__LocalMars *mars);
+static void __local_ekf_initial(__LocalEkf *ekf);
+
+// ()
 static void __local_transfer1_init(__LocalTransfer1 *transfer);
 static void __local_transfer2_init(__LocalTransfer2 *transfer);
 static void __local_transfer3_init(__LocalTransfer3 *transfer);
@@ -63,12 +99,22 @@ static void __local_hfi_init(__LocalHfi *hfi);
 static void __local_rolo_init(__LocalRolo *rolo);
 static void __local_mars_init(__LocalMars *mars);
 static void __local_ekf_init(__LocalEkf *ekf);
+// (分割线)-------------------------------------------------------------------------
 static void __local_delay1_init(__LocalDelay1 *delay);
 static void __local_delay2_init(__LocalDelay2 *delay);
 static void __local_delay3_init(__LocalDelay3 *delay);
 
+// ()
+#define __LOCAL_ZERO_ALL(obj) \
+    do{ \
+        math_memset(&(obj)->in,  0, sizeof((obj)->in)); \
+        math_memset(&(obj)->out, 0, sizeof((obj)->out)); \
+        math_memset((obj)->data, 0, sizeof(*(obj)->data)); \
+    }while(0)
+
 // ================================================================================
 // 2.实例获取静态池(声明)
+// ()
 #if CONFIG_TRANSFER1
 __LocalTransfer1 *__local_transfer1_get(uint8_t motor, int ch);
 #endif
@@ -168,6 +214,7 @@ __LocalMars *__local_mars_get(uint8_t motor, int ch);
 #if CONFIG_EKF
 __LocalEkf *__local_ekf_get(uint8_t motor, int ch);
 #endif
+// (分割线)-------------------------------------------------------------------------
 #if CONFIG_DELAY1
 __LocalDelay1 *__local_delay1_get(uint8_t motor, int ch);
 #endif
@@ -178,50 +225,51 @@ __LocalDelay2 *__local_delay2_get(uint8_t motor, int ch);
 __LocalDelay3 *__local_delay3_get(uint8_t motor, int ch);
 #endif
 
+// ()
 __LocalSine *__local_sine_get(uint8_t motor);
 __LocalCosine *__local_cosine_get(uint8_t motor);
 __LocalSinCos *__local_sincos_get(uint8_t motor);
 __LocalTan *__local_tan_get(uint8_t motor);
 __LocalAtan *__local_atan_get(uint8_t motor);
-__LocalLimit *__local_limit_get(uint8_t motor);
-__LocalSign *__local_sign_get(uint8_t motor);
-__LocalClarke *__local_clarke_get(uint8_t motor);
-__LocalPark *__local_park_get(uint8_t motor);
-__LocalIpark *__local_ipark_get(uint8_t motor);
-__LocalSpwm *__local_spwm_get(uint8_t motor);
-__LocalSvpwm *__local_svpwm_get(uint8_t motor);
-__LocalSwpwm *__local_swpwm_get(uint8_t motor);
-__LocalSingleRs *__local_singlers_get(uint8_t motor);
 
 // ================================================================================
-// 3.全局函数transfer基础
-// (典型一阶传递函数，计数1)----------------------------------------------------------
+// 3.全局函数transfer高级模块
+// (典型一阶传递函数，计数1)--------------------------|------------------------------
 struct __LocalTransfer1Data{
-    SguanQ i;
-    SguanQ o;
+    SguanQ i;                                       // (状态)历史输入
+    SguanQ o;                                       // (状态)历史输出
 
-    SguanQ data_num[2];
-    SguanQ data_den[2];
+    SguanQ data_num[2];                             // (系数)分子系数表
+    SguanQ data_den[2];                             // (系数)分母系数表
 };
+
+// (典型一阶传递函数，计数1)
+static void __local_transfer1_initial(__LocalTransfer1 *transfer){
+    transfer->data->data_num[0] = 
+        VALUE_F_TWO*transfer->params.num1 + 
+        transfer->params.num0*transfer->params.t;
+    transfer->data->data_num[1] = 
+        -VALUE_F_TWO*transfer->params.num1 + 
+        transfer->params.num0*transfer->params.t;
+
+    transfer->data->data_den[0] = 
+        VALUE_F_TWO*transfer->params.den1 + 
+        transfer->params.den0*transfer->params.t;
+    transfer->data->data_den[1] = 
+        -VALUE_F_TWO*transfer->params.den1 + 
+        transfer->params.den0*transfer->params.t;
+}
 
 // (典型一阶传递函数，计数1)
 static void __local_transfer1_init(__LocalTransfer1 *transfer){
     #if VALUE_MODE_MATH>=VALUE_MODE_Q15
     patch_transfer1_init(transfer);
     #else // VALUE_MODE_MATH
-    // 传递函数运算系数固定计算
-    transfer->data->data_num[0] = 2.0f*transfer->params.num1 + transfer->params.num0*transfer->params.t;
-    transfer->data->data_num[1] = -2.0f*transfer->params.num1 + transfer->params.num0*transfer->params.t;
-
-    transfer->data->data_den[0] = 2.0f*transfer->params.den1 + transfer->params.den0*transfer->params.t;
-    transfer->data->data_num[1] = -2.0f*transfer->params.den1 + transfer->params.den0*transfer->params.t;
-
     // 初始化为零
-    transfer->data->i = 0.0f;
-    transfer->data->o = 0.0f;
+    __LOCAL_ZERO_ALL(transfer);
 
-    transfer->in.input = 0.0f;
-    transfer->out.output = 0.0f;
+    // 传递函数运算系数固定计算
+    __local_transfer1_initial(transfer);
     #endif // VALUE_MODE_MATH
 }
 
@@ -232,15 +280,14 @@ void transfer_transfer1_loop(__LocalTransfer1 *transfer){
     #else // VALUE_MODE_MATH
     // 1.传递函数运算系数动态计算
     if (transfer->params.recalculate_total_flag){
-        transfer->data->data_num[0] = 2.0f*transfer->params.num1 + transfer->params.num0*transfer->params.t;
-        transfer->data->data_num[1] = -2.0f*transfer->params.num1 + transfer->params.num0*transfer->params.t;
-
-        transfer->data->data_den[0] = 2.0f*transfer->params.den1 + transfer->params.den0*transfer->params.t;
-        transfer->data->data_num[1] = -2.0f*transfer->params.den1 + transfer->params.den0*transfer->params.t;
+        __local_transfer1_initial(transfer);
     }
 
     // 2.运算传递函数
-    transfer->out.output = (transfer->in.input*transfer->data->data_num[0] + transfer->data->i*transfer->data->data_num[1] - transfer->data->o*transfer->data->data_den[1])/transfer->data->data_den[0];
+    transfer->out.output = 
+        (transfer->in.input*transfer->data->data_num[0] + 
+        transfer->data->i*transfer->data->data_num[1] - 
+        transfer->data->o*transfer->data->data_den[1])/transfer->data->data_den[0];
 
     // 3.更新历史数值
     transfer->data->i = transfer->in.input;
@@ -248,38 +295,55 @@ void transfer_transfer1_loop(__LocalTransfer1 *transfer){
     #endif // VALUE_MODE_MATH
 }
 
-// (典型二阶传递函数，计数2)----------------------------------------------------------
+// (典型二阶传递函数，计数2)--------------------------|------------------------------
 struct __LocalTransfer2Data{
-    SguanQ i[2];
-    SguanQ o[2];
+    SguanQ t_pow2;                                  // (系数)t的平方
 
-    SguanQ data_num[3];
-    SguanQ data_den[3];
+    SguanQ i[2];                                    // (状态)输入历史
+    SguanQ o[2];                                    // (状态)输出历史
+
+    SguanQ data_num[3];                             // (系数)分子系数表
+    SguanQ data_den[3];                             // (系数)分母系数表
 };
+
+// (典型二阶传递函数，计数2)
+static void __local_transfer2_initial(__LocalTransfer2 *transfer){
+    transfer->data->data_num[0] = 
+        VALUE_F_FOUR*transfer->params.num2 + 
+        VALUE_F_TWO*transfer->params.num1*transfer->params.t + 
+        transfer->params.num0*transfer->data->t_pow2;
+    transfer->data->data_num[1] = 
+        -VALUE_F_EIGHT*transfer->params.num2 + 
+        VALUE_F_TWO*transfer->params.num0*transfer->data->t_pow2;
+    transfer->data->data_num[2] = 
+        VALUE_F_FOUR*transfer->params.num2 - 
+        VALUE_F_TWO*transfer->params.num1*transfer->params.t + 
+        transfer->params.num0*transfer->data->t_pow2;
+    
+    transfer->data->data_den[0] = 
+        VALUE_F_FOUR*transfer->params.den2 + 
+        VALUE_F_TWO*transfer->params.den1*transfer->params.t + 
+        transfer->params.den0*transfer->data->t_pow2;
+    transfer->data->data_den[1] = 
+        -VALUE_F_EIGHT*transfer->params.den2 + 
+        VALUE_F_TWO*transfer->params.den0*transfer->data->t_pow2;
+    transfer->data->data_den[2] = 
+        VALUE_F_FOUR*transfer->params.den2 - 
+        VALUE_F_TWO*transfer->params.den1*transfer->params.t + 
+        transfer->params.den0*transfer->data->t_pow2;
+}
 
 // (典型二阶传递函数，计数2)
 static void __local_transfer2_init(__LocalTransfer2 *transfer){
     #if VALUE_MODE_MATH>=VALUE_MODE_Q15
     patch_transfer2_init(transfer);
     #else // VALUE_MODE_MATH
-    // 传递函数运算系数固定计算
-    transfer->data->data_num[0] = 4.0f*transfer->params.num2 + 2.0f*transfer->params.num1*transfer->params.t + transfer->params.num0*transfer->params.t*transfer->params.t;
-    transfer->data->data_num[1] = -8.0f*transfer->params.num2 + 2.0f*transfer->params.num0*transfer->params.t*transfer->params.t;
-    transfer->data->data_num[2] = 4.0f*transfer->params.num2 - 2.0f*transfer->params.num1*transfer->params.t + transfer->params.num0*transfer->params.t*transfer->params.t;
-    
-    transfer->data->data_den[0] = 4.0f*transfer->params.den2 + 2.0f*transfer->params.den1*transfer->params.t + transfer->params.den0*transfer->params.t*transfer->params.t;
-    transfer->data->data_den[1] = -8.0f*transfer->params.den2 + 2.0f*transfer->params.den0*transfer->params.t*transfer->params.t;
-    transfer->data->data_den[2] = 4.0f*transfer->params.den2 - 2.0f*transfer->params.den1*transfer->params.t + transfer->params.den0*transfer->params.t*transfer->params.t;
-
     // 初始化为零
-    transfer->data->i[0] = 0.0f;
-    transfer->data->i[1] = 0.0f;
-    
-    transfer->data->o[1] = 0.0f;
-    transfer->data->o[1] = 0.0f;
+    __LOCAL_ZERO_ALL(transfer);
 
-    transfer->in.input = 0.0f;
-    transfer->out.output = 0.0f;
+    // 传递函数运算系数固定计算
+    transfer->data->t_pow2 = math_pow(transfer->params.t, 2);
+    __local_transfer2_initial(transfer);
     #endif // VALUE_MODE_MATH
 }
 
@@ -290,17 +354,16 @@ void transfer_transfer2_loop(__LocalTransfer2 *transfer){
     #else // VALUE_MODE_MATH
     // 1.传递函数运算系数动态计算
     if (transfer->params.recalculate_total_flag){
-        transfer->data->data_num[0] = 4.0f*transfer->params.num2 + 2.0f*transfer->params.num1*transfer->params.t + transfer->params.num0*transfer->params.t*transfer->params.t;
-        transfer->data->data_num[1] = -8.0f*transfer->params.num2 + 2.0f*transfer->params.num0*transfer->params.t*transfer->params.t;
-        transfer->data->data_num[2] = 4.0f*transfer->params.num2 - 2.0f*transfer->params.num1*transfer->params.t + transfer->params.num0*transfer->params.t*transfer->params.t;
-        
-        transfer->data->data_den[0] = 4.0f*transfer->params.den2 + 2.0f*transfer->params.den1*transfer->params.t + transfer->params.den0*transfer->params.t*transfer->params.t;
-        transfer->data->data_den[1] = -8.0f*transfer->params.den2 + 2.0f*transfer->params.den0*transfer->params.t*transfer->params.t;
-        transfer->data->data_den[2] = 4.0f*transfer->params.den2 - 2.0f*transfer->params.den1*transfer->params.t + transfer->params.den0*transfer->params.t*transfer->params.t;
+        __local_transfer2_initial(transfer);
     }
 
     // 2.运算传递函数
-    transfer->out.output = (transfer->in.input*transfer->data->data_num[0] + transfer->data->i[0]*transfer->data->data_num[1] + transfer->data->i[1]*transfer->data->data_num[2] - transfer->data->o[0]*transfer->data->data_den[1] - transfer->data->o[1]*transfer->data->data_den[2])/transfer->data->data_den[0];
+    transfer->out.output = 
+        (transfer->in.input*transfer->data->data_num[0] + 
+        transfer->data->i[0]*transfer->data->data_num[1] + 
+        transfer->data->i[1]*transfer->data->data_num[2] - 
+        transfer->data->o[0]*transfer->data->data_den[1] - 
+        transfer->data->o[1]*transfer->data->data_den[2])/transfer->data->data_den[0];
 
     // 3.更新历史数值
     transfer->data->i[1] = transfer->data->i[0];
@@ -311,42 +374,75 @@ void transfer_transfer2_loop(__LocalTransfer2 *transfer){
     #endif // VALUE_MODE_MATH
 }
 
-// (典型三阶传递函数，计数3)----------------------------------------------------------
+// (典型三阶传递函数，计数3)--------------------------|------------------------------
 struct __LocalTransfer3Data{
-    SguanQ i[3];
-    SguanQ o[3];
+    SguanQ t_pow2;                                  // (系数)t的平方
+    SguanQ t_pow3;                                  // (系数)t的三次方
 
-    SguanQ data_num[4];
-    SguanQ data_den[4];
+    SguanQ i[3];                                    // (状态)输入历史
+    SguanQ o[3];                                    // (状态)输出历史
+
+    SguanQ data_num[4];                             // (系数)分子系数表
+    SguanQ data_den[4];                             // (系数)分母系数表
 };
+
+// (典型三阶传递函数，计数3)
+static void __local_transfer3_initial(__LocalTransfer3 *transfer){
+    transfer->data->data_num[0] = 
+        VALUE_F_EIGHT*transfer->params.num3 + 
+        VALUE_F_FOUR*transfer->params.num2*transfer->params.t + 
+        VALUE_F_TWO*transfer->params.num1*transfer->data->t_pow2 + 
+        transfer->params.num0*transfer->data->t_pow3;
+    transfer->data->data_num[1] = 
+        -VALUE_F_TWENTY_FOUR*transfer->params.num3 - 
+        VALUE_F_FOUR*transfer->params.num2*transfer->params.t + 
+        VALUE_F_TWO*transfer->params.num1*transfer->data->t_pow2 + 
+        VALUE_F_THREE*transfer->params.num0*transfer->data->t_pow3;
+    transfer->data->data_num[2] = 
+        VALUE_F_TWENTY_FOUR*transfer->params.num3 - 
+        VALUE_F_FOUR*transfer->params.num2*transfer->params.t - 
+        VALUE_F_TWO*transfer->params.num1*transfer->data->t_pow2 + 
+        VALUE_F_THREE*transfer->params.num0*transfer->data->t_pow3;
+    transfer->data->data_num[3] = 
+        -VALUE_F_EIGHT*transfer->params.num3 + 
+        VALUE_F_FOUR*transfer->params.num2*transfer->params.t - 
+        VALUE_F_TWO*transfer->params.num1*transfer->data->t_pow2 + 
+        transfer->params.num0*transfer->data->t_pow3;
+    
+    transfer->data->data_den[0] = 
+        VALUE_F_EIGHT*transfer->params.den3 + 
+        VALUE_F_FOUR*transfer->params.den2*transfer->params.t + 
+        VALUE_F_TWO*transfer->params.den1*transfer->data->t_pow2 + 
+        transfer->params.den0*transfer->data->t_pow3;
+    transfer->data->data_den[1] = 
+        -VALUE_F_TWENTY_FOUR*transfer->params.den3 - 
+        VALUE_F_FOUR*transfer->params.den2*transfer->params.t + 
+        VALUE_F_TWO*transfer->params.den1*transfer->data->t_pow2 + 
+        VALUE_F_THREE*transfer->params.den0*transfer->data->t_pow3;
+    transfer->data->data_den[2] = 
+        VALUE_F_TWENTY_FOUR*transfer->params.den3 - 
+        VALUE_F_FOUR*transfer->params.den2*transfer->params.t - 
+        VALUE_F_TWO*transfer->params.den1*transfer->data->t_pow2 + 
+        VALUE_F_THREE*transfer->params.den0*transfer->data->t_pow3;
+    transfer->data->data_den[3] = 
+        -VALUE_F_EIGHT*transfer->params.den3 + 
+        VALUE_F_FOUR*transfer->params.den2*transfer->params.t - 
+        VALUE_F_TWO*transfer->params.den1*transfer->data->t_pow2 + 
+        transfer->params.den0*transfer->data->t_pow3;
+}
 
 // (典型三阶传递函数，计数3)
 static void __local_transfer3_init(__LocalTransfer3 *transfer){
     #if VALUE_MODE_MATH>=VALUE_MODE_Q15
     patch_transfer3_init(transfer);
     #else // VALUE_MODE_MATH
-    // 传递函数运算系数固定计算
-    transfer->data->data_num[0] = 8.0f*transfer->params.num3 + 4.0f*transfer->params.num2*transfer->params.t + 2.0f*transfer->params.num1*transfer->params.t*transfer->params.t + transfer->params.num0*transfer->params.t*transfer->params.t*transfer->params.t;
-    transfer->data->data_num[1] = -24.0f*transfer->params.num3 - 4.0f*transfer->params.num2*transfer->params.t + 2.0f*transfer->params.num1*transfer->params.t*transfer->params.t + 3.0f*transfer->params.num0*transfer->params.t*transfer->params.t*transfer->params.t;
-    transfer->data->data_num[2] = 24.0f*transfer->params.num3 - 4.0f*transfer->params.num2*transfer->params.t - 2.0f*transfer->params.num1*transfer->params.t*transfer->params.t + 3.0f*transfer->params.num0*transfer->params.t*transfer->params.t*transfer->params.t;
-    transfer->data->data_num[3] = -8.0f*transfer->params.num3 + 4.0f*transfer->params.num2*transfer->params.t - 2.0f*transfer->params.num1*transfer->params.t*transfer->params.t + transfer->params.num0*transfer->params.t*transfer->params.t*transfer->params.t;
-    
-    transfer->data->data_den[0] = 8.0f*transfer->params.den3 + 4.0f*transfer->params.den2*transfer->params.t + 2.0f*transfer->params.den1*transfer->params.t*transfer->params.t + transfer->params.den0*transfer->params.t*transfer->params.t*transfer->params.t;
-    transfer->data->data_den[1] = -24.0f*transfer->params.den3 - 4.0f*transfer->params.den2*transfer->params.t + 2.0f*transfer->params.den1*transfer->params.t*transfer->params.t + 3.0f*transfer->params.den0*transfer->params.t*transfer->params.t*transfer->params.t;
-    transfer->data->data_den[2] = 24.0f*transfer->params.den3 - 4.0f*transfer->params.den2*transfer->params.t - 2.0f*transfer->params.den1*transfer->params.t*transfer->params.t + 3.0f*transfer->params.den0*transfer->params.t*transfer->params.t*transfer->params.t;
-    transfer->data->data_den[3] = -8.0f*transfer->params.den3 + 4.0f*transfer->params.den2*transfer->params.t - 2.0f*transfer->params.den1*transfer->params.t*transfer->params.t + transfer->params.den0*transfer->params.t*transfer->params.t*transfer->params.t;
-    
     // 初始化为零
-    transfer->data->i[0] = 0.0f;
-    transfer->data->i[1] = 0.0f;
-    transfer->data->i[2] = 0.0f;
-    
-    transfer->data->o[0] = 0.0f;
-    transfer->data->o[1] = 0.0f;
-    transfer->data->o[2] = 0.0f;
+    __LOCAL_ZERO_ALL(transfer);
 
-    transfer->in.input = 0.0f;
-    transfer->out.output = 0.0f;
+    // 传递函数运算系数固定计算
+    transfer->data->t_pow2 = math_pow(transfer->params.t, 2);
+    transfer->data->t_pow3 = math_pow(transfer->params.t, 3);
+    __local_transfer3_initial(transfer);
     #endif // VALUE_MODE_MATH
 }
 
@@ -357,19 +453,18 @@ void transfer_transfer3_loop(__LocalTransfer3 *transfer){
     #else // VALUE_MODE_MATH
     // 1.传递函数运算系数动态计算
     if (transfer->params.recalculate_total_flag){
-        transfer->data->data_num[0] = 8.0f*transfer->params.num3 + 4.0f*transfer->params.num2*transfer->params.t + 2.0f*transfer->params.num1*transfer->params.t*transfer->params.t + transfer->params.num0*transfer->params.t*transfer->params.t*transfer->params.t;
-        transfer->data->data_num[1] = -24.0f*transfer->params.num3 - 4.0f*transfer->params.num2*transfer->params.t + 2.0f*transfer->params.num1*transfer->params.t*transfer->params.t + 3.0f*transfer->params.num0*transfer->params.t*transfer->params.t*transfer->params.t;
-        transfer->data->data_num[2] = 24.0f*transfer->params.num3 - 4.0f*transfer->params.num2*transfer->params.t - 2.0f*transfer->params.num1*transfer->params.t*transfer->params.t + 3.0f*transfer->params.num0*transfer->params.t*transfer->params.t*transfer->params.t;
-        transfer->data->data_num[3] = -8.0f*transfer->params.num3 + 4.0f*transfer->params.num2*transfer->params.t - 2.0f*transfer->params.num1*transfer->params.t*transfer->params.t + transfer->params.num0*transfer->params.t*transfer->params.t*transfer->params.t;
-        
-        transfer->data->data_den[0] = 8.0f*transfer->params.den3 + 4.0f*transfer->params.den2*transfer->params.t + 2.0f*transfer->params.den1*transfer->params.t*transfer->params.t + transfer->params.den0*transfer->params.t*transfer->params.t*transfer->params.t;
-        transfer->data->data_den[1] = -24.0f*transfer->params.den3 - 4.0f*transfer->params.den2*transfer->params.t + 2.0f*transfer->params.den1*transfer->params.t*transfer->params.t + 3.0f*transfer->params.den0*transfer->params.t*transfer->params.t*transfer->params.t;
-        transfer->data->data_den[2] = 24.0f*transfer->params.den3 - 4.0f*transfer->params.den2*transfer->params.t - 2.0f*transfer->params.den1*transfer->params.t*transfer->params.t + 3.0f*transfer->params.den0*transfer->params.t*transfer->params.t*transfer->params.t;
-        transfer->data->data_den[3] = -8.0f*transfer->params.den3 + 4.0f*transfer->params.den2*transfer->params.t - 2.0f*transfer->params.den1*transfer->params.t*transfer->params.t + transfer->params.den0*transfer->params.t*transfer->params.t*transfer->params.t;
+        __local_transfer3_initial(transfer);
     }
 
     // 2.运算传递函数
-    transfer->out.output = (transfer->in.input*transfer->data->data_num[0] + transfer->data->i[0]*transfer->data->data_num[1] + transfer->data->i[1]*transfer->data->data_num[2] + transfer->data->i[2]*transfer->data->data_num[3] - transfer->data->o[0]*transfer->data->data_den[1] - transfer->data->o[1]*transfer->data->data_den[2] - transfer->data->o[2]*transfer->data->data_den[3])/transfer->data->data_den[0];
+    transfer->out.output = 
+        (transfer->in.input*transfer->data->data_num[0] + 
+        transfer->data->i[0]*transfer->data->data_num[1] + 
+        transfer->data->i[1]*transfer->data->data_num[2] + 
+        transfer->data->i[2]*transfer->data->data_num[3] - 
+        transfer->data->o[0]*transfer->data->data_den[1] - 
+        transfer->data->o[1]*transfer->data->data_den[2] - 
+        transfer->data->o[2]*transfer->data->data_den[3])/transfer->data->data_den[0];
 
     // 3.更新历史数值
     transfer->data->i[2] = transfer->data->i[1];
@@ -382,46 +477,89 @@ void transfer_transfer3_loop(__LocalTransfer3 *transfer){
     #endif // VALUE_MODE_MATH
 }
 
-// (典型四阶传递函数，计数4)----------------------------------------------------------
+// (典型四阶传递函数，计数4)--------------------------|------------------------------
 struct __LocalTransfer4Data{
-    SguanQ i[4];
-    SguanQ o[4];
+    SguanQ t_pow2;                                  // (系数)t的平方
+    SguanQ t_pow3;                                  // (系数)t的三次方
+    SguanQ t_pow4;                                  // (系数)t的四次方
 
-    SguanQ data_num[5];
-    SguanQ data_den[5];
+    SguanQ i[4];                                    // (状态)输入历史
+    SguanQ o[4];                                    // (状态)输出历史
+
+    SguanQ data_num[5];                             // (系数)分子系数表
+    SguanQ data_den[5];                             // (系数)分母系数表
 };
+
+// (典型四阶传递函数，计数4)
+static void __local_transfer4_initial(__LocalTransfer4 *transfer){
+    transfer->data->data_num[0] = 
+        VALUE_F_SIXTEEN*transfer->params.num4 + 
+        VALUE_F_EIGHT*transfer->params.num3*transfer->params.t + 
+        VALUE_F_FOUR*transfer->params.num2*transfer->data->t_pow2 + 
+        VALUE_F_TWO*transfer->params.num1*transfer->data->t_pow3 + 
+        transfer->params.num0*transfer->data->t_pow4;
+    transfer->data->data_num[1] = 
+        -VALUE_F_SIXTY_FOUR*transfer->params.num4 - 
+        VALUE_F_SIXTEEN*transfer->params.num3*transfer->params.t + 
+        VALUE_F_FOUR*transfer->params.num1*transfer->data->t_pow3 + 
+        VALUE_F_FOUR*transfer->params.num0*transfer->data->t_pow4;
+    transfer->data->data_num[2] = 
+        VALUE_F_NINETY_SIX*transfer->params.num4 - 
+        VALUE_F_EIGHT*transfer->params.num2*transfer->data->t_pow2 + 
+        VALUE_F_SIX*transfer->params.num0*transfer->data->t_pow4;
+    transfer->data->data_num[3] = 
+        -VALUE_F_SIXTY_FOUR*transfer->params.num4 + 
+        VALUE_F_SIXTEEN*transfer->params.num3*transfer->params.t - 
+        VALUE_F_FOUR*transfer->params.num1*transfer->data->t_pow3 + 
+        VALUE_F_FOUR*transfer->params.num0*transfer->data->t_pow4;
+    transfer->data->data_num[4] = 
+        VALUE_F_SIXTEEN*transfer->params.num4 - 
+        VALUE_F_EIGHT*transfer->params.num3*transfer->params.t + 
+        VALUE_F_FOUR*transfer->params.num2*transfer->data->t_pow2 - 
+        VALUE_F_TWO*transfer->params.num1*transfer->data->t_pow3 + 
+        transfer->params.num0*transfer->data->t_pow4;
+    
+    transfer->data->data_den[0] = 
+        VALUE_F_SIXTEEN*transfer->params.den4 + 
+        VALUE_F_EIGHT*transfer->params.den3*transfer->params.t + 
+        VALUE_F_FOUR*transfer->params.den2*transfer->data->t_pow2 + 
+        VALUE_F_TWO*transfer->params.den1*transfer->data->t_pow3 + 
+        transfer->params.den0*transfer->data->t_pow4;
+    transfer->data->data_den[1] = 
+        -VALUE_F_SIXTY_FOUR*transfer->params.den4 - 
+        VALUE_F_SIXTEEN*transfer->params.den3*transfer->params.t + 
+        VALUE_F_FOUR*transfer->params.den1*transfer->data->t_pow3 + 
+        VALUE_F_FOUR*transfer->params.den0*transfer->data->t_pow4;
+    transfer->data->data_den[2] = 
+        VALUE_F_NINETY_SIX*transfer->params.den4 - 
+        VALUE_F_EIGHT*transfer->params.den2*transfer->data->t_pow2 + 
+        VALUE_F_SIX*transfer->params.den0*transfer->data->t_pow4;
+    transfer->data->data_den[3] = 
+        -VALUE_F_SIXTY_FOUR*transfer->params.den4 + 
+        VALUE_F_SIXTEEN*transfer->params.den3*transfer->params.t - 
+        VALUE_F_FOUR*transfer->params.den1*transfer->data->t_pow3 + 
+        VALUE_F_FOUR*transfer->params.den0*transfer->data->t_pow4;
+    transfer->data->data_den[4] = 
+        VALUE_F_SIXTEEN*transfer->params.den4 - 
+        VALUE_F_EIGHT*transfer->params.den3*transfer->params.t + 
+        VALUE_F_FOUR*transfer->params.den2*transfer->data->t_pow2 - 
+        VALUE_F_TWO*transfer->params.den1*transfer->data->t_pow3 + 
+        transfer->params.den0*transfer->data->t_pow4;
+}
 
 // (典型四阶传递函数，计数4)
 static void __local_transfer4_init(__LocalTransfer4 *transfer){
     #if VALUE_MODE_MATH>=VALUE_MODE_Q15
     patch_transfer4_init(transfer);
     #else // VALUE_MODE_MATH
-    // 传递函数运算系数固定计算
-    transfer->data->data_num[0] = 16.0f*transfer->params.num4 + 8.0f*transfer->params.num3*transfer->params.t + 4.0f*transfer->params.num2*transfer->params.t*transfer->params.t + 2.0f*transfer->params.num1*transfer->params.t*transfer->params.t*transfer->params.t + transfer->params.num0*transfer->params.t*transfer->params.t*transfer->params.t*transfer->params.t;
-    transfer->data->data_num[1] = -64.0f*transfer->params.num4 - 16.0f*transfer->params.num3*transfer->params.t + 4.0f*transfer->params.num1*transfer->params.t*transfer->params.t*transfer->params.t + 4.0f*transfer->params.num0*transfer->params.t*transfer->params.t*transfer->params.t*transfer->params.t;
-    transfer->data->data_num[2] = 96.0f*transfer->params.num4 - 8.0f*transfer->params.num2*transfer->params.t*transfer->params.t + 6.0f*transfer->params.num0*transfer->params.t*transfer->params.t*transfer->params.t*transfer->params.t;
-    transfer->data->data_num[3] = -64.0f*transfer->params.num4 + 16.0f*transfer->params.num3*transfer->params.t - 4.0f*transfer->params.num1*transfer->params.t*transfer->params.t*transfer->params.t + 4.0f*transfer->params.num0*transfer->params.t*transfer->params.t*transfer->params.t*transfer->params.t;
-    transfer->data->data_num[4] = 16.0f*transfer->params.num4 - 8.0f*transfer->params.num3*transfer->params.t + 4.0f*transfer->params.num2*transfer->params.t*transfer->params.t - 2.0f*transfer->params.num1*transfer->params.t*transfer->params.t*transfer->params.t + transfer->params.num0*transfer->params.t*transfer->params.t*transfer->params.t*transfer->params.t;
-    
-    transfer->data->data_den[0] = 16.0f*transfer->params.den4 + 8.0f*transfer->params.den3*transfer->params.t + 4.0f*transfer->params.den2*transfer->params.t*transfer->params.t + 2.0f*transfer->params.den1*transfer->params.t*transfer->params.t*transfer->params.t + transfer->params.den0*transfer->params.t*transfer->params.t*transfer->params.t*transfer->params.t;
-    transfer->data->data_den[1] = -64.0f*transfer->params.den4 - 16.0f*transfer->params.den3*transfer->params.t + 4.0f*transfer->params.den1*transfer->params.t*transfer->params.t*transfer->params.t + 4.0f*transfer->params.den0*transfer->params.t*transfer->params.t*transfer->params.t*transfer->params.t;
-    transfer->data->data_den[2] = 96.0f*transfer->params.den4 - 8.0f*transfer->params.den2*transfer->params.t*transfer->params.t + 6.0f*transfer->params.den0*transfer->params.t*transfer->params.t*transfer->params.t*transfer->params.t;
-    transfer->data->data_den[3] = -64.0f*transfer->params.den4 + 16.0f*transfer->params.den3*transfer->params.t - 4.0f*transfer->params.den1*transfer->params.t*transfer->params.t*transfer->params.t + 4.0f*transfer->params.den0*transfer->params.t*transfer->params.t*transfer->params.t*transfer->params.t;
-    transfer->data->data_den[4] = 16.0f*transfer->params.den4 - 8.0f*transfer->params.den3*transfer->params.t + 4.0f*transfer->params.den2*transfer->params.t*transfer->params.t - 2.0f*transfer->params.den1*transfer->params.t*transfer->params.t*transfer->params.t + transfer->params.den0*transfer->params.t*transfer->params.t*transfer->params.t*transfer->params.t;
-
     // 初始化为零
-    transfer->data->i[0] = 0.0f;
-    transfer->data->i[1] = 0.0f;
-    transfer->data->i[2] = 0.0f;
-    transfer->data->i[3] = 0.0f;
+    __LOCAL_ZERO_ALL(transfer);
 
-    transfer->data->o[0] = 0.0f;
-    transfer->data->o[1] = 0.0f;
-    transfer->data->o[2] = 0.0f;
-    transfer->data->o[3] = 0.0f;
-
-    transfer->in.input = 0.0f;
-    transfer->out.output = 0.0f;
+    // 传递函数运算系数固定计算
+    transfer->data->t_pow2 = math_pow(transfer->params.t, 2);
+    transfer->data->t_pow3 = math_pow(transfer->params.t, 3);
+    transfer->data->t_pow4 = math_pow(transfer->params.t, 4);
+    __local_transfer4_initial(transfer);
     #endif // VALUE_MODE_MATH
 }
 
@@ -432,21 +570,20 @@ void transfer_transfer4_loop(__LocalTransfer4 *transfer){
     #else // VALUE_MODE_MATH
     // 1.传递函数运算系数动态计算
     if (transfer->params.recalculate_total_flag){
-        transfer->data->data_num[0] = 16.0f*transfer->params.num4 + 8.0f*transfer->params.num3*transfer->params.t + 4.0f*transfer->params.num2*transfer->params.t*transfer->params.t + 2.0f*transfer->params.num1*transfer->params.t*transfer->params.t*transfer->params.t + transfer->params.num0*transfer->params.t*transfer->params.t*transfer->params.t*transfer->params.t;
-        transfer->data->data_num[1] = -64.0f*transfer->params.num4 - 16.0f*transfer->params.num3*transfer->params.t + 4.0f*transfer->params.num1*transfer->params.t*transfer->params.t*transfer->params.t + 4.0f*transfer->params.num0*transfer->params.t*transfer->params.t*transfer->params.t*transfer->params.t;
-        transfer->data->data_num[2] = 96.0f*transfer->params.num4 - 8.0f*transfer->params.num2*transfer->params.t*transfer->params.t + 6.0f*transfer->params.num0*transfer->params.t*transfer->params.t*transfer->params.t*transfer->params.t;
-        transfer->data->data_num[3] = -64.0f*transfer->params.num4 + 16.0f*transfer->params.num3*transfer->params.t - 4.0f*transfer->params.num1*transfer->params.t*transfer->params.t*transfer->params.t + 4.0f*transfer->params.num0*transfer->params.t*transfer->params.t*transfer->params.t*transfer->params.t;
-        transfer->data->data_num[4] = 16.0f*transfer->params.num4 - 8.0f*transfer->params.num3*transfer->params.t + 4.0f*transfer->params.num2*transfer->params.t*transfer->params.t - 2.0f*transfer->params.num1*transfer->params.t*transfer->params.t*transfer->params.t + transfer->params.num0*transfer->params.t*transfer->params.t*transfer->params.t*transfer->params.t;
-        
-        transfer->data->data_den[0] = 16.0f*transfer->params.den4 + 8.0f*transfer->params.den3*transfer->params.t + 4.0f*transfer->params.den2*transfer->params.t*transfer->params.t + 2.0f*transfer->params.den1*transfer->params.t*transfer->params.t*transfer->params.t + transfer->params.den0*transfer->params.t*transfer->params.t*transfer->params.t*transfer->params.t;
-        transfer->data->data_den[1] = -64.0f*transfer->params.den4 - 16.0f*transfer->params.den3*transfer->params.t + 4.0f*transfer->params.den1*transfer->params.t*transfer->params.t*transfer->params.t + 4.0f*transfer->params.den0*transfer->params.t*transfer->params.t*transfer->params.t*transfer->params.t;
-        transfer->data->data_den[2] = 96.0f*transfer->params.den4 - 8.0f*transfer->params.den2*transfer->params.t*transfer->params.t + 6.0f*transfer->params.den0*transfer->params.t*transfer->params.t*transfer->params.t*transfer->params.t;
-        transfer->data->data_den[3] = -64.0f*transfer->params.den4 + 16.0f*transfer->params.den3*transfer->params.t - 4.0f*transfer->params.den1*transfer->params.t*transfer->params.t*transfer->params.t + 4.0f*transfer->params.den0*transfer->params.t*transfer->params.t*transfer->params.t*transfer->params.t;
-        transfer->data->data_den[4] = 16.0f*transfer->params.den4 - 8.0f*transfer->params.den3*transfer->params.t + 4.0f*transfer->params.den2*transfer->params.t*transfer->params.t - 2.0f*transfer->params.den1*transfer->params.t*transfer->params.t*transfer->params.t + transfer->params.den0*transfer->params.t*transfer->params.t*transfer->params.t*transfer->params.t;
+        __local_transfer4_initial(transfer);
     }
     
     // 2.运算传递函数
-    transfer->out.output = (transfer->in.input*transfer->data->data_num[0] + transfer->data->i[0]*transfer->data->data_num[1] + transfer->data->i[1]*transfer->data->data_num[2] + transfer->data->i[2]*transfer->data->data_num[3] + transfer->data->i[3]*transfer->data->data_num[4] - transfer->data->o[0]*transfer->data->data_den[1] - transfer->data->o[1]*transfer->data->data_den[2] - transfer->data->o[2]*transfer->data->data_den[3] - transfer->data->o[3]*transfer->data->data_den[4])/transfer->data->data_den[0];
+    transfer->out.output = 
+        (transfer->in.input*transfer->data->data_num[0] + 
+        transfer->data->i[0]*transfer->data->data_num[1] + 
+        transfer->data->i[1]*transfer->data->data_num[2] + 
+        transfer->data->i[2]*transfer->data->data_num[3] + 
+        transfer->data->i[3]*transfer->data->data_num[4] - 
+        transfer->data->o[0]*transfer->data->data_den[1] - 
+        transfer->data->o[1]*transfer->data->data_den[2] - 
+        transfer->data->o[2]*transfer->data->data_den[3] - 
+        transfer->data->o[3]*transfer->data->data_den[4])/transfer->data->data_den[0];
 
     // 3.更新历史数值
     transfer->data->i[3] = transfer->data->i[2];
@@ -461,50 +598,123 @@ void transfer_transfer4_loop(__LocalTransfer4 *transfer){
     #endif // VALUE_MODE_MATH
 }
 
-// (典型五阶传递函数，计数5)----------------------------------------------------------
+// (典型五阶传递函数，计数5)--------------------------|------------------------------
 struct __LocalTransfer5Data{
-    SguanQ i[5];
-    SguanQ o[5];
+    SguanQ t_pow2;                                  // (系数)t的平方
+    SguanQ t_pow3;                                  // (系数)t的三次方
+    SguanQ t_pow4;                                  // (系数)t的四次方
+    SguanQ t_pow5;                                  // (系数)t的五次方
 
-    SguanQ data_num[6];
-    SguanQ data_den[6];
+    SguanQ i[5];                                    // (状态)输入历史
+    SguanQ o[5];                                    // (状态)输出历史
+
+    SguanQ data_num[6];                             // (系数)分子系数表
+    SguanQ data_den[6];                             // (系数)分母系数表
 };
+
+// (典型五阶传递函数，计数5)
+static void __local_transfer5_initial(__LocalTransfer5 *transfer){
+    transfer->data->data_num[0] = 
+        VALUE_F_THIRTY_TWO*transfer->params.num5 + 
+        VALUE_F_SIXTEEN*transfer->params.num4*transfer->params.t + 
+        VALUE_F_EIGHT*transfer->params.num3*transfer->data->t_pow2 + 
+        VALUE_F_FOUR*transfer->params.num2*transfer->data->t_pow3 + 
+        VALUE_F_TWO*transfer->params.num1*transfer->data->t_pow4 + 
+        transfer->params.num0*transfer->data->t_pow5;
+    transfer->data->data_num[1] = 
+        -VALUE_F_1H_SIXTY*transfer->params.num5 - 
+        VALUE_F_FORTY_EIGHT*transfer->params.num4*transfer->params.t - 
+        VALUE_F_EIGHT*transfer->params.num3*transfer->data->t_pow2 + 
+        VALUE_F_FOUR*transfer->params.num2*transfer->data->t_pow3 + 
+        VALUE_F_SIX*transfer->params.num1*transfer->data->t_pow4 + 
+        VALUE_F_FIVE*transfer->params.num0*transfer->data->t_pow5;
+    transfer->data->data_num[2] = 
+        VALUE_F_3H_TWENTY*transfer->params.num5 + 
+        VALUE_F_THIRTY_TWO*transfer->params.num4*transfer->params.t - 
+        VALUE_F_SIXTEEN*transfer->params.num3*transfer->data->t_pow2 - 
+        VALUE_F_EIGHT*transfer->params.num2*transfer->data->t_pow3 + 
+        VALUE_F_FOUR*transfer->params.num1*transfer->data->t_pow4 + 
+        VALUE_F_TEN*transfer->params.num0*transfer->data->t_pow5;
+    transfer->data->data_num[3] = 
+        -VALUE_F_3H_TWENTY*transfer->params.num5 + 
+        VALUE_F_THIRTY_TWO*transfer->params.num4*transfer->params.t + 
+        VALUE_F_SIXTEEN*transfer->params.num3*transfer->data->t_pow2 - 
+        VALUE_F_EIGHT*transfer->params.num2*transfer->data->t_pow3 - 
+        VALUE_F_FOUR*transfer->params.num1*transfer->data->t_pow4 + 
+        VALUE_F_TEN*transfer->params.num0*transfer->data->t_pow5;
+    transfer->data->data_num[4] = 
+        VALUE_F_1H_SIXTY*transfer->params.num5 - 
+        VALUE_F_FORTY_EIGHT*transfer->params.num4*transfer->params.t + 
+        VALUE_F_EIGHT*transfer->params.num3*transfer->data->t_pow2 + 
+        VALUE_F_FOUR*transfer->params.num2*transfer->data->t_pow3 - 
+        VALUE_F_SIX*transfer->params.num1*transfer->data->t_pow4 + 
+        VALUE_F_FIVE*transfer->params.num0*transfer->data->t_pow5;
+    transfer->data->data_num[5] = 
+        -VALUE_F_THIRTY_TWO*transfer->params.num5 + 
+        VALUE_F_SIXTEEN*transfer->params.num4*transfer->params.t - 
+        VALUE_F_EIGHT*transfer->params.num3*transfer->data->t_pow2 + 
+        VALUE_F_FOUR*transfer->params.num2*transfer->data->t_pow3 - 
+        VALUE_F_TWO*transfer->params.num1*transfer->data->t_pow4 + 
+        transfer->params.num0*transfer->data->t_pow5;
+    
+    transfer->data->data_den[0] = 
+        VALUE_F_THIRTY_TWO*transfer->params.den5 + 
+        VALUE_F_SIXTEEN*transfer->params.den4*transfer->params.t + 
+        VALUE_F_EIGHT*transfer->params.den3*transfer->data->t_pow2 + 
+        VALUE_F_FOUR*transfer->params.den2*transfer->data->t_pow3 + 
+        VALUE_F_TWO*transfer->params.den1*transfer->data->t_pow4 + 
+        transfer->params.den0*transfer->data->t_pow5;
+    transfer->data->data_den[1] = 
+        -VALUE_F_1H_SIXTY*transfer->params.den5 - 
+        VALUE_F_FORTY_EIGHT*transfer->params.den4*transfer->params.t - 
+        VALUE_F_EIGHT*transfer->params.den3*transfer->data->t_pow2 + 
+        VALUE_F_FOUR*transfer->params.den2*transfer->data->t_pow3 + 
+        VALUE_F_SIX*transfer->params.den1*transfer->data->t_pow4 + 
+        VALUE_F_FIVE*transfer->params.den0*transfer->data->t_pow5;
+    transfer->data->data_den[2] = 
+        VALUE_F_3H_TWENTY*transfer->params.den5 + 
+        VALUE_F_THIRTY_TWO*transfer->params.den4*transfer->params.t - 
+        VALUE_F_SIXTEEN*transfer->params.den3*transfer->data->t_pow2 - 
+        VALUE_F_EIGHT*transfer->params.den2*transfer->data->t_pow3 + 
+        VALUE_F_FOUR*transfer->params.den1*transfer->data->t_pow4 + 
+        VALUE_F_TEN*transfer->params.den0*transfer->data->t_pow5;
+    transfer->data->data_den[3] = 
+        -VALUE_F_3H_TWENTY*transfer->params.den5 + 
+        VALUE_F_THIRTY_TWO*transfer->params.den4*transfer->params.t + 
+        VALUE_F_SIXTEEN*transfer->params.den3*transfer->data->t_pow2 - 
+        VALUE_F_EIGHT*transfer->params.den2*transfer->data->t_pow3 - 
+        VALUE_F_FOUR*transfer->params.den1*transfer->data->t_pow4 + 
+        VALUE_F_TEN*transfer->params.den0*transfer->data->t_pow5;
+    transfer->data->data_den[4] = 
+        VALUE_F_1H_SIXTY*transfer->params.den5 - 
+        VALUE_F_FORTY_EIGHT*transfer->params.den4*transfer->params.t + 
+        VALUE_F_EIGHT*transfer->params.den3*transfer->data->t_pow2 + 
+        VALUE_F_FOUR*transfer->params.den2*transfer->data->t_pow3 - 
+        VALUE_F_SIX*transfer->params.den1*transfer->data->t_pow4 + 
+        VALUE_F_FIVE*transfer->params.den0*transfer->data->t_pow5;
+    transfer->data->data_den[5] = 
+        -VALUE_F_THIRTY_TWO*transfer->params.den5 + 
+        VALUE_F_SIXTEEN*transfer->params.den4*transfer->params.t - 
+        VALUE_F_EIGHT*transfer->params.den3*transfer->data->t_pow2 + 
+        VALUE_F_FOUR*transfer->params.den2*transfer->data->t_pow3 - 
+        VALUE_F_TWO*transfer->params.den1*transfer->data->t_pow4 + 
+        transfer->params.den0*transfer->data->t_pow5;
+}
 
 // (典型五阶传递函数，计数5)
 static void __local_transfer5_init(__LocalTransfer5 *transfer){
     #if VALUE_MODE_MATH>=VALUE_MODE_Q15
     patch_transfer5_init(transfer);
     #else // VALUE_MODE_MATH
-    // 传递函数运算系数固定计算
-    transfer->data->data_num[0] = 32.0f*transfer->params.num5 + 16.0f*transfer->params.num4*transfer->params.t + 8.0f*transfer->params.num3*transfer->params.t*transfer->params.t + 4.0f*transfer->params.num2*transfer->params.t*transfer->params.t*transfer->params.t + 2.0f*transfer->params.num1*transfer->params.t*transfer->params.t*transfer->params.t*transfer->params.t + transfer->params.num0*transfer->params.t*transfer->params.t*transfer->params.t*transfer->params.t*transfer->params.t;
-    transfer->data->data_num[1] = -160.0f*transfer->params.num5 - 48.0f*transfer->params.num4*transfer->params.t - 8.0f*transfer->params.num3*transfer->params.t*transfer->params.t + 4.0f*transfer->params.num2*transfer->params.t*transfer->params.t*transfer->params.t + 6.0f*transfer->params.num1*transfer->params.t*transfer->params.t*transfer->params.t*transfer->params.t + 5.0f*transfer->params.num0*transfer->params.t*transfer->params.t*transfer->params.t*transfer->params.t*transfer->params.t;
-    transfer->data->data_num[2] = 320.0f*transfer->params.num5 + 32.0f*transfer->params.num4*transfer->params.t - 16.0f*transfer->params.num3*transfer->params.t*transfer->params.t - 8.0f*transfer->params.num2*transfer->params.t*transfer->params.t*transfer->params.t + 4.0f*transfer->params.num1*transfer->params.t*transfer->params.t*transfer->params.t*transfer->params.t + 10.0f*transfer->params.num0*transfer->params.t*transfer->params.t*transfer->params.t*transfer->params.t*transfer->params.t;
-    transfer->data->data_num[3] = -320.0f*transfer->params.num5 + 32.0f*transfer->params.num4*transfer->params.t + 16.0f*transfer->params.num3*transfer->params.t*transfer->params.t - 8.0f*transfer->params.num2*transfer->params.t*transfer->params.t*transfer->params.t - 4.0f*transfer->params.num1*transfer->params.t*transfer->params.t*transfer->params.t*transfer->params.t + 10.0f*transfer->params.num0*transfer->params.t*transfer->params.t*transfer->params.t*transfer->params.t*transfer->params.t;
-    transfer->data->data_num[4] = 160.0f*transfer->params.num5 - 48.0f*transfer->params.num4*transfer->params.t + 8.0f*transfer->params.num3*transfer->params.t*transfer->params.t + 4.0f*transfer->params.num2*transfer->params.t*transfer->params.t*transfer->params.t - 6.0f*transfer->params.num1*transfer->params.t*transfer->params.t*transfer->params.t*transfer->params.t + 5.0f*transfer->params.num0*transfer->params.t*transfer->params.t*transfer->params.t*transfer->params.t*transfer->params.t;
-    transfer->data->data_num[5] = -32.0f*transfer->params.num5 + 16.0f*transfer->params.num4*transfer->params.t - 8.0f*transfer->params.num3*transfer->params.t*transfer->params.t + 4.0f*transfer->params.num2*transfer->params.t*transfer->params.t*transfer->params.t - 2.0f*transfer->params.num1*transfer->params.t*transfer->params.t*transfer->params.t*transfer->params.t + transfer->params.num0*transfer->params.t*transfer->params.t*transfer->params.t*transfer->params.t*transfer->params.t;
-    
-    transfer->data->data_den[0] = 32.0f*transfer->params.den5 + 16.0f*transfer->params.den4*transfer->params.t + 8.0f*transfer->params.den3*transfer->params.t*transfer->params.t + 4.0f*transfer->params.den2*transfer->params.t*transfer->params.t*transfer->params.t + 2.0f*transfer->params.den1*transfer->params.t*transfer->params.t*transfer->params.t*transfer->params.t + transfer->params.den0*transfer->params.t*transfer->params.t*transfer->params.t*transfer->params.t*transfer->params.t;
-    transfer->data->data_den[1] = -160.0f*transfer->params.den5 - 48.0f*transfer->params.den4*transfer->params.t - 8.0f*transfer->params.den3*transfer->params.t*transfer->params.t + 4.0f*transfer->params.den2*transfer->params.t*transfer->params.t*transfer->params.t + 6.0f*transfer->params.den1*transfer->params.t*transfer->params.t*transfer->params.t*transfer->params.t + 5.0f*transfer->params.den0*transfer->params.t*transfer->params.t*transfer->params.t*transfer->params.t*transfer->params.t;
-    transfer->data->data_den[2] = 320.0f*transfer->params.den5 + 32.0f*transfer->params.den4*transfer->params.t - 16.0f*transfer->params.den3*transfer->params.t*transfer->params.t - 8.0f*transfer->params.den2*transfer->params.t*transfer->params.t*transfer->params.t + 4.0f*transfer->params.den1*transfer->params.t*transfer->params.t*transfer->params.t*transfer->params.t + 10.0f*transfer->params.den0*transfer->params.t*transfer->params.t*transfer->params.t*transfer->params.t*transfer->params.t;
-    transfer->data->data_den[3] = -320.0f*transfer->params.den5 + 32.0f*transfer->params.den4*transfer->params.t + 16.0f*transfer->params.den3*transfer->params.t*transfer->params.t - 8.0f*transfer->params.den2*transfer->params.t*transfer->params.t*transfer->params.t - 4.0f*transfer->params.den1*transfer->params.t*transfer->params.t*transfer->params.t*transfer->params.t + 10.0f*transfer->params.den0*transfer->params.t*transfer->params.t*transfer->params.t*transfer->params.t*transfer->params.t;
-    transfer->data->data_den[4] = 160.0f*transfer->params.den5 - 48.0f*transfer->params.den4*transfer->params.t + 8.0f*transfer->params.den3*transfer->params.t*transfer->params.t + 4.0f*transfer->params.den2*transfer->params.t*transfer->params.t*transfer->params.t - 6.0f*transfer->params.den1*transfer->params.t*transfer->params.t*transfer->params.t*transfer->params.t + 5.0f*transfer->params.den0*transfer->params.t*transfer->params.t*transfer->params.t*transfer->params.t*transfer->params.t;
-    transfer->data->data_den[5] = -32.0f*transfer->params.den5 + 16.0f*transfer->params.den4*transfer->params.t - 8.0f*transfer->params.den3*transfer->params.t*transfer->params.t + 4.0f*transfer->params.den2*transfer->params.t*transfer->params.t*transfer->params.t - 2.0f*transfer->params.den1*transfer->params.t*transfer->params.t*transfer->params.t*transfer->params.t + transfer->params.den0*transfer->params.t*transfer->params.t*transfer->params.t*transfer->params.t*transfer->params.t;
-    
     // 初始化为零
-    transfer->data->i[0] = 0.0f;
-    transfer->data->i[1] = 0.0f;
-    transfer->data->i[2] = 0.0f;
-    transfer->data->i[3] = 0.0f;
-    transfer->data->i[4] = 0.0f;
+    __LOCAL_ZERO_ALL(transfer);
 
-    transfer->data->o[0] = 0.0f;
-    transfer->data->o[1] = 0.0f;
-    transfer->data->o[2] = 0.0f;
-    transfer->data->o[3] = 0.0f;
-    transfer->data->o[4] = 0.0f;
-
-    transfer->in.input = 0.0f;
-    transfer->out.output = 0.0f;
+    // 传递函数运算系数固定计算
+    transfer->data->t_pow2 = math_pow(transfer->params.t, 2);
+    transfer->data->t_pow3 = math_pow(transfer->params.t, 3);
+    transfer->data->t_pow4 = math_pow(transfer->params.t, 4);
+    transfer->data->t_pow5 = math_pow(transfer->params.t, 5);
+    __local_transfer5_initial(transfer);
     #endif // VALUE_MODE_MATH
 }
 
@@ -515,23 +725,22 @@ void transfer_transfer5_loop(__LocalTransfer5 *transfer){
     #else // VALUE_MODE_MATH
     // 1.传递函数运算系数动态计算
     if (transfer->params.recalculate_total_flag){
-        transfer->data->data_num[0] = 32.0f*transfer->params.num5 + 16.0f*transfer->params.num4*transfer->params.t + 8.0f*transfer->params.num3*transfer->params.t*transfer->params.t + 4.0f*transfer->params.num2*transfer->params.t*transfer->params.t*transfer->params.t + 2.0f*transfer->params.num1*transfer->params.t*transfer->params.t*transfer->params.t*transfer->params.t + transfer->params.num0*transfer->params.t*transfer->params.t*transfer->params.t*transfer->params.t*transfer->params.t;
-        transfer->data->data_num[1] = -160.0f*transfer->params.num5 - 48.0f*transfer->params.num4*transfer->params.t - 8.0f*transfer->params.num3*transfer->params.t*transfer->params.t + 4.0f*transfer->params.num2*transfer->params.t*transfer->params.t*transfer->params.t + 6.0f*transfer->params.num1*transfer->params.t*transfer->params.t*transfer->params.t*transfer->params.t + 5.0f*transfer->params.num0*transfer->params.t*transfer->params.t*transfer->params.t*transfer->params.t*transfer->params.t;
-        transfer->data->data_num[2] = 320.0f*transfer->params.num5 + 32.0f*transfer->params.num4*transfer->params.t - 16.0f*transfer->params.num3*transfer->params.t*transfer->params.t - 8.0f*transfer->params.num2*transfer->params.t*transfer->params.t*transfer->params.t + 4.0f*transfer->params.num1*transfer->params.t*transfer->params.t*transfer->params.t*transfer->params.t + 10.0f*transfer->params.num0*transfer->params.t*transfer->params.t*transfer->params.t*transfer->params.t*transfer->params.t;
-        transfer->data->data_num[3] = -320.0f*transfer->params.num5 + 32.0f*transfer->params.num4*transfer->params.t + 16.0f*transfer->params.num3*transfer->params.t*transfer->params.t - 8.0f*transfer->params.num2*transfer->params.t*transfer->params.t*transfer->params.t - 4.0f*transfer->params.num1*transfer->params.t*transfer->params.t*transfer->params.t*transfer->params.t + 10.0f*transfer->params.num0*transfer->params.t*transfer->params.t*transfer->params.t*transfer->params.t*transfer->params.t;
-        transfer->data->data_num[4] = 160.0f*transfer->params.num5 - 48.0f*transfer->params.num4*transfer->params.t + 8.0f*transfer->params.num3*transfer->params.t*transfer->params.t + 4.0f*transfer->params.num2*transfer->params.t*transfer->params.t*transfer->params.t - 6.0f*transfer->params.num1*transfer->params.t*transfer->params.t*transfer->params.t*transfer->params.t + 5.0f*transfer->params.num0*transfer->params.t*transfer->params.t*transfer->params.t*transfer->params.t*transfer->params.t;
-        transfer->data->data_num[5] = -32.0f*transfer->params.num5 + 16.0f*transfer->params.num4*transfer->params.t - 8.0f*transfer->params.num3*transfer->params.t*transfer->params.t + 4.0f*transfer->params.num2*transfer->params.t*transfer->params.t*transfer->params.t - 2.0f*transfer->params.num1*transfer->params.t*transfer->params.t*transfer->params.t*transfer->params.t + transfer->params.num0*transfer->params.t*transfer->params.t*transfer->params.t*transfer->params.t*transfer->params.t;
-        
-        transfer->data->data_den[0] = 32.0f*transfer->params.den5 + 16.0f*transfer->params.den4*transfer->params.t + 8.0f*transfer->params.den3*transfer->params.t*transfer->params.t + 4.0f*transfer->params.den2*transfer->params.t*transfer->params.t*transfer->params.t + 2.0f*transfer->params.den1*transfer->params.t*transfer->params.t*transfer->params.t*transfer->params.t + transfer->params.den0*transfer->params.t*transfer->params.t*transfer->params.t*transfer->params.t*transfer->params.t;
-        transfer->data->data_den[1] = -160.0f*transfer->params.den5 - 48.0f*transfer->params.den4*transfer->params.t - 8.0f*transfer->params.den3*transfer->params.t*transfer->params.t + 4.0f*transfer->params.den2*transfer->params.t*transfer->params.t*transfer->params.t + 6.0f*transfer->params.den1*transfer->params.t*transfer->params.t*transfer->params.t*transfer->params.t + 5.0f*transfer->params.den0*transfer->params.t*transfer->params.t*transfer->params.t*transfer->params.t*transfer->params.t;
-        transfer->data->data_den[2] = 320.0f*transfer->params.den5 + 32.0f*transfer->params.den4*transfer->params.t - 16.0f*transfer->params.den3*transfer->params.t*transfer->params.t - 8.0f*transfer->params.den2*transfer->params.t*transfer->params.t*transfer->params.t + 4.0f*transfer->params.den1*transfer->params.t*transfer->params.t*transfer->params.t*transfer->params.t + 10.0f*transfer->params.den0*transfer->params.t*transfer->params.t*transfer->params.t*transfer->params.t*transfer->params.t;
-        transfer->data->data_den[3] = -320.0f*transfer->params.den5 + 32.0f*transfer->params.den4*transfer->params.t + 16.0f*transfer->params.den3*transfer->params.t*transfer->params.t - 8.0f*transfer->params.den2*transfer->params.t*transfer->params.t*transfer->params.t - 4.0f*transfer->params.den1*transfer->params.t*transfer->params.t*transfer->params.t*transfer->params.t + 10.0f*transfer->params.den0*transfer->params.t*transfer->params.t*transfer->params.t*transfer->params.t*transfer->params.t;
-        transfer->data->data_den[4] = 160.0f*transfer->params.den5 - 48.0f*transfer->params.den4*transfer->params.t + 8.0f*transfer->params.den3*transfer->params.t*transfer->params.t + 4.0f*transfer->params.den2*transfer->params.t*transfer->params.t*transfer->params.t - 6.0f*transfer->params.den1*transfer->params.t*transfer->params.t*transfer->params.t*transfer->params.t + 5.0f*transfer->params.den0*transfer->params.t*transfer->params.t*transfer->params.t*transfer->params.t*transfer->params.t;
-        transfer->data->data_den[5] = -32.0f*transfer->params.den5 + 16.0f*transfer->params.den4*transfer->params.t - 8.0f*transfer->params.den3*transfer->params.t*transfer->params.t + 4.0f*transfer->params.den2*transfer->params.t*transfer->params.t*transfer->params.t - 2.0f*transfer->params.den1*transfer->params.t*transfer->params.t*transfer->params.t*transfer->params.t + transfer->params.den0*transfer->params.t*transfer->params.t*transfer->params.t*transfer->params.t*transfer->params.t;
+        __local_transfer5_initial(transfer);
     }
     
     // 2.运算传递函数
-    transfer->out.output = (transfer->in.input*transfer->data->data_num[0] + transfer->data->i[0]*transfer->data->data_num[1] + transfer->data->i[1]*transfer->data->data_num[2] + transfer->data->i[2]*transfer->data->data_num[3] + transfer->data->i[3]*transfer->data->data_num[4] + transfer->data->i[4]*transfer->data->data_num[5] - transfer->data->o[0]*transfer->data->data_den[1] - transfer->data->o[1]*transfer->data->data_den[2] - transfer->data->o[2]*transfer->data->data_den[3] - transfer->data->o[3]*transfer->data->data_den[4] - transfer->data->o[4]*transfer->data->data_den[5])/transfer->data->data_den[0];
+    transfer->out.output = 
+        (transfer->in.input*transfer->data->data_num[0] + 
+        transfer->data->i[0]*transfer->data->data_num[1] + 
+        transfer->data->i[1]*transfer->data->data_num[2] + 
+        transfer->data->i[2]*transfer->data->data_num[3] + 
+        transfer->data->i[3]*transfer->data->data_num[4] + 
+        transfer->data->i[4]*transfer->data->data_num[5] - 
+        transfer->data->o[0]*transfer->data->data_den[1] - 
+        transfer->data->o[1]*transfer->data->data_den[2] - 
+        transfer->data->o[2]*transfer->data->data_den[3] - 
+        transfer->data->o[3]*transfer->data->data_den[4] - 
+        transfer->data->o[4]*transfer->data->data_den[5])/transfer->data->data_den[0];
 
     // 3.更新历史数值
     transfer->data->i[4] = transfer->data->i[3];
@@ -548,11 +757,10 @@ void transfer_transfer5_loop(__LocalTransfer5 *transfer){
     #endif // VALUE_MODE_MATH
 }
 
-// (积分器，计数6)-------------------------------------------------------------------
+// (积分器，计数6)-----------------------------------|------------------------------
 struct __LocalIntegratorData{
-    SguanQ i;
-
-    SguanQ data_num;
+    SguanQ i;                                       // (状态)历史输入
+    SguanQ data_num;                                // (系数)分子系数
 };
 
 // (积分器，计数6)
@@ -560,14 +768,11 @@ static void __local_integrator_init(__LocalIntegrator *integrator){
     #if VALUE_MODE_MATH>=VALUE_MODE_Q15
     patch_integrator_init(integrator);
     #else // VALUE_MODE_MATH
-    // 传递函数运算系数固定计算
-    integrator->data->data_num = integrator->params.t/2.0f;
-
     // 初始化为零
-    integrator->data->i = 0.0f;
+    __LOCAL_ZERO_ALL(integrator);
 
-    integrator->in.input = 0.0f;
-    integrator->out.output = 0.0f;
+    // 传递函数运算系数固定计算
+    integrator->data->data_num = integrator->params.t/VALUE_F_TWO;
     #endif // VALUE_MODE_MATH
 }
 
@@ -577,40 +782,46 @@ void transfer_integrator_loop(__LocalIntegrator *integrator){
     patch_integrator_loop(integrator);
     #else // VALUE_MODE_MATH
     // 1.运算传递函数
-    integrator->out.output += (integrator->in.input + integrator->data->i)*integrator->data->data_num;
+    integrator->out.output += 
+        (integrator->in.input + integrator->data->i)*integrator->data->data_num;
 
     // 2.更新历史数值
     integrator->data->i = integrator->in.input;
     #endif // VALUE_MODE_MATH
 }
 
-// (微分器，计数7)-------------------------------------------------------------------
+// (微分器，计数7)-----------------------------------|------------------------------
 struct __LocalDerivativeData{
-    SguanQ i;
-    SguanQ o;
+    SguanQ i;                                       // (状态)历史输入
+    SguanQ o;                                       // (状态)历史输出
 
-    SguanQ data_num[2];
-    SguanQ data_den[2];
+    SguanQ data_num[2];                             // (系数)分子系数表
+    SguanQ data_den[2];                             // (系数)分母系数表
 };
+
+// (微分器，计数7)
+static void __local_derivative_initial(__LocalDerivative *derivative){
+    derivative->data->data_num[0] = VALUE_F_TWO*derivative->params.wc;
+    derivative->data->data_num[1] = -VALUE_F_TWO*derivative->params.wc;
+
+    derivative->data->data_den[0] = 
+        VALUE_F_TWO + 
+        derivative->params.t*derivative->params.wc;
+    derivative->data->data_den[1] = 
+        -VALUE_F_TWO + 
+        derivative->params.t*derivative->params.wc;
+}
 
 // (微分器，计数7)
 static void __local_derivative_init(__LocalDerivative *derivative){
     #if VALUE_MODE_MATH>=VALUE_MODE_Q15
     patch_derivative_init(derivative);
     #else // VALUE_MODE_MATH
-    // 传递函数运算系数固定计算
-    derivative->data->data_num[0] = 2.0f*derivative->params.wc;
-    derivative->data->data_num[1] = -2.0f*derivative->params.wc;
-
-    derivative->data->data_den[0] = 2.0f + derivative->params.t*derivative->params.wc;
-    derivative->data->data_den[1] = -2.0f + derivative->params.t*derivative->params.wc;
-
     // 初始化为零
-    derivative->data->i = 0.0f;
-    derivative->data->o = 0.0f;
+    __LOCAL_ZERO_ALL(derivative);
 
-    derivative->in.input = 0.0f;
-    derivative->out.output = 0.0f;
+    // 传递函数运算系数固定计算
+    __local_derivative_initial(derivative);
     #endif // VALUE_MODE_MATH
 }
 
@@ -621,15 +832,14 @@ void transfer_derivative_loop(__LocalDerivative *derivative){
     #else // VALUE_MODE_MATH
     // 1.传递函数运算系数动态计算
     if (derivative->params.recalculate_total_flag){
-        derivative->data->data_num[0] = 2.0f*derivative->params.wc;
-        derivative->data->data_num[1] = -2.0f*derivative->params.wc;
-        
-        derivative->data->data_den[0] = 2.0f + derivative->params.t*derivative->params.wc;
-        derivative->data->data_den[1] = -2.0f + derivative->params.t*derivative->params.wc;
+        __local_derivative_initial(derivative);
     }
 
     // 2.运算传递函数
-    derivative->out.output = (derivative->in.input*derivative->data->data_num[0] + derivative->data->i*derivative->data->data_num[1] - derivative->data->o*derivative->data->data_den[1])/derivative->data->data_den[0];
+    derivative->out.output = 
+        (derivative->in.input*derivative->data->data_num[0] + 
+        derivative->data->i*derivative->data->data_num[1] - 
+        derivative->data->o*derivative->data->data_den[1])/derivative->data->data_den[0];
 
     // 3.更新历史数值
     derivative->data->i = derivative->in.input;
@@ -637,10 +847,14 @@ void transfer_derivative_loop(__LocalDerivative *derivative){
     #endif // VALUE_MODE_MATH
 }
 
-// (霍尔编码器，计数8)--------------------------------------------------------------
+// (霍尔编码器，计数8)-------------------------------|-------------------------------
 struct __LocalHallData{
-    SguanQ num;
-    SguanQ den;
+    SguanQ hall_a;                                  // (状态)霍尔A滤波值
+    SguanQ hall_b;                                  // (状态)霍尔B滤波值
+    SguanQ hall_c;                                  // (状态)霍尔C滤波值
+
+    SguanQ gain;                                    // (系数)滤波增益
+    SguanQ complement_gain;                         // (系数)互补增益
 };
 
 // (霍尔编码器，计数8)
@@ -648,13 +862,12 @@ static void __local_hall_init(__LocalHall *hall){
     #if VALUE_MODE_MATH>=VALUE_MODE_Q15
     patch_hall_init(hall);
     #else // VALUE_MODE_MATH
-    // 传递函数运算系数固定计算
-
-
-
     // 初始化为零
+    __LOCAL_ZERO_ALL(hall);
 
-    
+    // 传递函数运算系数固定计算
+    hall->data->gain = VALUE_F_ONE;
+    hall->data->complement_gain = 0;
     #endif // VALUE_MODE_MATH
 }
 
@@ -663,80 +876,279 @@ void transfer_hall_loop(__LocalHall *hall){
     #if VALUE_MODE_MATH>=VALUE_MODE_Q15
     patch_hall_loop(hall);
     #else // VALUE_MODE_MATH
+    // 1.传递函数运算系数动态计算
+    if (hall->params.recalculate_total_flag){
+        hall->data->gain = hall->params.t*hall->params.wc;
+        hall->data->complement_gain = VALUE_F_ONE - hall->data->gain;
+    }
 
+    // 2.创建函数局部变量
+    static uint8_t v[6] = {5, 3, 4, 1, 0, 2};
+    uint8_t signal_a,signal_b,signal_c,sector;
 
+    // 3.低通滤波及信号边界判断(防抖动)
+    hall->data->hall_a = hall->data->gain*((float)hall->in.gpio_a) + 
+                    hall->data->complement_gain*hall->data->hall_a;
+    hall->data->hall_b = hall->data->gain*((float)hall->in.gpio_b) + 
+                    hall->data->complement_gain*hall->data->hall_a;
+    hall->data->hall_c = hall->data->gain*((float)hall->in.gpio_c) + 
+                    hall->data->complement_gain*hall->data->hall_a;
+    
+    if (hall->data->hall_a >= hall->params.hall_high)   signal_a = 1;
+    else if(hall->data->hall_a <= hall->params.hall_low)signal_a = 0;
+    if (hall->data->hall_b >= hall->params.hall_high)   signal_b = 1;
+    else if(hall->data->hall_b <= hall->params.hall_low)signal_b = 0;
+    if (hall->data->hall_c >= hall->params.hall_high)   signal_c = 1;
+    else if(hall->data->hall_c <= hall->params.hall_low)signal_c = 0;
 
-
+    // 4.霍尔数据处理并输出角度值
+    sector = (signal_a << 2) | (signal_b << 1) | (signal_c);
+    hall->out.re = (v[sector - 1]*VALUE_F_2PI)/VALUE_F_SIX;
     #endif // VALUE_MODE_MATH
 }
 
-// (一阶线性自适应抗干扰控制，计数9)-------------------------------------------------
+// (一阶线性自抗扰控制，计数9)------------------------|------------------------------
 struct __LocalLadrc1Data{
-    SguanQ num;
-    SguanQ den;
+    SguanQ z1;                                      // (状态)输出估计
+    SguanQ z2;                                      // (状态)总扰动估计
+    SguanQ u_last;                                  // (状态)上一拍实际输出
+
+    SguanQ inv_b0;                                  // (系数)b0的倒数
+
+    SguanQ data_phi[2][2];                          // (系数)状态转移矩阵
+    SguanQ data_gu[2];                              // (系数)输入增益
+    SguanQ data_gy[2];                              // (系数)反馈增益
 };
 
-// (一阶线性自适应抗干扰控制，计数9)
+// (一阶线性自抗扰控制，计数9)
+static void __local_ladrc1_initial(__LocalLadrc1 *ladrc){
+    SguanQ beta1 = VALUE_F_TWO*ladrc->params.wo;
+    SguanQ beta2 = ladrc->params.wo*ladrc->params.wo;
+    SguanQ h = ladrc->params.t;
+    SguanQ b0 = ladrc->params.b0;
+    SguanQ a = VALUE_F_HALF*h*beta1;
+    SguanQ c = h*h*beta2/VALUE_F_FOUR;
+    SguanQ det = VALUE_F_ONE + a + c;
+    SguanQ b0_abs = (b0 >= 0) ? b0 : -b0;
+
+    ladrc->data->data_phi[0][0] = (VALUE_F_ONE - a - c)/det;
+    ladrc->data->data_phi[0][1] = h/det;
+    ladrc->data->data_phi[1][0] = -h*beta2/det;
+    ladrc->data->data_phi[1][1] = (VALUE_F_ONE + a - c)/det;
+
+    ladrc->data->data_gu[0] = h*b0/det;
+    ladrc->data->data_gu[1] = -(h*h*b0*beta2)/(VALUE_F_TWO*det);
+    ladrc->data->data_gy[0] = 
+        h*(beta1 + VALUE_F_HALF*h*beta2)/det;
+    ladrc->data->data_gy[1] = 
+        h*((VALUE_F_ONE + a)*beta2 - 
+        VALUE_F_HALF*h*beta2*beta1)/det;
+    ladrc->data->inv_b0 = (b0_abs > SGUAN_Q(1e-12))?(VALUE_F_ONE/b0):0;
+}
+
+// (一阶线性自抗扰控制，计数9)
 static void __local_ladrc1_init(__LocalLadrc1 *ladrc){
     #if VALUE_MODE_MATH>=VALUE_MODE_Q15
     patch_ladrc1_init(ladrc);
     #else // VALUE_MODE_MATH
-    // 传递函数运算系数固定计算
-
-
-
     // 初始化为零
+    __LOCAL_ZERO_ALL(ladrc);
 
-    
+    // 传递函数运算系数固定计算
+    __local_ladrc1_initial(ladrc);
     #endif // VALUE_MODE_MATH
 }
 
-// (一阶线性自适应抗干扰控制，计数9)
+// (一阶线性自抗扰控制，计数9)
 void transfer_ladrc1_loop(__LocalLadrc1 *ladrc){
     #if VALUE_MODE_MATH>=VALUE_MODE_Q15
     patch_ladrc1_loop(ladrc);
     #else // VALUE_MODE_MATH
+    // 1.传递函数运算系数动态计算
+    if (ladrc->params.recalculate_total_flag){
+        __local_ladrc1_initial(ladrc);
+    }
 
+    // 2.创建函数局部变量
+    SguanQ z1_next;
+    SguanQ z2_next;
+    SguanQ output;
 
-    
+    // 3.观测器状态更新并抗饱和
+    z1_next = ladrc->data->data_phi[0][0]*ladrc->data->z1 + 
+              ladrc->data->data_phi[0][1]*ladrc->data->z2 + 
+              ladrc->data->data_gu[0]*ladrc->data->u_last + 
+              ladrc->data->data_gy[0]*ladrc->in.fbk;
+    z2_next = ladrc->data->data_phi[1][0]*ladrc->data->z1 + 
+              ladrc->data->data_phi[1][1]*ladrc->data->z2 + 
+              ladrc->data->data_gu[1]*ladrc->data->u_last + 
+              ladrc->data->data_gy[1]*ladrc->in.fbk;
 
+    // 4.控制律u=(wc*(ref-z1)-z2)/b0及输出限幅
+    output = 
+        (ladrc->params.wc*(ladrc->in.ref-z1_next) - z2_next)*
+        ladrc->data->inv_b0;
+    if (output > ladrc->params.out_max) output = ladrc->params.out_max;
+    if (output < ladrc->params.out_min) output = ladrc->params.out_min;
+
+    // 5.更新历史数值
+    ladrc->data->z1 = z1_next;
+    ladrc->data->z2 = z2_next;
+    ladrc->data->u_last = output;
+    ladrc->out.output = output;
     #endif // VALUE_MODE_MATH
 }
 
-// (二阶线性自适应抗干扰控制，计数10)--------------------------------------------------
+// (二阶线性自抗扰控制，计数10)-----------------------|------------------------------
 struct __LocalLadrc2Data{
-    SguanQ num;
-    SguanQ den;
+    SguanQ z1;                                      // (状态)输出估计
+    SguanQ z2;                                      // (状态)输出导数估计
+    SguanQ z3;                                      // (状态)总扰动估计
+    SguanQ u_last;                                  // (状态)上一拍实际输出
+
+    SguanQ wc_pow2;                                 // (系数)wc的平方
+    SguanQ inv_b0;                                  // (系数)b0的倒数
+
+    SguanQ data_phi[3][3];                          // (系数)状态转移矩阵
+    SguanQ data_gu[3];                              // (系数)输入增益
+    SguanQ data_gy[3];                              // (系数)反馈增益
 };
 
-// (二阶线性自适应抗干扰控制，计数10)
+// (二阶线性自抗扰控制，计数10)
+static void __local_ladrc2_initial(__LocalLadrc2 *ladrc){
+    SguanQ beta1 = VALUE_F_THREE*ladrc->params.wo;
+    SguanQ beta2 = VALUE_F_THREE*ladrc->params.wo*ladrc->params.wo;
+    SguanQ beta3 = ladrc->params.wo*ladrc->params.wo*ladrc->params.wo;
+    SguanQ h = ladrc->params.t;
+    SguanQ b0 = ladrc->params.b0;
+    SguanQ b0_abs = (b0 >= 0) ? b0 : -b0;
+
+    SguanQ mat_m[3][3] = {
+        {VALUE_F_ONE+VALUE_F_HALF*h*beta1, -VALUE_F_HALF*h, 0},
+        {VALUE_F_HALF*h*beta2, VALUE_F_ONE, -VALUE_F_HALF*h},
+        {VALUE_F_HALF*h*beta3, 0, VALUE_F_ONE}
+    };
+    SguanQ mat_n[3][3] = {
+        {VALUE_F_ONE-VALUE_F_HALF*h*beta1, VALUE_F_HALF*h,  0},
+        {-VALUE_F_HALF*h*beta2, VALUE_F_ONE, VALUE_F_HALF*h},
+        {-VALUE_F_HALF*h*beta3, 0, VALUE_F_ONE}
+    };
+    SguanQ mat_inv[3][3];
+    SguanQ vec_u[3];
+    SguanQ vec_y[3];
+    math_matrix3_inv(mat_m, mat_inv);
+
+    ladrc->data->data_phi[0][0] = 
+        mat_inv[0][0]*mat_n[0][0] + mat_inv[0][1]*mat_n[1][0] + mat_inv[0][2]*mat_n[2][0];
+    ladrc->data->data_phi[0][1] = 
+        mat_inv[0][0]*mat_n[0][1] + mat_inv[0][1]*mat_n[1][1] + mat_inv[0][2]*mat_n[2][1];
+    ladrc->data->data_phi[0][2] = 
+        mat_inv[0][0]*mat_n[0][2] + mat_inv[0][1]*mat_n[1][2] + mat_inv[0][2]*mat_n[2][2];
+    ladrc->data->data_phi[1][0] = 
+        mat_inv[1][0]*mat_n[0][0] + mat_inv[1][1]*mat_n[1][0] + mat_inv[1][2]*mat_n[2][0];
+    ladrc->data->data_phi[1][1] = 
+        mat_inv[1][0]*mat_n[0][1] + mat_inv[1][1]*mat_n[1][1] + mat_inv[1][2]*mat_n[2][1];
+    ladrc->data->data_phi[1][2] = 
+        mat_inv[1][0]*mat_n[0][2] + mat_inv[1][1]*mat_n[1][2] + mat_inv[1][2]*mat_n[2][2];
+    ladrc->data->data_phi[2][0] = 
+        mat_inv[2][0]*mat_n[0][0] + mat_inv[2][1]*mat_n[1][0] + mat_inv[2][2]*mat_n[2][0];
+    ladrc->data->data_phi[2][1] = 
+        mat_inv[2][0]*mat_n[0][1] + mat_inv[2][1]*mat_n[1][1] + mat_inv[2][2]*mat_n[2][1];
+    ladrc->data->data_phi[2][2] = 
+        mat_inv[2][0]*mat_n[0][2] + mat_inv[2][1]*mat_n[1][2] + mat_inv[2][2]*mat_n[2][2];
+
+    vec_u[0] = 0;
+    vec_u[1] = h*b0;
+    vec_u[2] = 0;
+    ladrc->data->data_gu[0] = mat_inv[0][1]*vec_u[1];
+    ladrc->data->data_gu[1] = mat_inv[1][1]*vec_u[1];
+    ladrc->data->data_gu[2] = mat_inv[2][1]*vec_u[1];
+
+    vec_y[0] = h*beta1;
+    vec_y[1] = h*beta2;
+    vec_y[2] = h*beta3;
+    ladrc->data->data_gy[0] = 
+        mat_inv[0][0]*vec_y[0] + mat_inv[0][1]*vec_y[1] + mat_inv[0][2]*vec_y[2];
+    ladrc->data->data_gy[1] = 
+        mat_inv[1][0]*vec_y[0] + mat_inv[1][1]*vec_y[1] + mat_inv[1][2]*vec_y[2];
+    ladrc->data->data_gy[2] = 
+        mat_inv[2][0]*vec_y[0] + mat_inv[2][1]*vec_y[1] + mat_inv[2][2]*vec_y[2];
+
+    ladrc->data->wc_pow2 = ladrc->params.wc*ladrc->params.wc;
+    ladrc->data->inv_b0  = (b0_abs > SGUAN_Q(1e-12)) ? (VALUE_F_ONE/b0) : 0;
+}
+
+// (二阶线性自抗扰控制，计数10)
 static void __local_ladrc2_init(__LocalLadrc2 *ladrc){
     #if VALUE_MODE_MATH>=VALUE_MODE_Q15
     patch_ladrc2_init(ladrc);
     #else // VALUE_MODE_MATH
+    // 初始化为零
+    __LOCAL_ZERO_ALL(ladrc);
 
-
-    
+    // 传递函数运算系数固定计算
+    __local_ladrc2_initial(ladrc);
     #endif // VALUE_MODE_MATH
 }
 
-// (二阶线性自适应抗干扰控制，计数10)
+// (二阶线性自抗扰控制，计数10)
 void transfer_ladrc2_loop(__LocalLadrc2 *ladrc){
     #if VALUE_MODE_MATH>=VALUE_MODE_Q15
     patch_ladrc2_loop(ladrc);
     #else // VALUE_MODE_MATH
+    // 1.传递函数运算系数动态计算
+    if (ladrc->params.recalculate_total_flag){
+        __local_ladrc2_initial(ladrc);
+    }
 
+    // 2.创建函数局部变量
+    SguanQ z1_next;
+    SguanQ z2_next;
+    SguanQ z3_next;
+    SguanQ output;
 
-    
+    // 3.观测器状态更新(输入用上一拍实际输出，实现抗饱和)
+    z1_next = ladrc->data->data_phi[0][0]*ladrc->data->z1 + 
+              ladrc->data->data_phi[0][1]*ladrc->data->z2 + 
+              ladrc->data->data_phi[0][2]*ladrc->data->z3 + 
+              ladrc->data->data_gu[0]*ladrc->data->u_last + 
+              ladrc->data->data_gy[0]*ladrc->in.fbk;
+    z2_next = ladrc->data->data_phi[1][0]*ladrc->data->z1 + 
+              ladrc->data->data_phi[1][1]*ladrc->data->z2 + 
+              ladrc->data->data_phi[1][2]*ladrc->data->z3 + 
+              ladrc->data->data_gu[1]*ladrc->data->u_last + 
+              ladrc->data->data_gy[1]*ladrc->in.fbk;
+    z3_next = ladrc->data->data_phi[2][0]*ladrc->data->z1 + 
+              ladrc->data->data_phi[2][1]*ladrc->data->z2 + 
+              ladrc->data->data_phi[2][2]*ladrc->data->z3 + 
+              ladrc->data->data_gu[2]*ladrc->data->u_last + 
+              ladrc->data->data_gy[2]*ladrc->in.fbk;
 
+    // 4.控制律u=(wc^2*(ref-z1)-2*wc*z2-z3)/b0及输出限幅
+    output = (ladrc->data->wc_pow2*(ladrc->in.ref - z1_next) - 
+        VALUE_F_TWO*ladrc->params.wc*z2_next - z3_next)*ladrc->data->inv_b0;
+    if (output > ladrc->params.out_max) output = ladrc->params.out_max;
+    if (output < ladrc->params.out_min) output = ladrc->params.out_min;
+
+    // 5.更新历史数值
+    ladrc->data->z1 = z1_next;
+    ladrc->data->z2 = z2_next;
+    ladrc->data->z3 = z3_next;
+    ladrc->data->u_last = output;
+    ladrc->out.output = output;
     #endif // VALUE_MODE_MATH
 }
 
-// (传统指数型趋近率的滑模控制，计数11)------------------------------------------------
+// (传统指数型趋近率的滑模控制，计数11)----------------|------------------------------
 struct __LocalSmcData{
     SguanQ num;
     SguanQ den;
 };
+
+// (传统指数型趋近率的滑模控制，计数11)
+static void __local_smc_initial(__LocalSmc *smc){
+
+}
 
 // (传统指数型趋近率的滑模控制，计数11)
 static void __local_smc_init(__LocalSmc *smc){
@@ -761,11 +1173,16 @@ void transfer_smc_loop(__LocalSmc *smc){
     #endif // VALUE_MODE_MATH
 }
 
-// (增量式电流预测控制，计数12)-------------------------------------------------------
+// (增量式电流预测控制，计数12)-----------------------|------------------------------
 struct __LocalDpccData{
     SguanQ num;
     SguanQ den;
 };
+
+// (增量式电流预测控制，计数12)
+static void __local_dpcc_initial(__LocalDpcc *dpcc){
+
+}
 
 // (增量式电流预测控制，计数12)
 static void __local_dpcc_init(__LocalDpcc *dpcc){
@@ -790,11 +1207,16 @@ void transfer_dpcc_loop(__LocalDpcc *dpcc){
     #endif // VALUE_MODE_MATH
 }
 
-// (比例积分谐振调节器，计数13)-------------------------------------------------------
+// (比例积分谐振调节器，计数13)-----------------------|------------------------------
 struct __LocalPirData{
     SguanQ num;
     SguanQ den;
 };
+
+// (比例积分谐振调节器，计数13)
+static void __local_pir_initial(__LocalPir *pir){
+
+}
 
 // (比例积分谐振调节器，计数13)
 static void __local_pir_init(__LocalPir *pir){
@@ -819,11 +1241,16 @@ void transfer_pir_loop(__LocalPir *pir){
     #endif // VALUE_MODE_MATH
 }
 
-// (传统闭环控制器，计数14)-----------------------------------------------------------
+// (传统闭环控制器，计数14)---------------------------|------------------------------
 struct __LocalPidData{
     SguanQ num;
     SguanQ den;
 };
+
+// (传统闭环控制器，计数14)
+static void __local_pid_initial(__LocalPid *pid){
+
+}
 
 // (传统闭环控制器，计数14)
 static void __local_pid_init(__LocalPid *pid){
@@ -848,11 +1275,16 @@ void transfer_pid_loop(__LocalPid *pid){
     #endif // VALUE_MODE_MATH
 }
 
-// (开环锁相环，计数15)---------------------------------------------------------------
+// (开环锁相环，计数15)------------------------------|-------------------------------
 struct __LocalPllData{
     SguanQ num;
     SguanQ den;
 };
+
+// (开环锁相环，计数15)
+static void __local_pll_initial(__LocalPll *pll){
+
+}
 
 // (开环锁相环，计数15)
 static void __local_pll_init(__LocalPll *pll){
@@ -877,32 +1309,34 @@ void transfer_pll_loop(__LocalPll *pll){
     #endif // VALUE_MODE_MATH
 }
 
-// (一阶低通滤波器，计数16)-----------------------------------------------------------
+// (一阶低通滤波器，计数16)---------------------------|------------------------------
 struct __LocalLpf1Data{
-    SguanQ i;
-    SguanQ o;
+    SguanQ i;                                       // (状态)历史输入
+    SguanQ o;                                       // (状态)历史输出
 
-    SguanQ data_num;
-    SguanQ data_den[2];
+    SguanQ data_num;                                // (系数)分子系数
+    SguanQ data_den[2];                             // (系数)分母系数表
 };
+
+// (一阶低通滤波器，计数16)
+static void __local_lpf1_initial(__LocalLpf1 *lpf){
+    SguanQ temp = lpf->params.t*lpf->params.wc;
+
+    lpf->data->data_num = temp;
+    lpf->data->data_den[0] = VALUE_F_TWO + temp;
+    lpf->data->data_den[1] = -VALUE_F_TWO + temp;
+}
 
 // (一阶低通滤波器，计数16)
 static void __local_lpf1_init(__LocalLpf1 *lpf){
     #if VALUE_MODE_MATH>=VALUE_MODE_Q15
     patch_lpf1_init(lpf);
     #else // VALUE_MODE_MATH
-    // 传递函数运算系数固定计算
-    lpf->data->data_num = lpf->params.t*lpf->params.wc;
-
-    lpf->data->data_den[0] = 2.0f + lpf->params.t*lpf->params.wc;
-    lpf->data->data_den[1] = -2.0f + lpf->params.t*lpf->params.wc;
-
     // 初始化为零
-    lpf->data->i = 0.0f;
-    lpf->data->o = 0.0f;
+    __LOCAL_ZERO_ALL(lpf);
 
-    lpf->in.input = 0.0f;
-    lpf->out.output = 0.0f;
+    // 传递函数运算系数固定计算
+    __local_lpf1_initial(lpf);
     #endif // VALUE_MODE_MATH
 }
 
@@ -913,14 +1347,13 @@ void transfer_lpf1_loop(__LocalLpf1 *lpf){
     #else // VALUE_MODE_MATH
     // 1.传递函数运算系数动态计算
     if (lpf->params.recalculate_total_flag){
-        lpf->data->data_num = lpf->params.t*lpf->params.wc;
-    
-        lpf->data->data_den[0] = 2.0f + lpf->params.t*lpf->params.wc;
-        lpf->data->data_den[1] = -2.0f + lpf->params.t*lpf->params.wc;
+        __local_lpf1_initial(lpf);
     }
 
     // 2.运算传递函数
-    lpf->out.output = (lpf->in.input+lpf->data->i - lpf->data->o*lpf->data->data_den[1])/lpf->data->data_den[0];
+    lpf->out.output = 
+        ((lpf->in.input+lpf->data->i)*lpf->data->data_num - 
+        lpf->data->o*lpf->data->data_den[1])/lpf->data->data_den[0];
 
     // 3.更新历史数值
     lpf->data->i = lpf->in.input;
@@ -928,39 +1361,41 @@ void transfer_lpf1_loop(__LocalLpf1 *lpf){
     #endif // VALUE_MODE_MATH
 }
 
-// (二阶低通滤波器，计数17)-----------------------------------------------------------
+// (二阶低通滤波器，计数17)---------------------------|------------------------------
 struct __LocalLpf2Data{
-    SguanQ i[2];
-    SguanQ o[2];
+    SguanQ t_pow2;                                  // (系数)t的平方
+
+    SguanQ i[2];                                    // (状态)输入历史
+    SguanQ o[2];                                    // (状态)输出历史
     
-    // (data_num)0->现在和LLast
-    // (data_num)1->仅Last的系数
-    // (传递函数分子系数)
-    SguanQ data_num[2];
-    SguanQ data_den[3];
+    SguanQ data_num[2];                             // (系数)分子系数表
+    SguanQ data_den[3];                             // (系数)分母系数表
 };
+
+// (二阶低通滤波器，计数17)
+static void __local_lpf2_initial(__LocalLpf2 *lpf){
+    SguanQ twc = lpf->params.t*lpf->params.wc;
+    SguanQ twc_pow2 = lpf->data->t_pow2*lpf->params.wc*lpf->params.wc;
+
+    lpf->data->data_num[0] = twc_pow2;
+    lpf->data->data_num[1] = VALUE_F_TWO*twc_pow2;
+
+    lpf->data->data_den[0] = VALUE_F_FOUR + VALUE_F_2_SQRT2*twc + twc_pow2;
+    lpf->data->data_den[1] = -VALUE_F_EIGHT + VALUE_F_TWO*twc_pow2;
+    lpf->data->data_den[2] = VALUE_F_FOUR - VALUE_F_2_SQRT2*twc + twc_pow2;
+}
 
 // (二阶低通滤波器，计数17)
 static void __local_lpf2_init(__LocalLpf2 *lpf){
     #if VALUE_MODE_MATH>=VALUE_MODE_Q15
     patch_lpf2_init(lpf);
     #else // VALUE_MODE_MATH
-    // 传递函数运算系数固定计算
-    lpf->data->data_num[0] = lpf->params.t*lpf->params.wc*lpf->params.t*lpf->params.wc;
-    lpf->data->data_num[1] = 2.0f*lpf->params.t*lpf->params.wc*lpf->params.t*lpf->params.wc;
-
-    lpf->data->data_den[0] = 4.0f + VALUE_F_2_SQRT2*lpf->params.t*lpf->params.wc + lpf->params.t*lpf->params.wc*lpf->params.t*lpf->params.wc;
-    lpf->data->data_den[1] = -8.0f + 2.0f*lpf->params.t*lpf->params.wc*lpf->params.t*lpf->params.wc;
-    lpf->data->data_den[2] = 4.0f - VALUE_F_2_SQRT2*lpf->params.t*lpf->params.wc + lpf->params.t*lpf->params.wc*lpf->params.t*lpf->params.wc;
-
     // 初始化为零
-    lpf->data->i[0] = 0.0f;
-    lpf->data->i[1] = 0.0f;
-    lpf->data->o[0] = 0.0f;
-    lpf->data->o[1] = 0.0f;
-    
-    lpf->in.input = 0.0f;
-    lpf->out.output = 0.0f;
+    __LOCAL_ZERO_ALL(lpf);
+
+    // 传递函数运算系数固定计算
+    lpf->data->t_pow2 = math_pow(lpf->params.t, 2);
+    __local_lpf2_initial(lpf);
     #endif // VALUE_MODE_MATH
 }
 
@@ -971,16 +1406,15 @@ void transfer_lpf2_loop(__LocalLpf2 *lpf){
     #else // VALUE_MODE_MATH
     // 1.传递函数运算系数动态计算
     if (lpf->params.recalculate_total_flag){
-        lpf->data->data_num[0] = lpf->params.t*lpf->params.wc*lpf->params.t*lpf->params.wc;
-        lpf->data->data_num[1] = 2.0f*lpf->params.t*lpf->params.wc*lpf->params.t*lpf->params.wc;
-
-        lpf->data->data_den[0] = 4.0f + VALUE_F_2_SQRT2*lpf->params.t*lpf->params.wc + lpf->params.t*lpf->params.wc*lpf->params.t*lpf->params.wc;
-        lpf->data->data_den[1] = -8.0f + 2.0f*lpf->params.t*lpf->params.wc*lpf->params.t*lpf->params.wc;
-        lpf->data->data_den[2] = 4.0f - VALUE_F_2_SQRT2*lpf->params.t*lpf->params.wc + lpf->params.t*lpf->params.wc*lpf->params.t*lpf->params.wc;
+        __local_lpf2_initial(lpf);
     }
 
     // 2.运算传递函数
-    lpf->out.output = ((lpf->in.input + lpf->data->i[1])*lpf->data->data_num[0] + lpf->data->i[0]*lpf->data->data_num[1] - lpf->data->o[0]*lpf->data->data_den[1] - lpf->data->o[1]*lpf->data->data_den[2])/lpf->data->data_den[0];
+    lpf->out.output = 
+        ((lpf->in.input + lpf->data->i[1])*lpf->data->data_num[0] + 
+        lpf->data->i[0]*lpf->data->data_num[1] - 
+        lpf->data->o[0]*lpf->data->data_den[1] - 
+        lpf->data->o[1]*lpf->data->data_den[2])/lpf->data->data_den[0];
 
     // 3.更新历史数值
     lpf->data->i[1] = lpf->data->i[0];
@@ -991,33 +1425,36 @@ void transfer_lpf2_loop(__LocalLpf2 *lpf){
     #endif // VALUE_MODE_MATH
 }
 
-// (一阶高通滤波器，计数18)-----------------------------------------------------------
+// (一阶高通滤波器，计数18)---------------------------|------------------------------
 struct __LocalHpf1Data{
-    SguanQ i;
-    SguanQ o;
+    SguanQ i;                                       // (状态)历史输入
+    SguanQ o;                                       // (状态)历史输出
 
-    SguanQ data_num[2];
-    SguanQ data_den[2];
+    SguanQ data_num[2];                             // (系数)分子系数表
+    SguanQ data_den[2];                             // (系数)分母系数表
 };
+
+// (一阶高通滤波器，计数18)
+static void __local_hpf1_initial(__LocalHpf1 *hpf){
+    SguanQ twc = hpf->params.t*hpf->params.wc;
+
+    hpf->data->data_num[0] = VALUE_F_TWO;
+    hpf->data->data_num[1] = -VALUE_F_TWO;
+
+    hpf->data->data_den[0] = VALUE_F_TWO + twc;
+    hpf->data->data_den[1] = -VALUE_F_TWO + twc;
+}
 
 // (一阶高通滤波器，计数18)
 static void __local_hpf1_init(__LocalHpf1 *hpf){
     #if VALUE_MODE_MATH>=VALUE_MODE_Q15
     patch_hpf1_init(hpf);
     #else // VALUE_MODE_MATH
-    // 传递函数运算系数固定计算
-    hpf->data->data_num[0] = 2.0f;
-    hpf->data->data_num[1] = -2.0f;
-
-    hpf->data->data_den[0] = 2.0f + hpf->params.t*hpf->params.wc;
-    hpf->data->data_den[1] = -2.0f + hpf->params.t*hpf->params.wc;
-
     // 初始化为零
-    hpf->data->i = 0.0f;
-    hpf->data->o = 0.0f;
+    __LOCAL_ZERO_ALL(hpf);
 
-    hpf->in.input = 0.0f;
-    hpf->out.output = 0.0f;
+    // 传递函数运算系数固定计算
+    __local_hpf1_initial(hpf);
     #endif // VALUE_MODE_MATH
 }
 
@@ -1028,15 +1465,14 @@ void transfer_hpf1_loop(__LocalHpf1 *hpf){
     #else // VALUE_MODE_MATH
     // 1.传递函数运算系数动态计算
     if (hpf->params.recalculate_total_flag){
-        hpf->data->data_num[0] = 2.0f;
-        hpf->data->data_num[1] = -2.0f;
-
-        hpf->data->data_den[0] = 2.0f + hpf->params.t*hpf->params.wc;
-        hpf->data->data_den[1] = -2.0f + hpf->params.t*hpf->params.wc;
+        __local_hpf1_initial(hpf);
     }
 
     // 2.运算传递函数
-    hpf->out.output = (hpf->in.input*hpf->data->data_num[0] + hpf->data->i*hpf->data->data_num[1] - hpf->data->o*hpf->data->data_den[1])/hpf->data->data_den[0];
+    hpf->out.output = 
+        (hpf->in.input*hpf->data->data_num[0] + 
+        hpf->data->i*hpf->data->data_num[1] - 
+        hpf->data->o*hpf->data->data_den[1])/hpf->data->data_den[0];
 
     // 3.更新历史数值
     hpf->data->i = hpf->in.input;
@@ -1044,40 +1480,39 @@ void transfer_hpf1_loop(__LocalHpf1 *hpf){
     #endif // VALUE_MODE_MATH
 }
 
-// (二阶高通滤波器，计数19)-----------------------------------------------------------
+// (二阶高通滤波器，计数19)---------------------------|------------------------------
 struct __LocalHpf2Data{
-    SguanQ i[2];
-    SguanQ o[2];
+    SguanQ i[2];                                    // (状态)输入历史
+    SguanQ o[2];                                    // (状态)输出历史
 
-    // (data_num)0->现在和LLast
-    // (data_num)1->仅Last的系数
-    // (传递函数分子系数)
-    SguanQ data_num[2];
-    SguanQ data_den[3];
+    SguanQ data_num[2];                             // (系数)分子系数表
+    SguanQ data_den[3];                             // (系数)分母系数表
 };
+
+// (二阶高通滤波器，计数19)
+static void __local_hpf2_initial(__LocalHpf2 *hpf){
+    SguanQ twc = hpf->params.t*hpf->params.wc;
+    SguanQ twc_pow2 = 
+        hpf->params.t*hpf->params.wc*hpf->params.t*hpf->params.wc;
+
+    hpf->data->data_num[0] = VALUE_F_FOUR;
+    hpf->data->data_num[1] = -VALUE_F_EIGHT;
+
+    hpf->data->data_den[0] = VALUE_F_FOUR + VALUE_F_2_SQRT2*twc + twc_pow2;
+    hpf->data->data_den[1] = -VALUE_F_EIGHT + VALUE_F_TWO*twc_pow2;
+    hpf->data->data_den[2] = VALUE_F_FOUR - VALUE_F_2_SQRT2*twc + twc_pow2;
+}
 
 // (二阶高通滤波器，计数19)
 static void __local_hpf2_init(__LocalHpf2 *hpf){
     #if VALUE_MODE_MATH>=VALUE_MODE_Q15
     patch_hpf2_init(hpf);
     #else // VALUE_MODE_MATH
-    // 传递函数运算系数固定计算
-    hpf->data->data_num[0] = 4.0f;
-    hpf->data->data_num[1] = -8.0f;
-
-    hpf->data->data_den[0] = 4.0f + VALUE_F_2_SQRT2*hpf->params.t*hpf->params.wc + hpf->params.t*hpf->params.wc*hpf->params.t*hpf->params.wc;
-    hpf->data->data_den[1] = -8.0f + 2.0f*hpf->params.t*hpf->params.wc*hpf->params.t*hpf->params.wc;
-    hpf->data->data_den[2] = 4.0f - VALUE_F_2_SQRT2*hpf->params.t*hpf->params.wc + hpf->params.t*hpf->params.wc*hpf->params.t*hpf->params.wc;
-
     // 初始化为零
-    hpf->data->i[0] = 0.0f;
-    hpf->data->i[1] = 0.0f;
+    __LOCAL_ZERO_ALL(hpf);
 
-    hpf->data->o[0] = 0.0f;
-    hpf->data->o[1] = 0.0f;
-
-    hpf->in.input = 0.0f;
-    hpf->out.output = 0.0f;
+    // 传递函数运算系数固定计算
+    __local_hpf2_initial(hpf);
     #endif // VALUE_MODE_MATH
 }
 
@@ -1088,16 +1523,15 @@ void transfer_hpf2_loop(__LocalHpf2 *hpf){
     #else // VALUE_MODE_MATH
     // 1.传递函数运算系数动态计算
     if (hpf->params.recalculate_total_flag){
-        hpf->data->data_num[0] = 4.0f;
-        hpf->data->data_num[1] = -8.0f;
-
-        hpf->data->data_den[0] = 4.0f + VALUE_F_2_SQRT2*hpf->params.t*hpf->params.wc + hpf->params.t*hpf->params.wc*hpf->params.t*hpf->params.wc;
-        hpf->data->data_den[1] = -8.0f + 2.0f*hpf->params.t*hpf->params.wc*hpf->params.t*hpf->params.wc;
-        hpf->data->data_den[2] = 4.0f - VALUE_F_2_SQRT2*hpf->params.t*hpf->params.wc + hpf->params.t*hpf->params.wc*hpf->params.t*hpf->params.wc;
+        __local_hpf2_initial(hpf);
     }
 
     // 2.运算传递函数
-    hpf->out.output = ((hpf->in.input + hpf->data->i[1])*hpf->data->data_num[0] + hpf->data->i[0]*hpf->data->data_num[1] - hpf->data->o[0]*hpf->data->data_den[1] - hpf->data->o[1]*hpf->data->data_den[2])/hpf->data->data_den[0];
+    hpf->out.output = 
+        ((hpf->in.input + hpf->data->i[1])*hpf->data->data_num[0] + 
+        hpf->data->i[0]*hpf->data->data_num[1] - 
+        hpf->data->o[0]*hpf->data->data_den[1] - 
+        hpf->data->o[1]*hpf->data->data_den[2])/hpf->data->data_den[0];
 
     // 3.更新历史数值
     hpf->data->i[1] = hpf->data->i[0];
@@ -1108,40 +1542,48 @@ void transfer_hpf2_loop(__LocalHpf2 *hpf){
     #endif // VALUE_MODE_MATH
 }
 
-// (带通滤波器"一阶低通和高通串联"，计数20)--------------------------------------------
+// (带通滤波器"一阶低通和高通串联"，计数20)------------|------------------------------
 struct __LocalBpf1Data{
-    SguanQ i[2];
-    SguanQ o[2];
+    SguanQ i[2];                                    // (状态)输入历史
+    SguanQ o[2];                                    // (状态)输出历史
 
-    // (data_num)0->现在的系数
-    // (data_num)1->LLast的系数
-    // (传递函数分子系数)
-    SguanQ data_num[2];
-    SguanQ data_den[3];
+    SguanQ data_num[2];                             // (系数)分子系数表
+    SguanQ data_den[3];                             // (系数)分母系数表
 };
+
+// (带通滤波器"一阶低通和高通串联"，计数20)
+static void __local_bpf1_initial(__LocalBpf1 *bpf){
+    SguanQ twc_low = bpf->params.t*bpf->params.wc_low;
+    SguanQ twc_high = bpf->params.t*bpf->params.wc_high;
+
+    bpf->data->data_num[0] = VALUE_F_TWO*twc_low;
+    bpf->data->data_num[1] = -VALUE_F_TWO*twc_low;
+
+    bpf->data->data_den[0] = 
+        VALUE_F_FOUR + 
+        VALUE_F_TWO*twc_high + 
+        VALUE_F_TWO*twc_low + 
+        twc_high*twc_high;
+    bpf->data->data_den[1] = 
+        -VALUE_F_EIGHT + 
+        VALUE_F_TWO*twc_high*twc_high;
+    bpf->data->data_den[2] = 
+        VALUE_F_FOUR - 
+        VALUE_F_TWO*twc_high - 
+        VALUE_F_TWO*twc_low + 
+        twc_high*twc_high;
+}
 
 // (带通滤波器"一阶低通和高通串联"，计数20)
 static void __local_bpf1_init(__LocalBpf1 *bpf){
     #if VALUE_MODE_MATH>=VALUE_MODE_Q15
     patch_bpf1_init(bpf);
     #else // VALUE_MODE_MATH
-    // 传递函数运算系数固定计算
-    bpf->data->data_num[0] = 2.0f*bpf->params.t*bpf->params.wc_low;
-    bpf->data->data_num[1] = -2.0f*bpf->params.t*bpf->params.wc_low;
-
-    bpf->data->data_den[0] = 4.0f + 2.0f*bpf->params.t*bpf->params.wc_high + 2.0f*bpf->params.t*bpf->params.wc_low + bpf->params.t*bpf->params.t*bpf->params.wc_high*bpf->params.wc_low;
-    bpf->data->data_den[1] = -8.0f + 2.0f*bpf->params.t*bpf->params.t*bpf->params.wc_high*bpf->params.wc_low;
-    bpf->data->data_den[2] = 4.0f - 2.0f*bpf->params.t*bpf->params.wc_high - 2.0f*bpf->params.t*bpf->params.wc_low + bpf->params.t*bpf->params.t*bpf->params.wc_high*bpf->params.wc_low;
-
     // 初始化为零
-    bpf->data->i[0] = 0.0f;
-    bpf->data->i[1] = 0.0f;
+    __LOCAL_ZERO_ALL(bpf);
 
-    bpf->data->o[0] = 0.0f;
-    bpf->data->o[1] = 0.0f;
-    
-    bpf->in.input = 0.0f;
-    bpf->out.output = 0.0f;
+    // 传递函数运算系数固定计算
+    __local_bpf1_initial(bpf);
     #endif // VALUE_MODE_MATH
 }
 
@@ -1152,16 +1594,15 @@ void transfer_bpf1_loop(__LocalBpf1 *bpf){
     #else // VALUE_MODE_MATH
     // 1.传递函数运算系数动态计算
     if (bpf->params.recalculate_total_flag){
-        bpf->data->data_num[0] = 2.0f*bpf->params.t*bpf->params.wc_low;
-        bpf->data->data_num[1] = -2.0f*bpf->params.t*bpf->params.wc_low;
-
-        bpf->data->data_den[0] = 4.0f + 2.0f*bpf->params.t*bpf->params.wc_high + 2.0f*bpf->params.t*bpf->params.wc_low + bpf->params.t*bpf->params.t*bpf->params.wc_high*bpf->params.wc_low;
-        bpf->data->data_den[1] = -8.0f + 2.0f*bpf->params.t*bpf->params.t*bpf->params.wc_high*bpf->params.wc_low;
-        bpf->data->data_den[2] = 4.0f - 2.0f*bpf->params.t*bpf->params.wc_high - 2.0f*bpf->params.t*bpf->params.wc_low + bpf->params.t*bpf->params.t*bpf->params.wc_high*bpf->params.wc_low;
+        __local_bpf1_initial(bpf);
     }
 
     // 2.运算传递函数
-    bpf->out.output = (bpf->in.input*bpf->data->data_num[0] + bpf->data->i[1]*bpf->data->data_num[1] - bpf->data->o[0]*bpf->data->data_den[1] - bpf->data->o[1]*bpf->data->data_den[2])/bpf->data->data_den[0];
+    bpf->out.output = 
+        (bpf->in.input*bpf->data->data_num[0] + 
+        bpf->data->i[1]*bpf->data->data_num[1] - 
+        bpf->data->o[0]*bpf->data->data_den[1] - 
+        bpf->data->o[1]*bpf->data->data_den[2])/bpf->data->data_den[0];
 
     // 3.更新历史数值
     bpf->data->i[1] = bpf->data->i[0];
@@ -1172,40 +1613,38 @@ void transfer_bpf1_loop(__LocalBpf1 *bpf){
     #endif // VALUE_MODE_MATH
 }
 
-// (带通滤波器"典型二阶系统改型"，计数21)----------------------------------------------
+// (带通滤波器"典型二阶系统改型"，计数21)--------------|------------------------------
 struct __LocalBpf2Data{
-    SguanQ i[2];
-    SguanQ o[2];
+    SguanQ i[2];                                    // (状态)输入历史
+    SguanQ o[2];                                    // (状态)输出历史
 
-    // (data_num)0->现在的系数
-    // (data_num)1->LLast的系数
-    // (传递函数分子系数)
-    SguanQ data_num[2];
-    SguanQ data_den[3];
+    SguanQ data_num[2];                             // (系数)分子系数表
+    SguanQ data_den[3];                             // (系数)分母系数表
 };
+
+// (带通滤波器"典型二阶系统改型"，计数21)
+static void __local_bpf2_initial(__LocalBpf2 *bpf){
+    SguanQ two_zeta = bpf->params.t*bpf->params.wo*bpf->params.zeta;
+    SguanQ two_pow2 = bpf->params.t*bpf->params.wo*bpf->params.t*bpf->params.wo;
+
+    bpf->data->data_num[0] = VALUE_F_FOUR*two_zeta;
+    bpf->data->data_num[1] = -VALUE_F_FOUR*two_zeta;
+
+    bpf->data->data_den[0] = VALUE_F_FOUR + VALUE_F_FOUR*two_zeta + two_pow2;
+    bpf->data->data_den[1] = -VALUE_F_EIGHT + VALUE_F_TWO*two_pow2;
+    bpf->data->data_den[2] = VALUE_F_FOUR - VALUE_F_FOUR*two_zeta + two_pow2;
+}
 
 // (带通滤波器"典型二阶系统改型"，计数21)
 static void __local_bpf2_init(__LocalBpf2 *bpf){
     #if VALUE_MODE_MATH>=VALUE_MODE_Q15
     patch_bpf2_init(bpf);
     #else // VALUE_MODE_MATH
-    // 传递函数运算系数固定计算
-    bpf->data->data_num[0] = 4.0f*bpf->params.t*bpf->params.wo*bpf->params.zeta;
-    bpf->data->data_num[1] = -4.0f*bpf->params.t*bpf->params.wo*bpf->params.zeta;
-
-    bpf->data->data_den[0] = 4.0f + 4.0f*bpf->params.t*bpf->params.wo*bpf->params.zeta + bpf->params.t*bpf->params.wo*bpf->params.t*bpf->params.wo;
-    bpf->data->data_den[1] = -8.0f + 2.0f*bpf->params.t*bpf->params.wo*bpf->params.t*bpf->params.wo;
-    bpf->data->data_den[2] = 4.0f - 4.0f*bpf->params.t*bpf->params.wo*bpf->params.zeta + bpf->params.t*bpf->params.wo*bpf->params.t*bpf->params.wo;
-
     // 初始化为零
-    bpf->data->i[0] = 0.0f;
-    bpf->data->i[1] = 0.0f;
+    __LOCAL_ZERO_ALL(bpf);
 
-    bpf->data->o[0] = 0.0f;
-    bpf->data->o[1] = 0.0f;
-    
-    bpf->in.input = 0.0f;
-    bpf->out.output = 0.0f;
+    // 传递函数运算系数固定计算
+    __local_bpf2_initial(bpf);
     #endif // VALUE_MODE_MATH
 }
 
@@ -1216,16 +1655,15 @@ void transfer_bpf2_loop(__LocalBpf2 *bpf){
     #else // VALUE_MODE_MATH
     // 1.传递函数运算系数动态计算
     if (bpf->params.recalculate_total_flag){
-        bpf->data->data_num[0] = 4.0f*bpf->params.t*bpf->params.wo*bpf->params.zeta;
-        bpf->data->data_num[1] = -4.0f*bpf->params.t*bpf->params.wo*bpf->params.zeta;
-
-        bpf->data->data_den[0] = 4.0f + 4.0f*bpf->params.t*bpf->params.wo*bpf->params.zeta + bpf->params.t*bpf->params.wo*bpf->params.t*bpf->params.wo;
-        bpf->data->data_den[1] = -8.0f + 2.0f*bpf->params.t*bpf->params.wo*bpf->params.t*bpf->params.wo;
-        bpf->data->data_den[2] = 4.0f - 4.0f*bpf->params.t*bpf->params.wo*bpf->params.zeta + bpf->params.t*bpf->params.wo*bpf->params.t*bpf->params.wo;
+        __local_bpf2_initial(bpf);
     }
 
     // 2.运算传递函数
-    bpf->out.output = (bpf->in.input*bpf->data->data_num[0] + bpf->data->i[1]*bpf->data->data_num[1] - bpf->data->o[0]*bpf->data->data_den[1] - bpf->data->o[1]*bpf->data->data_den[2])/bpf->data->data_den[0];
+    bpf->out.output = 
+        (bpf->in.input*bpf->data->data_num[0] + 
+        bpf->data->i[1]*bpf->data->data_num[1] - 
+        bpf->data->o[0]*bpf->data->data_den[1] - 
+        bpf->data->o[1]*bpf->data->data_den[2])/bpf->data->data_den[0];
 
     // 3.更新历史数值
     bpf->data->i[1] = bpf->data->i[0];
@@ -1236,17 +1674,19 @@ void transfer_bpf2_loop(__LocalBpf2 *bpf){
     #endif // VALUE_MODE_MATH
 }
 
-// (广义积分器"典型二阶系统改型"，计数22)----------------------------------------------
+// (广义积分器"典型二阶系统改型"，计数22)--------------|------------------------------
 struct __LocalSogiData{
     SguanQ i[2];
     SguanQ o[2];
 
-    // (data_num)0->现在的系数
-    // (data_num)1->LLast的系数
-    // (传递函数分子系数)
     SguanQ data_num[2];
     SguanQ data_den[3];
 };
+
+// (广义积分器"典型二阶系统改型"，计数22)
+static void __local_sogi_initial(__LocalSogi *sogi){
+
+}
 
 // (广义积分器"典型二阶系统改型"，计数22)
 static void __local_sogi_init(__LocalSogi *sogi){
@@ -1276,40 +1716,38 @@ void transfer_sogi_loop(__LocalSogi *sogi){
     #endif // VALUE_MODE_MATH
 }
 
-// (陷波滤波器"典型二阶系统改型"，计数23)----------------------------------------------
+// (陷波滤波器"典型二阶系统改型"，计数23)--------------|------------------------------
 struct __LocalNfData{
-    SguanQ i[2];
-    SguanQ o[2];
+    SguanQ i[2];                                    // (状态)输入历史
+    SguanQ o[2];                                    // (状态)输出历史
 
-    // (data_num)0->现在和LLast
-    // (data_num)1->仅Last的系数
-    // (传递函数分子系数)
-    SguanQ data_num[2];
-    SguanQ data_den[3];
+    SguanQ data_num[2];                             // (系数)分子系数表
+    SguanQ data_den[3];                             // (系数)分母系数表
 };
+
+// (陷波滤波器"典型二阶系统改型"，计数23)
+static void __local_nf_initial(__LocalNf *nf){
+    SguanQ two_zeta = nf->params.t*nf->params.wo*nf->params.zeta;
+    SguanQ two_pow2 = nf->params.t*nf->params.wo*nf->params.t*nf->params.wo;
+
+    nf->data->data_num[0] = VALUE_F_FOUR + two_pow2;
+    nf->data->data_num[1] = -VALUE_F_EIGHT + VALUE_F_TWO*two_pow2;
+
+    nf->data->data_den[0] = VALUE_F_FOUR + VALUE_F_FOUR*two_zeta + two_pow2;
+    nf->data->data_den[1] = -VALUE_F_EIGHT + VALUE_F_TWO*two_pow2;
+    nf->data->data_den[2] = VALUE_F_FOUR - VALUE_F_FOUR*two_zeta + two_pow2;
+}
 
 // (陷波滤波器"典型二阶系统改型"，计数23)
 static void __local_nf_init(__LocalNf *nf){
     #if VALUE_MODE_MATH>=VALUE_MODE_Q15
     patch_nf_init(nf);
     #else // VALUE_MODE_MATH
-    // 传递函数运算系数固定计算
-    nf->data->data_num[0] = 4.0f + nf->params.t*nf->params.wo*nf->params.t*nf->params.wo;
-    nf->data->data_num[1] = -8.0f + 2.0f*nf->params.t*nf->params.wo*nf->params.t*nf->params.wo;
-
-    nf->data->data_den[0] = 4.0f + 4.0f*nf->params.t*nf->params.wo*nf->params.zeta + nf->params.t*nf->params.wo*nf->params.t*nf->params.wo;
-    nf->data->data_den[1] = -8.0f + 2.0f*nf->params.t*nf->params.wo*nf->params.t*nf->params.wo;
-    nf->data->data_den[2] = 4.0f - 4.0f*nf->params.t*nf->params.wo*nf->params.zeta + nf->params.t*nf->params.wo*nf->params.t*nf->params.wo;
-
     // 初始化为零
-    nf->data->i[0] = 0.0f;
-    nf->data->i[1] = 0.0f;
+    __LOCAL_ZERO_ALL(nf);
 
-    nf->data->o[0] = 0.0f;
-    nf->data->o[1] = 0.0f;
-
-    nf->in.input = 0.0f;
-    nf->out.output = 0.0f;
+    // 传递函数运算系数固定计算
+    __local_nf_initial(nf);
     #endif // VALUE_MODE_MATH
 }
 
@@ -1320,16 +1758,15 @@ void transfer_nf_loop(__LocalNf *nf){
     #else // VALUE_MODE_MATH
     // 1.传递函数运算系数动态计算
     if (nf->params.recalculate_total_flag){
-        nf->data->data_num[0] = 4.0f + nf->params.t*nf->params.wo*nf->params.t*nf->params.wo;
-        nf->data->data_num[1] = -8.0f + 2.0f*nf->params.t*nf->params.wo*nf->params.t*nf->params.wo;
-
-        nf->data->data_den[0] = 4.0f + 4.0f*nf->params.t*nf->params.wo*nf->params.zeta + nf->params.t*nf->params.wo*nf->params.t*nf->params.wo;
-        nf->data->data_den[1] = -8.0f + 2.0f*nf->params.t*nf->params.wo*nf->params.t*nf->params.wo;
-        nf->data->data_den[2] = 4.0f - 4.0f*nf->params.t*nf->params.wo*nf->params.zeta + nf->params.t*nf->params.wo*nf->params.t*nf->params.wo;
+        __local_nf_initial(nf);
     }
 
     // 2.运算传递函数
-    nf->out.output = ((nf->in.input + nf->data->i[1])*nf->data->data_num[0] + nf->data->i[0]*nf->data->data_num[1] - nf->data->o[0]*nf->data->data_den[1] - nf->data->o[1]*nf->data->data_den[2])/nf->data->data_den[0];
+    nf->out.output = 
+        ((nf->in.input + nf->data->i[1])*nf->data->data_num[0] + 
+        nf->data->i[0]*nf->data->data_num[1] - 
+        nf->data->o[0]*nf->data->data_den[1] - 
+        nf->data->o[1]*nf->data->data_den[2])/nf->data->data_den[0];
 
     // 3.更新历史数值
     nf->data->i[1] = nf->data->i[0];
@@ -1340,38 +1777,40 @@ void transfer_nf_loop(__LocalNf *nf){
     #endif // VALUE_MODE_MATH
 }
 
-// (陷波滤波器"三参数陷波滤波器"，计数24)----------------------------------------------
+// (陷波滤波器"三参数陷波滤波器"，计数24)--------------|------------------------------
 struct __LocalTpnfData{
-    SguanQ i[2];
-    SguanQ o[2];
+    SguanQ i[2];                                    // (状态)输入历史
+    SguanQ o[2];                                    // (状态)输出历史
 
-    SguanQ data_num[3];
-    SguanQ data_den[3];
+    SguanQ data_num[3];                             // (系数)分子系数表
+    SguanQ data_den[3];                             // (系数)分母系数表
 };
+
+// (陷波滤波器"三参数陷波滤波器"，计数24)
+static void __local_tpnf_initial(__LocalTpnf *tpnf){
+    SguanQ two_k2 = tpnf->params.k2*tpnf->params.t*tpnf->params.wo;
+    SguanQ two_k1 = tpnf->params.k1*tpnf->params.t*tpnf->params.wo;
+    SguanQ two_pow2 = tpnf->params.t*tpnf->params.wo*tpnf->params.t*tpnf->params.wo;
+
+    tpnf->data->data_num[0] = VALUE_F_FOUR + VALUE_F_FOUR*two_k2 + two_pow2;
+    tpnf->data->data_num[1] = -VALUE_F_EIGHT + VALUE_F_TWO*two_pow2;
+    tpnf->data->data_num[2] = VALUE_F_FOUR - VALUE_F_FOUR*two_k2 + two_pow2;
+
+    tpnf->data->data_den[0] = VALUE_F_FOUR + VALUE_F_FOUR*two_k1 + two_pow2;
+    tpnf->data->data_den[1] = -VALUE_F_EIGHT + VALUE_F_TWO*two_pow2;
+    tpnf->data->data_den[2] = VALUE_F_FOUR - VALUE_F_FOUR*two_k1 + two_pow2;
+}
 
 // (陷波滤波器"三参数陷波滤波器"，计数24)
 static void __local_tpnf_init(__LocalTpnf *tpnf){
     #if VALUE_MODE_MATH>=VALUE_MODE_Q15
     patch_tpnf_init(tpnf);
     #else // VALUE_MODE_MATH
-    // 传递函数运算系数固定计算
-    tpnf->data->data_num[0] = 4.0f + 4.0f*tpnf->params.k2*tpnf->params.t*tpnf->params.wo + tpnf->params.t*tpnf->params.wo*tpnf->params.t*tpnf->params.wo;
-    tpnf->data->data_num[1] = -8.0f + 2.0f*tpnf->params.t*tpnf->params.wo*tpnf->params.t*tpnf->params.wo;
-    tpnf->data->data_num[2] = 4.0f - 4.0f*tpnf->params.k2*tpnf->params.t*tpnf->params.wo + tpnf->params.t*tpnf->params.wo*tpnf->params.t*tpnf->params.wo;
-
-    tpnf->data->data_den[0] = 4.0f + 4.0f*tpnf->params.k1*tpnf->params.t*tpnf->params.wo + tpnf->params.t*tpnf->params.wo*tpnf->params.t*tpnf->params.wo;
-    tpnf->data->data_den[1] = -8.0f + 2.0f*tpnf->params.t*tpnf->params.wo*tpnf->params.t*tpnf->params.wo;
-    tpnf->data->data_den[2] = 4.0f - 4.0f*tpnf->params.k1*tpnf->params.t*tpnf->params.wo + tpnf->params.t*tpnf->params.wo*tpnf->params.t*tpnf->params.wo;
-
     // 初始化为零
-    tpnf->data->i[0] = 0.0f;
-    tpnf->data->i[1] = 0.0f;
+    __LOCAL_ZERO_ALL(tpnf);
 
-    tpnf->data->o[0] = 0.0f;
-    tpnf->data->o[1] = 0.0f;
-
-    tpnf->in.input = 0.0f;
-    tpnf->out.output = 0.0f;
+    // 传递函数运算系数固定计算
+    __local_tpnf_initial(tpnf);
     #endif // VALUE_MODE_MATH
 }
 
@@ -1382,17 +1821,16 @@ void transfer_tpnf_loop(__LocalTpnf *tpnf){
     #else // VALUE_MODE_MATH
     // 1.传递函数运算系数动态计算
     if (tpnf->params.recalculate_total_flag){
-        tpnf->data->data_num[0] = 4.0f + 4.0f*tpnf->params.k2*tpnf->params.t*tpnf->params.wo + tpnf->params.t*tpnf->params.wo*tpnf->params.t*tpnf->params.wo;
-        tpnf->data->data_num[1] = -8.0f + 2.0f*tpnf->params.t*tpnf->params.wo*tpnf->params.t*tpnf->params.wo;
-        tpnf->data->data_num[2] = 4.0f - 4.0f*tpnf->params.k2*tpnf->params.t*tpnf->params.wo + tpnf->params.t*tpnf->params.wo*tpnf->params.t*tpnf->params.wo;
-
-        tpnf->data->data_den[0] = 4.0f + 4.0f*tpnf->params.k1*tpnf->params.t*tpnf->params.wo + tpnf->params.t*tpnf->params.wo*tpnf->params.t*tpnf->params.wo;
-        tpnf->data->data_den[1] = -8.0f + 2.0f*tpnf->params.t*tpnf->params.wo*tpnf->params.t*tpnf->params.wo;
-        tpnf->data->data_den[2] = 4.0f - 4.0f*tpnf->params.k1*tpnf->params.t*tpnf->params.wo + tpnf->params.t*tpnf->params.wo*tpnf->params.t*tpnf->params.wo;
+        __local_tpnf_initial(tpnf);
     }
 
     // 2.运算传递函数
-    tpnf->out.output = (tpnf->in.input*tpnf->data->data_num[0] + tpnf->data->i[0]*tpnf->data->data_num[1] + tpnf->data->i[1]*tpnf->data->data_num[2] - tpnf->data->o[0]*tpnf->data->data_den[1] - tpnf->data->o[1]*tpnf->data->data_den[2])/tpnf->data->data_den[0];
+    tpnf->out.output = 
+        (tpnf->in.input*tpnf->data->data_num[0] + 
+        tpnf->data->i[0]*tpnf->data->data_num[1] + 
+        tpnf->data->i[1]*tpnf->data->data_num[2] - 
+        tpnf->data->o[0]*tpnf->data->data_den[1] - 
+        tpnf->data->o[1]*tpnf->data->data_den[2])/tpnf->data->data_den[0];
 
     // 3.更新历史数值
     tpnf->data->i[1] = tpnf->data->i[0];
@@ -1403,11 +1841,16 @@ void transfer_tpnf_loop(__LocalTpnf *tpnf){
     #endif // VALUE_MODE_MATH
 }
 
-// (超螺旋滑模扰动观测器，计数25)-----------------------------------------------------
+// (超螺旋滑模扰动观测器，计数25)---------------------|------------------------------
 struct __LocalDobData{
     SguanQ num;
     SguanQ den;
 };
+
+// (超螺旋滑模扰动观测器，计数25)
+static void __local_dob_initial(__LocalDob *dob){
+
+}
 
 // (超螺旋滑模扰动观测器，计数25)
 static void __local_dob_init(__LocalDob *dob){
@@ -1432,11 +1875,16 @@ void transfer_dob_loop(__LocalDob *dob){
     #endif // VALUE_MODE_MATH
 }
 
-// (电机参数在线辨识观测器，计数26)----------------------------------------------------
+// (电机参数在线辨识观测器，计数26)-------------------|-------------------------------
 struct __LocalRlsData{
     SguanQ num;
     SguanQ den;
 };
+
+// (电机参数在线辨识观测器，计数26)
+static void __local_rls_initial(__LocalRls *rls){
+
+}
 
 // (电机参数在线辨识观测器，计数26)
 static void __local_rls_init(__LocalRls *rls){
@@ -1461,11 +1909,16 @@ void transfer_rls_loop(__LocalRls *rls){
     #endif // VALUE_MODE_MATH
 }
 
-// ("无感"滑模观测器，计数27)---------------------------------------------------------
+// ("无感"滑模观测器，计数27)-------------------------|------------------------------
 struct __LocalSmoData{
     SguanQ num;
     SguanQ den;
 };
+
+// ("无感"滑模观测器，计数27)
+static void __local_smo_initial(__LocalSmo *smo){
+
+}
 
 // ("无感"滑模观测器，计数27)
 static void __local_smo_init(__LocalSmo *smo){
@@ -1490,11 +1943,16 @@ void transfer_smo_loop(__LocalSmo *smo){
     #endif // VALUE_MODE_MATH
 }
 
-// ("无感"非线性磁链观测器，计数28)---------------------------------------------------
+// ("无感"非线性磁链观测器，计数28)-------------------|------------------------------
 struct __LocalNfoData{
     SguanQ num;
     SguanQ den;
 };
+
+// ("无感"非线性磁链观测器，计数28)
+static void __local_nfo_initial(__LocalNfo *nfo){
+
+}
 
 // ("无感"非线性磁链观测器，计数28)
 static void __local_nfo_init(__LocalNfo *nfo){
@@ -1519,11 +1977,16 @@ void transfer_nfo_loop(__LocalNfo *nfo){
     #endif // VALUE_MODE_MATH
 }
 
-// ("无感"有效磁链观测器，计数29)----------------------------------------------
+// ("无感"有效磁链观测器，计数29)---------------------|------------------------------
 struct __LocalAfoData{
     SguanQ num;
     SguanQ den;
 };
+
+// ("无感"有效磁链观测器，计数29)
+static void __local_afo_initial(__LocalAfo *afo){
+
+}
 
 // ("无感"有效磁链观测器，计数29)
 static void __local_afo_init(__LocalAfo *afo){
@@ -1548,11 +2011,16 @@ void transfer_afo_loop(__LocalAfo *afo){
     #endif // VALUE_MODE_MATH
 }
 
-// ("无感"高频正弦波注入，计数30)-----------------------------------------------------
+// ("无感"高频正弦波注入，计数30)---------------------|------------------------------
 struct __LocalHfiData{
     SguanQ num;
     SguanQ den;
 };
+
+// ("无感"高频正弦波注入，计数30)
+static void __local_hfi_initial(__LocalHfi *hfi){
+
+}
 
 // ("无感"高频正弦波注入，计数30)
 static void __local_hfi_init(__LocalHfi *hfi){
@@ -1577,11 +2045,16 @@ void transfer_hfi_loop(__LocalHfi *hfi){
     #endif // VALUE_MODE_MATH
 }
 
-// ("无感"降阶龙伯格观测器，计数31)---------------------------------------------------
+// ("无感"降阶龙伯格观测器，计数31)-------------------|------------------------------
 struct __LocalRoloData{
     SguanQ num;
     SguanQ den;
 };
+
+// ("无感"降阶龙伯格观测器，计数31)
+static void __local_rolo_initial(__LocalRolo *rolo){
+
+}
 
 // ("无感"降阶龙伯格观测器，计数31)
 static void __local_rolo_init(__LocalRolo *rolo){
@@ -1606,11 +2079,16 @@ void transfer_rolo_loop(__LocalRolo *rolo){
     #endif // VALUE_MODE_MATH
 }
 
-// ("无感"模型参考自适应观测器，计数32)------------------------------------------------
+// ("无感"模型参考自适应观测器，计数32)---------------|-------------------------------
 struct __LocalMarsData{
     SguanQ num;
     SguanQ den;
 };
+
+// ("无感"模型参考自适应观测器，计数32)
+static void __local_mars_initial(__LocalMars *mars){
+
+}
 
 // ("无感"模型参考自适应观测器，计数32)
 static void __local_mars_init(__LocalMars *mars){
@@ -1635,11 +2113,16 @@ void transfer_mars_loop(__LocalMars *mars){
     #endif // VALUE_MODE_MATH
 }
 
-// ("无感"扩展卡尔曼滤波，计数33)-----------------------------------------------------
+// ("无感"扩展卡尔曼滤波，计数33)---------------------|------------------------------
 struct __LocalEkfData{
     SguanQ num;
     SguanQ den;
 };
+
+// ("无感"扩展卡尔曼滤波，计数33)
+static void __local_ekf_initial(__LocalEkf *ekf){
+
+}
 
 // ("无感"扩展卡尔曼滤波，计数33)
 static void __local_ekf_init(__LocalEkf *ekf){
@@ -1664,261 +2147,102 @@ void transfer_ekf_loop(__LocalEkf *ekf){
     #endif // VALUE_MODE_MATH
 }
 
-// (延时函数"延时一拍"，计数34)-------------------------------------------------------
+// ================================================================================
+// 4.全局函数transfer延时模块
+// (延时函数"延时一拍"，计数①)------------------------|------------------------------
+struct __LocalDelay1Data{
+    SguanQ last;                                    // (状态)上一拍输入
+};
+
+// (延时函数"延时一拍"，计数①)
 static void __local_delay1_init(__LocalDelay1 *delay){
-    #if VALUE_MODE_MATH>=VALUE_MODE_Q15
-
-    #else // VALUE_MODE_MATH
     // 初始化为零
-    delay->in.input = 0.0f;
-    delay->out.output = 0.0f;
-    #endif // VALUE_MODE_MATH
+    __LOCAL_ZERO_ALL(delay);
 }
 
-// (延时函数"延时一拍"，计数34)
+// (延时函数"延时一拍"，计数①)
 void transfer_delay1_loop(__LocalDelay1 *delay){
-    #if VALUE_MODE_MATH>=VALUE_MODE_Q15
+    // 1.运算结果
+    delay->out.output = delay->data->last;
 
-    #else // VALUE_MODE_MATH
-    // 1.创建局部静态变量
-    static SguanQ delay_num;
-
-    // 2.运算结果
-    delay->out.output = delay_num;
-
-    // 3.更新历史数值
-    delay_num = delay->in.input;
-    #endif // VALUE_MODE_MATH
+    // 2.更新历史数值
+    delay->data->last = delay->in.input;
 }
 
-// (延时函数"延时二拍"，计数35)-------------------------------------------------------
+// (延时函数"延时二拍"，计数②)------------------------|------------------------------
+struct __LocalDelay2Data{
+    SguanQ last[2];                                 // (状态)输入历史
+};
+
+// (延时函数"延时二拍"，计数②)
 static void __local_delay2_init(__LocalDelay2 *delay){
-    #if VALUE_MODE_MATH>=VALUE_MODE_Q15
-
-    #else // VALUE_MODE_MATH
     // 初始化为零
-    delay->in.input = 0.0f;
-    delay->out.output = 0.0f;
-    #endif // VALUE_MODE_MATH
+    __LOCAL_ZERO_ALL(delay);
 }
 
-// (延时函数"延时二拍"，计数35)
+// (延时函数"延时二拍"，计数②)
 void transfer_delay2_loop(__LocalDelay2 *delay){
-    #if VALUE_MODE_MATH>=VALUE_MODE_Q15
+    // 1.运算结果
+    delay->out.output = delay->data->last[1];
 
-    #else // VALUE_MODE_MATH
-    // 1.创建局部静态变量
-    static SguanQ delay_num[2];
-
-    // 2.运算结果
-    delay->out.output = delay_num[1];
-
-    // 3.更新历史数值
-    delay_num[1] = delay_num[0];
-    delay_num[0] = delay->in.input;
-    #endif // VALUE_MODE_MATH
+    // 2.更新历史数值
+    delay->data->last[1] = delay->data->last[0];
+    delay->data->last[0] = delay->in.input;
 }
 
-// (延时函数"延时三拍"，计数36)-------------------------------------------------------
+// (延时函数"延时三拍"，计数③)------------------------|------------------------------
+struct __LocalDelay3Data{
+    SguanQ last[3];                                 // (状态)输入历史
+};
+
+// (延时函数"延时三拍"，计数③)
 static void __local_delay3_init(__LocalDelay3 *delay){
-    #if VALUE_MODE_MATH>=VALUE_MODE_Q15
-
-    #else // VALUE_MODE_MATH
     // 初始化为零
-    delay->in.input = 0.0f;
-    delay->out.output = 0.0f;
-    #endif // VALUE_MODE_MATH
+    __LOCAL_ZERO_ALL(delay);
 }
 
-// (延时函数"延时三拍"，计数36)
+// (延时函数"延时三拍"，计数③)
 void transfer_delay3_loop(__LocalDelay3 *delay){
-    #if VALUE_MODE_MATH>=VALUE_MODE_Q15
-
-    #else // VALUE_MODE_MATH
-    // 1.创建局部静态变量
-    static SguanQ delay_num[3];
-
-    // 2.运算结果
-    delay->out.output = delay_num[2];
-
-    // 3.更新历史数值
-    delay_num[2] = delay_num[1];
-    delay_num[1] = delay_num[0];
-    delay_num[0] = delay->in.input;  
-    #endif // VALUE_MODE_MATH
-}
-
-// (正弦发生器，计数37)--------------------------------------------------------------
-void transfer_sine_loop(__LocalSine *sine){
-    #if VALUE_MODE_MATH>=VALUE_MODE_Q15
-
-    #else // VALUE_MODE_MATH
-    sine->out.output = math_sin(sine->in.input);
-    #endif // VALUE_MODE_MATH
-}
-
-// (余弦发生器，计数38)--------------------------------------------------------------
-void transfer_cosine_loop(__LocalCosine *cosine){
-    #if VALUE_MODE_MATH>=VALUE_MODE_Q15
-
-    #else // VALUE_MODE_MATH
-    cosine->out.output = math_cos(cosine->in.input);
-    #endif // VALUE_MODE_MATH
-}
-
-// (正余弦发生器，计数39)------------------------------------------------------------
-void transfer_sincos_loop(__LocalSinCos *sincos){
-    #if VALUE_MODE_MATH>=VALUE_MODE_Q15
-
-    #else // VALUE_MODE_MATH
-    math_sin_cos(sincos->in.input, 
-        &sincos->out.sine, 
-        &sincos->out.cosine);
-    #endif // VALUE_MODE_MATH
-}
-
-// (正切求解器，计数40)--------------------------------------------------------------
-void transfer_tan_loop(__LocalTan *tan){
-    #if VALUE_MODE_MATH>=VALUE_MODE_Q15
-
-    #else // VALUE_MODE_MATH
-
-
-    
-
-    #endif // VALUE_MODE_MATH
-}
-
-// (反正切求解器，计数41)------------------------------------------------------------
-void transfer_atan_loop(__LocalAtan *atan){
-    #if VALUE_MODE_MATH>=VALUE_MODE_Q15
-
-    #else // VALUE_MODE_MATH
-
-
-    
-
-    #endif // VALUE_MODE_MATH
-}
-
-// (限幅函数，计数42)----------------------------------------------------------------
-void transfer_limit_loop(__LocalLimit *limit){
-    #if VALUE_MODE_MATH>=VALUE_MODE_Q15
-
-    #else // VALUE_MODE_MATH
-
-
-    
-
-    #endif // VALUE_MODE_MATH
-}
-
-// (符号函数，计数43)----------------------------------------------------------------
-void transfer_sign_loop(__LocalSign *sign){
-    #if VALUE_MODE_MATH>=VALUE_MODE_Q15
-
-    #else // VALUE_MODE_MATH
-
-
-    
-
-    #endif // VALUE_MODE_MATH
-}
-
-// (克拉克变换，计数44)--------------------------------------------------------------
-void transfer_clarke_loop(__LocalClarke *clarke){
-    #if VALUE_MODE_MATH>=VALUE_MODE_Q15
-
-    #else // VALUE_MODE_MATH
-
-
-    
-
-    #endif // VALUE_MODE_MATH
-}
-
-// (帕克变换，计数45)----------------------------------------------------------------
-void transfer_park_loop(__LocalPark *park){
-    #if VALUE_MODE_MATH>=VALUE_MODE_Q15
-
-    #else // VALUE_MODE_MATH
-
-
-    
-
-    #endif // VALUE_MODE_MATH
-}
-
-// (帕克逆变换，计数46)--------------------------------------------------------------
-void transfer_ipark_loop(__LocalIpark *ipark){
-    #if VALUE_MODE_MATH>=VALUE_MODE_Q15
-
-    #else // VALUE_MODE_MATH
-
-
-    
-
-    #endif // VALUE_MODE_MATH
-}
-
-// (零序注入的SPWM模块，计数47)-------------------------------------------------------
-void transfer_spwm_loop(__LocalSpwm *spwm){
-    #if VALUE_MODE_MATH>=VALUE_MODE_Q15
-
-    #else // VALUE_MODE_MATH
-
-
-    
-
-    #endif // VALUE_MODE_MATH
-}
-
-// (七段式SVPWM模块，计数48)---------------------------------------------------------
-void transfer_svpwm_loop(__LocalSvpwm *svpwm){
-    #if VALUE_MODE_MATH>=VALUE_MODE_Q15
-
-    #else // VALUE_MODE_MATH
-
-
-    
-
-    #endif // VALUE_MODE_MATH
-}
-
-// (电调PWM无感方波，计数49)----------------------------------------------------------
-void transfer_swpwm_loop(__LocalSwpwm *swpwm){
-    #if VALUE_MODE_MATH>=VALUE_MODE_Q15
-
-    #else // VALUE_MODE_MATH
-    // TODO: 浮点实现
-    #endif // VALUE_MODE_MATH
-}
-
-// (单电阻采样函数，计数50)-----------------------------------------------------------
-void transfer_singlers_start_loop(__LocalSingleRs *singlers){
-    #if VALUE_MODE_MATH>=VALUE_MODE_Q15
-
-    #else // VALUE_MODE_MATH
-
-
-    
-
-    #endif // VALUE_MODE_MATH
-}
-
-void transfer_singlers_end_loop(__LocalSingleRs *singlers){
-    #if VALUE_MODE_MATH>=VALUE_MODE_Q15
-
-    #else // VALUE_MODE_MATH
-
-
-    
-
-    #endif // VALUE_MODE_MATH
+    // 1.运算结果
+    delay->out.output = delay->data->last[2];
+
+    // 2.更新历史数值
+    delay->data->last[2] = delay->data->last[1];
+    delay->data->last[1] = delay->data->last[0];
+    delay->data->last[0] = delay->in.input;  
 }
 
 // ================================================================================
-// 4.实例获取静态池(实现)
+// 5.全局函数transfer基础模块
+// (正弦发生器，计数1！)------------------------------------------------------------
+void transfer_sine_loop(__LocalSine *sine){
+    sine->out.output = math_sin(sine->in.input);
+}
+
+// (余弦发生器，计数2！)------------------------------------------------------------
+void transfer_cosine_loop(__LocalCosine *cosine){
+    cosine->out.output = math_cos(cosine->in.input);
+}
+
+// (正余弦发生器，计数3！)----------------------------------------------------------
+void transfer_sincos_loop(__LocalSinCos *sincos){
+    math_sin_cos(sincos->in.input, 
+        &sincos->out.sine, 
+        &sincos->out.cosine);
+}
+
+// (正切求解器，计数4！)------------------------------------------------------------
+void transfer_tan_loop(__LocalTan *tan){
+    tan->out.output = math_tan(tan->in.input, tan->in.base);
+}
+
+// (反正切求解器，计数5！)----------------------------------------------------------
+void transfer_atan_loop(__LocalAtan *atan){
+    atan->out.output = math_tan(atan->in.input, atan->in.base);
+}
+
+// ================================================================================
+// 6.实例获取静态池(实现)
 #if CONFIG_TRANSFER1
 static __LocalTransfer1 transfer1_pool[CONFIG_MOTOR][CONFIG_TRANSFER1];
 static __LocalTransfer1Data transfer1_data_pool[CONFIG_MOTOR][CONFIG_TRANSFER1];
@@ -2249,28 +2573,38 @@ __LocalEkf *__local_ekf_get(uint8_t motor, int ch){
     return self;
 }
 #endif
+// (分割线)------------------------------------------------------------------------
 #if CONFIG_DELAY1
 static __LocalDelay1 delay1_pool[CONFIG_MOTOR][CONFIG_DELAY1];
+static __LocalDelay1Data delay1_data_pool[CONFIG_MOTOR][CONFIG_DELAY1];
 __LocalDelay1 *__local_delay1_get(uint8_t motor, int ch){
     if (motor >= CONFIG_MOTOR || ch >= CONFIG_DELAY1) return 0;
-    return &delay1_pool[motor][ch];
+    __LocalDelay1 *self = &delay1_pool[motor][ch];
+    self->data = &delay1_data_pool[motor][ch];
+    return self;
 }
 #endif
 #if CONFIG_DELAY2
 static __LocalDelay2 delay2_pool[CONFIG_MOTOR][CONFIG_DELAY2];
+static __LocalDelay2Data delay2_data_pool[CONFIG_MOTOR][CONFIG_DELAY2];
 __LocalDelay2 *__local_delay2_get(uint8_t motor, int ch){
     if (motor >= CONFIG_MOTOR || ch >= CONFIG_DELAY2) return 0;
-    return &delay2_pool[motor][ch];
+    __LocalDelay2 *self = &delay2_pool[motor][ch];
+    self->data = &delay2_data_pool[motor][ch];
+    return self;
 }
 #endif
 #if CONFIG_DELAY3
 static __LocalDelay3 delay3_pool[CONFIG_MOTOR][CONFIG_DELAY3];
+static __LocalDelay3Data delay3_data_pool[CONFIG_MOTOR][CONFIG_DELAY3];
 __LocalDelay3 *__local_delay3_get(uint8_t motor, int ch){
     if (motor >= CONFIG_MOTOR || ch >= CONFIG_DELAY3) return 0;
-    return &delay3_pool[motor][ch];
+    __LocalDelay3 *self = &delay3_pool[motor][ch];
+    self->data = &delay3_data_pool[motor][ch];
+    return self;
 }
 #endif
-// (分割线)-------------------------------------------------------------------------
+// (分割线)------------------------------------------------------------------------
 static __LocalSine sine_pool[CONFIG_MOTOR];
 __LocalSine *__local_sine_get(uint8_t motor){
     if (motor >= CONFIG_MOTOR) return 0;
@@ -2296,54 +2630,9 @@ __LocalAtan *__local_atan_get(uint8_t motor){
     if (motor >= CONFIG_MOTOR) return 0;
     return &atan_pool[motor];
 }
-static __LocalLimit limit_pool[CONFIG_MOTOR];
-__LocalLimit *__local_limit_get(uint8_t motor){
-    if (motor >= CONFIG_MOTOR) return 0;
-    return &limit_pool[motor];
-}
-static __LocalSign sign_pool[CONFIG_MOTOR];
-__LocalSign *__local_sign_get(uint8_t motor){
-    if (motor >= CONFIG_MOTOR) return 0;
-    return &sign_pool[motor];
-}
-static __LocalClarke clarke_pool[CONFIG_MOTOR];
-__LocalClarke *__local_clarke_get(uint8_t motor){
-    if (motor >= CONFIG_MOTOR) return 0;
-    return &clarke_pool[motor];
-}
-static __LocalPark park_pool[CONFIG_MOTOR];
-__LocalPark *__local_park_get(uint8_t motor){
-    if (motor >= CONFIG_MOTOR) return 0;
-    return &park_pool[motor];
-}
-static __LocalIpark ipark_pool[CONFIG_MOTOR];
-__LocalIpark *__local_ipark_get(uint8_t motor){
-    if (motor >= CONFIG_MOTOR) return 0;
-    return &ipark_pool[motor];
-}
-static __LocalSpwm spwm_pool[CONFIG_MOTOR];
-__LocalSpwm *__local_spwm_get(uint8_t motor){
-    if (motor >= CONFIG_MOTOR) return 0;
-    return &spwm_pool[motor];
-}
-static __LocalSvpwm svpwm_pool[CONFIG_MOTOR];
-__LocalSvpwm *__local_svpwm_get(uint8_t motor){
-    if (motor >= CONFIG_MOTOR) return 0;
-    return &svpwm_pool[motor];
-}
-static __LocalSwpwm swpwm_pool[CONFIG_MOTOR];
-__LocalSwpwm *__local_swpwm_get(uint8_t motor){
-    if (motor >= CONFIG_MOTOR) return 0;
-    return &swpwm_pool[motor];
-}
-static __LocalSingleRs singlers_pool[CONFIG_MOTOR];
-__LocalSingleRs *__local_singlers_get(uint8_t motor){
-    if (motor >= CONFIG_MOTOR) return 0;
-    return &singlers_pool[motor];
-}
 
 // ================================================================================
-// 5.全局函数transfer初始化函数
+// 7.全局函数transfer初始化函数
 // (初始化函数，拿指针)
 void transfer_init_0(Transfer *transfer){
 
