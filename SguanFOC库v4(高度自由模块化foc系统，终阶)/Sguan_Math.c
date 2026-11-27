@@ -26,7 +26,37 @@
 #include "Sguan_Math.h"
 
 // ================================================================================
-// 1.各类型的sin表和atan表
+// 1.数学库全局函数全弱定义
+// (判断编译器是否原生支持weak功能)
+#if defined(__CC_ARM) \
+ || (defined(__ARMCC_VERSION) && (__ARMCC_VERSION >= 6000000)) \
+ || defined(__IAR_SYSTEMS_ICC__) \
+ || defined(__GNUC__) || defined(__clang__) \
+ || defined(__TASKING__) || defined(__ghs__) \
+ || defined(__TI_COMPILER_VERSION__)
+#  define __LOCAL_WEAK_SUPPORT 1
+#else
+#  define __LOCAL_WEAK_SUPPORT 0
+#endif
+
+// (定义具体写法，可提前定义__LOCAL_WEAK覆盖)
+#ifndef __LOCAL_WEAK
+#  if defined(__CC_ARM)
+#    define __LOCAL_WEAK __weak
+#  elif defined(__ARMCC_VERSION) && (__ARMCC_VERSION >= 6000000)
+#    define __LOCAL_WEAK __attribute__((weak))
+#  elif defined(__IAR_SYSTEMS_ICC__)
+#    define __LOCAL_WEAK __weak
+#  elif defined(__GNUC__) || defined(__clang__) \
+    || defined(__TASKING__) || defined(__ghs__) || defined(__TI_COMPILER_VERSION__)
+#    define __LOCAL_WEAK __attribute__((weak))
+#  else
+#    define __LOCAL_WEAK
+#  endif
+#endif
+
+// ================================================================================
+// 2.各类型的sin表和atan表
 // (float double Q15 Q31)
 #if VALUE_MODE_MATH==VALUE_MODE_Q15
 static const Q15 __local_sin_tab[512] = {
@@ -345,7 +375,7 @@ static const SguanF __local_atan_tab[91] = {
 #endif // VALUE_MODE_MATH
 
 // ================================================================================
-// 2.定点局部常量定义
+// 3.定点局部常量定义
 // (Q15局部常量定义)
 static const int32_t __LOCAL_Q15_MAX_32 = 32767;
 static const int32_t __LOCAL_Q15_MIN_32 = -32768;
@@ -365,7 +395,7 @@ static const int64_t __LOCAL_Q31_MIN_64 = -2147483648LL;
 #define __LOCAL_LN_F_EPS        1e-8f
 
 // ================================================================================
-// 3.局部函数__local所有声明
+// 4.局部函数__local所有声明
 static Q15 __local_q15_from_float(SguanF f, SguanF base_value);
 static SguanF __local_q15_to_float(Q15 q, SguanF base_value);
 static Q15 __local_q15_add(Q15 a, Q15 b);
@@ -428,7 +458,7 @@ static void __local_duty_adjust(
     SguanQ base, SguanQ delta, uint8_t minus_first);
 
 // ================================================================================
-// 4.局部函数__local基础
+// 5.局部函数__local基础
 // (q15相关局部函数)
 static Q15 __local_q15_from_float(SguanF f, SguanF base_value){
     SguanF scaled;
@@ -879,7 +909,7 @@ static Q31 __local_atan_q31(Q31 x, SguanF base){
 }
 
 // ================================================================================
-// 5.局部函数_local私有log相关(float)
+// 6.局部函数_local私有log相关(float)
 // (float位模式转float值)
 static float __local_ln_f_from_bits(uint32_t u){
     union { uint32_t u; float f; } v;
@@ -977,7 +1007,7 @@ static float __local_ln_f(float x){
 }
 
 // ================================================================================
-// 6.局部函数_local私有log相关(double)
+// 7.局部函数_local私有log相关(double)
 // (double位模式转double值)
 static double __local_ln_d_from_bits(uint64_t u){
     union { uint64_t u; double d; } v;
@@ -1075,7 +1105,7 @@ static double __local_ln_d(double x){
 }
 
 // ================================================================================
-// 7.局部函数__local单电阻采样
+// 8.局部函数__local单电阻采样
 // (三相占空比读取设计)
 static uint8_t __local_singlers_duty_loop(
     SguanQ du, SguanQ dv, SguanQ dw,
@@ -1137,9 +1167,9 @@ static void __local_duty_adjust(
 }
 
 // ================================================================================
-// 8.全局函数math基础
+// 9.全局函数math基础
 // (浮点转定点)
-SguanQ math_from_float(SguanF f, SguanF base_value){
+__LOCAL_WEAK SguanQ math_from_float(SguanF f, SguanF base_value){
     #if VALUE_MODE_MATH==VALUE_MODE_Q15
     (void)__local_q31_from_float;
     return __local_q15_from_float(f, base_value);
@@ -1156,7 +1186,7 @@ SguanQ math_from_float(SguanF f, SguanF base_value){
 }
 
 // (定点转浮点)
-SguanF math_to_float(SguanQ q, SguanF base_value){
+__LOCAL_WEAK SguanF math_to_float(SguanQ q, SguanF base_value){
     #if VALUE_MODE_MATH==VALUE_MODE_Q15
     (void)__local_q31_to_float;
     return __local_q15_to_float(q, base_value);
@@ -1173,7 +1203,7 @@ SguanF math_to_float(SguanQ q, SguanF base_value){
 }
 
 // (全格式加法)
-SguanQ math_add(SguanQ a, SguanQ b){
+__LOCAL_WEAK SguanQ math_add(SguanQ a, SguanQ b){
     #if VALUE_MODE_MATH==VALUE_MODE_Q15
     (void)__local_q31_add;
     return __local_q15_add(a, b);
@@ -1190,7 +1220,7 @@ SguanQ math_add(SguanQ a, SguanQ b){
 }
 
 // (全格式减法)
-SguanQ math_sub(SguanQ a, SguanQ b){
+__LOCAL_WEAK SguanQ math_sub(SguanQ a, SguanQ b){
     #if VALUE_MODE_MATH==VALUE_MODE_Q15
     (void)__local_q31_sub;
     return __local_q15_sub(a, b);
@@ -1207,7 +1237,7 @@ SguanQ math_sub(SguanQ a, SguanQ b){
 }
 
 // (全格式乘法)
-SguanQ math_mul(SguanQ a, SguanQ b){
+__LOCAL_WEAK SguanQ math_mul(SguanQ a, SguanQ b){
     #if VALUE_MODE_MATH==VALUE_MODE_Q15
     (void)__local_q31_mul;
     return __local_q15_mul(a, b);
@@ -1224,7 +1254,7 @@ SguanQ math_mul(SguanQ a, SguanQ b){
 }
 
 // (全格式除法)
-SguanQ math_div(SguanQ a, SguanQ b){
+__LOCAL_WEAK SguanQ math_div(SguanQ a, SguanQ b){
     #if VALUE_MODE_MATH==VALUE_MODE_Q15
     (void)__local_q31_div;
     return __local_q15_div(a, b);
@@ -1241,7 +1271,7 @@ SguanQ math_div(SguanQ a, SguanQ b){
 }
 
 // (定点单位互转)
-SguanQ math_convert_base(SguanQ q, SguanF old_base, SguanF new_base){
+__LOCAL_WEAK SguanQ math_convert_base(SguanQ q, SguanF old_base, SguanF new_base){
     #if VALUE_MODE_MATH==VALUE_MODE_Q15
     (void)__local_q31_convert_base;
     return __local_q15_convert_base(q, old_base, new_base);
@@ -1258,7 +1288,7 @@ SguanQ math_convert_base(SguanQ q, SguanF old_base, SguanF new_base){
 }
 
 // (快速求解sine)
-SguanQ math_sin(SguanQ x){
+__LOCAL_WEAK SguanQ math_sin(SguanQ x){
     #if VALUE_MODE_MATH==VALUE_MODE_Q15
     return __local_sin_q15(x);
     #elif VALUE_MODE_MATH==VALUE_MODE_Q31
@@ -1269,7 +1299,7 @@ SguanQ math_sin(SguanQ x){
 }
 
 // (快速求解cosine)
-SguanQ math_cos(SguanQ x){
+__LOCAL_WEAK SguanQ math_cos(SguanQ x){
     #if VALUE_MODE_MATH==VALUE_MODE_Q15
     return __local_cos_q15(x);
     #elif VALUE_MODE_MATH==VALUE_MODE_Q31
@@ -1280,7 +1310,7 @@ SguanQ math_cos(SguanQ x){
 }
 
 // (快速求解sine和cosine)
-void math_sin_cos(SguanQ x, SguanQ *sin_x, SguanQ *cos_x){
+__LOCAL_WEAK void math_sin_cos(SguanQ x, SguanQ *sin_x, SguanQ *cos_x){
     #if VALUE_MODE_MATH==VALUE_MODE_Q15
     (*sin_x) = __local_sin_q15(x);
     (*cos_x) = __local_cos_q15(x);
@@ -1296,7 +1326,7 @@ void math_sin_cos(SguanQ x, SguanQ *sin_x, SguanQ *cos_x){
 }
 
 // (快速求解tan函数)
-SguanQ math_tan(SguanQ x, uint8_t base_out){
+__LOCAL_WEAK SguanQ math_tan(SguanQ x, uint8_t base_out){
     SguanQ sine,cosine;
     if (base_out == 0){
         return 0;
@@ -1332,7 +1362,7 @@ SguanQ math_tan(SguanQ x, uint8_t base_out){
 }
 
 // (快速求解反三角tan函数)
-SguanQ math_atan(SguanQ x, SguanF base_in){
+__LOCAL_WEAK SguanQ math_atan(SguanQ x, SguanF base_in){
     #if VALUE_MODE_MATH==VALUE_MODE_Q15
     (void)__local_atan_f;
     (void)__local_atan_q31;
@@ -1351,9 +1381,9 @@ SguanQ math_atan(SguanQ x, SguanF base_in){
 }
 
 // ================================================================================
-// 9.全局函数math高级
+// 10.全局函数math高级
 // (自定义内存填充函数)
-void *math_memset(void *ptr, int value, size_t num){
+__LOCAL_WEAK void *math_memset(void *ptr, int value, size_t num){
     if (ptr == NULL || num == 0){
         return ptr;
     }
@@ -1368,7 +1398,7 @@ void *math_memset(void *ptr, int value, size_t num){
 }
 
 // (自定义内存拷贝函数)
-void *math_memcpy(void *dst, const void *src, size_t n){
+__LOCAL_WEAK void *math_memcpy(void *dst, const void *src, size_t n){
     uint8_t *d = (uint8_t *)dst;
     const uint8_t *s = (const uint8_t *)src;
     while (n--){
@@ -1378,7 +1408,7 @@ void *math_memcpy(void *dst, const void *src, size_t n){
 }
 
 // (自定义字符串比较)
-int math_strcmp(const char *s1, const char *s2){
+__LOCAL_WEAK int math_strcmp(const char *s1, const char *s2){
     const uint8_t *p1 = (const uint8_t *)s1;
     const uint8_t *p2 = (const uint8_t *)s2;
 
@@ -1390,7 +1420,7 @@ int math_strcmp(const char *s1, const char *s2){
 }
 
 // (三阶方阵求逆)
-void math_matrix3_inv(const SguanF mat[3][3], SguanF inv[3][3]){
+__LOCAL_WEAK void math_matrix3_inv(const SguanF mat[3][3], SguanF inv[3][3]){
     SguanF det;
     uint8_t i, j;
     det = mat[0][0]*(mat[1][1]*mat[2][2] - mat[1][2]*mat[2][1]) - 
@@ -1418,7 +1448,7 @@ void math_matrix3_inv(const SguanF mat[3][3], SguanF inv[3][3]){
 }
 
 // (定时器延时函数)
-uint8_t math_delay(uint32_t ms, uint32_t *count){
+__LOCAL_WEAK uint8_t math_delay(uint32_t ms, uint32_t *count){
     (*count)++;
     if ((*count) >= ms){
         return 1;
@@ -1427,7 +1457,7 @@ uint8_t math_delay(uint32_t ms, uint32_t *count){
 }
 
 // (参数取模[0, 2π))
-SguanQ math_normalize(SguanQ angle){
+__LOCAL_WEAK SguanQ math_normalize(SguanQ angle){
     #if VALUE_MODE_MATH==VALUE_MODE_Q15
     const SguanQ temp = VALUE_Q15_2PI;
     #elif VALUE_MODE_MATH==VALUE_MODE_Q31
@@ -1448,13 +1478,13 @@ SguanQ math_normalize(SguanQ angle){
 }
 
 // (角度积分函数)
-void math_rad_loop(SguanQ *out, SguanQ in, SguanQ time){
+__LOCAL_WEAK void math_rad_loop(SguanQ *out, SguanQ in, SguanQ time){
     (*out) = math_add(*out, math_mul(in, time));
     (*out) = math_normalize(*out);
 }
 
 // (角度越位处理函数)
-void math_correct(SguanQ *angle, SguanQ error){
+__LOCAL_WEAK void math_correct(SguanQ *angle, SguanQ error){
     #if VALUE_MODE_MATH==VALUE_MODE_Q15
     const SguanQ temp0 = VALUE_Q15_2PI;
     const SguanQ temp1 = VALUE_Q15_PI;
@@ -1475,14 +1505,14 @@ void math_correct(SguanQ *angle, SguanQ error){
 }
 
 // (数值限幅)
-SguanQ math_limit(SguanQ value, SguanQ max, SguanQ min){
+__LOCAL_WEAK SguanQ math_limit(SguanQ value, SguanQ max, SguanQ min){
     if (value > max) return max;
     if (value < min) return min;
     return value;
 }
 
 // (计算Sign的符号函数)
-SguanQ math_sign(SguanQ value, SguanF base_value){
+__LOCAL_WEAK SguanQ math_sign(SguanQ value, SguanF base_value){
     #if VALUE_MODE_MATH>=VALUE_MODE_Q15
     const SguanQ temp = math_from_float(1.0f, base_value);
     #else // VALUE_MODE_MATH
@@ -1498,7 +1528,7 @@ SguanQ math_sign(SguanQ value, SguanF base_value){
 }
 
 // (快速开平方)
-SguanQ math_sqrt(SguanQ x){
+__LOCAL_WEAK SguanQ math_sqrt(SguanQ x){
     #if VALUE_MODE_MATH==VALUE_MODE_Q15
     // 1.BASE语义：送入base=64的值，开方结果为base=8（sqrt(64)=8）
     // 因 math_from_float 已把base归一化，函数本身无需base参数
@@ -1602,22 +1632,22 @@ SguanQ math_sqrt(SguanQ x){
 }
 
 // (快速求解max)
-SguanQ math_max(SguanQ a, SguanQ b){
+__LOCAL_WEAK SguanQ math_max(SguanQ a, SguanQ b){
     return (a > b) ? a : b;
 }
 
 // (快速求解min)
-SguanQ math_min(SguanQ a, SguanQ b){
+__LOCAL_WEAK SguanQ math_min(SguanQ a, SguanQ b){
     return (a < b) ? a : b;
 }
 
 // (快速求解绝对值)
-SguanQ math_ads(SguanQ x){
+__LOCAL_WEAK SguanQ math_ads(SguanQ x){
     return (x < 0) ? -x : x;
 }
 
 // (浮点底数，整数指数，快速幂)
-SguanF math_pow(SguanF base, int n){
+__LOCAL_WEAK SguanF math_pow(SguanF base, int n){
     if (n == 0) {
         return VALUE_F_ONE;
     }
@@ -1638,7 +1668,7 @@ SguanF math_pow(SguanF base, int n){
 }
 
 // (自然对数ln(x))
-SguanF math_ln(SguanF x){
+__LOCAL_WEAK SguanF math_ln(SguanF x){
     #if VALUE_MODE_MATH==VALUE_MODE_DOUBLE
     return (SguanF)__local_ln_d((double)x);
     #else // VALUE_MODE_MATH->VALUE_MODE_FLOAT
@@ -1647,7 +1677,7 @@ SguanF math_ln(SguanF x){
 }
 
 // (底2对数log2(x))
-SguanF math_log2(SguanF x){
+__LOCAL_WEAK SguanF math_log2(SguanF x){
     #if VALUE_MODE_MATH==VALUE_MODE_DOUBLE
     return (SguanF)__local_log2_d((double)x);
     #else // VALUE_MODE_MATH->VALUE_MODE_FLOAT
@@ -1656,7 +1686,7 @@ SguanF math_log2(SguanF x){
 }
 
 // (求解不小于x的最小2的幂及对应指数n)
-SguanF math_find_base(SguanF x, int *n){
+__LOCAL_WEAK SguanF math_find_base(SguanF x, int *n){
     if (x <= 0){
         *n = 0;
         return 0;
@@ -1672,7 +1702,7 @@ SguanF math_find_base(SguanF x, int *n){
 }
 
 // (浮点数值的单位转换函数)
-SguanF math_find_unit(SguanF in, const char *unit){
+__LOCAL_WEAK SguanF math_find_unit(SguanF in, const char *unit){
     if (unit == NULL) {
         return in;
     }
@@ -1699,14 +1729,14 @@ SguanF math_find_unit(SguanF in, const char *unit){
 }
 
 // (求解双线性变换“预畸变”截止频率)
-SguanF math_find_wo(SguanF wo, SguanF ts){
+__LOCAL_WEAK SguanF math_find_wo(SguanF wo, SguanF ts){
     return (VALUE_F_TWO/ts)*math_tan(wo*ts/VALUE_F_TWO, 1);
 }
 
 // ================================================================================
-// 10.全局函数math电机
+// 11.全局函数math电机
 // (等幅值克拉克变换，仅两相电流)
-void math_clarke0(
+__LOCAL_WEAK void math_clarke0(
     SguanQ *i_alpha, 
     SguanQ *i_beta, 
     SguanQ i_a, 
@@ -1724,7 +1754,7 @@ void math_clarke0(
 }
 
 // (等幅值克拉克变换，三相电流)
-void math_clarke1(
+__LOCAL_WEAK void math_clarke1(
     SguanQ *i_alpha, 
     SguanQ *i_beta, 
     SguanQ i_a, 
@@ -1753,7 +1783,7 @@ void math_clarke1(
 }
 
 // (帕克变换)
-void math_park(
+__LOCAL_WEAK void math_park(
     SguanQ *i_d, 
     SguanQ *i_q, 
     SguanQ i_alpha, 
@@ -1765,7 +1795,7 @@ void math_park(
 }
 
 // (帕克逆变换)
-void math_ipark(
+__LOCAL_WEAK void math_ipark(
     SguanQ *u_alpha, 
     SguanQ *u_beta, 
     SguanQ u_d, 
@@ -1777,7 +1807,7 @@ void math_ipark(
 }
 
 // (spwm函数“三次谐波/零序注入”)
-void math_spwm(SguanQ u_alpha, SguanQ u_beta, 
+__LOCAL_WEAK void math_spwm(SguanQ u_alpha, SguanQ u_beta, 
     SguanQ *d_u, SguanQ *d_v, SguanQ *d_w){
     #if VALUE_MODE_MATH==VALUE_MODE_Q15
     const SguanQ sqrt_2 = VALUE_Q15_SQRT3_2;
@@ -1812,7 +1842,7 @@ void math_spwm(SguanQ u_alpha, SguanQ u_beta,
 }
 
 // (svpwm函数“六扇区判断_矢量作用时间”)
-uint8_t math_svpwm(SguanQ u_alpha, SguanQ u_beta, 
+__LOCAL_WEAK uint8_t math_svpwm(SguanQ u_alpha, SguanQ u_beta, 
     SguanQ *d_u, SguanQ *d_v, SguanQ *d_w){
     #if VALUE_MODE_MATH==VALUE_MODE_Q15
     const SguanQ ts = VALUE_Q15_MAX;
@@ -1957,7 +1987,7 @@ uint8_t math_svpwm(SguanQ u_alpha, SguanQ u_beta,
 }
 
 // (swpwm函数“纯六步换相”)
-uint8_t math_swpwm(int8_t *sector, uint32_t *num_count, 
+__LOCAL_WEAK uint8_t math_swpwm(int8_t *sector, uint32_t *num_count, 
     SguanQ const_ubus, SguanQ const_we, uint32_t const_count, 
     SguanQ ubus, SguanQ we, 
     SguanQ ua, SguanQ ub, SguanQ uc, SguanQ umid, 
@@ -2156,7 +2186,7 @@ uint8_t math_swpwm(int8_t *sector, uint32_t *num_count,
 }
 
 // (singlers函数“单电阻采样读取电流”)
-void math_singlers_start(
+__LOCAL_WEAK void math_singlers_start(
     uint8_t sector_svpwm, 
     int16_t motor_ix[3], 
     uint16_t raw_ch0, 
@@ -2203,7 +2233,7 @@ void math_singlers_start(
 }
 
 // (singlers函数“单电阻采样设置移相和ADC采样位置”)
-uint8_t math_singlers_end(
+__LOCAL_WEAK uint8_t math_singlers_end(
     SguanQ du, SguanQ dv, SguanQ dw,
     SguanQ const_duty_sw,
     SguanQ const_duty_adc,
